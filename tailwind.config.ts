@@ -78,25 +78,6 @@ export default <Partial<Config>>{
         400: '400ms',
         600: '600ms',
         800: '800ms'
-      },
-      keyframes: {
-        'fade-up': {
-          '0%': { opacity: '0', transform: 'translateY(24px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' }
-        },
-        'fade-in': {
-          '0%': { opacity: '0' },
-          '100%': { opacity: '1' }
-        },
-        reveal: {
-          '0%': { clipPath: 'inset(0 100% 0 0)' },
-          '100%': { clipPath: 'inset(0 0 0 0)' }
-        }
-      },
-      animation: {
-        'fade-up': 'fade-up 800ms cubic-bezier(0.16, 1, 0.3, 1) both',
-        'fade-in': 'fade-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both',
-        reveal: 'reveal 900ms cubic-bezier(0.65, 0, 0.35, 1) both'
       }
     }
   },

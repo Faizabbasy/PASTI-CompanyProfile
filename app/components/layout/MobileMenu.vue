@@ -1,11 +1,26 @@
 <script setup lang="ts">
+import gsap from 'gsap'
+
 const { navItems, primaryCta } = useNavigation()
 const { isOpen: open, close } = useMobileMenu()
 
 const route = useRoute()
+const listRef = ref<HTMLElement | null>(null)
 
 watch(open, (isOpen) => {
   document.documentElement.style.overflow = isOpen ? 'hidden' : ''
+
+  if (isOpen) {
+    nextTick(() => {
+      const items = listRef.value?.querySelectorAll('li')
+      if (!items?.length) return
+      gsap.fromTo(
+        items,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.05, delay: 0.15 }
+      )
+    })
+  }
 })
 
 onBeforeUnmount(() => {
@@ -35,9 +50,9 @@ onBeforeUnmount(() => {
         enter-to-class="opacity-100 translate-y-0"
       >
         <nav class="container-page flex h-full flex-col justify-between py-28">
-          <ul class="flex flex-col gap-1">
+          <ul ref="listRef" class="flex flex-col gap-1">
             <li
-              v-for="(item, index) in navItems"
+              v-for="item in navItems"
               :key="item.to"
               class="border-b border-navy-100"
             >
@@ -45,7 +60,6 @@ onBeforeUnmount(() => {
                 :to="item.to"
                 class="flex items-center gap-2 py-4 font-display text-display-sm font-semibold text-ink transition-colors duration-400 ease-editorial hover:text-navy-500"
                 :class="{ 'text-navy-700': route.path === item.to }"
-                :style="{ transitionDelay: `${index * 40}ms` }"
                 @click="close()"
               >
                 <span
