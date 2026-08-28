@@ -34,5 +34,13 @@ const ctaSecondary = { label: 'Tell us about it', to: '/contact' }
         </div>
       </div>
     </BaseContainer>
+
+    <div class="container-page mt-16 md:mt-20">
+      <div
+        class="aspect-[16/9] w-full animate-fade-in overflow-hidden rounded-3xl bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950 motion-reduce:animate-none md:aspect-[21/9]"
+        style="animation-delay: 500ms"
+        aria-hidden="true"
+      />
+    </div>
   </BaseSection>
 </template>
