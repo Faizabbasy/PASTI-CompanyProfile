@@ -4,5 +4,6 @@
     <LayoutHeader />
     <LayoutMobileMenu />
     <NuxtPage />
+    <LayoutFooter />
   </div>
 </template>
