@@ -4,21 +4,25 @@ import type { Platform } from '~/composables/usePlatforms'
 defineProps<{ platform: Platform }>()
 
 const rowRef = ref<HTMLElement | null>(null)
-useRevealOnScroll(rowRef, { threshold: 0.15 })
+useScrollReveal(rowRef)
+
+const { setState } = useCustomCursor()
 </script>
 
 <template>
-  <div ref="rowRef" class="reveal-up border-t border-navy-800">
+  <div ref="rowRef" class="border-t border-navy-800">
     <NuxtLink
       :to="platform.to"
       class="group grid grid-cols-1 gap-8 py-12 md:grid-cols-12 md:items-center md:gap-8 md:py-16"
+      @mouseenter="setState('view')"
+      @mouseleave="setState('default')"
     >
       <div class="md:col-span-5">
         <span class="font-display text-sm font-semibold text-navy-400" aria-hidden="true">
           {{ platform.index }}
         </span>
 
-        <h3 class="mt-4 text-display-md font-display font-semibold text-paper transition-colors duration-400 ease-editorial group-hover:text-yellow-400 md:text-display-lg">
+        <h3 class="mt-4 text-display-md font-display font-semibold text-paper transition-all duration-400 ease-editorial group-hover:translate-x-2 group-hover:text-yellow-400 md:text-display-lg">
           {{ platform.name }}
         </h3>
 
@@ -26,7 +30,7 @@ useRevealOnScroll(rowRef, { threshold: 0.15 })
           {{ platform.positioning }}
           <span
             aria-hidden="true"
-            class="transition-transform duration-400 ease-editorial group-hover:translate-x-1"
+            class="transition-transform duration-400 ease-editorial group-hover:translate-x-2"
           >→</span>
         </p>
       </div>
