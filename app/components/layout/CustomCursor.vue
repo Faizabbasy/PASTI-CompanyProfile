@@ -6,10 +6,12 @@ const { state, _markMounted } = useCustomCursor()
 const enabled = ref(false)
 const cursorRef = ref<HTMLElement | null>(null)
 
-onMounted(() => {
+onMounted(async () => {
   if (!window.matchMedia('(pointer: fine)').matches) return
   enabled.value = true
   _markMounted()
+
+  await nextTick()
 
   const el = cursorRef.value
   if (!el) return
