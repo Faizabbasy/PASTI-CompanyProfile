@@ -1,4 +1,4 @@
-export type CursorState = 'default' | 'link' | 'view' | 'inverse'
+export type CursorState = 'default' | 'link' | 'view' | 'inverse' | 'contact'
 
 const state = ref<CursorState>('default')
 let mounted = false

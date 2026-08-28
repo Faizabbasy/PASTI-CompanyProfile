@@ -7,11 +7,11 @@ const { email } = useFinalCta()
 const year = new Date().getFullYear()
 
 const footerRef = ref<HTMLElement | null>(null)
-useRevealOnScroll(footerRef)
+useScrollReveal(footerRef, { y: 16 })
 </script>
 
 <template>
-  <footer ref="footerRef" class="reveal-up bg-navy-950 py-16 md:py-20">
+  <footer ref="footerRef" class="bg-navy-950 py-16 md:py-20">
     <BaseContainer>
       <div class="flex flex-col gap-16 md:flex-row md:justify-between">
         <div class="flex flex-col gap-8">
@@ -30,7 +30,7 @@ useRevealOnScroll(footerRef)
               v-for="link in navLinks"
               :key="link.to"
               :to="link.to"
-              class="font-display text-body-md font-medium text-navy-200 transition-colors duration-400 ease-editorial hover:text-yellow-400"
+              class="group inline-flex w-fit items-center font-display text-body-md font-medium text-navy-200 transition-all duration-400 ease-editorial hover:translate-x-1 hover:text-yellow-400"
             >
               {{ link.label }}
             </NuxtLink>
@@ -42,7 +42,7 @@ useRevealOnScroll(footerRef)
               v-for="link in platformLinks"
               :key="link.to"
               :to="link.to"
-              class="font-display text-body-md font-medium text-paper transition-colors duration-400 ease-editorial hover:text-yellow-400"
+              class="group inline-flex w-fit items-center font-display text-body-md font-medium text-paper transition-all duration-400 ease-editorial hover:translate-x-1 hover:text-yellow-400"
             >
               {{ link.label }}
             </NuxtLink>

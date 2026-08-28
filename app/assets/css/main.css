@@ -104,6 +104,12 @@
     background-color: theme('colors.yellow.500');
   }
 
+  [data-cursor-state='contact'] .cursor-dot {
+    width: 96px;
+    height: 96px;
+    background-color: theme('colors.yellow.500');
+  }
+
   [data-cursor-state='inverse'] .cursor-dot {
     background-color: theme('colors.paper');
   }
