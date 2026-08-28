@@ -80,4 +80,23 @@
       transition: none;
     }
   }
+
+  /* Page-load intro: gates hero entrance animations behind a brief blank beat,
+     matching Cuberto's own load-in rather than animating on component mount.
+     Each [data-intro] element's own keyframes (fade-up/reveal) already start
+     from an invisible state, so pausing the animation is enough — no separate
+     opacity toggle needed on the section itself. */
+  [data-intro] {
+    animation-play-state: paused;
+  }
+
+  .intro-gate.is-ready [data-intro] {
+    animation-play-state: running;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    [data-intro] {
+      animation-play-state: running;
+    }
+  }
 }
