@@ -6,13 +6,13 @@ const cta = 'Visit insights'
 const { articles } = useInsights()
 
 const headingRef = ref<HTMLElement | null>(null)
-useRevealOnScroll(headingRef)
+useScrollReveal(headingRef, { y: 24 })
 </script>
 
 <template>
   <BaseSection as="section" class="rounded-t-[2.5rem] bg-navy-950">
     <BaseContainer>
-      <div ref="headingRef" class="reveal-up flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+      <div ref="headingRef" class="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
         <h2 class="text-display-lg text-paper">
           {{ heading }}
         </h2>

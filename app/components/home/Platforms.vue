@@ -8,13 +8,13 @@ const label = 'Platforms'
 const { platforms } = usePlatforms()
 
 const labelRef = ref<HTMLElement | null>(null)
-useRevealOnScroll(labelRef)
+useMaskedReveal(labelRef, { by: 'word' })
 </script>
 
 <template>
   <BaseSection as="section" class="bg-navy-950">
     <BaseContainer>
-      <p ref="labelRef" class="eyebrow reveal-up text-navy-300">
+      <p ref="labelRef" class="eyebrow text-navy-300">
         {{ label }}
       </p>
 

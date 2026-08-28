@@ -6,13 +6,13 @@ const heading = 'FAQ'
 const { items } = useFaq()
 
 const headingRef = ref<HTMLElement | null>(null)
-useRevealOnScroll(headingRef)
+useMaskedReveal(headingRef, { by: 'word' })
 </script>
 
 <template>
   <BaseSection as="section" class="bg-navy-950">
     <BaseContainer>
-      <h2 ref="headingRef" class="reveal-up text-display-lg text-paper">
+      <h2 ref="headingRef" class="text-display-lg text-paper">
         {{ heading }}
       </h2>
 

@@ -12,7 +12,12 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    /* Native smooth-scroll is intentionally NOT set here: Lenis (see
+       useLenis.ts) owns smooth scrolling once it starts, and CSS
+       `scroll-behavior: smooth` fights its RAF-driven scroll loop (double-
+       smoothing / jank on anchor jumps). Reduced-motion users (who never
+       get Lenis) simply get native instant scroll instead, which is the
+       correct reduced-motion behavior anyway. */
   }
 
   body {
@@ -61,26 +66,6 @@
 }
 
 @layer utilities {
-  /* Scroll-reveal primitive: pair with an IntersectionObserver directive/composable that toggles `.is-visible`. */
-  .reveal-up {
-    opacity: 0;
-    transform: translateY(32px);
-    transition: opacity 800ms cubic-bezier(0.16, 1, 0.3, 1), transform 800ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .reveal-up.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .reveal-up {
-      opacity: 1;
-      transform: none;
-      transition: none;
-    }
-  }
-
   /* Custom cursor dot — states switched via [data-cursor-state] set from
      useCustomCursor().setState(). Only mounted on (pointer: fine) devices;
      see CustomCursor.vue. */
