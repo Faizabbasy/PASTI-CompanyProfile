@@ -6,4 +6,5 @@
   <HomeHero />
   <HomeWhatWeDo />
   <HomeServiceCards />
+  <HomeTrust />
 </template>
