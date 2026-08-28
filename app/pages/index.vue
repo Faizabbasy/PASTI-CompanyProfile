@@ -5,4 +5,5 @@
 <template>
   <HomeHero />
   <HomeWhatWeDo />
+  <HomeServiceCards />
 </template>
