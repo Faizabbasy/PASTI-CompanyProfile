@@ -99,4 +99,37 @@
       animation-play-state: running;
     }
   }
+
+  /* Custom cursor dot — states switched via [data-cursor-state] set from
+     useCustomCursor().setState(). Only mounted on (pointer: fine) devices;
+     see CustomCursor.vue. */
+  .cursor-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 9999px;
+    background-color: theme('colors.navy.700');
+    transition: width 300ms cubic-bezier(0.16, 1, 0.3, 1), height 300ms cubic-bezier(0.16, 1, 0.3, 1),
+      background-color 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  [data-cursor-state='link'] .cursor-dot {
+    width: 20px;
+    height: 20px;
+  }
+
+  [data-cursor-state='view'] .cursor-dot {
+    width: 64px;
+    height: 64px;
+    background-color: theme('colors.yellow.500');
+  }
+
+  [data-cursor-state='inverse'] .cursor-dot {
+    background-color: theme('colors.paper');
+  }
+
+  @media (pointer: coarse) {
+    .cursor-dot {
+      display: none;
+    }
+  }
 }

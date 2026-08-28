@@ -5,6 +5,10 @@ export default defineNuxtConfig({
 
   modules: ['@nuxtjs/tailwindcss'],
 
+  imports: {
+    dirs: ['composables', 'composables/motion']
+  },
+
   css: ['~/assets/css/main.css'],
 
   app: {

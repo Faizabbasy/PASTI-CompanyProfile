@@ -1,0 +1,50 @@
+import gsap from 'gsap'
+import type { Ref } from 'vue'
+
+interface MagneticOptions {
+  strength?: number
+}
+
+/**
+ * Pointer-relative magnetic pull, bound only on fine-pointer (mouse/
+ * trackpad) devices — never on touch, per the task's explicit "no magnetic
+ * pointer behavior on mobile" instruction. Snaps back with an elastic-but-
+ * restrained ease on leave, matching the brief's "restrained overshoot"
+ * principle rather than a bouncy elastic.out.
+ */
+export function useMagnetic(target: Ref<HTMLElement | null>, options: MagneticOptions = {}) {
+  if (!import.meta.client) return
+
+  const { strength = 0.35 } = options
+
+  onMounted(() => {
+    const el = target.value
+    if (!el) return
+    if (!window.matchMedia('(pointer: fine)').matches) return
+
+    const handleMove = (event: PointerEvent) => {
+      const rect = el.getBoundingClientRect()
+      const relX = event.clientX - (rect.left + rect.width / 2)
+      const relY = event.clientY - (rect.top + rect.height / 2)
+
+      gsap.to(el, {
+        x: relX * strength,
+        y: relY * strength,
+        duration: 0.5,
+        ease: 'power3.out'
+      })
+    }
+
+    const handleLeave = () => {
+      gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: 'power2.out' })
+    }
+
+    el.addEventListener('pointermove', handleMove)
+    el.addEventListener('pointerleave', handleLeave)
+
+    onBeforeUnmount(() => {
+      el.removeEventListener('pointermove', handleMove)
+      el.removeEventListener('pointerleave', handleLeave)
+    })
+  })
+}
