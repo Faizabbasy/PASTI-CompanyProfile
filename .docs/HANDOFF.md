@@ -37,9 +37,27 @@ intended full word rather than guessing silently.
    no `chromium-cli` is available in this environment) across desktop/laptop/
    tablet/mobile viewports, checking for horizontal scroll, console errors,
    and that animations actually run (not just present in markup).
-5. Commit with a message explaining *why*, not just what. Push directly to
-   `origin/master` on `https://github.com/muhammadgrata30/PASTI` — the user
-   has said not to ask for push confirmation each time.
+5. Commit with a message explaining *why*, not just what. **Do NOT push.**
+   As of the session after TASK 09, the user pushes to
+   `origin/master` (`https://github.com/muhammadgrata30/PASTI`) from a
+   separate chat/session themselves — just commit locally and say so.
+   If the user explicitly asks *this* session to push, confirm first
+   (destructive/shared-state action) rather than assuming the old
+   "push every time" instruction still applies.
+6. Many task instructions reference truncated cells in the mapping doc as if
+   already resolved ("use the complete version"). Independently verify the
+   doc's actual raw text yourself (unzip the .docx, parse
+   `word/document.xml`) before trusting a user-supplied "full" string —
+   several truncations were only caught this way (see the section-by-section
+   log below for examples). When the doc's own text disagrees with what the
+   task instruction assumes, surface the discrepancy and ask the user to
+   confirm the real value rather than silently using either one.
+7. `./references/cuberto/` (mentioned in TASK 13's instructions as the
+   primary visual ground truth) does not exist in this repo and never has.
+   Confirmed with the user in TASK 13: fall back to live-screenshotting
+   https://cuberto.com per section (desktop + mobile) as ground truth
+   instead — same as steps 2 above. Don't assume the folder now exists in a
+   future session; check again, and if still missing, use the live site.
 
 ## Repo / auth notes
 - Git remote uses a fine-grained GitHub PAT scoped only to this repo. It is
@@ -87,6 +105,36 @@ Components under `app/components/home/Foo.vue` must be referenced as
 once with `ServiceRow.vue` inside `components/home/` — always double check
 the resolved tag name matches the folder prefix.
 
+### Gotcha — `ref` on `<NuxtLink>` breaks `useRevealOnScroll` and SSR hydration
+`useRevealOnScroll` calls `IntersectionObserver.observe(target.value)` and
+expects a real DOM node. Putting the template `ref` directly on a
+`<NuxtLink>` gives you the *component instance*, not an element — this
+throws during setup and broke hydration for the **entire page**, not just
+that component (hit in TASK 10, `PlatformRow.vue`). Always wrap the link in
+a plain `<div ref="...">` and put the `NuxtLink` (or any component, not
+native element) inside it.
+
+### Gotcha — custom `@layer utilities` rules vs Tailwind's generated utility classes
+A hand-written rule in `main.css`'s `@layer utilities` (e.g. `.intro-gate {
+opacity: 0 }`) will **beat** a same-specificity Tailwind utility class like
+`opacity-100` applied via `:class` — Tailwind's generated utilities are
+injected at the `@tailwind utilities` directive (top of the file), so
+anything written after it in the same layer wins the cascade regardless of
+where the class appears in the HTML. Hit this in the intro-animation work
+after TASK 13: toggling `opacity-100` via Vue never overrode `.intro-gate`'s
+`opacity: 0`, and the hero stayed invisible forever. Don't fight this by
+reordering CSS — prefer state that doesn't collide with a Tailwind utility
+name (e.g. gate `animation-play-state` on a data attribute instead of
+toggling opacity directly).
+
+### Gotcha — Tailwind `animation-fill-mode: both` + `animation-play-state: paused`
+This combo is a clean way to gate an entrance animation until some JS-driven
+"ready" flag flips (used for the Hero's page-load intro): with `both` fill
+mode, a paused animation still renders its `0%` keyframe (typically
+invisible), so you don't need a separate opacity toggle on top — just flip
+`animation-play-state` from `paused` to `running` once ready. See
+`useIntroReady()` / `.intro-gate` / `[data-intro]` in `main.css`.
+
 ## What's built so far (commits, newest last)
 1. `f95b03c` — **Foundation**: Nuxt 4 + Tailwind scaffold, design tokens,
    `BaseContainer`/`BaseSection`, `useRevealOnScroll` composable.
@@ -96,8 +144,7 @@ the resolved tag name matches the folder prefix.
    header caused visual bleed-through, so don't put it back inside Header.vue).
    Nav items + CTA label live in `useNavigation()`. OPEN/e-CORPORATE get a
    small yellow dot marker as first-class platform links.
-3. `10b17ea` — **Hero**: `HomeHero.vue`, centered eyebrow/H1/2-CTA layout,
-   on-mount staggered `animate-fade-up`.
+3. `10b17ea` — **Hero**: `HomeHero.vue`, centered eyebrow/H1/2-CTA layout.
 4. `ed08a39` — **What We Do**: `HomeWhatWeDo.vue`, asymmetric 2-column
    (label left, intro right) matching Cuberto's actual layout for this
    section (different from Hero's centered layout) — verified against the
@@ -106,29 +153,117 @@ the resolved tag name matches the folder prefix.
    + `useServices()`. Built as full-width row blocks (Cuberto's actual
    pattern, not generic cards). All 5 rows always show title+body+CTA (the
    client explicitly chose this over Cuberto's real accordion/collapse
-   behavior); hover still darkens the row navy with white text, matching
+   behavior — **intentional deviation, do not "fix" this in a future visual-
+   parity pass**); hover still darkens the row navy with white text, matching
    Cuberto's hover treatment.
 6. `0417ade` — **Trust**: `HomeTrust.vue` + `useTrustedClients()`. Heading
    "Trusted by leading organizations", 4-col/2-col logo grid with grayscale
-   → color hover and staggered scroll-reveal, matching Cuberto's live Trust
-   section composition. **Logo grid is currently empty** — no PASTI client
-   logos exist in the repo and the mapping doc requires logos to be
-   "approved for publication" before use, so nothing was invented. Anyone
-   picking up work: if you get approved logo assets, drop them in
-   `public/logos/` (or similar) and populate the `clients` array in
-   `useTrustedClients.ts` — the grid/animation will just work.
+   → color hover and staggered scroll-reveal. **Logo grid is still empty** —
+   no PASTI client logos exist in the repo and the mapping doc requires logos
+   to be "approved for publication" before use. Drop approved assets in
+   `public/logos/` (or similar) and populate `clients` in
+   `useTrustedClients.ts` once available — the grid/animation will just work.
+7. `653540b` — **Selected Work**: `HomeSelectedWork.vue` +
+   `HomeSelectedWorkCard.vue` + `useSelectedWork.ts`. 2-column staggered/
+   masonry grid, dark navy section, 10 project cards with empty gradient
+   placeholder visuals (no approved case-study imagery exists yet). Cards and
+   the "View all projects" CTA are non-interactive (no `<a>`/route) since no
+   Work detail pages exist. The mapping doc's list of *named* PASTI case
+   studies (section 11) is not paired to specific card slots by the doc
+   itself — that pairing is still unresolved, not guessed.
+8. `4332cce` — **Why PASTI**: `HomeWhyPasti.vue` + `HomeWhyPastiMetric.vue` +
+   `useWhyPasti.ts`. Deliberately **not** a card grid like Cuberto's — client
+   asked for an editorial metric list (large typography rows + hairlines)
+   instead, to avoid "SaaS stat card" styling. Metric 01's value ("2020") was
+   truncated to "202" in the source doc; the full value was confirmed by the
+   client directly, not guessed.
+9. `18f964a` — **Insights**: `HomeInsights.vue` + `HomeInsightsCard.vue` +
+   `useInsights.ts`. 3-up grid, title-only cards (no invented publish dates/
+   authors/categories/thumbnails — the doc requires real PASTI articles and
+   none exist yet). Two fields were truncated mid-word in the source with no
+   ellipsis marker (article 1 title, the CTA text); confirmed by the client.
+10. `6287009` — **Final CTA**: `HomeFinalCta.vue` + `useFinalCta.ts`.
+    Two-line oversized heading, second line is an underlined link to
+    `/contact`. **`email` is `null`** — the doc's PASTI email replacement is
+    itself truncated ("hello@pastitech." with no TLD) and no complete PASTI
+    contact email exists anywhere in the doc or repo. The component omits
+    the email action entirely when null (not a placeholder string) — just
+    set `email` in `useFinalCta.ts` once the real address is confirmed and
+    it activates automatically in both `FinalCta.vue` and `Footer.vue`.
+11. `64439b6` — **OPEN & e-CORPORATE platform section**:
+    `HomePlatforms.vue` + `HomePlatformRow.vue` + `usePlatforms.ts`. Adapts
+    Selected Work's full-width row grammar (not a small-card grid) for two
+    first-class product rows. OPEN's positioning ("One Procurement Ecosystem
+    Network") is verbatim from the doc. **e-CORPORATE has no real
+    positioning anywhere in the source** — the doc itself says to keep it
+    high-level until an approved product brief exists — so it shows a
+    neutral status label ("Enterprise platform · Coming soon"), not an
+    invented description. Don't write e-CORPORATE feature copy until that
+    brief exists.
+12. `aaad3f3` — **FAQ**: `HomeFaq.vue` + `HomeFaqItem.vue` + `useFaq.ts`.
+    Native `<details>/<summary>` accordion (free keyboard support), multiple
+    items can be open at once (verified against Cuberto live — opening item
+    2 does not close item 1). Height animates via the `grid-template-rows:
+    0fr → 1fr` trick, not JS `scrollHeight` measurement. 3 questions + 2
+    answers were truncated mid-sentence in the source with no ellipsis
+    marker; confirmed by the client.
+13. `b2dd255` — **Footer**: `LayoutFooter.vue` + `useFooter.ts`. Mounted in
+    `app.vue` (layout-level, like Header) so it appears on every route, not
+    just the homepage. 3 of 5 nav labels and both platform-link cells were
+    truncated/placeholder in the source ("Solution", "Insi", "Let's Ta", "O",
+    "e") — full labels confirmed by the client. No social icons or privacy-
+    policy link — none exist in the source and Cuberto's originals are
+    Cuberto-specific, so nothing was invented. Email row reuses
+    `useFinalCta().email` (see #10).
+14. `b6da248` — **TASK 13 visual parity pass**: audited the whole homepage
+    section-by-section against Cuberto's live site (no `references/cuberto/`
+    folder exists in this repo — see gotcha above). Found one CRITICAL gap:
+    Hero had no image/visual block at all, while Cuberto's hero has a large
+    device-mockup image directly under the CTAs. Added a placeholder visual
+    block (rounded, 16:9 desktop / 21:9 wider, gradient navy) matching
+    Cuberto's hero image proportions — confirmed with the client before
+    building. Everything else audited was already close enough to Cuberto's
+    layout/rhythm/motion from its own build task and needed no structural
+    change.
+15. `0af9ee4` — **Hero page-load intro animation**: added a brief blank beat
+    (`useIntroReady()`, ~250ms) before entrance animations start, plus a
+    word/line-level clip-reveal (`animate-reveal`) on the H1 instead of the
+    whole sentence fading up as one block — closer to Cuberto's own load-in.
+    See the two new gotchas above (`ref` on `NuxtLink`, and the
+    `@layer utilities` cascade trap) for bugs hit and fixed while building
+    this.
 
 ## Not built yet (homepage sections remaining per the mapping doc)
-- 06 — Selected Work (project case studies)
-- 07 — Why PASTI (intro + 4 metrics)
-- 08 — Insights (3 articles)
-- 09 — Final CTA
-- Footer / platform links (section 15 in the doc)
+- All 15 mapped homepage sections (00 through Footer) are now built. What's
+  left is asset/content, not structure:
+  - Trust section client logos (empty grid, see #6 above)
+  - Selected Work project imagery + named-case-study-to-slot pairing (#7)
+  - Insights real article data: thumbnails, dates, authors, categories (#9)
+  - PASTI contact email / office address (#10, gates Footer's email row too)
+  - OPEN / e-CORPORATE product visuals, and e-CORPORATE's real positioning
+    copy once a product brief is approved (#11)
+  - Hero's product/device mockup image (#14, currently a placeholder)
 - Testimonials: **do not build** unless real approved quotes are supplied —
   the doc says to hide the component rather than invent quotes.
 - Technology/Creative/Work/About/Insights/Contact — all currently 404 (no
   pages exist yet, only referenced as nav links). Out of scope until a task
   asks for them explicitly.
+- No further TASK numbers have been assigned past TASK 13 as of this
+  writing — check with the user for what's next (likely: real assets as
+  they become available, then individual sub-pages for the 404 routes).
+
+## Visual verification setup (Playwright, ad hoc)
+No `chromium-cli` exists in this environment. The reliable pattern used
+across every task: `mkdir` a throwaway dir under the scratchpad, `npm init
+-y && npm install playwright@1.62.1`, then a one-off `node -e "..."` script
+using `chromium.launch()` — never `npx playwright install` alone (it
+installs the browser binary but not the npm package needed to `require()`
+it; you need both, and the binary is cached at
+`$LOCALAPPDATA/ms-playwright` so it's normally already there — only the npm
+package needs reinstalling per scratch dir). Screenshot section-by-section
+by scrolling to a text locator (`page.locator('text=...').first()`) rather
+than relying on `fullPage: true` (has timed out / OOM'd on heavy pages like
+Cuberto's live site). Delete the scratch dir when done.
 
 ## How to run locally
 ```bash
