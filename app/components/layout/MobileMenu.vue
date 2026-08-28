@@ -14,11 +14,20 @@ watch(open, (isOpen) => {
     nextTick(() => {
       const items = listRef.value?.querySelectorAll('li')
       if (!items?.length) return
-      gsap.fromTo(
-        items,
-        { opacity: 0, y: 16 },
-        { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.05, delay: 0.15 }
-      )
+
+      const mm = gsap.matchMedia()
+
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        gsap.fromTo(
+          items,
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.05, delay: 0.15 }
+        )
+      })
+
+      mm.add('(prefers-reduced-motion: reduce)', () => {
+        gsap.set(items, { opacity: 1, y: 0 })
+      })
     })
   }
 })
