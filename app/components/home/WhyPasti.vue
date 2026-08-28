@@ -1,0 +1,33 @@
+<script setup lang="ts">
+// Copy sourced from .docs/PASTI_Cuberto_Template_Content_Mapping.docx, section 07 — WHY PASTI.
+const label = 'Why PASTI'
+const intro = 'We combine technology and creativity to help businesses turn challenges into scalable solutions, meaningful experiences and measurable impact.'
+
+const { metrics } = useWhyPasti()
+
+const labelRef = ref<HTMLElement | null>(null)
+const introRef = ref<HTMLElement | null>(null)
+
+useRevealOnScroll(labelRef)
+useRevealOnScroll(introRef, { threshold: 0.3 })
+</script>
+
+<template>
+  <BaseSection as="section">
+    <BaseContainer>
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
+        <p ref="labelRef" class="eyebrow reveal-up md:col-span-3">
+          {{ label }}
+        </p>
+
+        <p ref="introRef" class="reveal-up text-body-lg text-ink md:col-span-8 md:col-start-5 lg:col-span-7 lg:col-start-6">
+          {{ intro }}
+        </p>
+      </div>
+
+      <div class="mt-16 md:mt-20">
+        <HomeWhyPastiMetric v-for="metric in metrics" :key="metric.index" :metric="metric" />
+      </div>
+    </BaseContainer>
+  </BaseSection>
+</template>

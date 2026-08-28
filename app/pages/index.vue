@@ -8,4 +8,5 @@
   <HomeServiceCards />
   <HomeTrust />
   <HomeSelectedWork />
+  <HomeWhyPasti />
 </template>
