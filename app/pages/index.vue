@@ -9,6 +9,7 @@
   <HomeTrust />
   <HomeSelectedWork />
   <HomeWhyPasti />
+  <HomePlatforms />
   <HomeInsights />
   <HomeFinalCta />
 </template>

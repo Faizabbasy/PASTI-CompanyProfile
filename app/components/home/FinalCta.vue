@@ -7,7 +7,7 @@ useRevealOnScroll(headingRef)
 </script>
 
 <template>
-  <BaseSection as="section" class="rounded-t-[2.5rem] bg-navy-950">
+  <BaseSection as="section" class="bg-navy-950">
     <BaseContainer>
       <div ref="headingRef" class="reveal-up">
         <p class="text-display-md font-display font-semibold text-paper md:text-display-lg">
