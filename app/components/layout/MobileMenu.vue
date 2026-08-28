@@ -7,6 +7,8 @@ const { isOpen: open, close } = useMobileMenu()
 const route = useRoute()
 const listRef = ref<HTMLElement | null>(null)
 
+let mm: gsap.MatchMedia | undefined
+
 watch(open, (isOpen) => {
   document.documentElement.style.overflow = isOpen ? 'hidden' : ''
 
@@ -15,7 +17,8 @@ watch(open, (isOpen) => {
       const items = listRef.value?.querySelectorAll('li')
       if (!items?.length) return
 
-      const mm = gsap.matchMedia()
+      mm?.revert()
+      mm = gsap.matchMedia()
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
         gsap.fromTo(
@@ -34,6 +37,7 @@ watch(open, (isOpen) => {
 
 onBeforeUnmount(() => {
   document.documentElement.style.overflow = ''
+  mm?.revert()
 })
 </script>
 

@@ -84,11 +84,19 @@ intended full word rather than guessing silently.
   `.container-page` = max-width page gutter wrapper. Components:
   `<BaseSection>` and `<BaseContainer>` wrap these.
 - Buttons: `.btn-primary` (navy), `.btn-accent` (yellow), `.btn-outline`.
-- Animation: `animate-fade-up` / `animate-fade-in` / `animate-reveal` Tailwind
-  utilities (on-mount style animations — use the *utility class*, not a raw
-  custom `animation:` property in scoped CSS, see gotcha below). For
-  scroll-triggered reveals use the `useRevealOnScroll(templateRef, options?)`
-  composable paired with the `.reveal-up` CSS utility class in `main.css`.
+- Animation (as of TASK 14 — replaces the old Tailwind-keyframe system
+  entirely, see "What's built so far" #16 below): **GSAP + ScrollTrigger +
+  Lenis**. Six composables live under `app/composables/motion/`:
+  `useLenis` (smooth-scroll driver, mounted once at the app root),
+  `useGsapContext` (wraps `gsap.context()` + auto-cleanup on unmount),
+  `useMaskedReveal` (clip-path word/line text reveal), `useScrollReveal`
+  (generic scroll-triggered entrance), `useMagnetic` (cursor-follow hover
+  effect on CTAs/links), and `useCustomCursor` (module-level singleton
+  cursor state). The custom cursor itself renders via
+  `app/components/layout/CustomCursor.vue` (mounted once in `app.vue`,
+  `pointer: fine` only). `animate-fade-up`/`animate-fade-in`/`animate-reveal`
+  and `useRevealOnScroll`/`.reveal-up` **no longer exist** — do not reference
+  them in new work.
 
 ### Gotcha already hit twice — read before adding new animation
 Tailwind's `theme.extend.animation`/`keyframes` only emit `@keyframes` into
@@ -105,35 +113,80 @@ Components under `app/components/home/Foo.vue` must be referenced as
 once with `ServiceRow.vue` inside `components/home/` — always double check
 the resolved tag name matches the folder prefix.
 
-### Gotcha — `ref` on `<NuxtLink>` breaks `useRevealOnScroll` and SSR hydration
-`useRevealOnScroll` calls `IntersectionObserver.observe(target.value)` and
-expects a real DOM node. Putting the template `ref` directly on a
-`<NuxtLink>` gives you the *component instance*, not an element — this
-throws during setup and broke hydration for the **entire page**, not just
-that component (hit in TASK 10, `PlatformRow.vue`). Always wrap the link in
-a plain `<div ref="...">` and put the `NuxtLink` (or any component, not
-native element) inside it.
+### Gotcha — nested `app/composables/` subdirectories need explicit `imports.dirs`
+Nuxt 4 auto-imports composables from the **top level** of `app/composables/`
+only, by default. A nested subdirectory — like `app/composables/motion/`,
+added in TASK 14 to group the six GSAP/Lenis composables — is **not**
+scanned unless you add it explicitly:
+```ts
+// nuxt.config.ts
+imports: {
+  dirs: ['composables', 'composables/motion']
+}
+```
+Without this, composables under the nested folder (`useLenis`,
+`useGsapContext`, `useMaskedReveal`, `useScrollReveal`, `useMagnetic`,
+`useCustomCursor`) fail to auto-import **silently** — no build error, just an
+undefined function at runtime. This caused a real bug during TASK 14's Task
+1 (motion foundation). If a future task adds another nested composables
+subdirectory (e.g. `app/composables/forms/`), it needs its own entry added
+to this same `dirs` array.
+
+### Gotcha — `ref` on a Vue *component* (e.g. `<NuxtLink>`) is not a DOM node
+Still very much alive post-TASK 14, and not tied to any specific composable
+— it's a general Vue rule: a template `ref` placed directly on a **component**
+resolves to that component's instance, not its rendered DOM element. Any code
+that then calls native DOM methods on `target.value` — `getBoundingClientRect()`,
+`addEventListener()`, `IntersectionObserver.observe()`, etc. — will throw or
+silently no-op. Originally hit via the now-deleted `useRevealOnScroll`
+composable's `IntersectionObserver.observe(target.value)` call (TASK 10,
+`PlatformRow.vue`), which broke hydration for the **entire page**, not just
+that component. It resurfaced identically **twice** during TASK 14 with
+`useMagnetic` (which reads `getBoundingClientRect()`/adds pointer listeners
+on its target): once on Hero's primary CTA (`Hero.vue`, Task 2 of the motion
+plan) and once on Final CTA's heading-link (`FinalCta.vue`, Task 7) — both
+crashed the app with a hydration/runtime error, both fixed identically by
+wrapping the `<NuxtLink>` in a plain `<div ref="...">` and passing that div's
+ref to `useMagnetic` instead. **Always wrap the link (or any component, not
+native element) in a plain element and put the ref there** whenever the
+consuming code needs a real DOM node — this applies to `useMagnetic`,
+`useMaskedReveal`, `useScrollReveal`, or any future composable that touches
+the DOM directly.
 
 ### Gotcha — custom `@layer utilities` rules vs Tailwind's generated utility classes
-A hand-written rule in `main.css`'s `@layer utilities` (e.g. `.intro-gate {
-opacity: 0 }`) will **beat** a same-specificity Tailwind utility class like
-`opacity-100` applied via `:class` — Tailwind's generated utilities are
-injected at the `@tailwind utilities` directive (top of the file), so
-anything written after it in the same layer wins the cascade regardless of
-where the class appears in the HTML. Hit this in the intro-animation work
-after TASK 13: toggling `opacity-100` via Vue never overrode `.intro-gate`'s
-`opacity: 0`, and the hero stayed invisible forever. Don't fight this by
-reordering CSS — prefer state that doesn't collide with a Tailwind utility
-name (e.g. gate `animation-play-state` on a data attribute instead of
-toggling opacity directly).
+A hand-written rule in `main.css`'s `@layer utilities` will **beat** a
+same-specificity Tailwind utility class applied via `:class` — Tailwind's
+generated utilities are injected at the `@tailwind utilities` directive (top
+of the file), so anything written after it in the same layer wins the
+cascade regardless of where the class appears in the HTML. This mechanism
+(CSS layer ordering) hasn't changed and can still bite. The original example
+that surfaced it, `.intro-gate { opacity: 0 }` colliding with a
+Vue-toggled `opacity-100` (hit in the intro-animation work after TASK 13),
+**no longer exists in the codebase** — TASK 14 replaced that whole
+CSS-driven intro gate with a GSAP timeline (see `useIntroReady()` below and
+`Hero.vue`). `@layer utilities` today only hosts the custom-cursor's
+`.cursor-dot` / `[data-cursor-state='...']` rules, which don't collide with
+any Tailwind utility name. Still, if a future task adds a hand-written rule
+here that shares a name/specificity with a Tailwind utility, prefer state
+that doesn't collide (a data-attribute selector, a differently-named class)
+over fighting the cascade by reordering CSS.
 
-### Gotcha — Tailwind `animation-fill-mode: both` + `animation-play-state: paused`
-This combo is a clean way to gate an entrance animation until some JS-driven
-"ready" flag flips (used for the Hero's page-load intro): with `both` fill
-mode, a paused animation still renders its `0%` keyframe (typically
-invisible), so you don't need a separate opacity toggle on top — just flip
-`animation-play-state` from `paused` to `running` once ready. See
-`useIntroReady()` / `.intro-gate` / `[data-intro]` in `main.css`.
+### Gotcha (superseded mechanism, composable itself unchanged) — page-load intro gating
+Pre-TASK 14, the Hero's page-load intro used Tailwind
+`animation-fill-mode: both` + `animation-play-state: paused` on
+`.intro-gate` / `[data-intro]` elements, flipped to `running` once
+`useIntroReady()` resolved. **That CSS-driven mechanism and both classes are
+gone** — confirmed via grep, `.intro-gate`/`[data-intro]` no longer appear
+anywhere in the codebase. `useIntroReady()` itself is **unchanged**: it still
+provides the same ~250ms blank-beat gate (`requestAnimationFrame` +
+`setTimeout`) via an `introReady` ref, documented in
+`app/composables/useIntroReady.ts`. What changed is the *consumer* pattern —
+`Hero.vue` now does `watch(introReady, (ready) => { if (!ready) return; ...
+})` inside `useGsapContext()` to gate the **start of a hand-built GSAP
+timeline** (word-mask reveal + CTA/visual fade-in), not to toggle
+`animation-play-state` on paused CSS animations. Any future consumer of
+`useIntroReady()` should follow the GSAP-timeline-gate pattern, not
+resurrect the CSS one.
 
 ## What's built so far (commits, newest last)
 1. `f95b03c` — **Foundation**: Nuxt 4 + Tailwind scaffold, design tokens,
@@ -227,11 +280,35 @@ invisible), so you don't need a separate opacity toggle on top — just flip
     change.
 15. `0af9ee4` — **Hero page-load intro animation**: added a brief blank beat
     (`useIntroReady()`, ~250ms) before entrance animations start, plus a
-    word/line-level clip-reveal (`animate-reveal`) on the H1 instead of the
-    whole sentence fading up as one block — closer to Cuberto's own load-in.
-    See the two new gotchas above (`ref` on `NuxtLink`, and the
-    `@layer utilities` cascade trap) for bugs hit and fixed while building
-    this.
+    word/line-level clip-reveal on the H1 instead of the whole sentence
+    fading up as one block — closer to Cuberto's own load-in. This used a
+    CSS-only `animation-play-state` approach at the time; superseded by
+    TASK 14 below (see the gotchas above for what changed and why).
+16. `9b7bcac`…`fd05b9c` — **TASK 14, Cuberto motion parity pass**: replaced
+    the entire on-mount/scroll-reveal Tailwind-keyframe system
+    (`animate-fade-up`/`animate-fade-in`/`animate-reveal`,
+    `useRevealOnScroll`/`.reveal-up` — all deleted) with a **GSAP +
+    ScrollTrigger + Lenis** foundation (`9b7bcac`), six composables under
+    `app/composables/motion/` (see "Design tokens" above). Added a custom
+    cursor with 5 states — default/link/view/inverse/contact
+    (`CustomCursor.vue` + `useCustomCursor.ts`; fixed twice for
+    mount/hydration ordering, `a3ff082` and `026282c`). Added magnetic hover
+    (`useMagnetic`) to Hero's primary CTA and Final CTA's heading-link, and
+    rebuilt Hero's page-load intro as a hand-built GSAP timeline gated on
+    `useIntroReady()` instead of CSS `animation-play-state` (`494d8af`).
+    Replaced the old CSS keyframe reveals with masked word/line-reveal text
+    animation (`useMaskedReveal`) across What We Do, Why PASTI, and other
+    copy-heavy sections (`7fc6611`). Added entrance (clip-path + scale),
+    hover, and per-column parallax motion to Selected Work — no pinning
+    (`3d275f7`). Extended hover motion to Services, Insights, and Platforms
+    rows with a differential title/arrow shift pattern (`f093bb0`,
+    `e42ec13`). Refined FAQ icon easing and Footer hover motion, added Final
+    CTA's magnetic interaction (`365c6f9`). Fixed a leftover CSS-only reveal
+    pattern found during final QA (`fd05b9c`), and guarded MobileMenu's
+    stagger animation with `prefers-reduced-motion` (`2be9bcc`). See the
+    gotchas above (`ref` on a Vue component, `@layer utilities` cascade, the
+    `imports.dirs` nested-composables trap, and the superseded intro-gate
+    mechanism) for bugs hit and fixed while building this.
 
 ## Not built yet (homepage sections remaining per the mapping doc)
 - All 15 mapped homepage sections (00 through Footer) are now built. What's

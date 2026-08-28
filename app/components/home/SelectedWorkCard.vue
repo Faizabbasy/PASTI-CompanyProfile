@@ -20,7 +20,7 @@ useGsapContext(() => {
   const mm = gsap.matchMedia()
 
   mm.add('(prefers-reduced-motion: reduce)', () => {
-    gsap.set(card, { opacity: 1, y: 0, scale: 1, clipPath: 'inset(0% round 16px)' })
+    gsap.set(card, { opacity: 1, scale: 1, clipPath: 'inset(0% round 16px)' })
   })
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
@@ -36,9 +36,9 @@ useGsapContext(() => {
     })
 
     // Subtle per-card vertical parallax as the grid scrolls — offset cards
-    // (odd rows, per SelectedWork.vue's md:mt-20 stagger) drift a touch
-    // slower than the base rate, matching the light "cards move at
-    // slightly different speeds" effect referenced in the spec.
+    // (odd rows, per SelectedWork.vue's md:mt-20 stagger) drift roughly 2x
+    // further/faster than the base rate (-24 vs -12), matching the light
+    // "cards move at slightly different speeds" effect referenced in the spec.
     const parallax = gsap.matchMedia().add('(min-width: 768px)', () => {
       const parallaxTween = gsap.to(card, {
         y: props.offset ? -24 : -12,

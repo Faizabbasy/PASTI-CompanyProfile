@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 
-const { state, _markMounted } = useCustomCursor()
+const { state } = useCustomCursor()
 
 const enabled = ref(false)
 const cursorRef = ref<HTMLElement | null>(null)
@@ -15,7 +15,6 @@ onBeforeUnmount(() => {
 onMounted(() => {
   if (!window.matchMedia('(pointer: fine)').matches) return
   enabled.value = true
-  _markMounted()
 
   nextTick(() => {
     const el = cursorRef.value
