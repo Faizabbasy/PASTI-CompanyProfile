@@ -7,4 +7,5 @@
   <HomeWhatWeDo />
   <HomeServiceCards />
   <HomeTrust />
+  <HomeSelectedWork />
 </template>
