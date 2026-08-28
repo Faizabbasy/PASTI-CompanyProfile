@@ -9,4 +9,5 @@
   <HomeTrust />
   <HomeSelectedWork />
   <HomeWhyPasti />
+  <HomeInsights />
 </template>
