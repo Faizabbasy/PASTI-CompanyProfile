@@ -11,5 +11,6 @@
   <HomeWhyPasti />
   <HomePlatforms />
   <HomeInsights />
+  <HomeFaq />
   <HomeFinalCta />
 </template>
