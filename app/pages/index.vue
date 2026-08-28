@@ -10,4 +10,5 @@
   <HomeSelectedWork />
   <HomeWhyPasti />
   <HomeInsights />
+  <HomeFinalCta />
 </template>
