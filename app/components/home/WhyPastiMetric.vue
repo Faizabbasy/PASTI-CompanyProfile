@@ -4,16 +4,19 @@ import type { WhyPastiMetric } from '~/composables/useWhyPasti'
 defineProps<{ metric: WhyPastiMetric }>()
 
 const rowRef = ref<HTMLElement | null>(null)
-useRevealOnScroll(rowRef, { threshold: 0.3 })
+const valueRef = ref<HTMLElement | null>(null)
+
+useScrollReveal(rowRef, { y: 0 })
+useMaskedReveal(valueRef, { by: 'line' })
 </script>
 
 <template>
-  <div ref="rowRef" class="reveal-up grid grid-cols-1 gap-2 border-t border-navy-100 py-8 md:grid-cols-12 md:items-baseline md:gap-8 md:py-10">
+  <div ref="rowRef" class="grid grid-cols-1 gap-2 border-t border-navy-100 py-8 md:grid-cols-12 md:items-baseline md:gap-8 md:py-10">
     <span class="font-display text-sm font-semibold text-navy-300 md:col-span-1" aria-hidden="true">
       {{ metric.index }}
     </span>
 
-    <p v-if="metric.value" class="font-display text-display-md font-semibold text-ink md:col-span-4">
+    <p v-if="metric.value" ref="valueRef" class="font-display text-display-md font-semibold text-ink md:col-span-4">
       {{ metric.value }}
     </p>
 

@@ -8,19 +8,19 @@ const { metrics } = useWhyPasti()
 const labelRef = ref<HTMLElement | null>(null)
 const introRef = ref<HTMLElement | null>(null)
 
-useRevealOnScroll(labelRef)
-useRevealOnScroll(introRef, { threshold: 0.3 })
+useMaskedReveal(labelRef, { by: 'word' })
+useMaskedReveal(introRef, { by: 'line' })
 </script>
 
 <template>
   <BaseSection as="section">
     <BaseContainer>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
-        <p ref="labelRef" class="eyebrow reveal-up md:col-span-3">
+        <p ref="labelRef" class="eyebrow md:col-span-3">
           {{ label }}
         </p>
 
-        <p ref="introRef" class="reveal-up text-body-lg text-ink md:col-span-8 md:col-start-5 lg:col-span-7 lg:col-start-6">
+        <p ref="introRef" class="text-body-lg text-ink md:col-span-8 md:col-start-5 lg:col-span-7 lg:col-start-6">
           {{ intro }}
         </p>
       </div>
