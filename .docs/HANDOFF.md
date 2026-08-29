@@ -350,6 +350,98 @@ resurrect the CSS one.
       via Playwright — see gotcha note below if a future session touches
       this again.
 
+18. **Session after #17: Service rows layout fix, Hero rebuilt twice more,
+    real logo asset, cursor spotlight** (no TASK number assigned; commits
+    `33ee2af` onward through `54b841c`). Dense session — client iterated on
+    the Hero multiple times, including one full detour that was reverted.
+    Read this whole entry before touching Hero.vue, Logo.vue, or
+    ServiceRow.vue again.
+    - **Service rows alignment + description placement** (`33ee2af`,
+      `e33e845`, `8b4f6f6`): fixed `items-center`→`items-start` so
+      title/description/index share a top baseline across all 5 rows
+      (previously only row 1 aligned by coincidence). Description's reveal
+      animation split from the row's height-tween so it visibly eases in
+      on its own beat (`y:16→0`, 150ms delay) instead of popping in flat.
+      Then, per a follow-up screenshot from the client showing Cuberto's
+      actual open-card layout, moved the description from a right-hand
+      column to directly under the title (stacked, one column, matching
+      Cuberto exactly) and **removed the standalone "Explore" link** —
+      the whole row is now one `NuxtLink` (wrapped in a plain `<div
+      ref="rowRef">` for the same Vue-component-ref gotcha documented
+      above), so clicking anywhere on a row navigates to `/technology`.
+      Also collapsed the three decorative shape variants
+      (diagonal/chevron/radial) down to one (`service-shape-diagonal`
+      only) — the client flagged the chevron's "X" look as wrong and
+      asked for one consistent treatment.
+    - **Hero: wordmark experiment, built then fully reverted.** The client
+      asked for a giant "PASTI" wordmark (styled like the navbar logo,
+      with an animated dot flying in) to replace the sentence headline.
+      This was built, verified, and iterated on (letter-by-letter reveal,
+      dot entrance animation) — then the client asked to revert it
+      entirely back to the sentence headline. **Do not resurrect the
+      wordmark-hero idea from git history without being asked** — it was
+      explicitly rejected, not just deprioritized. The revert was done by
+      restoring `Hero.vue` from commit `534a6e8` (last known-good sentence
+      headline), not by hand-editing forward.
+    - **Hero: hierarchy flip, then full Cuberto structural match.** After
+      the wordmark revert, the client first asked to swap prominence
+      between the two lines — "Technology. Creativity. Impact." became
+      the large `<h1>`, "We build technology..." became a small line
+      above it. Then, after comparing screenshots of Cuberto's actual
+      hero, asked to match Cuberto's structure **exactly**: no small
+      label above the headline at all, no CTA row in this section.
+      Current final structure (as of `54b841c`): headline (now
+      `text-display-lg/xl`, much larger than before) → subtext paragraph
+      below it → visual block. `ctaPrimary`/`ctaSecondary` and
+      `useMagnetic` are gone from Hero entirely. The word-reveal
+      `wrapWord()` helper now adds `margin: -0.2em` (outer) /
+      `padding: 0.2em` (inner) — copied from Cuberto's own live DOM
+      structure (verified via `outerHTML` inspection) — to stop
+      descenders (g, y, p) clipping during the reveal; the previous
+      version didn't have this and it happened to not matter for the
+      words used, but keep it for any future headline text.
+    - **Real logo asset.** Client supplied
+      `.docs/LOGO/pasti logo (1).png` (full "PASTI" wordmark + dot,
+      1205×527, transparent background) and
+      `.docs/LOGO/PASTI PUTIH LOGO biru.png` (a "P." icon mark, likely
+      for a future favicon — **not currently used anywhere**, don't wire
+      it up without being asked). The wordmark was copied to
+      `public/images/pasti-logo.png` and `LayoutLogo.vue` now renders it
+      via `<img>` instead of CSS text. **Non-obvious part:** on light
+      backgrounds (navbar) the image renders untouched — the source
+      art's dot is already correctly positioned/colored. On dark
+      backgrounds (footer) it needs to read as white, but
+      `brightness-0 invert` also turns the dot white (filters apply
+      per-pixel uniformly, there's no way to invert selectively) — and
+      in the source art the dot actually **overlaps** the top of the
+      final "I", it isn't a clean gap, which was confirmed by measuring
+      the PNG with a percentage-grid overlay in a scratch HTML file. So
+      the inverted/footer variant (`<LayoutLogo inverted />`, used in
+      `Footer.vue`) crops the image at a hand-tuned width
+      (`2.13em` of a `1em`-tall wrapper) to cut the source dot out of
+      frame, then draws a solid `bg-yellow-500` CSS span back on top at
+      hand-tuned coordinates. If the source PNG is ever replaced, these
+      crop/position numbers will need re-tuning the same way (screenshot
+      at high `deviceScaleFactor`, adjust, re-screenshot — there's no
+      shortcut without image-editing tooling, which this environment
+      doesn't have: no ImageMagick, no `sharp`).
+    - **Cursor spotlight on the Hero headline.** New composable
+      `app/composables/motion/useCursorSpotlight.ts`: tracks
+      `pointermove` over a wrapper element and writes
+      `--spotlight-x`/`--spotlight-y` custom properties (smoothed via a
+      short GSAP tween so it glides, not snaps) that a `radial-gradient`
+      mask (`.cursor-spotlight` in `main.css`) reads on a second,
+      absolutely-positioned, `aria-hidden` copy of the headline text
+      (`text-yellow-500`) stacked on top of the real navy one. The mask
+      is a **hard-edged** circle (`black` all the way to
+      `--spotlight-radius`, `transparent` one pixel past it) — an
+      earlier version had a soft ~70px feather between radius and edge,
+      which the client rejected as looking "kaya gradient" (like a
+      gradient); they want solid yellow inside the circle, full stop.
+      Fine-pointer only (`window.matchMedia('(pointer: fine)')`, same
+      gating pattern as `useMagnetic`/`CustomCursor.vue`), so it's
+      simply absent on touch devices rather than trying to simulate it.
+
 ### Gotcha — per-row `ScrollTrigger` instances need their own `useGsapContext`
 `HomeServiceRow.vue`'s scroll-accordion (#17 above) creates one
 `ScrollTrigger` per row instance inside `useGsapContext()`, keyed to that
@@ -372,7 +464,15 @@ once for all five.
   - PASTI contact email / office address (#10, gates Footer's email row too)
   - OPEN / e-CORPORATE product visuals, and e-CORPORATE's real positioning
     copy once a product brief is approved (#11)
-  - Hero's product/device mockup image (#14, currently a placeholder)
+  - Hero's product/device mockup image (#14, currently a placeholder —
+    Hero's own text content and structure changed substantially since
+    #14 was written, see #18, but the visual block itself is still the
+    same gradient placeholder)
+  - Favicon: `.docs/LOGO/PASTI PUTIH LOGO biru.png` (a "P." icon mark)
+    was supplied alongside the wordmark logo in #18 and looks intended
+    for this, but hasn't been wired up — `public/favicon.ico` is still
+    whatever was scaffolded in TASK 00. Ask before changing it in case
+    the client has an opinion on format/sizing.
 - Testimonials: **do not build** unless real approved quotes are supplied —
   the doc says to hide the component rather than invent quotes.
 - Technology/Creative/Work/About/Insights/Contact — all currently 404 (no
