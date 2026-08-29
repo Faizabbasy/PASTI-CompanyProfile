@@ -2,11 +2,10 @@
 import gsap from 'gsap'
 
 // Copy sourced verbatim from .docs/PASTI_Cuberto_Template_Content_Mapping.docx, section 02 — HERO.
-// Client asked for an exact structural match to Cuberto's own hero: no small label above
-// the headline, no CTA row in this section — just headline, then a shorter subtext line
-// below it, matching Cuberto's own <h1> + one-paragraph-subtext layout precisely.
 const headline = 'Technology. Creativity. Impact.'
 const subtext = 'We build technology and creative solutions for businesses ready to move forward.'
+const ctaPrimary = { label: 'Explore our work', to: '/work' }
+const ctaSecondary = { label: 'Tell us about it', to: '/contact' }
 
 const { introReady } = useIntroReady()
 
@@ -14,7 +13,11 @@ const headingRef = ref<HTMLElement | null>(null)
 const headingWrapRef = ref<HTMLElement | null>(null)
 const spotlightRef = ref<HTMLElement | null>(null)
 const subtextRef = ref<HTMLElement | null>(null)
+const ctaRowRef = ref<HTMLElement | null>(null)
+const ctaPrimaryRef = ref<HTMLElement | null>(null)
 const visualRef = ref<HTMLElement | null>(null)
+
+useMagnetic(ctaPrimaryRef, { strength: 0.25 })
 
 /** Wraps a word in the outer-clip / inner-translate mask structure, matching
  * Cuberto's own hero markup exactly (verified via their live DOM): the outer
@@ -48,7 +51,7 @@ useGsapContext(() => {
       onCleanup(() => mm.revert())
 
       mm.add('(prefers-reduced-motion: reduce)', () => {
-        gsap.set([subtextRef.value, visualRef.value].filter(Boolean), { opacity: 1, y: 0, scale: 1, clipPath: 'none' })
+        gsap.set([subtextRef.value, ctaRowRef.value, visualRef.value].filter(Boolean), { opacity: 1, y: 0, scale: 1, clipPath: 'none' })
       })
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
@@ -69,14 +72,16 @@ useGsapContext(() => {
         }
         gsap.set(allHeadingWords, { yPercent: 120 })
         if (subtextRef.value) gsap.set(subtextRef.value, { opacity: 0, y: 12 })
+        if (ctaRowRef.value) gsap.set(ctaRowRef.value, { opacity: 0, y: 12 })
         if (visualRef.value) gsap.set(visualRef.value, { opacity: 0, scale: 1.05, clipPath: 'inset(4% round 24px)' })
 
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
         tl.to(allHeadingWords, { yPercent: 0, duration: 0.65, stagger: 0.03 }, 0)
         if (subtextRef.value) tl.to(subtextRef.value, { opacity: 1, y: 0, duration: 0.5 }, 0.35)
+        if (ctaRowRef.value) tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: 0.5 }, 0.45)
         if (visualRef.value) {
-          tl.to(visualRef.value, { opacity: 1, scale: 1, clipPath: 'inset(0% round 24px)', duration: 0.9 }, 0.5)
+          tl.to(visualRef.value, { opacity: 1, scale: 1, clipPath: 'inset(0% round 24px)', duration: 0.9 }, 0.55)
         }
 
         return () => tl.kill()
@@ -109,6 +114,17 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
         <p ref="subtextRef" class="mt-6 max-w-2xl text-body-lg text-muted">
           {{ subtext }}
         </p>
+
+        <div ref="ctaRowRef" class="mt-8 flex flex-col items-center gap-4 sm:flex-row">
+          <div ref="ctaPrimaryRef" class="inline-block">
+            <NuxtLink :to="ctaPrimary.to" class="btn-primary">
+              {{ ctaPrimary.label }}
+            </NuxtLink>
+          </div>
+          <NuxtLink :to="ctaSecondary.to" class="btn-outline">
+            {{ ctaSecondary.label }}
+          </NuxtLink>
+        </div>
       </div>
     </BaseContainer>
 
