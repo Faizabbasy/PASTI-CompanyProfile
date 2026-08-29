@@ -51,22 +51,22 @@ useGsapContext(() => {
 
 <template>
   <header class="relative z-50 bg-paper">
-    <div class="container-page flex h-16 items-center justify-between md:h-20">
+    <div class="container-page flex h-16 items-center md:h-20">
       <div ref="logoRef">
         <LayoutLogo />
       </div>
 
-      <nav ref="navRef" class="hidden items-center gap-10 lg:flex">
+      <nav ref="navRef" class="ml-auto hidden items-center gap-10 lg:flex">
         <LayoutNavLink v-for="item in navItems" :key="item.to" :item="item" />
       </nav>
 
-      <div ref="ctaRef" class="hidden lg:block">
+      <div ref="ctaRef" class="ml-10 hidden lg:block">
         <NuxtLink :to="primaryCta.to" class="btn-primary">
           {{ primaryCta.label }}
         </NuxtLink>
       </div>
 
-      <div ref="toggleRef">
+      <div ref="toggleRef" class="ml-auto lg:hidden">
         <LayoutMenuToggle :open="mobileOpen" @toggle="toggleMobile" />
       </div>
     </div>

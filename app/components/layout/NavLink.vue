@@ -11,14 +11,14 @@ const { setState } = useCustomCursor()
 <template>
   <NuxtLink
     :to="item.to"
-    class="group relative flex items-center gap-1.5 py-2 font-display text-sm font-medium text-ink"
+    class="group relative flex items-center gap-1.5 py-2 font-display text-sm font-semibold text-ink"
     :class="{ 'text-navy-700': route.path === item.to }"
     @mouseenter="setState('link')"
     @mouseleave="setState('default')"
   >
     <span
       v-if="item.isPlatform"
-      class="h-1.5 w-1.5 rounded-full bg-yellow-500 transition-transform duration-400 ease-editorial group-hover:scale-125"
+      class="mt-[0.55em] h-1.5 w-1.5 shrink-0 self-start rounded-full bg-yellow-500 transition-transform duration-400 ease-editorial group-hover:scale-125"
       aria-hidden="true"
     />
     <span ref="labelRef" class="relative block overflow-clip">
