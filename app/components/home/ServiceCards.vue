@@ -5,7 +5,7 @@ const { services } = useServices()
 <template>
   <BaseSection as="section" class="pt-0 md:pt-8">
     <BaseContainer>
-      <div class="flex flex-col gap-4 md:gap-5">
+      <div class="mx-auto flex max-w-5xl flex-col gap-4 md:gap-5">
         <HomeServiceRow v-for="service in services" :key="service.index" :service="service" />
       </div>
     </BaseContainer>
