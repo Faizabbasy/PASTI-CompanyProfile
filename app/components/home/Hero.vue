@@ -107,7 +107,7 @@ useGsapContext(() => {
           {{ eyebrow }}
         </p>
 
-        <h1 ref="headingRef" class="mt-6 max-w-3xl text-display-sm md:max-w-none md:text-display-md">
+        <h1 ref="headingRef" class="mt-6 max-w-3xl font-extrabold text-display-sm md:max-w-none md:text-display-md">
           {{ headline }}
         </h1>
 
