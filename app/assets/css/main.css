@@ -104,4 +104,25 @@
       display: none;
     }
   }
+
+  /* Accent-colored text layer revealed only in a hard-edged circle around
+     the cursor — position driven by --spotlight-x/--spotlight-y (set from
+     useCursorSpotlight.ts via pointermove), radius from --spotlight-radius.
+     No feather: the client explicitly wants solid yellow inside the circle,
+     not a soft gradient falloff. Uses -webkit-mask-image too since Safari
+     doesn't support the unprefixed mask-image property yet. */
+  .cursor-spotlight {
+    -webkit-mask-image: radial-gradient(
+      circle at var(--spotlight-x, -9999px) var(--spotlight-y, -9999px),
+      black 0,
+      black var(--spotlight-radius, 110px),
+      transparent calc(var(--spotlight-radius, 110px) + 1px)
+    );
+    mask-image: radial-gradient(
+      circle at var(--spotlight-x, -9999px) var(--spotlight-y, -9999px),
+      black 0,
+      black var(--spotlight-radius, 110px),
+      transparent calc(var(--spotlight-radius, 110px) + 1px)
+    );
+  }
 }

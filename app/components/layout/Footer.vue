@@ -15,9 +15,7 @@ useScrollReveal(footerRef, { y: 16 })
     <BaseContainer>
       <div class="flex flex-col gap-16 md:flex-row md:justify-between">
         <div class="flex flex-col gap-8">
-          <NuxtLink to="/" class="font-display text-2xl font-extrabold tracking-tight text-paper">
-            PASTI<span class="ml-0.5 inline-block h-1.5 w-1.5 rounded-full bg-yellow-500 align-super" aria-hidden="true" />
-          </NuxtLink>
+          <LayoutLogo inverted />
 
           <NuxtLink v-if="email" :to="`mailto:${email}`" class="btn-outline w-fit border-navy-700 text-paper hover:border-paper">
             {{ email }}
