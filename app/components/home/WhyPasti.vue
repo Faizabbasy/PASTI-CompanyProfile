@@ -25,8 +25,13 @@ useMaskedReveal(introRef, { by: 'line' })
         </p>
       </div>
 
-      <div class="mt-16 md:mt-20">
-        <HomeWhyPastiMetric v-for="metric in metrics" :key="metric.index" :metric="metric" />
+      <div class="mt-16 grid grid-cols-1 gap-4 sm:grid-cols-2 md:mt-20 lg:grid-cols-3">
+        <HomeWhyPastiMetric
+          v-for="(metric, i) in metrics"
+          :key="metric.index"
+          :metric="metric"
+          :tone="i % 2 === 0 ? 'navy' : 'yellow'"
+        />
       </div>
     </BaseContainer>
   </BaseSection>

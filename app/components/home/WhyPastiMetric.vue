@@ -1,30 +1,33 @@
 <script setup lang="ts">
 import type { WhyPastiMetric } from '~/composables/useWhyPasti'
 
-defineProps<{ metric: WhyPastiMetric }>()
+defineProps<{ metric: WhyPastiMetric; tone: 'navy' | 'yellow' }>()
 
-const rowRef = ref<HTMLElement | null>(null)
+const cardRef = ref<HTMLElement | null>(null)
 const valueRef = ref<HTMLElement | null>(null)
 
-useScrollReveal(rowRef, { y: 0 })
+useScrollReveal(cardRef, { y: 24 })
 useMaskedReveal(valueRef, { by: 'line' })
 </script>
 
 <template>
-  <div ref="rowRef" class="grid grid-cols-1 gap-2 border-t border-navy-100 py-8 md:grid-cols-12 md:items-baseline md:gap-8 md:py-10">
-    <span class="font-display text-sm font-semibold text-navy-300 md:col-span-1" aria-hidden="true">
-      {{ metric.index }}
-    </span>
+  <div
+    ref="cardRef"
+    class="flex h-full flex-col justify-between gap-8 rounded-3xl p-8"
+    :class="tone === 'navy' ? 'bg-navy-50' : 'bg-yellow-50'"
+  >
+    <span class="text-navy-700" aria-hidden="true" v-html="metric.icon" />
 
-    <p v-if="metric.value" ref="valueRef" class="font-display text-display-md font-semibold text-ink md:col-span-4">
-      {{ metric.value }}
-    </p>
-
-    <p
-      class="text-body-lg text-muted md:col-start-6"
-      :class="metric.value ? 'md:col-span-7' : 'md:col-span-11 md:text-display-sm md:font-display md:font-medium md:text-ink'"
-    >
-      {{ metric.label }}
-    </p>
+    <div>
+      <p v-if="metric.value" ref="valueRef" class="font-display text-display-md font-semibold text-ink">
+        {{ metric.value }}
+      </p>
+      <p
+        class="text-body-sm uppercase tracking-widest text-navy-500"
+        :class="metric.value ? 'mt-2' : 'text-body-lg normal-case tracking-normal text-ink'"
+      >
+        {{ metric.label }}
+      </p>
+    </div>
   </div>
 </template>
