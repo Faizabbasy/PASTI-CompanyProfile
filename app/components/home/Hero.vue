@@ -15,7 +15,6 @@ const spotlightRef = ref<HTMLElement | null>(null)
 const subtextRef = ref<HTMLElement | null>(null)
 const ctaRowRef = ref<HTMLElement | null>(null)
 const ctaPrimaryRef = ref<HTMLElement | null>(null)
-const visualRef = ref<HTMLElement | null>(null)
 
 useMagnetic(ctaPrimaryRef, { strength: 0.25 })
 
@@ -51,7 +50,7 @@ useGsapContext(() => {
       onCleanup(() => mm.revert())
 
       mm.add('(prefers-reduced-motion: reduce)', () => {
-        gsap.set([subtextRef.value, ctaRowRef.value, visualRef.value].filter(Boolean), { opacity: 1, y: 0, scale: 1, clipPath: 'none' })
+        gsap.set([subtextRef.value, ctaRowRef.value].filter(Boolean), { opacity: 1, y: 0 })
       })
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
@@ -73,16 +72,12 @@ useGsapContext(() => {
         gsap.set(allHeadingWords, { yPercent: 120 })
         if (subtextRef.value) gsap.set(subtextRef.value, { opacity: 0, y: 12 })
         if (ctaRowRef.value) gsap.set(ctaRowRef.value, { opacity: 0, y: 12 })
-        if (visualRef.value) gsap.set(visualRef.value, { opacity: 0, scale: 1.05, clipPath: 'inset(4% round 24px)' })
 
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
         tl.to(allHeadingWords, { yPercent: 0, duration: 0.65, stagger: 0.03 }, 0)
         if (subtextRef.value) tl.to(subtextRef.value, { opacity: 1, y: 0, duration: 0.5 }, 0.35)
         if (ctaRowRef.value) tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: 0.5 }, 0.45)
-        if (visualRef.value) {
-          tl.to(visualRef.value, { opacity: 1, scale: 1, clipPath: 'inset(0% round 24px)', duration: 0.9 }, 0.55)
-        }
 
         return () => tl.kill()
       })
@@ -127,13 +122,5 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
         </div>
       </div>
     </BaseContainer>
-
-    <div class="container-page mt-16 md:mt-20">
-      <div
-        ref="visualRef"
-        class="aspect-[16/9] w-full overflow-hidden rounded-3xl bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950 md:aspect-[21/9]"
-        aria-hidden="true"
-      />
-    </div>
   </BaseSection>
 </template>
