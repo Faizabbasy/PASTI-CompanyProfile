@@ -50,7 +50,7 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <header class="sticky top-0 z-50 bg-paper">
+  <header class="relative z-50 bg-paper">
     <div class="container-page flex h-16 items-center justify-between md:h-20">
       <div ref="logoRef">
         <LayoutLogo />
