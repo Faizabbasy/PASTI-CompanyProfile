@@ -7,6 +7,7 @@ const props = defineProps<{ service: Service; shape: 'diagonal' | 'chevron' | 'r
 
 const rowRef = ref<HTMLElement | null>(null)
 const bodyRef = ref<HTMLElement | null>(null)
+const bodyTextRef = ref<HTMLElement | null>(null)
 const isOpen = ref(false)
 
 const { setState } = useCustomCursor()
@@ -14,12 +15,14 @@ const { setState } = useCustomCursor()
 useGsapContext(() => {
   const row = rowRef.value
   const body = bodyRef.value
-  if (!row || !body) return
+  const bodyText = bodyTextRef.value
+  if (!row || !body || !bodyText) return
 
   const mm = gsap.matchMedia()
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
     gsap.set(body, { height: 0, opacity: 0 })
+    gsap.set(bodyText, { y: 16, opacity: 0 })
 
     const st = ScrollTrigger.create({
       trigger: row,
@@ -33,6 +36,13 @@ useGsapContext(() => {
           duration: 0.6,
           ease: 'cubic-bezier(0.16, 1, 0.3, 1)'
         })
+        gsap.to(bodyText, {
+          y: self.isActive ? 0 : 16,
+          opacity: self.isActive ? 1 : 0,
+          duration: 0.5,
+          delay: self.isActive ? 0.15 : 0,
+          ease: 'cubic-bezier(0.16, 1, 0.3, 1)'
+        })
       }
     })
 
@@ -42,6 +52,7 @@ useGsapContext(() => {
   mm.add('(prefers-reduced-motion: reduce)', () => {
     isOpen.value = true
     gsap.set(body, { height: 'auto', opacity: 1 })
+    gsap.set(bodyText, { y: 0, opacity: 1 })
   })
 })
 </script>
@@ -49,7 +60,7 @@ useGsapContext(() => {
 <template>
   <div
     ref="rowRef"
-    class="group relative grid grid-cols-1 gap-6 overflow-hidden rounded-2xl p-8 transition-colors duration-400 ease-editorial md:grid-cols-12 md:items-center md:gap-8 md:p-12"
+    class="group relative grid grid-cols-1 gap-6 overflow-hidden rounded-2xl p-8 transition-colors duration-400 ease-editorial md:grid-cols-12 md:items-start md:gap-8 md:p-12"
     :class="isOpen ? 'bg-navy-800' : 'bg-navy-50'"
     @mouseenter="setState('link')"
     @mouseleave="setState('default')"
@@ -77,12 +88,12 @@ useGsapContext(() => {
     </div>
 
     <div ref="bodyRef" class="relative overflow-hidden md:col-span-4">
-      <p class="text-body-md" :class="isOpen ? 'text-navy-100' : 'text-muted'">
+      <p ref="bodyTextRef" class="text-body-md" :class="isOpen ? 'text-navy-100' : 'text-muted'">
         {{ service.body }}
       </p>
     </div>
 
-    <div class="relative hidden items-center justify-end gap-10 md:col-span-1 md:flex">
+    <div class="relative hidden items-start justify-end gap-10 md:col-span-1 md:flex">
       <span
         class="font-display text-3xl font-semibold transition-all duration-400 ease-editorial"
         :class="isOpen ? 'scale-110 text-navy-500' : 'text-navy-200'"
