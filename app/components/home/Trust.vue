@@ -21,14 +21,14 @@ useScrollReveal(gridRef, { y: 16, children: '.trust-logo', stagger: 0.06 })
       <div
         v-if="clients.length"
         ref="gridRef"
-        class="mx-auto mt-16 grid max-w-4xl grid-cols-2 items-center justify-items-center gap-x-8 gap-y-12 md:grid-cols-4 md:gap-x-12"
+        class="mx-auto mt-16 flex max-w-5xl flex-wrap items-center justify-center gap-x-12 gap-y-10"
       >
         <div
           v-for="client in clients"
           :key="client.name"
-          class="trust-logo flex items-center justify-center opacity-70 grayscale transition-opacity duration-400 ease-editorial hover:opacity-100 hover:grayscale-0"
+          class="trust-logo flex h-10 w-28 items-center justify-center opacity-70 grayscale transition-opacity duration-400 ease-editorial hover:opacity-100 hover:grayscale-0"
         >
-          <img :src="client.logo" :alt="client.name" class="h-8 w-auto max-w-[140px] object-contain" loading="lazy" />
+          <img :src="client.logo" :alt="client.name" class="max-h-full max-w-full object-contain" loading="lazy" />
         </div>
       </div>
     </BaseContainer>
