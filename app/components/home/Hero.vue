@@ -3,7 +3,7 @@ import gsap from 'gsap'
 
 // Copy sourced verbatim from .docs/PASTI_Cuberto_Template_Content_Mapping.docx, section 02 — HERO.
 const eyebrow = 'Technology. Creativity. Impact.'
-const headlineLines = ['We build technology', 'and creative solutions', 'for businesses ready to move forward.']
+const headline = 'We build technology and creative solutions for businesses ready to move forward.'
 const ctaPrimary = { label: 'Explore our work', to: '/work' }
 const ctaSecondary = { label: 'Tell us about it', to: '/contact' }
 
@@ -66,24 +66,18 @@ useGsapContext(() => {
           eyebrowWords.push(inner)
         }
 
-        const lineGroups: HTMLElement[][] = []
-        for (const lineEl of Array.from(heading.children) as HTMLElement[]) {
-          const words: HTMLElement[] = []
-          const lineText = lineEl.textContent ?? ''
-          lineEl.textContent = ''
-          for (const part of lineText.split(/(\s+)/).filter(Boolean)) {
-            if (/^\s+$/.test(part)) {
-              lineEl.appendChild(document.createTextNode(part))
-              continue
-            }
-            const { outer, inner } = wrapWord(part)
-            lineEl.appendChild(outer)
-            words.push(inner)
+        const allHeadingWords: HTMLElement[] = []
+        const headingText = heading.textContent ?? ''
+        heading.textContent = ''
+        for (const part of headingText.split(/(\s+)/).filter(Boolean)) {
+          if (/^\s+$/.test(part)) {
+            heading.appendChild(document.createTextNode(part))
+            continue
           }
-          lineGroups.push(words)
+          const { outer, inner } = wrapWord(part)
+          heading.appendChild(outer)
+          allHeadingWords.push(inner)
         }
-
-        const allHeadingWords = lineGroups.flat()
         gsap.set([...eyebrowWords, ...allHeadingWords], { yPercent: 120 })
         if (ctaRowRef.value) gsap.set(ctaRowRef.value, { opacity: 0, y: 16 })
         if (visualRef.value) gsap.set(visualRef.value, { opacity: 0, scale: 1.05, clipPath: 'inset(4% round 24px)' })
@@ -108,13 +102,13 @@ useGsapContext(() => {
 <template>
   <BaseSection as="section" class="pb-16 pt-20 md:pb-24 md:pt-28 lg:pt-32">
     <BaseContainer>
-      <div class="mx-auto flex max-w-4xl flex-col items-center text-center">
+      <div class="mx-auto flex max-w-4xl flex-col items-center text-center md:max-w-5xl">
         <p ref="eyebrowRef" class="eyebrow">
           {{ eyebrow }}
         </p>
 
-        <h1 ref="headingRef" class="mt-6 text-display-lg md:text-display-xl">
-          <span v-for="line in headlineLines" :key="line" class="block">{{ line }}</span>
+        <h1 ref="headingRef" class="mt-6 max-w-3xl text-display-sm md:max-w-none md:text-display-md">
+          {{ headline }}
         </h1>
 
         <div ref="ctaRowRef" class="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
