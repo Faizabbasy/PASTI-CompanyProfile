@@ -204,11 +204,10 @@ resurrect the CSS one.
    live site, not assumed.
 5. `4511625` — **Service Cards**: `HomeServiceCards.vue` + `HomeServiceRow.vue`
    + `useServices()`. Built as full-width row blocks (Cuberto's actual
-   pattern, not generic cards). All 5 rows always show title+body+CTA (the
-   client explicitly chose this over Cuberto's real accordion/collapse
-   behavior — **intentional deviation, do not "fix" this in a future visual-
-   parity pass**); hover still darkens the row navy with white text, matching
-   Cuberto's hover treatment.
+   pattern, not generic cards).
+   **Superseded by a later session** (see #17 below) — rows are now
+   scroll-triggered expand/collapse, not always-visible with hover-darken.
+   Left here only for commit-history context.
 6. `0417ade` — **Trust**: `HomeTrust.vue` + `useTrustedClients()`. Heading
    "Trusted by leading organizations", 4-col/2-col logo grid with grayscale
    → color hover and staggered scroll-reveal. **Logo grid is still empty** —
@@ -309,6 +308,60 @@ resurrect the CSS one.
     gotchas above (`ref` on a Vue component, `@layer utilities` cascade, the
     `imports.dirs` nested-composables trap, and the superseded intro-gate
     mechanism) for bugs hit and fixed while building this.
+17. **Hero headline reflow + navbar restyle + Service rows scroll-accordion**
+    (session after TASK 14, no TASK number assigned): three separate
+    client-directed changes, each re-verified against Cuberto's live site
+    with fresh screenshots (not assumed from memory):
+    - **Hero** (`HomeHero.vue`): `headlineLines[]` (3 forced `<span
+      class="block">` lines) collapsed into one `headline` string that wraps
+      naturally. Cuberto's live hero turned out to be **center-aligned**,
+      not left — the only real difference from the old PASTI build was
+      forced-vs-natural line breaks and a smaller type scale. Also widened
+      the heading's max-width and stepped `text-display-lg/xl` down to
+      `text-display-sm/md` so it settles at 2 lines on desktop instead of
+      3–4. Word-mask reveal logic updated to split words off the single
+      heading block directly (was iterating `heading.children` per forced
+      line — that loop is gone now that there's only one child).
+    - **Navbar** (`LayoutHeader.vue`): restyled to match Cuberto's visual
+      treatment — solid `bg-paper` (no `backdrop-blur`), dropped
+      `border-b`, shrank `h-20/h-24` to `h-16/h-20`, widened nav `gap-8` to
+      `gap-10`, swapped the CTA from `.btn-accent` (yellow) to
+      `.btn-primary` (navy solid) for a high-contrast pill like Cuberto's
+      black one. **Nav items themselves (8 links incl. OPEN/e-CORPORATE
+      platform dots), logo, and mobile menu were explicitly left alone** —
+      this was a styling-only pass, not an IA change.
+    - **Service rows** (`HomeServiceRow.vue` + `HomeServiceCards.vue`):
+      **reverses the #5 decision above.** Client re-requested Cuberto's
+      real behavior after seeing it live-screenshotted: each row now
+      expands/collapses independently via its own `ScrollTrigger`
+      (`start: 'top 75%', end: 'bottom 35%'`, `onToggle` drives an
+      `isOpen` ref), not on hover and not always-visible. Confirmed via
+      live Cuberto screenshots that multiple rows can be open
+      simultaneously (it's per-row scroll visibility, not a
+      one-open-at-a-time accordion), and that open rows get a decorative
+      abstract gradient shape on the right — added three CSS-gradient
+      variants (`service-shape-diagonal/chevron/radial`, cycled by index
+      in `ServiceCards.vue`) since no image assets exist for this. Body
+      height is tweened via GSAP (`height: 0 → auto`, not the FAQ's
+      `grid-template-rows` trick) because it needs to reverse in sync with
+      scroll direction, not just play-once. `reduced-motion` fallback
+      forces all rows permanently open. Verified both scroll directions
+      (down = progressive expand, up = progressive re-collapse) and mobile
+      via Playwright — see gotcha note below if a future session touches
+      this again.
+
+### Gotcha — per-row `ScrollTrigger` instances need their own `useGsapContext`
+`HomeServiceRow.vue`'s scroll-accordion (#17 above) creates one
+`ScrollTrigger` per row instance inside `useGsapContext()`, keyed to that
+component's own mount/unmount — not a single shared trigger in the parent
+`HomeServiceCards.vue`. This matters because `ScrollTrigger.create()` calls
+made outside a `gsap.context()` scope leak across route navigation/HMR (the
+same class of bug `useGsapContext` exists to prevent elsewhere in the
+codebase — see the Design tokens section above). If a future change moves
+this logic up into `ServiceCards.vue` (e.g. to orchestrate cross-row
+behavior), each trigger still needs to stay individually scoped/cleaned up,
+not just batched into one context with a shared teardown that fires only
+once for all five.
 
 ## Not built yet (homepage sections remaining per the mapping doc)
 - All 15 mapped homepage sections (00 through Footer) are now built. What's
