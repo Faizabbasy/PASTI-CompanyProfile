@@ -111,6 +111,6 @@ useGsapContext(() => {
 
 <style scoped>
 .service-shape-diagonal {
-  background: linear-gradient(115deg, transparent 40%, rgba(251, 186, 0, 0.12) 55%, transparent 70%);
+  background: radial-gradient(120% 100% at 100% 0%, rgba(251, 186, 0, 0.28) 0%, rgba(251, 186, 0, 0.12) 35%, transparent 70%);
 }
 </style>
