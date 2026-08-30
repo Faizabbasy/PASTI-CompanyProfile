@@ -33,14 +33,14 @@ useGsapContext(() => {
         gsap.to(body, {
           height: self.isActive ? 'auto' : 0,
           opacity: self.isActive ? 1 : 0,
-          duration: 0.6,
+          duration: 0.85,
           ease: 'cubic-bezier(0.16, 1, 0.3, 1)'
         })
         gsap.to(bodyText, {
           y: self.isActive ? 0 : 16,
           opacity: self.isActive ? 1 : 0,
-          duration: 0.5,
-          delay: self.isActive ? 0.15 : 0,
+          duration: 0.65,
+          delay: self.isActive ? 0.2 : 0,
           ease: 'cubic-bezier(0.16, 1, 0.3, 1)'
         })
       }
@@ -61,14 +61,14 @@ useGsapContext(() => {
   <div ref="rowRef">
     <NuxtLink
       to="/technology"
-      class="group relative block overflow-hidden rounded-2xl p-10 transition-colors duration-400 ease-editorial md:p-16"
+      class="group relative block overflow-hidden rounded-2xl p-10 transition-colors duration-600 ease-editorial md:p-16"
       :class="isOpen ? 'bg-navy-800' : 'bg-navy-50'"
       @mouseenter="setState('link')"
       @mouseleave="setState('default')"
     >
       <div
         aria-hidden="true"
-        class="pointer-events-none absolute inset-y-0 right-0 w-2/5 opacity-0 transition-opacity duration-400 ease-editorial service-shape-bars"
+        class="pointer-events-none absolute inset-y-0 right-0 w-2/5 opacity-0 transition-opacity duration-600 ease-editorial service-shape-bars"
         :class="isOpen ? 'opacity-100' : 'opacity-0'"
       />
 

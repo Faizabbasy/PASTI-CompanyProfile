@@ -24,7 +24,11 @@ export function useLenis() {
   if (prefersReducedMotion) return
 
   lenis = new Lenis({
-    autoRaf: false
+    autoRaf: false,
+    duration: 1.3,
+    easing: (t) => 1 - Math.pow(1 - t, 4),
+    smoothWheel: true,
+    wheelMultiplier: 1
   })
 
   lenis.on('scroll', ScrollTrigger.update)
