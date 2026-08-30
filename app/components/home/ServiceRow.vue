@@ -68,7 +68,7 @@ useGsapContext(() => {
     >
       <div
         aria-hidden="true"
-        class="pointer-events-none absolute inset-y-0 right-0 w-1/2 opacity-0 transition-opacity duration-400 ease-editorial service-shape-diagonal"
+        class="pointer-events-none absolute inset-y-0 right-0 w-2/5 opacity-0 transition-opacity duration-400 ease-editorial service-shape-bars"
         :class="isOpen ? 'opacity-100' : 'opacity-0'"
       />
 
@@ -110,7 +110,17 @@ useGsapContext(() => {
 </template>
 
 <style scoped>
-.service-shape-diagonal {
-  background: radial-gradient(120% 100% at 100% 0%, rgba(251, 186, 0, 0.28) 0%, rgba(251, 186, 0, 0.12) 35%, transparent 70%);
+.service-shape-bars {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(251, 186, 0, 0.05) 30%,
+    rgba(251, 186, 0, 0.08) 50%,
+    rgba(251, 186, 0, 0.13) 68%,
+    rgba(251, 186, 0, 0.19) 84%,
+    rgba(251, 186, 0, 0.24) 100%
+  );
+  mask-image: repeating-linear-gradient(90deg, #000 0, #000 6px, transparent 6px, transparent 14px);
+  -webkit-mask-image: repeating-linear-gradient(90deg, #000 0, #000 6px, transparent 6px, transparent 14px);
 }
 </style>
