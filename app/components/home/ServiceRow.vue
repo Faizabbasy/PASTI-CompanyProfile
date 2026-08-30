@@ -61,7 +61,7 @@ useGsapContext(() => {
   <div ref="rowRef">
     <NuxtLink
       to="/technology"
-      class="group relative block overflow-hidden rounded-2xl p-8 transition-colors duration-400 ease-editorial md:p-12"
+      class="group relative block overflow-hidden rounded-2xl p-10 transition-colors duration-400 ease-editorial md:p-16"
       :class="isOpen ? 'bg-navy-800' : 'bg-navy-50'"
       @mouseenter="setState('link')"
       @mouseleave="setState('default')"
@@ -74,13 +74,13 @@ useGsapContext(() => {
 
       <div class="relative flex items-start justify-between gap-6">
         <h3
-          class="text-display-sm font-display font-semibold transition-all duration-400 ease-editorial"
+          class="text-display-md font-display font-semibold transition-all duration-400 ease-editorial"
           :class="isOpen ? 'translate-x-2 text-paper' : 'text-ink'"
         >
           {{ service.title }}
         </h3>
         <span
-          class="font-display text-2xl font-semibold transition-all duration-400 ease-editorial md:text-3xl"
+          class="font-display text-3xl font-semibold transition-all duration-400 ease-editorial md:text-4xl"
           :class="isOpen ? 'scale-110 text-navy-500' : 'text-navy-200'"
           aria-hidden="true"
         >
@@ -89,7 +89,7 @@ useGsapContext(() => {
       </div>
 
       <div ref="bodyRef" class="relative overflow-hidden">
-        <p ref="bodyTextRef" class="mt-4 max-w-2xl text-body-md" :class="isOpen ? 'text-navy-100' : 'text-muted'">
+        <p ref="bodyTextRef" class="mt-6 max-w-2xl text-body-lg" :class="isOpen ? 'text-navy-100' : 'text-muted'">
           {{ service.body }}
         </p>
       </div>
