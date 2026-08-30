@@ -13,11 +13,16 @@ const { setState } = useCustomCursor()
 </script>
 
 <template>
-  <footer ref="footerRef" class="border-t border-navy-900 bg-navy-950 py-16 md:py-20">
-    <BaseContainer>
+  <footer ref="footerRef" class="relative overflow-hidden border-t border-navy-900 bg-navy-950 py-16 md:py-20">
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -left-1/4 -top-1/2 h-[32rem] w-[32rem] rounded-full bg-yellow-500/[0.06] blur-3xl"
+    />
+
+    <BaseContainer class="relative">
       <div class="grid grid-cols-1 gap-12 md:grid-cols-12 md:gap-8">
-        <div class="footer-reveal flex flex-col gap-6 md:col-span-5">
-          <div class="text-[2.75rem] md:text-[3.25rem]">
+        <div class="footer-reveal flex flex-col gap-8 md:col-span-4">
+          <div class="w-fit origin-left scale-[1.6] md:scale-[1.9]">
             <LayoutLogo inverted />
           </div>
 
@@ -32,7 +37,7 @@ const { setState } = useCustomCursor()
           </NuxtLink>
         </div>
 
-        <nav class="footer-reveal flex flex-col gap-4 md:col-span-4 md:col-start-7">
+        <nav class="footer-reveal flex flex-col gap-4 border-navy-800 md:col-span-4 md:col-start-6 md:border-l md:pl-8">
           <p class="eyebrow text-navy-500">Navigate</p>
           <NuxtLink
             v-for="link in navLinks"
@@ -50,7 +55,7 @@ const { setState } = useCustomCursor()
           </NuxtLink>
         </nav>
 
-        <nav class="footer-reveal flex flex-col gap-4 md:col-span-3">
+        <nav class="footer-reveal flex flex-col gap-4 border-navy-800 md:col-span-3 md:col-start-10 md:border-l md:pl-8">
           <p class="eyebrow text-navy-500">Platforms</p>
           <NuxtLink
             v-for="link in platformLinks"
