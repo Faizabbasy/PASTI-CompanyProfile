@@ -24,7 +24,7 @@ const { setState } = useCustomCursor()
         <div ref="headingLinkRef" class="mt-2 inline-block">
           <NuxtLink
             :to="ctaTo"
-            class="group inline-block text-display-md font-display font-semibold text-paper underline decoration-navy-700 underline-offset-8 transition-colors duration-400 ease-editorial hover:text-yellow-400 hover:decoration-yellow-400 md:text-display-lg"
+            class="group inline-block border-b-2 border-navy-700 text-display-md font-display font-semibold leading-[1.15] text-paper transition-colors duration-400 ease-editorial hover:border-yellow-400 hover:text-yellow-400 md:text-display-lg"
             @mouseenter="setState('contact')"
             @mouseleave="setState('inverse')"
           >
