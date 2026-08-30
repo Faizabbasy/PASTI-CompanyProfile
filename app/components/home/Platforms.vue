@@ -12,7 +12,7 @@ useMaskedReveal(labelRef, { by: 'word' })
 </script>
 
 <template>
-  <BaseSection as="section" class="bg-navy-950">
+  <BaseSection as="section" class="rounded-t-[2.5rem] bg-navy-950">
     <BaseContainer>
       <p ref="labelRef" class="eyebrow text-navy-300">
         {{ label }}
