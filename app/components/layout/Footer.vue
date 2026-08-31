@@ -72,7 +72,7 @@ const { setState } = useCustomCursor()
       </div>
 
       <div class="footer-reveal mt-16 flex flex-col-reverse gap-4 border-t border-navy-800 pt-8 text-body-sm text-navy-400 sm:flex-row sm:items-center sm:justify-between md:mt-20">
-        <p>&copy; {{ year }}, PASTI</p>
+        <p>&copy; {{ year }} PT Hidup Pasti Bahagia</p>
         <p class="text-navy-500">Technology + Creative under one roof by PASTI</p>
       </div>
     </BaseContainer>
