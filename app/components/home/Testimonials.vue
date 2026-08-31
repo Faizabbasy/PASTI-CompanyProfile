@@ -49,7 +49,7 @@ useGsapContext(() => {
     })
 
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: grid, start: 'top 75%', once: true }
+      scrollTrigger: { trigger: grid, start: 'top 75%', toggleActions: 'restart none restart reverse' }
     })
 
     tl.to(cards, {

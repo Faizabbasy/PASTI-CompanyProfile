@@ -32,7 +32,7 @@ useGsapContext(() => {
       clipPath: 'inset(0% round 16px)',
       duration: 1,
       ease: 'power3.out',
-      scrollTrigger: { trigger: card, start: 'top 88%', once: true }
+      scrollTrigger: { trigger: card, start: 'top 88%', toggleActions: 'restart none restart reverse' }
     })
 
     // Subtle per-card vertical parallax as the grid scrolls — offset cards
@@ -67,7 +67,12 @@ useGsapContext(() => {
     @mouseleave="setState('default')"
   >
     <div ref="mediaRef" class="aspect-[4/5] w-full overflow-hidden rounded-2xl">
-      <div class="h-full w-full bg-gradient-to-br from-navy-800 to-navy-950 transition-transform duration-600 ease-editorial group-hover:scale-105" />
+      <img
+        :src="project.image"
+        :alt="project.title"
+        loading="lazy"
+        class="h-full w-full object-cover transition-transform duration-600 ease-editorial group-hover:scale-105"
+      >
     </div>
     <p class="mt-6 text-body-md text-navy-100">
       {{ project.title }}

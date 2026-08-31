@@ -21,16 +21,31 @@ useScrollReveal(gridRef, { y: 16, children: '.trust-logo', stagger: 0.06 })
       <div
         v-if="clients.length"
         ref="gridRef"
-        class="mx-auto mt-16 flex max-w-5xl flex-wrap items-center justify-center gap-x-12 gap-y-10"
+        class="mx-auto mt-16 flex max-w-6xl flex-wrap items-center justify-center gap-x-16 gap-y-14"
       >
         <div
           v-for="client in clients"
           :key="client.name"
-          class="trust-logo flex h-16 w-40 items-center justify-center"
+          class="trust-logo flex h-24 w-56 items-center justify-center"
         >
-          <img :src="client.logo" :alt="client.name" class="max-h-full max-w-full object-contain" loading="lazy" />
+          <img
+            :src="client.logo"
+            :alt="client.name"
+            class="max-h-full max-w-full object-contain"
+            :class="{
+              'wordpress-logo scale-150': client.name === 'WordPress',
+              'scale-150': client.name === 'Shopify'
+            }"
+            loading="lazy"
+          />
         </div>
       </div>
     </BaseContainer>
   </BaseSection>
 </template>
+
+<style scoped>
+.wordpress-logo {
+  filter: brightness(1.08) contrast(2.2);
+}
+</style>

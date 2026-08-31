@@ -66,7 +66,7 @@ export function useMaskedReveal(target: Ref<HTMLElement | null>, options: Masked
         stagger,
         delay,
         scrollTrigger: trigger
-          ? { trigger: el, start: 'top 85%', once: true }
+          ? { trigger: el, start: 'top 85%', toggleActions: 'restart none restart reverse' }
           : undefined
       })
 

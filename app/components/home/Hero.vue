@@ -75,9 +75,9 @@ useGsapContext(() => {
 
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
-        tl.to(allHeadingWords, { yPercent: 0, duration: 0.65, stagger: 0.03 }, 0)
-        if (subtextRef.value) tl.to(subtextRef.value, { opacity: 1, y: 0, duration: 0.5 }, 0.35)
-        if (ctaRowRef.value) tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: 0.5 }, 0.45)
+        tl.to(allHeadingWords, { yPercent: 0, duration: 0.9, stagger: 0.08 })
+        if (subtextRef.value) tl.to(subtextRef.value, { opacity: 1, y: 0, duration: 0.6 }, '+=0.1')
+        if (ctaRowRef.value) tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: 0.6 }, '+=0.1')
 
         return () => tl.kill()
       })

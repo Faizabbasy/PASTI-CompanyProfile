@@ -11,8 +11,13 @@ const { setState } = useCustomCursor()
 
 <template>
   <div ref="cardRef" class="group" @mouseenter="setState('view')" @mouseleave="setState('default')">
-    <div class="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-navy-800 to-navy-950" aria-hidden="true">
-      <div class="h-full w-full transition-transform duration-600 ease-editorial group-hover:scale-105" />
+    <div class="aspect-[4/3] w-full overflow-hidden rounded-2xl">
+      <img
+        :src="article.image"
+        :alt="article.title"
+        loading="lazy"
+        class="h-full w-full object-cover transition-transform duration-600 ease-editorial group-hover:scale-105"
+      >
     </div>
 
     <p class="mt-6 inline-flex items-center gap-2 text-body-lg font-display font-medium text-paper">

@@ -46,7 +46,7 @@ export function useScrollReveal(target: Ref<HTMLElement | null>, options: Scroll
 
       const anim = gsap.to(items, {
         ...toVars,
-        scrollTrigger: { trigger: el, start: 'top 85%', once: true }
+        scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'restart none restart reverse' }
       })
 
       return () => anim.kill()

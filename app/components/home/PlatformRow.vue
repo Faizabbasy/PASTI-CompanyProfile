@@ -36,8 +36,13 @@ const { setState } = useCustomCursor()
       </div>
 
       <div class="md:col-span-7">
-        <div class="aspect-[16/10] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-navy-800 to-navy-950" aria-hidden="true">
-          <div class="h-full w-full transition-transform duration-600 ease-editorial group-hover:scale-105" />
+        <div class="aspect-[16/10] w-full overflow-hidden rounded-2xl">
+          <img
+            :src="platform.image"
+            :alt="platform.name"
+            loading="lazy"
+            class="h-full w-full object-cover transition-transform duration-600 ease-editorial group-hover:scale-105"
+          >
         </div>
       </div>
     </NuxtLink>

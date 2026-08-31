@@ -1,31 +1,29 @@
 export interface InsightArticle {
   index: string
   title: string
+  image: string
 }
 
 /**
- * Insights article titles, per .docs/PASTI_Cuberto_Template_Content_Mapping.docx
- * section 08 — INSIGHTS. Titles are used only as a content footprint per the
- * placement rule "Insights must use real PASTI articles. The mapping table gives
- * the content footprint, not fake publication history."
+ * Insights articles. Images sourced from .docs/image/insight*.PNG, 7 real poster-style
+ * article visuals supplied by the client (each already carries its own headline, in the
+ * same "full promo poster" format as Selected Work's case-study images). Titles below
+ * each card were updated to match the headline shown in its image, replacing the prior
+ * generic placeholder titles.
  *
- * Article 01's "REPLACE WITH" cell and the CTA cell are both truncated mid-word in
- * the source doc (no ellipsis marker) — "Building Digital Products That Actuall"
- * and "Visit insi". Their full text ("...Actually Work" / "Visit insights") was
- * confirmed directly by the client rather than guessed.
- *
- * No real PASTI article assets (thumbnail, publish date, author, category, reading
- * time) exist yet. Per the doc's content-safety rule, none of that metadata is
- * invented here — cards render title-only with an empty placeholder visual, same
- * approach as Trust's client logos and Selected Work's project imagery. Swap in
- * real article data (and extend this interface with real metadata fields) once
- * PASTI's actual published articles are provided.
+ * Only the first 3 (most relevant to PASTI's enterprise/tech/security profile) render
+ * in the homepage section; the full set of 7 lives on the /insights page, reached via
+ * this section's "Visit insights" link.
  */
 export function useInsights() {
   const articles: InsightArticle[] = [
-    { index: '01', title: 'Building Digital Products That Actually Work' },
-    { index: '02', title: 'What Businesses Should Know Before Going Digital' },
-    { index: '03', title: 'Technology, Creativity and the Future of Business' }
+    { index: '01', title: 'Cybersecurity: Protect What Matters. Build With Confidence.', image: '/images/insights/cybersecurity-compliance.png' },
+    { index: '02', title: 'Enterprise Technology', image: '/images/insights/enterprise-technology.png' },
+    { index: '03', title: 'AI & Digital Transformation', image: '/images/insights/ai-digital-transformation.png' },
+    { index: '04', title: 'The Future of Business: Innovate Today. Lead Tomorrow.', image: '/images/insights/future-of-business.png' },
+    { index: '05', title: 'Creative & Brand', image: '/images/insights/creative-and-brand.png' },
+    { index: '06', title: 'Ideas That Move Business Forward.', image: '/images/insights/ideas-that-move-business.png' },
+    { index: '07', title: 'Digital Product & UX', image: '/images/insights/digital-product-ux.png' }
   ]
 
   return { articles }
