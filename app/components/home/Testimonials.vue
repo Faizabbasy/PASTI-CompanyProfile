@@ -73,9 +73,9 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <BaseSection as="section" class="pb-0">
+  <BaseSection as="section" class="bg-navy-950">
     <BaseContainer>
-      <p ref="labelRef" class="eyebrow text-center">
+      <p ref="labelRef" class="eyebrow text-center text-navy-400">
         {{ label }}
       </p>
 
