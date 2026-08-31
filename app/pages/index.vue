@@ -8,6 +8,7 @@
   <HomeServiceCards />
   <HomeTrust />
   <HomeSelectedWork />
+  <HomeTestimonials />
   <HomeWhyPasti />
   <HomePlatforms />
   <HomeInsights />
