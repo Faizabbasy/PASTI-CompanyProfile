@@ -450,6 +450,98 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
       })
     }
 
+    // Lower-center fill: the space directly below the CTA row (below
+    // |fy| ~0.5, where the headline/subtext/CTA column ends) reads
+    // conspicuously empty — the picture-frame bands above deliberately
+    // avoid it because it sits inside the same clearX/clearY box that
+    // protects the text. But that box is only actually occupied by text
+    // in its upper half; below the CTA row there's no text at all, so a
+    // dedicated low-density fill goes there without touching any copy.
+    const lowerFillCount = 20
+    for (let i = 0; i < lowerFillCount; i++) {
+      const z = -1.5 - Math.random() * 3
+      const { halfHeight, halfWidth } = frustumHalfExtents(z)
+
+      const fx = (Math.random() * 2 - 1) * 0.55
+      const fy = -(0.42 + Math.random() * 0.4)
+
+      const geo = shapeLib[i % shapeLib.length]!
+      const scale = 0.05 + Math.random() * 0.14
+      const muted = Math.random() > 0.25
+      const color = muted ? (i % 2 === 0 ? 0x8fa2ad : 0xb9c4cb) : palette[i % palette.length]!
+      starMuted.push(muted)
+      const floatAmp = 0.06 + Math.random() * 0.1
+      const parallax = 0.2 + Math.random() * 0.3
+
+      starSpecs.push({
+        geometry: geo,
+        x: fx * halfWidth,
+        y: fy * halfHeight,
+        z,
+        scale,
+        color,
+        rotSpeedX: 0.1 + Math.random() * 0.18,
+        rotSpeedY: 0.08 + Math.random() * 0.16,
+        rotSpeedZ: (Math.random() - 0.5) * 0.1,
+        floatAmp,
+        floatSpeed: 0.15 + Math.random() * 0.2,
+        floatPhase: Math.random() * Math.PI * 2,
+        parallax,
+        isFocal: false
+      })
+    }
+
+    // Deep-background layer: a sparser field pushed much farther back
+    // (z down to ~-14) so fog naturally fades/blurs it into atmosphere —
+    // adds real depth behind the near shards. Still uses the same
+    // clearX/clearY text-exclusion box as the main starfield: a shard's
+    // world depth doesn't matter for whether it visually collides with the
+    // headline, since the headline is flat 2D HTML composited on top of
+    // the canvas — only its projected screen-space x/y matters, and a
+    // "distant" shard at small fx/fy still lands squarely on the text.
+    const deepCount = 22
+    for (let i = 0; i < deepCount; i++) {
+      const z = -8 - Math.random() * 6
+      const { halfHeight, halfWidth } = frustumHalfExtents(z)
+
+      const deepClearX = 0.68
+      const deepClearY = 0.72
+      const angle = Math.random() * Math.PI * 2
+      const r = deepClearX + Math.random() * (1 - deepClearX)
+      const fx = Math.cos(angle) * r
+      const fy = Math.sin(angle) * r * (deepClearY / deepClearX)
+
+      const geo = shapeLib[i % shapeLib.length]!
+      const scale = 0.18 + Math.random() * 0.26
+      const muted = Math.random() > 0.15
+      const color = muted ? (i % 2 === 0 ? 0x8fa2ad : 0xb9c4cb) : palette[i % palette.length]!
+      starMuted.push(muted)
+      const floatAmp = 0.08 + Math.random() * 0.12
+      const parallax = 0.15 + Math.random() * 0.2
+
+      let y = fy * halfHeight
+      if (fy > 0) {
+        y = Math.min(y, clampTopWorldY(halfHeight, halfHeight) - floatAmp * parallax)
+      }
+
+      starSpecs.push({
+        geometry: geo,
+        x: fx * halfWidth,
+        y,
+        z,
+        scale,
+        color,
+        rotSpeedX: 0.04 + Math.random() * 0.08,
+        rotSpeedY: 0.03 + Math.random() * 0.07,
+        rotSpeedZ: (Math.random() - 0.5) * 0.04,
+        floatAmp,
+        floatSpeed: 0.1 + Math.random() * 0.12,
+        floatPhase: Math.random() * Math.PI * 2,
+        parallax,
+        isFocal: false
+      })
+    }
+
     starShards = starSpecs.map((spec, i) => {
       const mesh = new THREE.Mesh(spec.geometry, starfieldShardMaterial(spec.color, starMuted[i]!))
       const basePos = new THREE.Vector3(spec.x, spec.y, spec.z)
