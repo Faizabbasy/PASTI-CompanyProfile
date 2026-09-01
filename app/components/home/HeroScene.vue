@@ -15,16 +15,16 @@ const { introReady } = useIntroReady()
 
 let resizeObserver: ResizeObserver | undefined
 let intersectionObserver: IntersectionObserver | undefined
-let ribbons: ReturnType<typeof useHeroRibbons> | undefined
+let scene: ReturnType<typeof useHeroScene> | undefined
 let introWatchStop: (() => void) | undefined
 let scrollTrigger: ScrollTrigger | undefined
 
 function handlePointerMove(event: PointerEvent) {
-  if (!containerRef.value || !ribbons) return
+  if (!containerRef.value || !scene) return
   const rect = containerRef.value.getBoundingClientRect()
   const x = ((event.clientX - rect.left) / rect.width) * 2 - 1
   const y = ((event.clientY - rect.top) / rect.height) * 2 - 1
-  ribbons.setPointer(x, y)
+  scene.setPointer(x, y)
 }
 
 onMounted(() => {
@@ -39,19 +39,19 @@ onMounted(() => {
   nextTick(() => {
     if (!containerRef.value || !canvasRef.value) return
 
-    ribbons = useHeroRibbons(canvasRef, containerRef)
-    ribbons.start()
-    ribbons.fit()
+    scene = useHeroScene(canvasRef, containerRef)
+    scene.start()
+    scene.fit()
 
     introWatchStop = watch(
       introReady,
       (ready) => {
-        if (ready) ribbons?.playEntrance()
+        if (ready) scene?.playEntrance()
       },
       { immediate: true }
     )
 
-    resizeObserver = new ResizeObserver(() => ribbons?.fit())
+    resizeObserver = new ResizeObserver(() => scene?.fit())
     resizeObserver.observe(containerRef.value)
 
     // Pause the render loop when the Hero scrolls out of view so the
@@ -60,8 +60,8 @@ onMounted(() => {
     intersectionObserver = new IntersectionObserver(
       (entries) => {
         const isVisible = entries[0]?.isIntersecting ?? false
-        if (isVisible) ribbons?.start()
-        else ribbons?.stop()
+        if (isVisible) scene?.start()
+        else scene?.stop()
       },
       { threshold: 0 }
     )
@@ -69,7 +69,7 @@ onMounted(() => {
 
     containerRef.value.addEventListener('pointermove', handlePointerMove)
 
-    // Drives the cascade's scroll-reaction (drift + rotation) as the Hero
+    // Drives the field's scroll-reaction (drift + rotation) as the Hero
     // scrolls out of view — 0 while the Hero fills the viewport, 1 once it
     // has fully scrolled past. Scoped to this component's own trigger, not
     // a shared one, matching the per-instance ScrollTrigger pattern used by
@@ -79,7 +79,7 @@ onMounted(() => {
       start: 'top top',
       end: 'bottom top',
       scrub: true,
-      onUpdate: (self) => ribbons?.setScrollProgress(self.progress)
+      onUpdate: (self) => scene?.setScrollProgress(self.progress)
     })
   })
 })
@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
   introWatchStop?.()
   scrollTrigger?.kill()
   containerRef.value?.removeEventListener('pointermove', handlePointerMove)
-  ribbons?.dispose()
+  scene?.dispose()
 })
 </script>
 
