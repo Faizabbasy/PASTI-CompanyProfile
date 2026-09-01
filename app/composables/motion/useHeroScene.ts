@@ -15,6 +15,7 @@ interface ShardSpec {
   floatSpeed: number
   floatPhase: number
   parallax: number
+  isFocal: boolean
 }
 
 interface Shard {
@@ -29,6 +30,7 @@ interface Shard {
   floatPhase: number
   parallax: number
   delay: number
+  isFocal: boolean
 }
 
 const NAVY = 0x0b3954
@@ -36,6 +38,9 @@ const NAVY_LIGHT = 0x1c5c86
 const YELLOW = 0xfbba00
 const INK = 0x0e1b24
 const STEEL = 0x3d7fa8
+
+/** World position of the intro's focal sphere / shatter origin point. */
+const FOCAL_ORIGIN = new THREE.Vector3(0, 1.9, 1.5)
 
 /**
  * Builds a small library of faceted, low-poly gem shapes (not spheres/cubes)
@@ -103,6 +108,43 @@ function shardMaterial(color: number, glass: boolean): THREE.MeshPhysicalMateria
   })
 }
 
+function starfieldShardMaterial(color: number, muted: boolean): THREE.MeshStandardMaterial {
+  return new THREE.MeshStandardMaterial({
+    color,
+    metalness: 0.3,
+    roughness: 0.55,
+    transparent: true,
+    opacity: muted ? 0.28 : 0.85,
+    side: THREE.DoubleSide
+  })
+}
+
+/**
+ * A single frosted-glass sphere used as the intro's "before" state — the
+ * Hero opens on this one focal shape, which then shatters outward into the
+ * full shard field. Kept visually simple (no facets) so the shatter reads
+ * as a clear before/after transformation rather than just another crystal.
+ */
+function makeFocalSphere(): THREE.Mesh {
+  const geo = new THREE.SphereGeometry(0.42, 48, 32)
+  const material = new THREE.MeshPhysicalMaterial({
+    color: NAVY_LIGHT,
+    metalness: 0.1,
+    roughness: 0.1,
+    transmission: 0.55,
+    thickness: 1.2,
+    ior: 1.3,
+    clearcoat: 1,
+    clearcoatRoughness: 0.08,
+    side: THREE.DoubleSide
+  })
+  const mesh = new THREE.Mesh(geo, material)
+  // Sits above the headline's vertical center rather than dead-center, so
+  // the hold-phase doesn't visually block the text underneath it.
+  mesh.position.copy(FOCAL_ORIGIN)
+  return mesh
+}
+
 /**
  * Faint drifting dust-mote field for atmosphere/depth — low-count,
  * low-opacity, never the focal point.
@@ -149,8 +191,11 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
   let camera: THREE.PerspectiveCamera | undefined
   let scene: THREE.Scene | undefined
   let group: THREE.Group | undefined
+  let starGroup: THREE.Group | undefined
   let particles: THREE.Points | undefined
+  let focalSphere: THREE.Mesh | undefined
   let shards: Shard[] = []
+  let starShards: Shard[] = []
   let rafId: number | undefined
   let lastTime = 0
   let elapsed = 0
@@ -158,6 +203,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
   let pointerX = 0
   let pointerY = 0
   let scrollProgress = 0
+  let entranceSettled = false
   const cameraBase = new THREE.Vector3(0, 0, 10)
   const FOV = 42
 
@@ -165,7 +211,8 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
   function frustumHalfExtents(z: number) {
     const distance = cameraBase.z - z
     const halfHeight = distance * Math.tan((FOV * Math.PI) / 360)
-    return { halfHeight, halfWidth: halfHeight } // aspect applied by caller
+    const aspect = camera?.aspect ?? 1
+    return { halfHeight, halfWidth: halfHeight * aspect }
   }
 
   function buildScene() {
@@ -200,6 +247,13 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
 
     group = new THREE.Group()
     scene.add(group)
+
+    starGroup = new THREE.Group()
+    scene.add(starGroup)
+
+    focalSphere = makeFocalSphere()
+    focalSphere.scale.setScalar(0.001)
+    scene.add(focalSphere)
 
     particles = makeParticles()
     scene.add(particles)
@@ -260,7 +314,8 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
           floatAmp: 0.12 + Math.random() * 0.16,
           floatSpeed: 0.18 + Math.random() * 0.16,
           floatPhase: Math.random() * Math.PI * 2,
-          parallax: 0.35 + slotIndex * 0.2
+          parallax: 0.35 + slotIndex * 0.2,
+          isFocal: true
         })
         globalIndex++
       })
@@ -269,14 +324,15 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     shards = specs.map((spec, i) => {
       const glass = i % 3 === 1
       const mesh = new THREE.Mesh(spec.geometry, shardMaterial(spec.color, glass))
-      mesh.position.set(spec.x, spec.y, spec.z)
+      const basePos = new THREE.Vector3(spec.x, spec.y, spec.z)
+      mesh.position.copy(FOCAL_ORIGIN)
       mesh.scale.setScalar(0.001)
       mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
       group!.add(mesh)
 
       return {
         mesh,
-        basePos: mesh.position.clone(),
+        basePos,
         targetScale: spec.scale,
         rotSpeedX: spec.rotSpeedX,
         rotSpeedY: spec.rotSpeedY,
@@ -285,20 +341,152 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
         floatSpeed: spec.floatSpeed,
         floatPhase: spec.floatPhase,
         parallax: spec.parallax,
-        delay: i * 0.05
+        delay: i * 0.05,
+        isFocal: true
+      }
+    })
+
+    // "Starfield frame": a much denser field of small, mostly-muted shards
+    // scattered across the whole frustum (not just the four hero-flanking
+    // quadrants) — a faint decorative border of tiny tumbling shapes, dense
+    // toward the frame edges, sparse toward the text column so it never
+    // competes with the headline. A handful get full accent color/opacity
+    // to keep the field from reading as flat gray noise.
+    const starCount = 46
+    const starSpecs: ShardSpec[] = []
+    const starMuted: boolean[] = []
+    for (let i = 0; i < starCount; i++) {
+      const depthT = Math.random()
+      const z = -1 - depthT * 3.5
+      const { halfHeight, halfWidth } = frustumHalfExtents(z)
+
+      // Placed on one of the four outer picture-frame bands (left/right/
+      // top/bottom of a fixed text-clearance box), never inside it — a
+      // deterministic "always outside" placement rather than radial-falloff
+      // rejection sampling, which left stray points in front of the text on
+      // wide viewports where the frustum's visible area grows faster than a
+      // fixed fractional radius does.
+      const clearX = 0.82
+      const clearY = 0.86
+      const outerMax = 0.97
+      const band = Math.floor(Math.random() * 4)
+      let fx = 0
+      let fy = 0
+      if (band === 0) {
+        // left band
+        fx = -(clearX + Math.random() * (outerMax - clearX))
+        fy = (Math.random() * 2 - 1) * outerMax
+      } else if (band === 1) {
+        // right band
+        fx = clearX + Math.random() * (outerMax - clearX)
+        fy = (Math.random() * 2 - 1) * outerMax
+      } else if (band === 2) {
+        // top band
+        fx = (Math.random() * 2 - 1) * outerMax
+        fy = clearY + Math.random() * (outerMax - clearY)
+      } else {
+        // bottom band
+        fx = (Math.random() * 2 - 1) * outerMax
+        fy = -(clearY + Math.random() * (outerMax - clearY))
+      }
+
+      const geo = shapeLib[i % shapeLib.length]!
+      const scale = 0.06 + Math.random() * 0.16
+      const muted = Math.random() > 0.22
+      const color = muted ? (i % 2 === 0 ? 0x8fa2ad : 0xb9c4cb) : palette[i % palette.length]!
+      starMuted.push(muted)
+
+      starSpecs.push({
+        geometry: geo,
+        x: fx * halfWidth,
+        y: fy * halfHeight,
+        z,
+        scale,
+        color,
+        rotSpeedX: 0.1 + Math.random() * 0.18,
+        rotSpeedY: 0.08 + Math.random() * 0.16,
+        rotSpeedZ: (Math.random() - 0.5) * 0.1,
+        floatAmp: 0.06 + Math.random() * 0.1,
+        floatSpeed: 0.15 + Math.random() * 0.2,
+        floatPhase: Math.random() * Math.PI * 2,
+        parallax: 0.2 + Math.random() * 0.3,
+        isFocal: false
+      })
+    }
+
+    starShards = starSpecs.map((spec, i) => {
+      const mesh = new THREE.Mesh(spec.geometry, starfieldShardMaterial(spec.color, starMuted[i]!))
+      const basePos = new THREE.Vector3(spec.x, spec.y, spec.z)
+      mesh.position.copy(FOCAL_ORIGIN)
+      mesh.scale.setScalar(0.001)
+      mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
+      starGroup!.add(mesh)
+
+      return {
+        mesh,
+        basePos,
+        targetScale: spec.scale,
+        rotSpeedX: spec.rotSpeedX,
+        rotSpeedY: spec.rotSpeedY,
+        rotSpeedZ: spec.rotSpeedZ,
+        floatAmp: spec.floatAmp,
+        floatSpeed: spec.floatSpeed,
+        floatPhase: spec.floatPhase,
+        parallax: spec.parallax,
+        delay: i * 0.015,
+        isFocal: false
       }
     })
 
     fit()
   }
 
+  /**
+   * Intro sequence: the scene opens on a single focal sphere at center,
+   * holds briefly, then "shatters" — the sphere scales away while every
+   * shard (hero shards + starfield) erupts outward from the origin toward
+   * its resting position, scaling up from nothing as it travels. Distance-
+   * based delay/duration stagger (farther shards launch slightly later and
+   * take slightly longer) keeps the burst reading as one continuous wave
+   * rather than every piece popping at once.
+   */
   function playEntrance() {
-    shards.forEach((s) => {
+    if (!focalSphere) return
+
+    const tl = gsap.timeline()
+
+    tl.to(focalSphere.scale, { x: 1, y: 1, z: 1, duration: 0.7, ease: 'back.out(1.6)' })
+    tl.to(focalSphere.scale, { x: 0.001, y: 0.001, z: 0.001, duration: 0.45, ease: 'power2.in' }, '+=0.35')
+    tl.set(focalSphere, { visible: false })
+
+    const allShards = [...shards, ...starShards]
+    const shatterStart = 1.0
+    const origin = FOCAL_ORIGIN.clone()
+    entranceSettled = false
+    let maxFinish = 0
+
+    allShards.forEach((s) => {
+      const dist = s.basePos.distanceTo(origin)
+      const travelDelay = shatterStart + Math.min(dist * 0.025, 0.35) + s.delay * 0.4
+      const travelDuration = 0.9 + Math.min(dist * 0.02, 0.4)
       const target = s.targetScale
-      gsap.to(s.mesh.scale, { x: target, y: target, z: target, duration: 1.3, delay: 0.1 + s.delay, ease: 'back.out(1.4)' })
+
+      gsap.fromTo(
+        s.mesh.position,
+        { x: origin.x, y: origin.y, z: origin.z },
+        { x: s.basePos.x, y: s.basePos.y, z: s.basePos.z, duration: travelDuration, delay: travelDelay, ease: 'power3.out' }
+      )
+      gsap.to(s.mesh.scale, { x: target, y: target, z: target, duration: 0.7, delay: travelDelay, ease: 'back.out(1.5)' })
+
+      maxFinish = Math.max(maxFinish, travelDelay + travelDuration)
     })
+
+    gsap.delayedCall(maxFinish, () => {
+      entranceSettled = true
+    })
+
     if (particles) {
-      gsap.fromTo(particles.material, { opacity: 0 }, { opacity: 0.14, duration: 2.2, delay: 0.5, ease: 'power1.out' })
+      gsap.fromTo(particles.material, { opacity: 0 }, { opacity: 0.14, duration: 2, delay: shatterStart + 0.6, ease: 'power1.out' })
     }
   }
 
@@ -335,11 +523,29 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     group.position.y = -scrollProgress * 1.4
     group.rotation.z = scrollProgress * 0.1
 
+    // While the shatter entrance is still animating (GSAP tweening each
+    // shard's position from origin to basePos), skip the float-driven
+    // position override below — it would otherwise fight the tween every
+    // frame and the shatter would never visibly travel outward.
+    const applyFloat = entranceSettled
+
     shards.forEach((s) => {
       s.mesh.rotation.x += s.rotSpeedX * dt
       s.mesh.rotation.y += s.rotSpeedY * dt
       s.mesh.rotation.z += s.rotSpeedZ * dt
 
+      if (!applyFloat) return
+      const float = Math.sin(elapsed * s.floatSpeed + s.floatPhase) * s.floatAmp
+      s.mesh.position.y = s.basePos.y + float * s.parallax
+      s.mesh.position.x = s.basePos.x + Math.cos(elapsed * s.floatSpeed * 0.7 + s.floatPhase) * 0.08 * s.parallax
+    })
+
+    starShards.forEach((s) => {
+      s.mesh.rotation.x += s.rotSpeedX * dt
+      s.mesh.rotation.y += s.rotSpeedY * dt
+      s.mesh.rotation.z += s.rotSpeedZ * dt
+
+      if (!applyFloat) return
       const float = Math.sin(elapsed * s.floatSpeed + s.floatPhase) * s.floatAmp
       s.mesh.position.y = s.basePos.y + float * s.parallax
       s.mesh.position.x = s.basePos.x + Math.cos(elapsed * s.floatSpeed * 0.7 + s.floatPhase) * 0.08 * s.parallax
@@ -385,10 +591,18 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
 
   function dispose() {
     stop()
+    gsap.killTweensOf([focalSphere?.scale, ...shards.map((s) => s.mesh.position), ...shards.map((s) => s.mesh.scale)])
     shards.forEach((s) => {
       ;(s.mesh.material as THREE.Material).dispose()
     })
     shards = []
+    starShards.forEach((s) => {
+      ;(s.mesh.material as THREE.Material).dispose()
+    })
+    starShards = []
+    focalSphere?.geometry.dispose()
+    ;(focalSphere?.material as THREE.Material | undefined)?.dispose()
+    focalSphere = undefined
     particles?.geometry.dispose()
     ;(particles?.material as THREE.Material | undefined)?.dispose()
     particles = undefined
@@ -397,6 +611,8 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     scene = undefined
     camera = undefined
     group = undefined
+    starGroup = undefined
+    entranceSettled = false
   }
 
   return { start, stop, dispose, fit, playEntrance, setPointer, setScrollProgress }
