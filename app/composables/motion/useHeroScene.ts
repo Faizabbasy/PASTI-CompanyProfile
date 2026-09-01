@@ -208,51 +208,62 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     const palette = [NAVY, NAVY_LIGHT, YELLOW, INK, STEEL]
     const specs: ShardSpec[] = []
 
-    // Two symmetric clusters (left / right of the centered headline), each
-    // built from fractional frustum coordinates so every shard's world
-    // position is guaranteed inside the visible frame at its own depth —
-    // no more guessing world units against an assumed aspect ratio.
-    const clusterDefs = [
-      { side: -1, count: 7 },
-      { side: 1, count: 7 }
+    // Four quadrant slots (top-left, bottom-left, top-right, bottom-right),
+    // each holding a small number of shards placed on their own fixed grid
+    // cell — not randomly scattered within a shared region — so shapes sit
+    // clearly apart from each other instead of overlapping into a single
+    // blob. fx/fy are fractions of the frustum half-extents at each shard's
+    // own depth, so every position is guaranteed inside the visible frame
+    // regardless of aspect ratio; fx stays well clear of center so nothing
+    // crosses into the headline's text column, fy stays clear of the
+    // vertical mid-band where the headline sits.
+    const quadrants = [
+      { sideX: -1, sideY: 1 },
+      { sideX: -1, sideY: -1 },
+      { sideX: 1, sideY: 1 },
+      { sideX: 1, sideY: -1 }
     ]
 
-    clusterDefs.forEach(({ side, count }) => {
-      for (let i = 0; i < count; i++) {
-        const p = i / (count - 1)
-        const z = -1.5 - p * 5.5
+    // Each quadrant gets 3 shards on a diagonal ladder running from the
+    // outer frame edge toward (but never reaching) the text column, spaced
+    // far enough apart on both axes that their bounding spheres can't touch
+    // even at max scale. The nearest-to-center slot still sits clear of the
+    // headline's max-width column and the CTA row's vertical band.
+    const slotOffsets = [
+      { dx: 0, dy: 0, dz: 0 },
+      { dx: 0.22, dy: 0.24, dz: -1.8 },
+      { dx: 0.06, dy: 0.5, dz: -3.4 }
+    ]
+
+    let globalIndex = 0
+    quadrants.forEach(({ sideX, sideY }) => {
+      slotOffsets.forEach((slot, slotIndex) => {
+        const z = -2 - slot.dz * -1 - slotIndex * 0.6
         const { halfHeight, halfWidth } = frustumHalfExtents(z)
 
-        // fx/fy are fractions of the frustum half-extents at this depth —
-        // clamped well under 1 so the shard's own radius never pokes past
-        // the visible edge, even for the largest scale used below. fx is
-        // kept well clear of center (>= 0.78) so shards flank the
-        // headline's centered text column instead of overlapping it; fy is
-        // pushed away from the vertical mid-band (where the headline sits)
-        // toward the top or bottom of the frame.
-        const fx = 0.78 + p * 0.26 + Math.sin(i * 1.7) * 0.04
-        const fyRaw = Math.sin(i * 2.3 + side) * 0.5
-        const fy = fyRaw >= 0 ? 0.32 + fyRaw * 0.55 : -0.32 + fyRaw * 0.55
+        const fx = 0.66 + slot.dx
+        const fy = 0.58 + slot.dy
 
-        const geo = shapeLib[i % shapeLib.length]!
-        const scale = 0.45 + Math.random() * 0.6 - p * 0.12
+        const geo = shapeLib[globalIndex % shapeLib.length]!
+        const scale = 0.4 + (globalIndex % 3) * 0.12
 
         specs.push({
           geometry: geo,
-          x: side * fx * halfWidth,
-          y: fy * halfHeight,
+          x: sideX * fx * halfWidth,
+          y: sideY * fy * halfHeight,
           z,
-          scale: Math.max(scale, 0.32),
-          color: palette[(i + (side > 0 ? 2 : 0)) % palette.length]!,
+          scale,
+          color: palette[globalIndex % palette.length]!,
           rotSpeedX: 0.05 + Math.random() * 0.09,
           rotSpeedY: 0.04 + Math.random() * 0.08,
           rotSpeedZ: (Math.random() - 0.5) * 0.05,
           floatAmp: 0.12 + Math.random() * 0.16,
           floatSpeed: 0.18 + Math.random() * 0.16,
           floatPhase: Math.random() * Math.PI * 2,
-          parallax: 0.35 + p * 0.55
+          parallax: 0.35 + slotIndex * 0.2
         })
-      }
+        globalIndex++
+      })
     })
 
     shards = specs.map((spec, i) => {
