@@ -304,12 +304,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     rim.position.set(-4, -3, 3)
     scene.add(rim)
 
-    const fill = new THREE.DirectionalLight(0xdfe9ee, 0.6)
-    fill.position.set(-3, 3, 5)
-    scene.add(fill)
-
-    scene.add(new THREE.HemisphereLight(0xffffff, NAVY, 0.5))
-    scene.add(new THREE.AmbientLight(0x9fb2bd, 0.35))
+    scene.add(new THREE.HemisphereLight(0xffffff, NAVY, 0.55))
 
     group = new THREE.Group()
     scene.add(group)
@@ -352,8 +347,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     const slotOffsets = [
       { dx: 0, dy: 0, dz: 0 },
       { dx: 0.22, dy: 0.24, dz: -1.8 },
-      { dx: 0.06, dy: 0.5, dz: -3.4 },
-      { dx: 0.32, dy: 0.06, dz: -5.0 }
+      { dx: 0.06, dy: 0.5, dz: -3.4 }
     ]
 
     let globalIndex = 0
@@ -428,7 +422,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     // toward the frame edges, sparse toward the text column so it never
     // competes with the headline. A handful get full accent color/opacity
     // to keep the field from reading as flat gray noise.
-    const starCount = 72
+    const starCount = 18
     const starSpecs: ShardSpec[] = []
     const starMuted: boolean[] = []
     for (let i = 0; i < starCount; i++) {
@@ -504,7 +498,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     // protects the text. But that box is only actually occupied by text
     // in its upper half; below the CTA row there's no text at all, so a
     // dedicated low-density fill goes there without touching any copy.
-    const lowerFillCount = 20
+    const lowerFillCount = 4
     for (let i = 0; i < lowerFillCount; i++) {
       const z = -1.5 - Math.random() * 3
       const { halfHeight, halfWidth } = frustumHalfExtents(z)
@@ -546,7 +540,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     // headline, since the headline is flat 2D HTML composited on top of
     // the canvas — only its projected screen-space x/y matters, and a
     // "distant" shard at small fx/fy still lands squarely on the text.
-    const deepCount = 22
+    const deepCount = 6
     for (let i = 0; i < deepCount; i++) {
       const z = -8 - Math.random() * 6
       const { halfHeight, halfWidth } = frustumHalfExtents(z)
@@ -735,7 +729,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     const w = Math.max(rect.width, 1)
     const h = Math.max(rect.height, 1)
     renderer.setSize(w, h, false)
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     camera.aspect = w / h
     camera.updateProjectionMatrix()
   }

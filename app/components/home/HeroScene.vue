@@ -18,6 +18,8 @@ let intersectionObserver: IntersectionObserver | undefined
 let scene: ReturnType<typeof useHeroScene> | undefined
 let introWatchStop: (() => void) | undefined
 let scrollTrigger: ScrollTrigger | undefined
+let idleHandle: number | undefined
+let idleCancel: ((handle: number) => void) | undefined
 
 function handlePointerMove(event: PointerEvent) {
   if (!containerRef.value || !scene) return
@@ -36,55 +38,68 @@ onMounted(() => {
   if (!shouldEnable) return
   enabled.value = true
 
+  // Deferred off the hydration/reload critical path: building the shard
+  // field's meshes/materials synchronously inside onMounted competed with
+  // the browser settling the reload itself, reading as a stuck/frozen page
+  // for a beat. requestIdleCallback (timeout fallback for Safari, which
+  // lacks it) lets the browser paint/settle first. Handle is stashed so
+  // onBeforeUnmount can cancel it if the component unmounts before it fires
+  // (fast route away / fast reload).
+  const schedule = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 120) as unknown as number)
+  idleCancel = window.cancelIdleCallback ?? ((handle: number) => window.clearTimeout(handle))
+
   nextTick(() => {
-    if (!containerRef.value || !canvasRef.value) return
+    idleHandle = schedule(() => {
+      if (!containerRef.value || !canvasRef.value) return
 
-    scene = useHeroScene(canvasRef, containerRef)
-    scene.start()
-    scene.fit()
+      scene = useHeroScene(canvasRef, containerRef)
+      scene.start()
+      scene.fit()
 
-    introWatchStop = watch(
-      introReady,
-      (ready) => {
-        if (ready) scene?.playEntrance()
-      },
-      { immediate: true }
-    )
+      introWatchStop = watch(
+        introReady,
+        (ready) => {
+          if (ready) scene?.playEntrance()
+        },
+        { immediate: true }
+      )
 
-    resizeObserver = new ResizeObserver(() => scene?.fit())
-    resizeObserver.observe(containerRef.value)
+      resizeObserver = new ResizeObserver(() => scene?.fit())
+      resizeObserver.observe(containerRef.value)
 
-    // Pause the render loop when the Hero scrolls out of view so the
-    // GPU/battery cost drops to zero once the user has moved on, same
-    // performance-conscious pattern as the custom cursor / magnetic hover.
-    intersectionObserver = new IntersectionObserver(
-      (entries) => {
-        const isVisible = entries[0]?.isIntersecting ?? false
-        if (isVisible) scene?.start()
-        else scene?.stop()
-      },
-      { threshold: 0 }
-    )
-    intersectionObserver.observe(containerRef.value)
+      // Pause the render loop when the Hero scrolls out of view so the
+      // GPU/battery cost drops to zero once the user has moved on, same
+      // performance-conscious pattern as the custom cursor / magnetic hover.
+      intersectionObserver = new IntersectionObserver(
+        (entries) => {
+          const isVisible = entries[0]?.isIntersecting ?? false
+          if (isVisible) scene?.start()
+          else scene?.stop()
+        },
+        { threshold: 0 }
+      )
+      intersectionObserver.observe(containerRef.value)
 
-    containerRef.value.addEventListener('pointermove', handlePointerMove)
+      containerRef.value.addEventListener('pointermove', handlePointerMove)
 
-    // Drives the field's scroll-reaction (drift + rotation) as the Hero
-    // scrolls out of view — 0 while the Hero fills the viewport, 1 once it
-    // has fully scrolled past. Scoped to this component's own trigger, not
-    // a shared one, matching the per-instance ScrollTrigger pattern used by
-    // HomeServiceRow.vue (see HANDOFF.md).
-    scrollTrigger = ScrollTrigger.create({
-      trigger: containerRef.value,
-      start: 'top top',
-      end: 'bottom top',
-      scrub: true,
-      onUpdate: (self) => scene?.setScrollProgress(self.progress)
-    })
+      // Drives the field's scroll-reaction (drift + rotation) as the Hero
+      // scrolls out of view — 0 while the Hero fills the viewport, 1 once it
+      // has fully scrolled past. Scoped to this component's own trigger, not
+      // a shared one, matching the per-instance ScrollTrigger pattern used by
+      // HomeServiceRow.vue (see HANDOFF.md).
+      scrollTrigger = ScrollTrigger.create({
+        trigger: containerRef.value,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+        onUpdate: (self) => scene?.setScrollProgress(self.progress)
+      })
+    }) as unknown as number
   })
 })
 
 onBeforeUnmount(() => {
+  if (idleHandle !== undefined) idleCancel?.(idleHandle)
   resizeObserver?.disconnect()
   intersectionObserver?.disconnect()
   introWatchStop?.()
