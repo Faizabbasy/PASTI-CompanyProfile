@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
 // `enabled` MUST stay false through the initial render on both server and
 // client so hydration sees the same (empty) DOM on both sides — flipping it
 // synchronously during setup() from a client-only check caused a hydration
@@ -15,6 +17,7 @@ let resizeObserver: ResizeObserver | undefined
 let intersectionObserver: IntersectionObserver | undefined
 let ribbons: ReturnType<typeof useHeroRibbons> | undefined
 let introWatchStop: (() => void) | undefined
+let scrollTrigger: ScrollTrigger | undefined
 
 function handlePointerMove(event: PointerEvent) {
   if (!containerRef.value || !ribbons) return
@@ -65,6 +68,19 @@ onMounted(() => {
     intersectionObserver.observe(containerRef.value)
 
     containerRef.value.addEventListener('pointermove', handlePointerMove)
+
+    // Drives the cascade's scroll-reaction (drift + rotation) as the Hero
+    // scrolls out of view — 0 while the Hero fills the viewport, 1 once it
+    // has fully scrolled past. Scoped to this component's own trigger, not
+    // a shared one, matching the per-instance ScrollTrigger pattern used by
+    // HomeServiceRow.vue (see HANDOFF.md).
+    scrollTrigger = ScrollTrigger.create({
+      trigger: containerRef.value,
+      start: 'top top',
+      end: 'bottom top',
+      scrub: true,
+      onUpdate: (self) => ribbons?.setScrollProgress(self.progress)
+    })
   })
 })
 
@@ -72,6 +88,7 @@ onBeforeUnmount(() => {
   resizeObserver?.disconnect()
   intersectionObserver?.disconnect()
   introWatchStop?.()
+  scrollTrigger?.kill()
   containerRef.value?.removeEventListener('pointermove', handlePointerMove)
   ribbons?.dispose()
 })
