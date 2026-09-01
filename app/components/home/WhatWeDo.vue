@@ -9,8 +9,8 @@ const labelRef = ref<HTMLElement | null>(null)
 const introRef = ref<HTMLElement | null>(null)
 
 useScrollReveal(gridRef, { y: 32 })
-useMaskedReveal(labelRef, { by: 'word' })
-useMaskedReveal(introRef, { by: 'line' })
+useMaskedReveal(labelRef, { by: 'word', blur: true })
+useMaskedReveal(introRef, { by: 'line', blur: true })
 </script>
 
 <template>
