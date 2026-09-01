@@ -4,7 +4,7 @@ import gsap from 'gsap'
 // Copy sourced verbatim from .docs/PASTI_Cuberto_Template_Content_Mapping.docx, section 02 — HERO.
 const headline = 'Technology. Creativity. Impact.'
 const subtext = 'We build technology and creative solutions for businesses ready to move forward.'
-const ctaPrimary = { label: 'Explore our work', to: '/work' }
+const ctaPrimary = { label: 'Explore our work', to: '#selected-work' }
 const ctaSecondary = { label: 'Tell us about it' }
 
 const { link: whatsappLink } = useWhatsapp()
@@ -149,9 +149,9 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
 
         <div ref="ctaRowRef" class="mt-8 flex flex-col items-center gap-4 sm:flex-row">
           <div ref="ctaPrimaryRef" class="inline-block">
-            <NuxtLink :to="ctaPrimary.to" class="btn-primary">
+            <a :href="ctaPrimary.to" class="btn-primary">
               {{ ctaPrimary.label }}
-            </NuxtLink>
+            </a>
           </div>
           <a :href="whatsappLink" target="_blank" rel="noopener noreferrer" class="btn-outline">
             {{ ctaSecondary.label }}

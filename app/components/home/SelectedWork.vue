@@ -10,7 +10,7 @@ useMaskedReveal(headingRef, { by: 'word' })
 </script>
 
 <template>
-  <BaseSection as="section" class="rounded-t-[2.5rem] bg-navy-950">
+  <BaseSection id="selected-work" as="section" class="rounded-t-[2.5rem] bg-navy-950">
     <BaseContainer>
       <h2 ref="headingRef" class="text-display-lg text-paper">
         {{ heading }}
