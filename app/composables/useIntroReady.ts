@@ -15,7 +15,7 @@ export function useIntroReady() {
     requestAnimationFrame(() => {
       setTimeout(() => {
         introReady.value = true
-      }, 250)
+      }, 100)
     })
   }
 
