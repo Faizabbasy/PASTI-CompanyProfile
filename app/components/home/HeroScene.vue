@@ -38,18 +38,18 @@ onMounted(() => {
   if (!shouldEnable) return
   enabled.value = true
 
-  // Deferred off the hydration/reload critical path: building the shard
-  // field's meshes/materials synchronously inside onMounted competed with
-  // the browser settling the reload itself, reading as a stuck/frozen page
-  // for a beat. requestIdleCallback (timeout fallback for Safari, which
-  // lacks it) lets the browser paint/settle first. Handle is stashed so
-  // onBeforeUnmount can cancel it if the component unmounts before it fires
-  // (fast route away / fast reload).
-  const schedule = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 120) as unknown as number)
-  idleCancel = window.cancelIdleCallback ?? ((handle: number) => window.clearTimeout(handle))
+  // Deferred one frame off the hydration/reload critical path: building the
+  // shard field's meshes/materials synchronously inside onMounted competed
+  // with the browser settling the reload itself, reading as a stuck/frozen
+  // page for a beat. requestAnimationFrame (not requestIdleCallback — idle
+  // time isn't guaranteed to arrive quickly and made the felt delay worse)
+  // lets one paint happen first, then builds the scene on the very next
+  // frame. Handle is stashed so onBeforeUnmount can cancel it if the
+  // component unmounts before it fires (fast route away / fast reload).
+  idleCancel = (handle: number) => cancelAnimationFrame(handle)
 
   nextTick(() => {
-    idleHandle = schedule(() => {
+    idleHandle = requestAnimationFrame(() => {
       if (!containerRef.value || !canvasRef.value) return
 
       scene = useHeroScene(canvasRef, containerRef)
@@ -94,7 +94,7 @@ onMounted(() => {
         scrub: true,
         onUpdate: (self) => scene?.setScrollProgress(self.progress)
       })
-    }) as unknown as number
+    })
   })
 })
 

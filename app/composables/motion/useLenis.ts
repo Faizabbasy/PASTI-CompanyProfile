@@ -25,10 +25,11 @@ export function useLenis() {
 
   lenis = new Lenis({
     autoRaf: false,
-    duration: 1.3,
-    easing: (t) => 1 - Math.pow(1 - t, 4),
+    duration: 0.9,
+    easing: (t) => 1 - Math.pow(1 - t, 3),
     smoothWheel: true,
-    wheelMultiplier: 1
+    wheelMultiplier: 1,
+    syncTouch: true
   })
 
   lenis.on('scroll', ScrollTrigger.update)
