@@ -11,7 +11,7 @@ const { setState } = useCustomCursor()
 <template>
   <NuxtLink
     :to="item.to"
-    class="group relative flex items-center gap-1.5 py-2 font-display text-sm font-semibold text-ink"
+    class="group relative flex items-center gap-1.5 py-2 font-display text-sm font-semibold text-ink transition-opacity duration-400 ease-editorial"
     :class="{ 'text-navy-700': route.path === item.to }"
     @mouseenter="setState('link')"
     @mouseleave="setState('default')"

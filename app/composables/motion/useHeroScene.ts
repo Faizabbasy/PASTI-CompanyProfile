@@ -204,8 +204,19 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
   let pointerY = 0
   let scrollProgress = 0
   let entranceSettled = false
+  let containerHeightPx = 1
   const cameraBase = new THREE.Vector3(0, 0, 10)
   const FOV = 42
+
+  // The fixed header sits on top of the Hero at up to ~84px tall (desktop
+  // h-20 + a few px breathing room) while fully transparent — so nothing in
+  // the 3D field is allowed to rise into that screen-space band, or it
+  // visually collides with the logo/nav text even though the header still
+  // wins the DOM stacking order for clicks. Converted to world units per
+  // depth in clampTopWorldY below, since a fixed px value doesn't map to a
+  // fixed fraction of the frustum (closer shards need a bigger world-unit
+  // margin than farther ones for the same on-screen pixel gap).
+  const HEADER_CLEARANCE_PX = 140
 
   /** Visible half-height/width of the frustum at world-z `z`, given the camera sits at cameraBase.z. */
   function frustumHalfExtents(z: number) {
@@ -213,6 +224,13 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     const halfHeight = distance * Math.tan((FOV * Math.PI) / 360)
     const aspect = camera?.aspect ?? 1
     return { halfHeight, halfWidth: halfHeight * aspect }
+  }
+
+  /** Highest a shard's world-space Y is allowed to go at a given depth's halfHeight, keeping it clear of the fixed header band. */
+  function clampTopWorldY(y: number, halfHeight: number): number {
+    const pxToWorld = halfHeight / (containerHeightPx / 2)
+    const ceiling = halfHeight - HEADER_CLEARANCE_PX * pxToWorld
+    return Math.min(y, ceiling)
   }
 
   function buildScene() {
@@ -223,6 +241,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
 
     const rect = containerRef.value.getBoundingClientRect()
     const aspect = Math.max(rect.width, 1) / Math.max(rect.height, 1)
+    containerHeightPx = Math.max(rect.height, 1)
 
     camera = new THREE.PerspectiveCamera(FOV, aspect, 0.1, 100)
     camera.position.copy(cameraBase)
@@ -300,21 +319,30 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
 
         const geo = shapeLib[globalIndex % shapeLib.length]!
         const scale = 0.4 + (globalIndex % 3) * 0.12
+        const floatAmp = 0.12 + Math.random() * 0.16
+        const parallax = 0.35 + slotIndex * 0.2
+
+        let y = sideY * fy * halfHeight
+        if (sideY > 0) {
+          // Top-half shards: keep the float-animation's peak (not just the
+          // resting position) clear of the header band.
+          y = Math.min(y, clampTopWorldY(halfHeight, halfHeight) - floatAmp * parallax)
+        }
 
         specs.push({
           geometry: geo,
           x: sideX * fx * halfWidth,
-          y: sideY * fy * halfHeight,
+          y,
           z,
           scale,
           color: palette[globalIndex % palette.length]!,
           rotSpeedX: 0.05 + Math.random() * 0.09,
           rotSpeedY: 0.04 + Math.random() * 0.08,
           rotSpeedZ: (Math.random() - 0.5) * 0.05,
-          floatAmp: 0.12 + Math.random() * 0.16,
+          floatAmp,
           floatSpeed: 0.18 + Math.random() * 0.16,
           floatPhase: Math.random() * Math.PI * 2,
-          parallax: 0.35 + slotIndex * 0.2,
+          parallax,
           isFocal: true
         })
         globalIndex++
@@ -395,21 +423,28 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
       const muted = Math.random() > 0.22
       const color = muted ? (i % 2 === 0 ? 0x8fa2ad : 0xb9c4cb) : palette[i % palette.length]!
       starMuted.push(muted)
+      const floatAmp = 0.06 + Math.random() * 0.1
+      const parallax = 0.2 + Math.random() * 0.3
+
+      let y = fy * halfHeight
+      if (fy > 0) {
+        y = Math.min(y, clampTopWorldY(halfHeight, halfHeight) - floatAmp * parallax)
+      }
 
       starSpecs.push({
         geometry: geo,
         x: fx * halfWidth,
-        y: fy * halfHeight,
+        y,
         z,
         scale,
         color,
         rotSpeedX: 0.1 + Math.random() * 0.18,
         rotSpeedY: 0.08 + Math.random() * 0.16,
         rotSpeedZ: (Math.random() - 0.5) * 0.1,
-        floatAmp: 0.06 + Math.random() * 0.1,
+        floatAmp,
         floatSpeed: 0.15 + Math.random() * 0.2,
         floatPhase: Math.random() * Math.PI * 2,
-        parallax: 0.2 + Math.random() * 0.3,
+        parallax,
         isFocal: false
       })
     }
