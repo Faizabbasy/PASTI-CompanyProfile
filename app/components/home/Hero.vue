@@ -5,8 +5,9 @@ import gsap from 'gsap'
 const headline = 'Technology. Creativity. Impact.'
 const subtext = 'We build technology and creative solutions for businesses ready to move forward.'
 const ctaPrimary = { label: 'Explore our work', to: '/work' }
-const ctaSecondary = { label: 'Tell us about it', to: '/contact' }
+const ctaSecondary = { label: 'Tell us about it' }
 
+const { link: whatsappLink } = useWhatsapp()
 const { introReady } = useIntroReady()
 
 const headingRef = ref<HTMLElement | null>(null)
@@ -152,9 +153,9 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
               {{ ctaPrimary.label }}
             </NuxtLink>
           </div>
-          <NuxtLink :to="ctaSecondary.to" class="btn-outline">
+          <a :href="whatsappLink" target="_blank" rel="noopener noreferrer" class="btn-outline">
             {{ ctaSecondary.label }}
-          </NuxtLink>
+          </a>
         </div>
       </div>
     </BaseContainer>

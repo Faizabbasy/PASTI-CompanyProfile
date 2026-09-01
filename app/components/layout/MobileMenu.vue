@@ -2,6 +2,7 @@
 import gsap from 'gsap'
 
 const { navItems, primaryCta } = useNavigation()
+const { link: whatsappLink } = useWhatsapp()
 const { isOpen: open, close } = useMobileMenu()
 
 const route = useRoute()
@@ -85,9 +86,9 @@ onBeforeUnmount(() => {
             </li>
           </ul>
 
-          <NuxtLink :to="primaryCta.to" class="btn-accent w-full" @click="close()">
+          <a :href="whatsappLink" target="_blank" rel="noopener noreferrer" class="btn-accent w-full" @click="close()">
             {{ primaryCta.label }}
-          </NuxtLink>
+          </a>
         </nav>
       </Transition>
     </div>

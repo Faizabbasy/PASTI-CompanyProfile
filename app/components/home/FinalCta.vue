@@ -4,6 +4,7 @@ import gsap from 'gsap'
 // Copy sourced from .docs/PASTI_Cuberto_Template_Content_Mapping.docx, section 09 — FINAL CTA.
 const { eyebrowLine, headingLine, ctaTo, officeLabel, email } = useFinalCta()
 const { primaryCta } = useNavigation()
+const { link: whatsappLink } = useWhatsapp()
 
 const eyebrowRef = ref<HTMLElement | null>(null)
 const headingRef = ref<HTMLElement | null>(null)
@@ -73,10 +74,17 @@ useGsapContext(() => {
         </div>
 
         <div ref="ctaButtonRef" class="group mt-10 block w-fit md:mt-12">
-          <NuxtLink :to="ctaTo" class="btn-accent" @mouseenter="setState('contact')" @mouseleave="setState('inverse')">
+          <a
+            :href="whatsappLink"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-accent"
+            @mouseenter="setState('contact')"
+            @mouseleave="setState('inverse')"
+          >
             {{ primaryCta.label }}
             <span aria-hidden="true" class="inline-block transition-transform duration-400 ease-editorial group-hover:translate-x-1">→</span>
-          </NuxtLink>
+          </a>
         </div>
       </div>
 
