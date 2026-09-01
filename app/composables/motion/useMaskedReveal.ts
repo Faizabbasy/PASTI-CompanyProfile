@@ -11,6 +11,9 @@ interface MaskedRevealOptions {
   stagger?: number
   trigger?: boolean
   delay?: number
+  /** Adds a blur-to-focus touch on top of the slide-up reveal: each unit starts
+   *  softly blurred and sharpens as it settles, instead of just sliding in crisp. */
+  blur?: boolean
 }
 
 /**
@@ -23,7 +26,7 @@ interface MaskedRevealOptions {
 export function useMaskedReveal(target: Ref<HTMLElement | null>, options: MaskedRevealOptions = {}) {
   if (!import.meta.client) return
 
-  const { by = 'word', stagger = 0.05, trigger = true, delay = 0 } = options
+  const { by = 'word', stagger = 0.05, trigger = true, delay = 0, blur = false } = options
 
   onMounted(() => {
     const el = target.value
@@ -48,6 +51,18 @@ export function useMaskedReveal(target: Ref<HTMLElement | null>, options: Masked
       const inner = document.createElement('span')
       inner.style.display = 'inline-block'
       inner.textContent = unit
+      inner.dataset.revealEl = ''
+      inner.dataset.revealKind = 'mask'
+
+      if (blur) {
+        // The blur filter's halo extends past the glyphs' sharp edges — a
+        // tight clip on `outer` would hard-cut that halo mid-blur and look
+        // like a visible seam. Compensating margin/padding (same trick as
+        // Hero's wrapWord for descenders) gives the halo room without
+        // shifting the settled, unblurred layout.
+        outer.style.margin = '-0.15em'
+        inner.style.padding = '0.15em'
+      }
 
       outer.appendChild(inner)
       el.appendChild(outer)
@@ -57,10 +72,11 @@ export function useMaskedReveal(target: Ref<HTMLElement | null>, options: Masked
     const mm = gsap.matchMedia()
 
     mm.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.set(innerSpans, { yPercent: 120 })
+      gsap.set(innerSpans, blur ? { yPercent: 120, filter: 'blur(8px)' } : { yPercent: 120 })
 
       const anim = gsap.to(innerSpans, {
         yPercent: 0,
+        ...(blur ? { filter: 'blur(0px)' } : {}),
         duration: 0.8,
         ease: 'power3.out',
         stagger,
@@ -74,7 +90,7 @@ export function useMaskedReveal(target: Ref<HTMLElement | null>, options: Masked
     })
 
     mm.add('(prefers-reduced-motion: reduce)', () => {
-      gsap.set(innerSpans, { yPercent: 0 })
+      gsap.set(innerSpans, blur ? { yPercent: 0, filter: 'blur(0px)' } : { yPercent: 0 })
     })
 
     onBeforeUnmount(() => mm.revert())

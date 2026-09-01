@@ -35,6 +35,8 @@ function wrapWord(word: string): { outer: HTMLSpanElement; inner: HTMLSpanElemen
   inner.style.display = 'inline-block'
   inner.style.padding = '0.2em'
   inner.textContent = word
+  inner.dataset.revealEl = ''
+  inner.dataset.revealKind = 'mask'
 
   outer.appendChild(inner)
   return { outer, inner }
@@ -69,6 +71,15 @@ useGsapContext(() => {
           heading.appendChild(outer)
           allHeadingWords.push(inner)
         }
+        if (subtextRef.value) {
+          subtextRef.value.dataset.revealEl = ''
+          subtextRef.value.dataset.revealKind = 'scroll'
+        }
+        if (ctaRowRef.value) {
+          ctaRowRef.value.dataset.revealEl = ''
+          ctaRowRef.value.dataset.revealKind = 'scroll'
+        }
+
         gsap.set(allHeadingWords, { yPercent: 120 })
         if (subtextRef.value) gsap.set(subtextRef.value, { opacity: 0, y: 12 })
         if (ctaRowRef.value) gsap.set(ctaRowRef.value, { opacity: 0, y: 12 })

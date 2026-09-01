@@ -31,6 +31,11 @@ export function useScrollReveal(target: Ref<HTMLElement | null>, options: Scroll
     const items = children ? Array.from(el.querySelectorAll<HTMLElement>(children)) : [el]
     if (!items.length) return
 
+    for (const item of items) {
+      item.dataset.revealEl = ''
+      item.dataset.revealKind = 'scroll'
+    }
+
     const mm = gsap.matchMedia()
 
     mm.add('(prefers-reduced-motion: no-preference)', () => {

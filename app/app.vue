@@ -9,6 +9,22 @@ if (import.meta.client && 'scrollRestoration' in window.history) {
 }
 
 useLenis()
+
+// Play the reveal-tagged elements' un-reveal tween before a page-to-page
+// navigation actually swaps the route, so text/cards visibly retreat
+// instead of the page just cutting away mid-reveal. Awaiting inside the
+// guard (rather than redirecting) simply holds the pending navigation
+// until the tween resolves.
+const router = useRouter()
+
+router.beforeEach(async (to, from) => {
+  const isFirstNavigation = from.matched.length === 0
+  if (isFirstNavigation || to.path === from.path) return true
+
+  const { playLeave } = useLeaveTransition()
+  await playLeave()
+  return true
+})
 </script>
 
 <template>
@@ -17,7 +33,13 @@ useLenis()
     <LayoutCustomCursor />
     <LayoutHeader />
     <LayoutMobileMenu />
-    <NuxtPage />
+    <NuxtPage v-slot="{ Component }">
+      <Transition name="page" mode="out-in">
+        <div :key="$route.fullPath">
+          <component :is="Component" />
+        </div>
+      </Transition>
+    </NuxtPage>
     <LayoutFooter />
   </div>
 </template>
