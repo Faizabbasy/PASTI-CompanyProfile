@@ -31,6 +31,7 @@ router.beforeEach(async (to, from) => {
   <div>
     <NuxtRouteAnnouncer />
     <LayoutCustomCursor />
+    <LayoutSectionCurtain />
     <LayoutHeader />
     <LayoutMobileMenu />
     <NuxtPage v-slot="{ Component }">

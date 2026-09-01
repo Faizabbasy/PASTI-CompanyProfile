@@ -9,6 +9,11 @@ const ctaSecondary = { label: 'Tell us about it' }
 
 const { link: whatsappLink } = useWhatsapp()
 const { introReady } = useIntroReady()
+const { playTo } = useSectionCurtain()
+
+function goToSelectedWork() {
+  playTo(ctaPrimary.to)
+}
 
 const headingRef = ref<HTMLElement | null>(null)
 const headingWrapRef = ref<HTMLElement | null>(null)
@@ -149,7 +154,7 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
 
         <div ref="ctaRowRef" class="mt-8 flex flex-col items-center gap-4 sm:flex-row">
           <div ref="ctaPrimaryRef" class="inline-block">
-            <a :href="ctaPrimary.to" class="btn-primary">
+            <a :href="ctaPrimary.to" class="btn-primary" @click.prevent="goToSelectedWork">
               {{ ctaPrimary.label }}
             </a>
           </div>

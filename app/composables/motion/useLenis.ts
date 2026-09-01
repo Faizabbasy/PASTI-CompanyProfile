@@ -40,3 +40,20 @@ export function useLenis() {
 
   document.documentElement.classList.add('lenis')
 }
+
+/**
+ * Jumps to a target with no scroll animation — used by useSectionCurtain to
+ * reposition the page while a full-screen panel hides the viewport, so the
+ * jump itself is never seen. Falls back to native scrollIntoView when Lenis
+ * hasn't started (prefers-reduced-motion, or called before useLenis()).
+ */
+export function scrollToImmediate(target: string) {
+  if (!import.meta.client) return
+
+  if (lenis) {
+    lenis.scrollTo(target, { immediate: true })
+    return
+  }
+
+  document.querySelector(target)?.scrollIntoView({ behavior: 'auto', block: 'start' })
+}
