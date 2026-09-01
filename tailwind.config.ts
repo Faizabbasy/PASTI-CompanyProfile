@@ -7,6 +7,16 @@ export default <Partial<Config>>{
     './layouts/**/*.vue',
     './pages/**/*.vue'
   ],
+  // Vue's <Transition name="page"> in app.vue injects these classes at
+  // runtime (page-enter-active, page-leave-to, etc.) — they never appear as
+  // literal text in any scanned template, so Tailwind's JIT content scanner
+  // would otherwise purge the hand-written rules for them out of main.css.
+  safelist: [
+    'page-enter-active',
+    'page-leave-active',
+    'page-enter-from',
+    'page-leave-to'
+  ],
   theme: {
     screens: {
       sm: '480px',
