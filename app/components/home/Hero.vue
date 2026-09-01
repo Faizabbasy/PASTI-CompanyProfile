@@ -12,6 +12,7 @@ const { introReady } = useIntroReady()
 const headingRef = ref<HTMLElement | null>(null)
 const headingWrapRef = ref<HTMLElement | null>(null)
 const spotlightRef = ref<HTMLElement | null>(null)
+const shineRef = ref<HTMLElement | null>(null)
 const subtextRef = ref<HTMLElement | null>(null)
 const ctaRowRef = ref<HTMLElement | null>(null)
 const ctaPrimaryRef = ref<HTMLElement | null>(null)
@@ -83,12 +84,29 @@ useGsapContext(() => {
         gsap.set(allHeadingWords, { yPercent: 120 })
         if (subtextRef.value) gsap.set(subtextRef.value, { opacity: 0, y: 12 })
         if (ctaRowRef.value) gsap.set(ctaRowRef.value, { opacity: 0, y: 12 })
+        if (shineRef.value) gsap.set(shineRef.value, { opacity: 0, backgroundPosition: '130% 130%' })
 
         const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
 
         tl.to(allHeadingWords, { yPercent: 0, duration: 0.9, stagger: 0.08 })
-        if (subtextRef.value) tl.to(subtextRef.value, { opacity: 1, y: 0, duration: 0.6 }, '+=0.1')
-        if (ctaRowRef.value) tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: 0.6 }, '+=0.1')
+        tl.addLabel('shineStart')
+        if (subtextRef.value) tl.to(subtextRef.value, { opacity: 1, y: 0, duration: 0.6 }, 'shineStart+=0.1')
+        if (ctaRowRef.value) tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: 0.6 }, 'shineStart+=0.2')
+
+        // Shine sweep: a one-off "kinclong" touch on the headline once its
+        // own word reveal has settled — a diagonal light band travels
+        // across the text toward the top-right. Positioned relative to the
+        // 'shineStart' label on the SAME timeline as the reveal (not a
+        // separate hardcoded-delay timeline), so it always starts right as
+        // the reveal finishes.
+        if (shineRef.value) {
+          tl.to(
+            shineRef.value,
+            { opacity: 1, backgroundPosition: '-30% -30%', duration: 2.2, ease: 'cubic-bezier(0.65, 0, 0.35, 1)' },
+            'shineStart'
+          )
+          tl.set(shineRef.value, { opacity: 0 })
+        }
 
         return () => tl.kill()
       })
@@ -111,6 +129,13 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
           <h1
             ref="spotlightRef"
             class="pointer-events-none absolute inset-0 font-extrabold leading-[1.04] tracking-tight text-yellow-500 text-display-lg cursor-spotlight md:text-display-xl"
+            aria-hidden="true"
+          >
+            {{ headline }}
+          </h1>
+          <h1
+            ref="shineRef"
+            class="pointer-events-none absolute inset-0 font-extrabold leading-[1.04] tracking-tight text-display-lg hero-shine md:text-display-xl"
             aria-hidden="true"
           >
             {{ headline }}

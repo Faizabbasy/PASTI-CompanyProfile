@@ -148,4 +148,33 @@
       transparent calc(var(--spotlight-radius, 110px) + 1px)
     );
   }
+
+  /* Hero page-load shine sweep — a diagonal band of yellow light that
+     travels once across the headline text (bottom-left to top-right) right
+     after its word reveal settles. Opacity/background-position are driven
+     by Hero.vue's GSAP timeline, not CSS animation, so it stays in sync
+     with the reveal instead of racing it on a hardcoded delay. Uses
+     background-clip: text on a SEPARATE flat text layer stacked over the
+     real heading (same technique as .cursor-spotlight above) rather than
+     the word-mask spans directly — background-clip: text breaks when
+     nested inside those inline-block mask spans. */
+  .hero-shine {
+    background-image: linear-gradient(
+      115deg,
+      transparent 0%, transparent 42%,
+      theme('colors.yellow.500') 49%, theme('colors.yellow.100') 51%, theme('colors.yellow.500') 53%,
+      transparent 60%, transparent 100%
+    );
+    background-size: 280% 280%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-shine {
+      display: none;
+    }
+  }
 }
