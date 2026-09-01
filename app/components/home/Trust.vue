@@ -6,6 +6,7 @@ const { clients } = useTrustedClients()
 
 const headingRef = ref<HTMLElement | null>(null)
 const gridRef = ref<HTMLElement | null>(null)
+const hoveredClient = ref<string | null>(null)
 
 useMaskedReveal(headingRef, { by: 'word' })
 useScrollReveal(gridRef, { y: 16, children: '.trust-logo', stagger: 0.06 })
@@ -26,7 +27,11 @@ useScrollReveal(gridRef, { y: 16, children: '.trust-logo', stagger: 0.06 })
         <div
           v-for="client in clients"
           :key="client.name"
-          class="trust-logo flex h-24 w-56 items-center justify-center"
+          class="trust-logo flex h-24 w-56 items-center justify-center transition-all duration-400 ease-editorial"
+          :class="hoveredClient === client.name ? 'scale-110' : 'scale-100'"
+          :style="{ opacity: hoveredClient && hoveredClient !== client.name ? 0.3 : 1 }"
+          @mouseenter="hoveredClient = client.name"
+          @mouseleave="hoveredClient = null"
         >
           <img
             :src="client.logo"
