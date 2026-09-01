@@ -72,6 +72,52 @@ function buildShapeLibrary(): THREE.BufferGeometry[] {
   return shapes
 }
 
+/**
+ * Builds one large "sculpted wedge" — a solid, curved blade shape (thick
+ * extrusion, not a thin ribbon) that tapers from a broad rounded base to a
+ * narrow tip along a gentle arc. Flanks the Hero left/right as a single
+ * bold focal shape distinct from the small faceted crystal field —
+ * `mirror` flips the curve/taper direction so the left and right wedges
+ * read as a matched pair, not the same shape pasted twice.
+ */
+function buildWedgeGeometry(mirror: boolean): THREE.ExtrudeGeometry {
+  const shape = new THREE.Shape()
+  const segs = 32
+  const length = 6.4
+  const baseWidth = 1.6
+  const tipWidth = 0.22
+  const curveAmount = 1.9
+  const m = mirror ? -1 : 1
+
+  const topPts: THREE.Vector2[] = []
+  const botPts: THREE.Vector2[] = []
+
+  for (let i = 0; i <= segs; i++) {
+    const p = i / segs
+    const x = p * length * m
+    const curve = Math.sin(p * Math.PI * 0.5) * curveAmount * m
+    const w = baseWidth + (tipWidth - baseWidth) * Math.pow(p, 1.6)
+    topPts.push(new THREE.Vector2(x, curve + w / 2))
+    botPts.push(new THREE.Vector2(x, curve - w / 2))
+  }
+
+  shape.moveTo(topPts[0]!.x, topPts[0]!.y)
+  topPts.forEach((pt) => shape.lineTo(pt.x, pt.y))
+  for (let i = botPts.length - 1; i >= 0; i--) shape.lineTo(botPts[i]!.x, botPts[i]!.y)
+  shape.closePath()
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: baseWidth * 0.85,
+    bevelEnabled: true,
+    bevelThickness: baseWidth * 0.16,
+    bevelSize: baseWidth * 0.12,
+    bevelSegments: 8,
+    curveSegments: 24
+  })
+  geo.center()
+  return geo
+}
+
 function jitterVertices(geo: THREE.BufferGeometry, amount: number) {
   const pos = geo.attributes.position as THREE.BufferAttribute
   for (let i = 0; i < pos.count; i++) {
@@ -196,6 +242,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
   let focalSphere: THREE.Mesh | undefined
   let shards: Shard[] = []
   let starShards: Shard[] = []
+  let wedgeShards: Shard[] = []
   let rafId: number | undefined
   let lastTime = 0
   let elapsed = 0
@@ -566,6 +613,70 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
       }
     })
 
+    // Two large sculpted wedges flanking the Hero — one bold curved-blade
+    // focal shape per side, distinct from the small faceted crystal field.
+    // buildWedgeGeometry() runs geo.center(), so the mesh's local origin
+    // sits at the shape's midpoint, not its anchor/tail end. Rather than
+    // estimate the shape's inward reach by hand (got this wrong twice —
+    // the curve means it isn't just half the straight-line length), the
+    // geometry's own computed bounding box gives the real inward extent,
+    // and the anchor X is derived from placing that inward edge exactly at
+    // the same clearX boundary the starfield uses, so it's guaranteed
+    // consistent with every other shape's text clearance.
+    const wedgeZ = -3.2
+    const { halfHeight: wedgeHalfHeight, halfWidth: wedgeHalfWidth } = frustumHalfExtents(wedgeZ)
+    const wedgeClearX = 0.82
+    const wedgeFy = -0.62
+    const wedgeSpecs: Array<{ mirror: boolean; sideX: number }> = [
+      { mirror: false, sideX: -1 },
+      { mirror: true, sideX: 1 }
+    ]
+
+    wedgeShards = wedgeSpecs.map(({ mirror, sideX }, i) => {
+      const geo = buildWedgeGeometry(mirror)
+      geo.computeBoundingBox()
+      const box = geo.boundingBox!
+      // Inward extent along local X, accounting for the shape's own
+      // rotation.z tilt (a small correction; the shape is wide, not tall,
+      // so most of the tilt's effect is on Y not X reach).
+      const inwardLocalX = sideX > 0 ? box.min.x : box.max.x
+      const inwardReach = Math.abs(inwardLocalX) * 1.05
+
+      const material = shardMaterial(i === 0 ? NAVY : NAVY_LIGHT, false)
+      const mesh = new THREE.Mesh(geo, material)
+
+      let y = wedgeFy * wedgeHalfHeight
+      y = Math.min(y, clampTopWorldY(wedgeHalfHeight, wedgeHalfHeight) - 0.4)
+
+      // The anchor sits at whatever X makes the shape's inward edge land
+      // exactly at wedgeClearX * halfWidth — i.e. flush with the same
+      // clearance boundary the starfield respects.
+      const clearanceX = wedgeClearX * wedgeHalfWidth
+      const x = sideX * (clearanceX + inwardReach)
+
+      const basePos = new THREE.Vector3(x, y, wedgeZ)
+      mesh.position.copy(FOCAL_ORIGIN)
+      mesh.scale.setScalar(0.001)
+      mesh.rotation.z = sideX > 0 ? Math.PI * 0.06 : -Math.PI * 0.06
+      mesh.rotation.y = sideX > 0 ? -0.15 : 0.15
+      group!.add(mesh)
+
+      return {
+        mesh,
+        basePos,
+        targetScale: 1,
+        rotSpeedX: 0.01,
+        rotSpeedY: 0.012,
+        rotSpeedZ: 0,
+        floatAmp: 0.1,
+        floatSpeed: 0.12 + i * 0.02,
+        floatPhase: i * Math.PI,
+        parallax: 0.3,
+        delay: 0.5 + i * 0.15,
+        isFocal: true
+      }
+    })
+
     fit()
   }
 
@@ -587,7 +698,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     tl.to(focalSphere.scale, { x: 0.001, y: 0.001, z: 0.001, duration: 0.45, ease: 'power2.in' }, '+=0.35')
     tl.set(focalSphere, { visible: false })
 
-    const allShards = [...shards, ...starShards]
+    const allShards = [...shards, ...starShards, ...wedgeShards]
     const shatterStart = 1.0
     const origin = FOCAL_ORIGIN.clone()
     entranceSettled = false
@@ -689,6 +800,19 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
       s.mesh.position.x = s.basePos.x + Math.cos(elapsed * s.floatSpeed * 0.7 + s.floatPhase) * 0.08 * s.parallax
     })
 
+    // Wedges get a much gentler cursor response than the small crystals —
+    // a large bold shape spinning fast would read as chaotic rather than
+    // "sculpted". Just a slow tilt toward the cursor and a slow vertical
+    // breathe, no position drift (keeps the curved silhouette stable).
+    wedgeShards.forEach((s) => {
+      s.mesh.rotation.y += (s.rotSpeedY + cursorSpinY * s.parallax * 0.12) * dt
+      s.mesh.rotation.x += cursorSpinX * s.parallax * 0.08 * dt
+
+      if (!applyFloat) return
+      const float = Math.sin(elapsed * s.floatSpeed + s.floatPhase) * s.floatAmp
+      s.mesh.position.y = s.basePos.y + float * s.parallax
+    })
+
     if (particles) {
       particles.rotation.y = elapsed * 0.012
       particles.rotation.x = Math.sin(elapsed * 0.04) * 0.03
@@ -738,6 +862,11 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
       ;(s.mesh.material as THREE.Material).dispose()
     })
     starShards = []
+    wedgeShards.forEach((s) => {
+      s.mesh.geometry.dispose()
+      ;(s.mesh.material as THREE.Material).dispose()
+    })
+    wedgeShards = []
     focalSphere?.geometry.dispose()
     ;(focalSphere?.material as THREE.Material | undefined)?.dispose()
     focalSphere = undefined
