@@ -305,7 +305,8 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     const slotOffsets = [
       { dx: 0, dy: 0, dz: 0 },
       { dx: 0.22, dy: 0.24, dz: -1.8 },
-      { dx: 0.06, dy: 0.5, dz: -3.4 }
+      { dx: 0.06, dy: 0.5, dz: -3.4 },
+      { dx: 0.32, dy: 0.06, dz: -5.0 }
     ]
 
     let globalIndex = 0
@@ -380,7 +381,7 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     // toward the frame edges, sparse toward the text column so it never
     // competes with the headline. A handful get full accent color/opacity
     // to keep the field from reading as flat gray noise.
-    const starCount = 46
+    const starCount = 72
     const starSpecs: ShardSpec[] = []
     const starMuted: boolean[] = []
     for (let i = 0; i < starCount; i++) {
@@ -564,9 +565,19 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     // frame and the shatter would never visibly travel outward.
     const applyFloat = entranceSettled
 
+    // Cursor-driven per-shard spin: each shard keeps tumbling on its own
+    // idle axis, but the cursor's position adds an extra rotation delta on
+    // top — so moving the mouse across the Hero visibly "turns" every
+    // crystal to show a different facet, like it's being spun in place,
+    // without moving any shard's position (which stays inside its
+    // carefully-cleared slot). Pointer magnitude (not just direction)
+    // scales the effect, so a still cursor settles back to plain idle spin.
+    const cursorSpinY = pointerX * 4.2
+    const cursorSpinX = -pointerY * 3.2
+
     shards.forEach((s) => {
-      s.mesh.rotation.x += s.rotSpeedX * dt
-      s.mesh.rotation.y += s.rotSpeedY * dt
+      s.mesh.rotation.x += (s.rotSpeedX + cursorSpinX * s.parallax * 0.7) * dt
+      s.mesh.rotation.y += (s.rotSpeedY + cursorSpinY * s.parallax * 0.7) * dt
       s.mesh.rotation.z += s.rotSpeedZ * dt
 
       if (!applyFloat) return
@@ -576,8 +587,8 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     })
 
     starShards.forEach((s) => {
-      s.mesh.rotation.x += s.rotSpeedX * dt
-      s.mesh.rotation.y += s.rotSpeedY * dt
+      s.mesh.rotation.x += (s.rotSpeedX + cursorSpinX * s.parallax * 0.8) * dt
+      s.mesh.rotation.y += (s.rotSpeedY + cursorSpinY * s.parallax * 0.8) * dt
       s.mesh.rotation.z += s.rotSpeedZ * dt
 
       if (!applyFloat) return

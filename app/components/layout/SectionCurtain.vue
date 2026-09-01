@@ -38,6 +38,7 @@ useGsapContext(() => {
   <div
     ref="panelRef"
     aria-hidden="true"
-    class="fixed inset-0 z-[60] bg-navy-950 pointer-events-none"
+    class="fixed inset-0 z-[60] translate-y-full bg-navy-950 pointer-events-none"
+    style="will-change: transform"
   />
 </template>
