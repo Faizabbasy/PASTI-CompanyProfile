@@ -125,9 +125,10 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
 </script>
 
 <template>
-  <BaseSection as="section" class="pb-16 pt-20 md:pb-24 md:pt-28 lg:pt-32">
+  <BaseSection as="section" class="relative pb-16 pt-20 md:pb-24 md:pt-28 lg:pt-32">
+    <HomeHeroRibbons />
     <BaseContainer>
-      <div class="mx-auto flex max-w-5xl flex-col items-center text-center">
+      <div class="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
         <div ref="headingWrapRef" class="relative max-w-4xl md:max-w-none">
           <h1 ref="headingRef" class="font-extrabold leading-[1.04] tracking-tight text-display-lg md:text-display-xl">
             {{ headline }}
