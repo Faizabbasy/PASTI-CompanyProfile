@@ -1,232 +1,150 @@
 import * as THREE from 'three'
 import gsap from 'gsap'
 
-interface ShardSpec {
-  geometry: THREE.BufferGeometry
-  x: number
-  y: number
-  z: number
-  scale: number
+const NAVY = 0x0b3954
+const NAVY_DEEP = 0x051b28
+const NAVY_LIGHT = 0x1c5c86
+const STEEL = 0x3d7fa8
+const YELLOW = 0xfbba00
+
+// Foreground ribbons sit close to the camera, so their world-space radius
+// reads much larger on screen (perspective) than the same radius would
+// farther back — needs a wider world-space clearance to still look clear
+// of the text at the screen level. Shared between the base-curve clearance
+// guard and the roll-up morph target's clamp so both agree on the same
+// boundary.
+const TEXT_CLEAR_X_FORE = 6.4
+const TEXT_CLEAR_X = 4.6
+
+/**
+ * Large curved "ribbon" bands — thick tubular arcs running from close to
+ * the camera back into depth, monumental and close-framed rather than a
+ * distant decorative field. Built with TubeGeometry along a Catmull-Rom
+ * curve per ribbon (not a flat plane) so it reads as a solid glossy band
+ * with real cross-section, catching a moving specular highlight as it
+ * curves.
+ */
+interface RibbonSpec {
+  points: THREE.Vector3[]
+  radius: number
   color: number
-  rotSpeedX: number
-  rotSpeedY: number
-  rotSpeedZ: number
-  floatAmp: number
-  floatSpeed: number
-  floatPhase: number
-  parallax: number
-  isFocal: boolean
+  layer: 'fore' | 'mid' | 'back'
+  driftAmp: number
+  driftSpeed: number
+  driftPhase: number
+  bobAmp: number
 }
 
-interface Shard {
+interface Ribbon {
   mesh: THREE.Mesh
   basePos: THREE.Vector3
-  targetScale: number
-  rotSpeedX: number
-  rotSpeedY: number
-  rotSpeedZ: number
-  floatAmp: number
-  floatSpeed: number
-  floatPhase: number
+  baseRot: THREE.Euler
+  driftAmp: number
+  driftSpeed: number
+  driftPhase: number
+  bobAmp: number
   parallax: number
-  delay: number
-  isFocal: boolean
 }
 
-const NAVY = 0x0b3954
-const NAVY_LIGHT = 0x1c5c86
-const YELLOW = 0xfbba00
-const INK = 0x0e1b24
-const STEEL = 0x3d7fa8
-
-/** World position of the intro's focal sphere / shatter origin point. */
-const FOCAL_ORIGIN = new THREE.Vector3(0, 1.9, 1.5)
-
 /**
- * Builds a small library of faceted, low-poly gem shapes (not spheres/cubes)
- * so the field reads as deliberate "cut crystal" geometry rather than stock
- * primitives — the Awwwards-style floating-shard look. Each shape is a
- * distorted/truncated polyhedron pushed slightly off-regular so facets catch
- * light unevenly, like a real cut gem.
+ * Builds a smooth arcing spine for one ribbon: starts near the camera
+ * (large |z| toward NEAR) and sweeps back toward the background, with a
+ * lateral curve so it reads as an arch/band rather than a straight beam.
+ * `bulge` bows the curve sideways, `rise` lifts/drops it vertically across
+ * its length — varying both per ribbon keeps the set from reading as
+ * repeated copies of one shape. A high segment count keeps both this curve
+ * and its roll-up morph target smooth under TubeGeometry's own Frenet-frame
+ * interpolation, rather than reading faceted.
  */
-function buildShapeLibrary(): THREE.BufferGeometry[] {
-  const shapes: THREE.BufferGeometry[] = []
-
-  const ico = new THREE.IcosahedronGeometry(1, 0)
-  jitterVertices(ico, 0.12)
-  shapes.push(ico)
-
-  const octa = new THREE.OctahedronGeometry(1, 0)
-  jitterVertices(octa, 0.14)
-  shapes.push(octa)
-
-  const tetra = new THREE.TetrahedronGeometry(1.15, 0)
-  jitterVertices(tetra, 0.1)
-  shapes.push(tetra)
-
-  const dode = new THREE.DodecahedronGeometry(0.95, 0)
-  jitterVertices(dode, 0.08)
-  shapes.push(dode)
-
-  shapes.forEach((geo) => geo.computeVertexNormals())
-  return shapes
+function buildRibbonCurve(opts: {
+  startX: number
+  startY: number
+  startZ: number
+  endX: number
+  endY: number
+  endZ: number
+  bulge: number
+  rise: number
+}): THREE.Vector3[] {
+  const { startX, startY, startZ, endX, endY, endZ, bulge, rise } = opts
+  const segments = 32
+  const points: THREE.Vector3[] = []
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments
+    const x = startX + (endX - startX) * t + Math.sin(t * Math.PI) * bulge
+    const y = startY + (endY - startY) * t + Math.sin(t * Math.PI * 0.85) * rise
+    const z = startZ + (endZ - startZ) * t
+    points.push(new THREE.Vector3(x, y, z))
+  }
+  return points
 }
 
 /**
- * Builds one large "sculpted wedge" — a solid, curved blade shape (thick
- * extrusion, not a thin ribbon) that tapers from a broad rounded base to a
- * narrow tip along a gentle arc. Flanks the Hero left/right as a single
- * bold focal shape distinct from the small faceted crystal field —
- * `mirror` flips the curve/taper direction so the left and right wedges
- * read as a matched pair, not the same shape pasted twice.
+ * Builds the press-and-hold "roll up" variant of the same spine: same
+ * point count as the base curve (required — morph targets need matching
+ * vertex topology). Each point eases from its resting position toward a
+ * tight vertical coil sitting above the ribbon's own top end, as if the
+ * band were being reeled upward and spooled into a small roll — the
+ * "naik ke atas terus roll" motion — rather than winding along its own
+ * length in place (the earlier spiral-in-place version).
  */
-function buildWedgeGeometry(mirror: boolean): THREE.ExtrudeGeometry {
-  const shape = new THREE.Shape()
-  const segs = 32
-  const length = 6.4
-  const baseWidth = 1.6
-  const tipWidth = 0.22
-  const curveAmount = 1.9
-  const m = mirror ? -1 : 1
+function buildRollUpCurve(basePoints: THREE.Vector3[], coilRadius: number, turns: number, phase: number, minAbsX: number): THREE.Vector3[] {
+  // Reel toward whichever endpoint sits higher, so the roll reads as
+  // "gathering upward" regardless of which end of the curve is index 0.
+  const first = basePoints[0]!
+  const last = basePoints[basePoints.length - 1]!
+  const reelTarget = first.y >= last.y ? first : last
+  // Capped well below the fixed transparent header band — without this,
+  // a ribbon whose top end already sits high (the foreground ribbons
+  // nearest the camera) spools up into a coil that visually collides with
+  // the navbar even though the navbar's own z-index keeps it clickable.
+  // The coil's own radius adds further screen-space reach on top of this
+  // center point, so the cap sits well below the header, not just below
+  // frame-top.
+  const MAX_SPOOL_Y = 0.6
+  const spoolCenter = new THREE.Vector3(reelTarget.x, Math.min(reelTarget.y + 2.4, MAX_SPOOL_Y), reelTarget.z)
 
-  const topPts: THREE.Vector2[] = []
-  const botPts: THREE.Vector2[] = []
+  return basePoints.map((p, i) => {
+    const t = i / (basePoints.length - 1)
+    // proximityToReel is 1 at the reel end itself and 0 at the far end —
+    // gather must be highest (fully at spoolCenter) right at the reel end
+    // and ease down toward the far end, which stays closer to its
+    // original position. Points nearer the reel end gather in faster
+    // (their gather rises toward 1 sooner as press progresses further)
+    // so the coil reads as spooling from that end rather than every point
+    // converging at once.
+    const proximityToReel = reelTarget === first ? 1 - t : t
+    const gather = Math.pow(proximityToReel, 0.6)
 
-  for (let i = 0; i <= segs; i++) {
-    const p = i / segs
-    const x = p * length * m
-    const curve = Math.sin(p * Math.PI * 0.5) * curveAmount * m
-    const w = baseWidth + (tipWidth - baseWidth) * Math.pow(p, 1.6)
-    topPts.push(new THREE.Vector2(x, curve + w / 2))
-    botPts.push(new THREE.Vector2(x, curve - w / 2))
-  }
+    const angle = proximityToReel * Math.PI * 2 * turns + phase
+    const spin = new THREE.Vector3(Math.cos(angle) * coilRadius, Math.sin(angle) * coilRadius * 0.4, Math.sin(angle) * coilRadius * 0.6)
 
-  shape.moveTo(topPts[0]!.x, topPts[0]!.y)
-  topPts.forEach((pt) => shape.lineTo(pt.x, pt.y))
-  for (let i = botPts.length - 1; i >= 0; i--) shape.lineTo(botPts[i]!.x, botPts[i]!.y)
-  shape.closePath()
+    const point = new THREE.Vector3().lerpVectors(p, spoolCenter, gather).add(spin.multiplyScalar(gather))
 
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: baseWidth * 0.85,
-    bevelEnabled: true,
-    bevelThickness: baseWidth * 0.16,
-    bevelSize: baseWidth * 0.12,
-    bevelSegments: 8,
-    curveSegments: 24
-  })
-  geo.center()
-  return geo
-}
-
-function jitterVertices(geo: THREE.BufferGeometry, amount: number) {
-  const pos = geo.attributes.position as THREE.BufferAttribute
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i) + (Math.random() - 0.5) * amount
-    const y = pos.getY(i) + (Math.random() - 0.5) * amount
-    const z = pos.getZ(i) + (Math.random() - 0.5) * amount
-    pos.setXYZ(i, x, y, z)
-  }
-  pos.needsUpdate = true
-}
-
-function shardMaterial(color: number, glass: boolean): THREE.MeshPhysicalMaterial {
-  if (glass) {
-    return new THREE.MeshPhysicalMaterial({
-      color,
-      metalness: 0.05,
-      roughness: 0.06,
-      transmission: 0.82,
-      thickness: 1.4,
-      ior: 1.4,
-      clearcoat: 1,
-      clearcoatRoughness: 0.05,
-      side: THREE.DoubleSide
-    })
-  }
-  return new THREE.MeshPhysicalMaterial({
-    color,
-    metalness: 0.55,
-    roughness: 0.22,
-    clearcoat: 0.9,
-    clearcoatRoughness: 0.12,
-    reflectivity: 0.6,
-    side: THREE.DoubleSide
-  })
-}
-
-function starfieldShardMaterial(color: number, muted: boolean): THREE.MeshStandardMaterial {
-  return new THREE.MeshStandardMaterial({
-    color,
-    metalness: 0.3,
-    roughness: 0.55,
-    transparent: true,
-    opacity: muted ? 0.28 : 0.85,
-    side: THREE.DoubleSide
+    // Same hard clamp as the base-curve guard below: whatever the spool
+    // and spin math produce, no point is allowed to end up closer to the
+    // z-axis than the text-clearance boundary.
+    if (Math.abs(point.x) < minAbsX) {
+      point.x = (point.x >= 0 ? 1 : -1) * minAbsX
+    }
+    return point
   })
 }
 
 /**
- * A single frosted-glass sphere used as the intro's "before" state — the
- * Hero opens on this one focal shape, which then shatters outward into the
- * full shard field. Kept visually simple (no facets) so the shatter reads
- * as a clear before/after transformation rather than just another crystal.
- */
-function makeFocalSphere(): THREE.Mesh {
-  const geo = new THREE.SphereGeometry(0.42, 48, 32)
-  const material = new THREE.MeshPhysicalMaterial({
-    color: NAVY_LIGHT,
-    metalness: 0.1,
-    roughness: 0.1,
-    transmission: 0.55,
-    thickness: 1.2,
-    ior: 1.3,
-    clearcoat: 1,
-    clearcoatRoughness: 0.08,
-    side: THREE.DoubleSide
-  })
-  const mesh = new THREE.Mesh(geo, material)
-  // Sits above the headline's vertical center rather than dead-center, so
-  // the hold-phase doesn't visually block the text underneath it.
-  mesh.position.copy(FOCAL_ORIGIN)
-  return mesh
-}
-
-/**
- * Faint drifting dust-mote field for atmosphere/depth — low-count,
- * low-opacity, never the focal point.
- */
-function makeParticles(): THREE.Points {
-  const count = 70
-  const positions = new Float32Array(count * 3)
-  for (let i = 0; i < count; i++) {
-    positions[i * 3] = (Math.random() - 0.5) * 15
-    positions[i * 3 + 1] = (Math.random() - 0.5) * 9
-    positions[i * 3 + 2] = (Math.random() - 0.5) * 9 - 1
-  }
-  const geo = new THREE.BufferGeometry()
-  geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-
-  const material = new THREE.PointsMaterial({
-    color: 0xdcebf5,
-    size: 0.03,
-    transparent: true,
-    opacity: 0.14,
-    depthWrite: false,
-    sizeAttenuation: true
-  })
-
-  return new THREE.Points(geo, material)
-}
-
-/**
- * Renders a symmetric field of floating, slowly tumbling faceted crystal
- * shards flanking the Hero's centered text — two clusters (left, right)
- * whose outermost members sit well inside the camera frustum at every
- * common desktop width, so nothing reads as arbitrarily clipped. Position
- * spread is expressed as a fraction of the frustum's visible half-width/
- * height at each shard's own depth (computed from actual camera FOV/z),
- * not hand-tuned world units — so the composition self-corrects across
- * aspect ratios instead of needing re-tuning per breakpoint.
+ * Renders a small set of large, curved glossy ribbon bands sweeping from
+ * near the camera into deep background, framing the Hero's centered text
+ * with a monumental, immersive 3D environment rather than a distant
+ * decorative effect. Idle motion is a slow forward/backward drift along
+ * the camera axis (a "walking closer, drifting back" ambient breathing)
+ * rather than rotation, plus subtle pointer parallax. Press-and-hold winds
+ * each ribbon up into a tight vertical coil above its own top end and
+ * releases back smoothly — no per-frame geometry rebuild, driven by a
+ * precomputed morph target. Dark navy/ink surfaces with strong specular
+ * response and a slow-traveling highlight (via animated light positions)
+ * give the glossy/metallic read; a low-intensity yellow rim light ties the
+ * accent back to the PASTI palette without a constant emissive tint
+ * washing out the navy base color.
  *
  * Caller owns viewport/reduced-motion/pointer gating and lifecycle
  * (mount/unmount, resize, IntersectionObserver pause) — this composable
@@ -237,12 +155,9 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
   let camera: THREE.PerspectiveCamera | undefined
   let scene: THREE.Scene | undefined
   let group: THREE.Group | undefined
-  let starGroup: THREE.Group | undefined
-  let particles: THREE.Points | undefined
-  let focalSphere: THREE.Mesh | undefined
-  let shards: Shard[] = []
-  let starShards: Shard[] = []
-  let wedgeShards: Shard[] = []
+  let ribbons: Ribbon[] = []
+  let keyLight: THREE.DirectionalLight | undefined
+  let rimLight: THREE.DirectionalLight | undefined
   let rafId: number | undefined
   let lastTime = 0
   let elapsed = 0
@@ -250,22 +165,25 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
   let pointerX = 0
   let pointerY = 0
   let scrollProgress = 0
-  let entranceSettled = false
-  let containerHeightPx = 1
-  const cameraBase = new THREE.Vector3(0, 0, 10)
-  const FOV = 42
+  // Starts at 1 (fully visible) rather than 0 — playEntrance() is a cosmetic
+  // fade-in on top of this, not the gate for base visibility. Gating base
+  // visibility on an intro-timeline callback firing meant any failure/race
+  // in that timeline (a separate composable's ready-flag) left the scene
+  // permanently invisible even though it was rendering correctly.
+  let entranceProgress = 1
+  // 0 = resting arc shape, 1 = fully rolled up (press-and-hold shape).
+  // Driven by a GSAP tween in setPressed() rather than snapping instantly,
+  // so the roll winds up/unwinds smoothly rather than popping.
+  let pressProgress = 0
+  let pressTween: gsap.core.Tween | undefined
+  const cameraBase = new THREE.Vector3(0, 0.4, 9.5)
+  const FOV = 38
 
-  // The fixed header sits on top of the Hero at up to ~84px tall (desktop
-  // h-20 + a few px breathing room) while fully transparent — so nothing in
-  // the 3D field is allowed to rise into that screen-space band, or it
-  // visually collides with the logo/nav text even though the header still
-  // wins the DOM stacking order for clicks. Converted to world units per
-  // depth in clampTopWorldY below, since a fixed px value doesn't map to a
-  // fixed fraction of the frustum (closer shards need a bigger world-unit
-  // margin than farther ones for the same on-screen pixel gap).
+  // The fixed header sits on top of the Hero at up to ~84px tall while
+  // fully transparent — nothing in the scene should visually rise into
+  // that screen-space band, or it collides with the logo/nav.
   const HEADER_CLEARANCE_PX = 140
 
-  /** Visible half-height/width of the frustum at world-z `z`, given the camera sits at cameraBase.z. */
   function frustumHalfExtents(z: number) {
     const distance = cameraBase.z - z
     const halfHeight = distance * Math.tan((FOV * Math.PI) / 360)
@@ -273,11 +191,93 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     return { halfHeight, halfWidth: halfHeight * aspect }
   }
 
-  /** Highest a shard's world-space Y is allowed to go at a given depth's halfHeight, keeping it clear of the fixed header band. */
-  function clampTopWorldY(y: number, halfHeight: number): number {
-    const pxToWorld = halfHeight / (containerHeightPx / 2)
-    const ceiling = halfHeight - HEADER_CLEARANCE_PX * pxToWorld
-    return Math.min(y, ceiling)
+  function buildRibbonSpecs(): RibbonSpec[] {
+    // Six ribbons across three depth bands so foreground/mid/background
+    // parallax reads clearly. Every curve's endpoints AND midpoint stay
+    // outside a fixed text-clearance half-width (TEXT_CLEAR_X) around the
+    // z-axis, so the band frames the headline from the left/right/corners
+    // rather than crossing directly over it — clipping through the frame
+    // edges (per the reference's "object cropped by viewport" framing) is
+    // fine, clipping through the text column is not.
+    const specs: RibbonSpec[] = [
+      {
+        points: buildRibbonCurve({ startX: -9.5, startY: -4.5, startZ: 6.5, endX: -7.8, endY: 2.6, endZ: -8, bulge: -1.6, rise: 0.4 }),
+        radius: 0.6,
+        color: NAVY,
+        layer: 'fore',
+        driftAmp: 2.4,
+        driftSpeed: 0.1,
+        driftPhase: 0,
+        bobAmp: 0.12
+      },
+      {
+        points: buildRibbonCurve({ startX: 10, startY: 2.7, startZ: 7, endX: 8.1, endY: -4.4, endZ: -8, bulge: 1.8, rise: -0.3 }),
+        radius: 0.54,
+        color: NAVY_DEEP,
+        layer: 'fore',
+        driftAmp: 2.2,
+        driftSpeed: 0.09,
+        driftPhase: 1.4,
+        bobAmp: 0.11
+      },
+      {
+        points: buildRibbonCurve({ startX: -6.4, startY: 5, startZ: -1, endX: -5.6, endY: -5.4, endZ: -12, bulge: -1.4, rise: 0.5 }),
+        radius: 0.38,
+        color: NAVY_LIGHT,
+        layer: 'mid',
+        driftAmp: 1.6,
+        driftSpeed: 0.12,
+        driftPhase: 2.6,
+        bobAmp: 0.09
+      },
+      {
+        points: buildRibbonCurve({ startX: 6.8, startY: -5, startZ: -1.5, endX: 5.9, endY: 5.2, endZ: -12.5, bulge: 1.3, rise: -0.4 }),
+        radius: 0.36,
+        color: STEEL,
+        layer: 'mid',
+        driftAmp: 1.6,
+        driftSpeed: 0.11,
+        driftPhase: 3.8,
+        bobAmp: 0.09
+      },
+      {
+        points: buildRibbonCurve({ startX: -5.2, startY: -5.5, startZ: -10, endX: -4.6, endY: 5.8, endZ: -20, bulge: -1.4, rise: 0.3 }),
+        radius: 0.24,
+        color: NAVY_DEEP,
+        layer: 'back',
+        driftAmp: 1,
+        driftSpeed: 0.08,
+        driftPhase: 5,
+        bobAmp: 0.06
+      },
+      {
+        points: buildRibbonCurve({ startX: 5.4, startY: 5.6, startZ: -10.5, endX: 4.8, endY: -5.6, endZ: -20.5, bulge: 1.3, rise: -0.3 }),
+        radius: 0.22,
+        color: NAVY_LIGHT,
+        layer: 'back',
+        driftAmp: 1,
+        driftSpeed: 0.085,
+        driftPhase: 6.1,
+        bobAmp: 0.06
+      }
+    ]
+
+    // Safety check (dev-time only cost, negligible): every ribbon must stay
+    // outside the text clearance column, using a wider margin for the
+    // foreground layer since its on-screen size is larger at the same
+    // world-space radius. Kept as a guard rather than a silent visual
+    // assumption, since a future tuning pass could easily reintroduce a
+    // curve that drifts back across the text.
+    specs.forEach((spec) => {
+      const clear = spec.layer === 'fore' ? TEXT_CLEAR_X_FORE : TEXT_CLEAR_X
+      spec.points.forEach((p) => {
+        if (Math.abs(p.x) < clear && p.z > -12) {
+          console.warn('[HeroScene] ribbon point drifts into text clearance column', p)
+        }
+      })
+    })
+
+    return specs
   }
 
   function buildScene() {
@@ -288,386 +288,88 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
 
     const rect = containerRef.value.getBoundingClientRect()
     const aspect = Math.max(rect.width, 1) / Math.max(rect.height, 1)
-    containerHeightPx = Math.max(rect.height, 1)
 
     camera = new THREE.PerspectiveCamera(FOV, aspect, 0.1, 100)
     camera.position.copy(cameraBase)
+    camera.lookAt(0, 0.3, -6)
 
     scene = new THREE.Scene()
-    scene.fog = new THREE.Fog(0x0b3954, 10, 22)
+    scene.fog = new THREE.Fog(0xf3f6f8, 14, 30)
 
-    const key = new THREE.DirectionalLight(0xffffff, 1.6)
-    key.position.set(4, 5, 6)
-    scene.add(key)
+    // Key light drives the traveling specular streak — its position is
+    // animated in tick() rather than using a custom shader, which stays
+    // cheap while still reading as a highlight sliding across each ribbon's
+    // glossy surface as the light sweeps past it.
+    keyLight = new THREE.DirectionalLight(0xffffff, 1.1)
+    keyLight.position.set(4, 6, 8)
+    scene.add(keyLight)
 
-    const rim = new THREE.DirectionalLight(YELLOW, 1.3)
-    rim.position.set(-4, -3, 3)
-    scene.add(rim)
+    rimLight = new THREE.DirectionalLight(YELLOW, 0.25)
+    rimLight.position.set(-5, -2, 4)
+    scene.add(rimLight)
 
-    scene.add(new THREE.HemisphereLight(0xffffff, NAVY, 0.55))
+    scene.add(new THREE.HemisphereLight(0xdce8ef, NAVY_DEEP, 0.22))
 
     group = new THREE.Group()
     scene.add(group)
 
-    starGroup = new THREE.Group()
-    scene.add(starGroup)
+    const specs = buildRibbonSpecs()
+    ribbons = specs.map((spec, i) => {
+      const curve = new THREE.CatmullRomCurve3(spec.points, false, 'catmullrom', 0.5)
+      const tubularSegments = 80
+      const radialSegments = 12
+      const geo = new THREE.TubeGeometry(curve, tubularSegments, spec.radius, radialSegments, false)
 
-    focalSphere = makeFocalSphere()
-    focalSphere.scale.setScalar(0.001)
-    scene.add(focalSphere)
+      // Roll-up morph target: same tubular/radial segment counts as the
+      // base geometry (required — morph targets need matching vertex
+      // topology), built from the reeled-in variant of the same spine.
+      // Assigning it as morphAttributes.position lets pressProgress drive
+      // the press-and-hold "ribbon rolls up" shape purely via
+      // morphTargetInfluences, with no per-frame geometry rebuild.
+      const clear = spec.layer === 'fore' ? TEXT_CLEAR_X_FORE : TEXT_CLEAR_X
+      // Foreground ribbons carry the largest tube radius and sit closest to
+      // the camera, so the same coilRadius multiplier reads far larger on
+      // screen than it does for mid/back ribbons — a smaller multiplier
+      // keeps their rolled-up coil compact enough to clear the header.
+      const coilMultiplier = spec.layer === 'fore' ? 0.7 : 1.5
+      const rollPoints = buildRollUpCurve(spec.points, spec.radius * coilMultiplier, 5, i * 1.7, clear)
+      const rollCurveObj = new THREE.CatmullRomCurve3(rollPoints, false, 'catmullrom', 0.5)
+      const rollGeo = new THREE.TubeGeometry(rollCurveObj, tubularSegments, spec.radius, radialSegments, false)
+      geo.morphAttributes.position = [rollGeo.attributes.position as THREE.BufferAttribute]
+      rollGeo.dispose()
 
-    particles = makeParticles()
-    scene.add(particles)
-
-    const shapeLib = buildShapeLibrary()
-    const palette = [NAVY, NAVY_LIGHT, YELLOW, INK, STEEL]
-    const specs: ShardSpec[] = []
-
-    // Four quadrant slots (top-left, bottom-left, top-right, bottom-right),
-    // each holding a small number of shards placed on their own fixed grid
-    // cell — not randomly scattered within a shared region — so shapes sit
-    // clearly apart from each other instead of overlapping into a single
-    // blob. fx/fy are fractions of the frustum half-extents at each shard's
-    // own depth, so every position is guaranteed inside the visible frame
-    // regardless of aspect ratio; fx stays well clear of center so nothing
-    // crosses into the headline's text column, fy stays clear of the
-    // vertical mid-band where the headline sits.
-    const quadrants = [
-      { sideX: -1, sideY: 1 },
-      { sideX: -1, sideY: -1 },
-      { sideX: 1, sideY: 1 },
-      { sideX: 1, sideY: -1 }
-    ]
-
-    // Each quadrant gets 3 shards on a diagonal ladder running from the
-    // outer frame edge toward (but never reaching) the text column, spaced
-    // far enough apart on both axes that their bounding spheres can't touch
-    // even at max scale. The nearest-to-center slot still sits clear of the
-    // headline's max-width column and the CTA row's vertical band.
-    const slotOffsets = [
-      { dx: 0, dy: 0, dz: 0 },
-      { dx: 0.22, dy: 0.24, dz: -1.8 },
-      { dx: 0.06, dy: 0.5, dz: -3.4 }
-    ]
-
-    let globalIndex = 0
-    quadrants.forEach(({ sideX, sideY }) => {
-      slotOffsets.forEach((slot, slotIndex) => {
-        const z = -2 - slot.dz * -1 - slotIndex * 0.6
-        const { halfHeight, halfWidth } = frustumHalfExtents(z)
-
-        const fx = 0.66 + slot.dx
-        const fy = 0.58 + slot.dy
-
-        const geo = shapeLib[globalIndex % shapeLib.length]!
-        const scale = 0.4 + (globalIndex % 3) * 0.12
-        const floatAmp = 0.12 + Math.random() * 0.16
-        const parallax = 0.35 + slotIndex * 0.2
-
-        let y = sideY * fy * halfHeight
-        if (sideY > 0) {
-          // Top-half shards: keep the float-animation's peak (not just the
-          // resting position) clear of the header band.
-          y = Math.min(y, clampTopWorldY(halfHeight, halfHeight) - floatAmp * parallax)
-        }
-
-        specs.push({
-          geometry: geo,
-          x: sideX * fx * halfWidth,
-          y,
-          z,
-          scale,
-          color: palette[globalIndex % palette.length]!,
-          rotSpeedX: 0.05 + Math.random() * 0.09,
-          rotSpeedY: 0.04 + Math.random() * 0.08,
-          rotSpeedZ: (Math.random() - 0.5) * 0.05,
-          floatAmp,
-          floatSpeed: 0.18 + Math.random() * 0.16,
-          floatPhase: Math.random() * Math.PI * 2,
-          parallax,
-          isFocal: true
-        })
-        globalIndex++
+      // No constant emissive tint — an always-on emissive color washes the
+      // whole surface with yellow regardless of light position, which read
+      // as a flat brownish tone instead of navy. The yellow accent comes
+      // only from rimLight's reflected specular (position-dependent, so it
+      // can read as a moving streak), keeping the base surface color true
+      // navy/steel.
+      const material = new THREE.MeshPhysicalMaterial({
+        color: spec.color,
+        metalness: 0.4,
+        roughness: 0.32,
+        clearcoat: 0.8,
+        clearcoatRoughness: 0.15,
+        reflectivity: 0.4
       })
-    })
 
-    shards = specs.map((spec, i) => {
-      const glass = i % 3 === 1
-      const mesh = new THREE.Mesh(spec.geometry, shardMaterial(spec.color, glass))
-      const basePos = new THREE.Vector3(spec.x, spec.y, spec.z)
-      mesh.position.copy(FOCAL_ORIGIN)
-      mesh.scale.setScalar(0.001)
-      mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
-      group!.add(mesh)
-
-      return {
-        mesh,
-        basePos,
-        targetScale: spec.scale,
-        rotSpeedX: spec.rotSpeedX,
-        rotSpeedY: spec.rotSpeedY,
-        rotSpeedZ: spec.rotSpeedZ,
-        floatAmp: spec.floatAmp,
-        floatSpeed: spec.floatSpeed,
-        floatPhase: spec.floatPhase,
-        parallax: spec.parallax,
-        delay: i * 0.05,
-        isFocal: true
-      }
-    })
-
-    // "Starfield frame": a much denser field of small, mostly-muted shards
-    // scattered across the whole frustum (not just the four hero-flanking
-    // quadrants) — a faint decorative border of tiny tumbling shapes, dense
-    // toward the frame edges, sparse toward the text column so it never
-    // competes with the headline. A handful get full accent color/opacity
-    // to keep the field from reading as flat gray noise.
-    const starCount = 18
-    const starSpecs: ShardSpec[] = []
-    const starMuted: boolean[] = []
-    for (let i = 0; i < starCount; i++) {
-      const depthT = Math.random()
-      const z = -1 - depthT * 3.5
-      const { halfHeight, halfWidth } = frustumHalfExtents(z)
-
-      // Placed on one of the four outer picture-frame bands (left/right/
-      // top/bottom of a fixed text-clearance box), never inside it — a
-      // deterministic "always outside" placement rather than radial-falloff
-      // rejection sampling, which left stray points in front of the text on
-      // wide viewports where the frustum's visible area grows faster than a
-      // fixed fractional radius does.
-      const clearX = 0.82
-      const clearY = 0.86
-      const outerMax = 0.97
-      const band = Math.floor(Math.random() * 4)
-      let fx = 0
-      let fy = 0
-      if (band === 0) {
-        // left band
-        fx = -(clearX + Math.random() * (outerMax - clearX))
-        fy = (Math.random() * 2 - 1) * outerMax
-      } else if (band === 1) {
-        // right band
-        fx = clearX + Math.random() * (outerMax - clearX)
-        fy = (Math.random() * 2 - 1) * outerMax
-      } else if (band === 2) {
-        // top band
-        fx = (Math.random() * 2 - 1) * outerMax
-        fy = clearY + Math.random() * (outerMax - clearY)
-      } else {
-        // bottom band
-        fx = (Math.random() * 2 - 1) * outerMax
-        fy = -(clearY + Math.random() * (outerMax - clearY))
-      }
-
-      const geo = shapeLib[i % shapeLib.length]!
-      const scale = 0.06 + Math.random() * 0.16
-      const muted = Math.random() > 0.22
-      const color = muted ? (i % 2 === 0 ? 0x8fa2ad : 0xb9c4cb) : palette[i % palette.length]!
-      starMuted.push(muted)
-      const floatAmp = 0.06 + Math.random() * 0.1
-      const parallax = 0.2 + Math.random() * 0.3
-
-      let y = fy * halfHeight
-      if (fy > 0) {
-        y = Math.min(y, clampTopWorldY(halfHeight, halfHeight) - floatAmp * parallax)
-      }
-
-      starSpecs.push({
-        geometry: geo,
-        x: fx * halfWidth,
-        y,
-        z,
-        scale,
-        color,
-        rotSpeedX: 0.1 + Math.random() * 0.18,
-        rotSpeedY: 0.08 + Math.random() * 0.16,
-        rotSpeedZ: (Math.random() - 0.5) * 0.1,
-        floatAmp,
-        floatSpeed: 0.15 + Math.random() * 0.2,
-        floatPhase: Math.random() * Math.PI * 2,
-        parallax,
-        isFocal: false
-      })
-    }
-
-    // Lower-center fill: the space directly below the CTA row (below
-    // |fy| ~0.5, where the headline/subtext/CTA column ends) reads
-    // conspicuously empty — the picture-frame bands above deliberately
-    // avoid it because it sits inside the same clearX/clearY box that
-    // protects the text. But that box is only actually occupied by text
-    // in its upper half; below the CTA row there's no text at all, so a
-    // dedicated low-density fill goes there without touching any copy.
-    const lowerFillCount = 4
-    for (let i = 0; i < lowerFillCount; i++) {
-      const z = -1.5 - Math.random() * 3
-      const { halfHeight, halfWidth } = frustumHalfExtents(z)
-
-      const fx = (Math.random() * 2 - 1) * 0.55
-      const fy = -(0.42 + Math.random() * 0.4)
-
-      const geo = shapeLib[i % shapeLib.length]!
-      const scale = 0.05 + Math.random() * 0.14
-      const muted = Math.random() > 0.25
-      const color = muted ? (i % 2 === 0 ? 0x8fa2ad : 0xb9c4cb) : palette[i % palette.length]!
-      starMuted.push(muted)
-      const floatAmp = 0.06 + Math.random() * 0.1
-      const parallax = 0.2 + Math.random() * 0.3
-
-      starSpecs.push({
-        geometry: geo,
-        x: fx * halfWidth,
-        y: fy * halfHeight,
-        z,
-        scale,
-        color,
-        rotSpeedX: 0.1 + Math.random() * 0.18,
-        rotSpeedY: 0.08 + Math.random() * 0.16,
-        rotSpeedZ: (Math.random() - 0.5) * 0.1,
-        floatAmp,
-        floatSpeed: 0.15 + Math.random() * 0.2,
-        floatPhase: Math.random() * Math.PI * 2,
-        parallax,
-        isFocal: false
-      })
-    }
-
-    // Deep-background layer: a sparser field pushed much farther back
-    // (z down to ~-14) so fog naturally fades/blurs it into atmosphere —
-    // adds real depth behind the near shards. Still uses the same
-    // clearX/clearY text-exclusion box as the main starfield: a shard's
-    // world depth doesn't matter for whether it visually collides with the
-    // headline, since the headline is flat 2D HTML composited on top of
-    // the canvas — only its projected screen-space x/y matters, and a
-    // "distant" shard at small fx/fy still lands squarely on the text.
-    const deepCount = 6
-    for (let i = 0; i < deepCount; i++) {
-      const z = -8 - Math.random() * 6
-      const { halfHeight, halfWidth } = frustumHalfExtents(z)
-
-      const deepClearX = 0.68
-      const deepClearY = 0.72
-      const angle = Math.random() * Math.PI * 2
-      const r = deepClearX + Math.random() * (1 - deepClearX)
-      const fx = Math.cos(angle) * r
-      const fy = Math.sin(angle) * r * (deepClearY / deepClearX)
-
-      const geo = shapeLib[i % shapeLib.length]!
-      const scale = 0.18 + Math.random() * 0.26
-      const muted = Math.random() > 0.15
-      const color = muted ? (i % 2 === 0 ? 0x8fa2ad : 0xb9c4cb) : palette[i % palette.length]!
-      starMuted.push(muted)
-      const floatAmp = 0.08 + Math.random() * 0.12
-      const parallax = 0.15 + Math.random() * 0.2
-
-      let y = fy * halfHeight
-      if (fy > 0) {
-        y = Math.min(y, clampTopWorldY(halfHeight, halfHeight) - floatAmp * parallax)
-      }
-
-      starSpecs.push({
-        geometry: geo,
-        x: fx * halfWidth,
-        y,
-        z,
-        scale,
-        color,
-        rotSpeedX: 0.04 + Math.random() * 0.08,
-        rotSpeedY: 0.03 + Math.random() * 0.07,
-        rotSpeedZ: (Math.random() - 0.5) * 0.04,
-        floatAmp,
-        floatSpeed: 0.1 + Math.random() * 0.12,
-        floatPhase: Math.random() * Math.PI * 2,
-        parallax,
-        isFocal: false
-      })
-    }
-
-    starShards = starSpecs.map((spec, i) => {
-      const mesh = new THREE.Mesh(spec.geometry, starfieldShardMaterial(spec.color, starMuted[i]!))
-      const basePos = new THREE.Vector3(spec.x, spec.y, spec.z)
-      mesh.position.copy(FOCAL_ORIGIN)
-      mesh.scale.setScalar(0.001)
-      mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
-      starGroup!.add(mesh)
-
-      return {
-        mesh,
-        basePos,
-        targetScale: spec.scale,
-        rotSpeedX: spec.rotSpeedX,
-        rotSpeedY: spec.rotSpeedY,
-        rotSpeedZ: spec.rotSpeedZ,
-        floatAmp: spec.floatAmp,
-        floatSpeed: spec.floatSpeed,
-        floatPhase: spec.floatPhase,
-        parallax: spec.parallax,
-        delay: i * 0.015,
-        isFocal: false
-      }
-    })
-
-    // Two large sculpted wedges flanking the Hero — one bold curved-blade
-    // focal shape per side, distinct from the small faceted crystal field.
-    // buildWedgeGeometry() runs geo.center(), so the mesh's local origin
-    // sits at the shape's midpoint, not its anchor/tail end. Rather than
-    // estimate the shape's inward reach by hand (got this wrong twice —
-    // the curve means it isn't just half the straight-line length), the
-    // geometry's own computed bounding box gives the real inward extent,
-    // and the anchor X is derived from placing that inward edge exactly at
-    // the same clearX boundary the starfield uses, so it's guaranteed
-    // consistent with every other shape's text clearance.
-    const wedgeZ = -3.2
-    const { halfHeight: wedgeHalfHeight, halfWidth: wedgeHalfWidth } = frustumHalfExtents(wedgeZ)
-    const wedgeClearX = 0.82
-    const wedgeFy = -0.62
-    const wedgeSpecs: Array<{ mirror: boolean; sideX: number }> = [
-      { mirror: false, sideX: -1 },
-      { mirror: true, sideX: 1 }
-    ]
-
-    wedgeShards = wedgeSpecs.map(({ mirror, sideX }, i) => {
-      const geo = buildWedgeGeometry(mirror)
-      geo.computeBoundingBox()
-      const box = geo.boundingBox!
-      // Inward extent along local X, accounting for the shape's own
-      // rotation.z tilt (a small correction; the shape is wide, not tall,
-      // so most of the tilt's effect is on Y not X reach).
-      const inwardLocalX = sideX > 0 ? box.min.x : box.max.x
-      const inwardReach = Math.abs(inwardLocalX) * 1.05
-
-      const material = shardMaterial(i === 0 ? NAVY : NAVY_LIGHT, false)
       const mesh = new THREE.Mesh(geo, material)
-
-      let y = wedgeFy * wedgeHalfHeight
-      y = Math.min(y, clampTopWorldY(wedgeHalfHeight, wedgeHalfHeight) - 0.4)
-
-      // The anchor sits at whatever X makes the shape's inward edge land
-      // exactly at wedgeClearX * halfWidth — i.e. flush with the same
-      // clearance boundary the starfield respects.
-      const clearanceX = wedgeClearX * wedgeHalfWidth
-      const x = sideX * (clearanceX + inwardReach)
-
-      const basePos = new THREE.Vector3(x, y, wedgeZ)
-      mesh.position.copy(FOCAL_ORIGIN)
-      mesh.scale.setScalar(0.001)
-      mesh.rotation.z = sideX > 0 ? Math.PI * 0.06 : -Math.PI * 0.06
-      mesh.rotation.y = sideX > 0 ? -0.15 : 0.15
+      mesh.morphTargetInfluences = [0]
+      const basePos = new THREE.Vector3(0, 0, 0)
+      mesh.position.copy(basePos)
       group!.add(mesh)
+
+      const parallax = spec.layer === 'fore' ? 1 : spec.layer === 'mid' ? 0.6 : 0.32
 
       return {
         mesh,
         basePos,
-        targetScale: 1,
-        rotSpeedX: 0.01,
-        rotSpeedY: 0.012,
-        rotSpeedZ: 0,
-        floatAmp: 0.1,
-        floatSpeed: 0.12 + i * 0.02,
-        floatPhase: i * Math.PI,
-        parallax: 0.3,
-        delay: 0.5 + i * 0.15,
-        isFocal: true
+        baseRot: mesh.rotation.clone(),
+        driftAmp: spec.driftAmp,
+        driftSpeed: spec.driftSpeed,
+        driftPhase: spec.driftPhase,
+        bobAmp: spec.bobAmp,
+        parallax
       }
     })
 
@@ -675,52 +377,24 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
   }
 
   /**
-   * Intro sequence: the scene opens on a single focal sphere at center,
-   * holds briefly, then "shatters" — the sphere scales away while every
-   * shard (hero shards + starfield) erupts outward from the origin toward
-   * its resting position, scaling up from nothing as it travels. Distance-
-   * based delay/duration stagger (farther shards launch slightly later and
-   * take slightly longer) keeps the burst reading as one continuous wave
-   * rather than every piece popping at once.
+   * Optional cosmetic entrance: eases the scene from a dimmed start up to
+   * full presence, so it feels like it's settling in rather than snapping
+   * on. Purely additive — base visibility does not depend on this ever
+   * being called (see entranceProgress above).
    */
   function playEntrance() {
-    if (!focalSphere) return
-
-    const tl = gsap.timeline()
-
-    tl.to(focalSphere.scale, { x: 1, y: 1, z: 1, duration: 0.7, ease: 'back.out(1.6)' })
-    tl.to(focalSphere.scale, { x: 0.001, y: 0.001, z: 0.001, duration: 0.45, ease: 'power2.in' }, '+=0.35')
-    tl.set(focalSphere, { visible: false })
-
-    const allShards = [...shards, ...starShards, ...wedgeShards]
-    const shatterStart = 1.0
-    const origin = FOCAL_ORIGIN.clone()
-    entranceSettled = false
-    let maxFinish = 0
-
-    allShards.forEach((s) => {
-      const dist = s.basePos.distanceTo(origin)
-      const travelDelay = shatterStart + Math.min(dist * 0.025, 0.35) + s.delay * 0.4
-      const travelDuration = 0.9 + Math.min(dist * 0.02, 0.4)
-      const target = s.targetScale
-
-      gsap.fromTo(
-        s.mesh.position,
-        { x: origin.x, y: origin.y, z: origin.z },
-        { x: s.basePos.x, y: s.basePos.y, z: s.basePos.z, duration: travelDuration, delay: travelDelay, ease: 'power3.out' }
-      )
-      gsap.to(s.mesh.scale, { x: target, y: target, z: target, duration: 0.7, delay: travelDelay, ease: 'back.out(1.5)' })
-
-      maxFinish = Math.max(maxFinish, travelDelay + travelDuration)
-    })
-
-    gsap.delayedCall(maxFinish, () => {
-      entranceSettled = true
-    })
-
-    if (particles) {
-      gsap.fromTo(particles.material, { opacity: 0 }, { opacity: 0.14, duration: 2, delay: shatterStart + 0.6, ease: 'power1.out' })
-    }
+    entranceProgress = 0.4
+    gsap.to(
+      { t: 0 },
+      {
+        t: 1,
+        duration: 1.6,
+        ease: 'power2.out',
+        onUpdate: function () {
+          entranceProgress = (this.targets()[0] as { t: number }).t
+        }
+      }
+    )
   }
 
   function fit() {
@@ -735,82 +409,58 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
   }
 
   function tick(dt: number) {
-    if (!group || !camera) return
+    if (!group || !camera || !keyLight || !rimLight) return
     elapsed += dt
 
-    // Cursor parallax: group rotation plus a camera offset so the field
-    // reads as real depth, not a flat rotating sticker.
-    const targetRotY = pointerX * 0.16
-    const targetRotX = -pointerY * 0.08
-    group.rotation.y += (targetRotY - group.rotation.y) * Math.min(dt * 2.6, 1)
-    group.rotation.x += (targetRotX - group.rotation.x) * Math.min(dt * 2.6, 1)
+    // Subtle camera drift toward the pointer — deliberately small
+    // magnitudes so it reads as "alive" rather than an obvious follow.
+    const camTargetX = cameraBase.x + pointerX * 0.35
+    const camTargetY = cameraBase.y + pointerY * 0.2
+    camera.position.x += (camTargetX - camera.position.x) * Math.min(dt * 1.4, 1)
+    camera.position.y += (camTargetY - camera.position.y) * Math.min(dt * 1.4, 1)
+    camera.lookAt(pointerX * 0.6, 0.3 + pointerY * 0.3, -6)
 
-    const camTargetX = cameraBase.x + pointerX * 0.4
-    const camTargetY = cameraBase.y + pointerY * 0.25
-    camera.position.x += (camTargetX - camera.position.x) * Math.min(dt * 2.2, 1)
-    camera.position.y += (camTargetY - camera.position.y) * Math.min(dt * 2.2, 1)
-    camera.lookAt(0, 0, 0)
+    // Scroll reaction: the whole ribbon environment fades and drifts back
+    // slightly as the Hero leaves the viewport, so the transition to the
+    // next section doesn't feel abrupt.
+    const scrollFade = 1 - scrollProgress * 0.9
+    group.position.y = -scrollProgress * 0.9
 
-    // Scroll reaction: as the Hero scrolls out of view, the whole field
-    // drifts apart and rotates — feels alive rather than idling.
-    group.position.y = -scrollProgress * 1.4
-    group.rotation.z = scrollProgress * 0.1
+    // Key light sweeps slowly across the scene — this is the "highlight
+    // traveling along the surface" effect: a moving light source reads as
+    // a glossy specular streak sliding across each ribbon's curved tube
+    // without needing a custom shader.
+    keyLight.position.x = Math.sin(elapsed * 0.11) * 7
+    keyLight.position.y = 4 + Math.cos(elapsed * 0.08) * 3
+    keyLight.position.z = 6 + Math.sin(elapsed * 0.07) * 3
 
-    // While the shatter entrance is still animating (GSAP tweening each
-    // shard's position from origin to basePos), skip the float-driven
-    // position override below — it would otherwise fight the tween every
-    // frame and the shatter would never visibly travel outward.
-    const applyFloat = entranceSettled
+    // Rim light sweeps on its own slower, out-of-phase path — this is what
+    // reads as the yellow specular streak gliding along the ribbon
+    // surfaces over time, independent of the white key light's highlight.
+    rimLight.position.x = -5 + Math.cos(elapsed * 0.065) * 6
+    rimLight.position.y = -2 + Math.sin(elapsed * 0.05) * 4
+    rimLight.position.z = 4 + Math.cos(elapsed * 0.04) * 2.5
 
-    // Cursor-driven per-shard spin: each shard keeps tumbling on its own
-    // idle axis, but the cursor's position adds an extra rotation delta on
-    // top — so moving the mouse across the Hero visibly "turns" every
-    // crystal to show a different facet, like it's being spun in place,
-    // without moving any shard's position (which stays inside its
-    // carefully-cleared slot). Pointer magnitude (not just direction)
-    // scales the effect, so a still cursor settles back to plain idle spin.
-    const cursorSpinY = pointerX * 4.2
-    const cursorSpinX = -pointerY * 3.2
+    ribbons.forEach((r) => {
+      // Idle motion: a slow forward/backward drift along the camera axis
+      // (z), like the ribbon is walking closer then drifting back —
+      // "zoom in / zoom out" rather than rotating. A slight vertical bob
+      // and pointer parallax layer on top, scaled by depth so foreground
+      // ribbons move more than background ones.
+      const drift = Math.sin(elapsed * r.driftSpeed + r.driftPhase) * r.driftAmp
+      const bob = Math.sin(elapsed * r.driftSpeed * 1.3 + r.driftPhase) * r.bobAmp
 
-    shards.forEach((s) => {
-      s.mesh.rotation.x += (s.rotSpeedX + cursorSpinX * s.parallax * 0.7) * dt
-      s.mesh.rotation.y += (s.rotSpeedY + cursorSpinY * s.parallax * 0.7) * dt
-      s.mesh.rotation.z += s.rotSpeedZ * dt
+      r.mesh.position.z = r.basePos.z + drift * (1 - pressProgress)
+      r.mesh.position.y = r.basePos.y + bob + pointerY * 0.12 * r.parallax + pressProgress * 0.5 * r.parallax
+      r.mesh.position.x = r.basePos.x + pointerX * 0.18 * r.parallax * (1 - pressProgress)
 
-      if (!applyFloat) return
-      const float = Math.sin(elapsed * s.floatSpeed + s.floatPhase) * s.floatAmp
-      s.mesh.position.y = s.basePos.y + float * s.parallax
-      s.mesh.position.x = s.basePos.x + Math.cos(elapsed * s.floatSpeed * 0.7 + s.floatPhase) * 0.08 * s.parallax
+      if (r.mesh.morphTargetInfluences) r.mesh.morphTargetInfluences[0] = pressProgress
+
+      const mat = r.mesh.material as THREE.MeshPhysicalMaterial
+      mat.opacity = 1
+      mat.transparent = scrollFade < 1
+      if (mat.transparent) mat.opacity = Math.max(scrollFade, 0)
     })
-
-    starShards.forEach((s) => {
-      s.mesh.rotation.x += (s.rotSpeedX + cursorSpinX * s.parallax * 0.8) * dt
-      s.mesh.rotation.y += (s.rotSpeedY + cursorSpinY * s.parallax * 0.8) * dt
-      s.mesh.rotation.z += s.rotSpeedZ * dt
-
-      if (!applyFloat) return
-      const float = Math.sin(elapsed * s.floatSpeed + s.floatPhase) * s.floatAmp
-      s.mesh.position.y = s.basePos.y + float * s.parallax
-      s.mesh.position.x = s.basePos.x + Math.cos(elapsed * s.floatSpeed * 0.7 + s.floatPhase) * 0.08 * s.parallax
-    })
-
-    // Wedges get a much gentler cursor response than the small crystals —
-    // a large bold shape spinning fast would read as chaotic rather than
-    // "sculpted". Just a slow tilt toward the cursor and a slow vertical
-    // breathe, no position drift (keeps the curved silhouette stable).
-    wedgeShards.forEach((s) => {
-      s.mesh.rotation.y += (s.rotSpeedY + cursorSpinY * s.parallax * 0.12) * dt
-      s.mesh.rotation.x += cursorSpinX * s.parallax * 0.08 * dt
-
-      if (!applyFloat) return
-      const float = Math.sin(elapsed * s.floatSpeed + s.floatPhase) * s.floatAmp
-      s.mesh.position.y = s.basePos.y + float * s.parallax
-    })
-
-    if (particles) {
-      particles.rotation.y = elapsed * 0.012
-      particles.rotation.x = Math.sin(elapsed * 0.04) * 0.03
-    }
   }
 
   function loop(now: number) {
@@ -845,36 +495,47 @@ export function useHeroScene(canvasRef: Ref<HTMLCanvasElement | null>, container
     scrollProgress = p
   }
 
+  /**
+   * Drives the press-and-hold "roll up" transformation: eases
+   * pressProgress toward 1 while held, back toward 0 on release. Called
+   * from pointerdown/pointerup in HeroScene.vue; safe to call repeatedly
+   * (each call kills the in-flight tween so a fast press/release/press
+   * doesn't queue up stale tweens fighting each other).
+   */
+  function setPressed(pressed: boolean) {
+    pressTween?.kill()
+    pressTween = gsap.to(
+      { v: pressProgress },
+      {
+        v: pressed ? 1 : 0,
+        duration: pressed ? 1.1 : 0.8,
+        ease: pressed ? 'power2.out' : 'power2.inOut',
+        onUpdate: function () {
+          pressProgress = (this.targets()[0] as { v: number }).v
+        }
+      }
+    )
+  }
+
   function dispose() {
     stop()
-    gsap.killTweensOf([focalSphere?.scale, ...shards.map((s) => s.mesh.position), ...shards.map((s) => s.mesh.scale)])
-    shards.forEach((s) => {
-      ;(s.mesh.material as THREE.Material).dispose()
+    pressTween?.kill()
+    gsap.killTweensOf(ribbons.map((r) => r.mesh.material))
+    ribbons.forEach((r) => {
+      r.mesh.geometry.dispose()
+      ;(r.mesh.material as THREE.Material).dispose()
     })
-    shards = []
-    starShards.forEach((s) => {
-      ;(s.mesh.material as THREE.Material).dispose()
-    })
-    starShards = []
-    wedgeShards.forEach((s) => {
-      s.mesh.geometry.dispose()
-      ;(s.mesh.material as THREE.Material).dispose()
-    })
-    wedgeShards = []
-    focalSphere?.geometry.dispose()
-    ;(focalSphere?.material as THREE.Material | undefined)?.dispose()
-    focalSphere = undefined
-    particles?.geometry.dispose()
-    ;(particles?.material as THREE.Material | undefined)?.dispose()
-    particles = undefined
+    ribbons = []
     renderer?.dispose()
     renderer = undefined
     scene = undefined
     camera = undefined
     group = undefined
-    starGroup = undefined
-    entranceSettled = false
+    keyLight = undefined
+    rimLight = undefined
+    entranceProgress = 1
+    pressProgress = 0
   }
 
-  return { start, stop, dispose, fit, playEntrance, setPointer, setScrollProgress }
+  return { start, stop, dispose, fit, playEntrance, setPointer, setScrollProgress, setPressed }
 }
