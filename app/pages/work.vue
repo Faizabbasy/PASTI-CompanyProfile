@@ -21,12 +21,19 @@ const showMore = ref(false)
 
 const heroRef = ref<HTMLElement | null>(null)
 const introRef = ref<HTMLElement | null>(null)
+const heroStackRef = ref<HTMLElement | null>(null)
 const approachHeadingRef = ref<HTMLElement | null>(null)
 const approachBodyRef = ref<HTMLElement | null>(null)
 const moreListRef = ref<HTMLElement | null>(null)
 
+// The three cards shown floating in the hero, front-to-back — reuses the
+// same `primary` projects listed in full below, just the first three so the
+// hero reads as "a stack of real work", not a generic promo graphic.
+const heroStack = primary.slice(0, 3)
+
 useMaskedReveal(heroRef, { by: 'word', trigger: false })
 useScrollReveal(introRef, { y: 16 })
+useScrollReveal(heroStackRef, { y: 24, children: '.work-hero-card', stagger: 0.12 })
 useMaskedReveal(approachHeadingRef, { by: 'word' })
 useScrollReveal(approachBodyRef, { y: 16 })
 
@@ -51,21 +58,47 @@ watch(showMore, async (isOpen) => {
 </script>
 
 <template>
-  <BaseSection as="section" class="relative bg-paper pb-16 pt-32 md:pb-24 md:pt-40">
+  <BaseSection as="section" class="relative overflow-hidden bg-paper pb-16 pt-32 md:pb-24 md:pt-40">
     <BaseHeroBackdrop />
     <BaseContainer>
-      <p class="eyebrow">{{ eyebrow }}</p>
-      <h1 ref="heroRef" class="mt-4 max-w-3xl text-display-lg text-ink">
-        {{ heading }}
-      </h1>
-      <p ref="introRef" class="mt-6 max-w-xl text-body-lg text-muted">
-        {{ intro }}
-      </p>
+      <div class="grid grid-cols-1 items-center gap-16 lg:grid-cols-12 lg:gap-8">
+        <div class="lg:col-span-7">
+          <p class="eyebrow">{{ eyebrow }}</p>
+          <h1 ref="heroRef" class="mt-4 max-w-3xl text-display-lg text-ink">
+            {{ heading }}
+          </h1>
+          <p ref="introRef" class="mt-6 max-w-xl text-body-lg text-muted">
+            {{ intro }}
+          </p>
 
-      <div class="mt-12 flex flex-wrap gap-x-12 gap-y-6 border-t border-navy-100 pt-8">
-        <div v-for="stat in heroStats" :key="stat.label">
-          <p class="font-display text-display-sm font-semibold text-ink">{{ stat.value }}</p>
-          <p class="mt-1 text-body-sm text-muted">{{ stat.label }}</p>
+          <div class="mt-12 flex flex-wrap gap-x-12 gap-y-6 border-t border-navy-100 pt-8">
+            <div v-for="stat in heroStats" :key="stat.label">
+              <p class="font-display text-display-sm font-semibold text-ink">{{ stat.value }}</p>
+              <p class="mt-1 text-body-sm text-muted">{{ stat.label }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div ref="heroStackRef" class="relative hidden aspect-[4/5] lg:col-span-5 lg:mr-6 lg:block">
+          <div
+            v-for="(project, index) in heroStack"
+            :key="project.index"
+            class="work-hero-card absolute inset-0 overflow-hidden rounded-2xl shadow-[0_30px_60px_-20px_rgba(11,22,32,0.35)]"
+            :style="{
+              transform: `translate(${index * 3}%, ${index * -5}%) rotate(${(index - 1) * 3}deg)`,
+              zIndex: heroStack.length - index
+            }"
+          >
+            <img
+              :src="project.image"
+              :alt="project.title"
+              loading="eager"
+              class="h-full w-full object-cover"
+            >
+            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-navy-950/70 to-transparent p-5">
+              <p class="font-display text-body-sm font-semibold text-white">{{ project.title }}</p>
+            </div>
+          </div>
         </div>
       </div>
     </BaseContainer>

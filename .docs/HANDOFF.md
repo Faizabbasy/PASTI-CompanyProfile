@@ -86,17 +86,24 @@ intended full word rather than guessing silently.
 - Buttons: `.btn-primary` (navy), `.btn-accent` (yellow), `.btn-outline`.
 - Animation (as of TASK 14 — replaces the old Tailwind-keyframe system
   entirely, see "What's built so far" #16 below): **GSAP + ScrollTrigger +
-  Lenis**. Six composables live under `app/composables/motion/`:
-  `useLenis` (smooth-scroll driver, mounted once at the app root),
-  `useGsapContext` (wraps `gsap.context()` + auto-cleanup on unmount),
-  `useMaskedReveal` (clip-path word/line text reveal), `useScrollReveal`
-  (generic scroll-triggered entrance), `useMagnetic` (cursor-follow hover
-  effect on CTAs/links), and `useCustomCursor` (module-level singleton
-  cursor state). The custom cursor itself renders via
-  `app/components/layout/CustomCursor.vue` (mounted once in `app.vue`,
-  `pointer: fine` only). `animate-fade-up`/`animate-fade-in`/`animate-reveal`
-  and `useRevealOnScroll`/`.reveal-up` **no longer exist** — do not reference
-  them in new work.
+  Lenis**, plus **Three.js** (`three`, added in session #19 — see the
+  gotcha below, this broke the original "no extra animation dependency"
+  policy on purpose for the Hero's 3D scene). `app/composables/motion/`
+  now holds ten composables (grew from the original six documented in
+  TASK 14): `useLenis` (smooth-scroll driver, mounted once at the app
+  root), `useGsapContext` (wraps `gsap.context()` + auto-cleanup on
+  unmount), `useMaskedReveal` (clip-path word/line text reveal),
+  `useScrollReveal` (generic scroll-triggered entrance), `useMagnetic`
+  (cursor-follow hover effect on CTAs/links), `useCustomCursor`
+  (module-level singleton cursor state), `useCursorSpotlight` (radial
+  cursor-tracked text highlight, added in #18), `useHeroScene` (the Hero's
+  Three.js scene, see #19), `useCountUp` (GSAP number count-up for About's
+  stats, added in #19), and `useLeaveTransition` (reverses in-view reveal
+  elements before a route change, added in #19). The custom cursor itself
+  renders via `app/components/layout/CustomCursor.vue` (mounted once in
+  `app.vue`, `pointer: fine` only). `animate-fade-up`/`animate-fade-in`/
+  `animate-reveal` and `useRevealOnScroll`/`.reveal-up` **no longer
+  exist** — do not reference them in new work.
 
 ### Gotcha already hit twice — read before adding new animation
 Tailwind's `theme.extend.animation`/`keyframes` only emit `@keyframes` into
@@ -278,7 +285,8 @@ resurrect the CSS one.
     layout/rhythm/motion from its own build task and needed no structural
     change.
 15. `0af9ee4` — **Hero page-load intro animation**: added a brief blank beat
-    (`useIntroReady()`, ~250ms) before entrance animations start, plus a
+    (`useIntroReady()`, ~250ms — **shortened to 100ms in session #19** via
+    `6aa36cc`, current value) before entrance animations start, plus a
     word/line-level clip-reveal on the H1 instead of the whole sentence
     fading up as one block — closer to Cuberto's own load-in. This used a
     CSS-only `animation-play-state` approach at the time; superseded by
@@ -442,6 +450,69 @@ resurrect the CSS one.
       gating pattern as `useMagnetic`/`CustomCursor.vue`), so it's
       simply absent on touch devices rather than trying to simulate it.
 
+### Gotcha — `three` is now a real dependency (Hero 3D scene)
+The "no extra animation dependency beyond GSAP/Lenis" policy stated in
+"Design tokens" above was explicitly broken in the session documented as #19
+below: `three` (`^0.185.1`) was added because the Hero's 3D shard/wedge/
+starfield scene needs real 3D geometry that CSS/GSAP can't produce. This was
+a deliberate, client-discussed exception, not an oversight — don't remove it
+as an unused/errant dependency.
+
+### Gotcha — GSAP transform tweens don't replace a pre-existing CSS transform, they layer on it
+Hit in #19's curtain-panel bug: an element hidden via a Tailwind
+`translate-y-full` class, then later driven by a GSAP `yPercent` tween,
+doesn't have that CSS transform "taken over" by GSAP — GSAP caches whatever
+transform is already on the element and composes its own tween on top of it,
+so a `yPercent: -100` slide-out could land at a net transform that isn't
+actually off-screen (the leftover CSS offset canceling out the GSAP one).
+Symptom: GSAP reports the tween completing normally, but the element
+visually doesn't move. Fix pattern: if GSAP will ever drive an element's
+transform, give it its initial hidden/offset state via `gsap.set(...)` in
+`onMounted` (or an inline style), not a CSS utility class — the class is
+fine for the SSR/first-paint flash-prevention case *only* if GSAP is never
+going to touch that same transform property later. If both are needed
+(SSR-safe initial state **and** a later GSAP tween, as `SectionCurtain.vue`
+needed to fix the reload black-flash), make sure the CSS class sets the
+*same* transform GSAP's own initial `gsap.set()` would also set, so there's
+nothing left over to cancel against.
+
+### Gotcha — `gsap.registerPlugin(ScrollTrigger)` at module top-level breaks SSR
+A component that calls `gsap.registerPlugin(ScrollTrigger)` unconditionally
+at module scope (not inside an `import.meta.client` guard) corrupts the
+shared `gsap` singleton when it runs during Nuxt's Node SSR pass (Vercel),
+surfacing as `gsap$2.registerPlugin is not a function` on every subsequent
+request on that server process — a full production 500, not just a
+client-side animation glitch. Hit once in `SelectedWorkCard.vue` (`af2e227`)
+after copying a pattern that worked in a composable but skipped the guard
+other composables (`useLenis`, `useMaskedReveal`, `useScrollReveal`) already
+had. Any new component that registers a GSAP plugin directly (rather than
+through an existing composable) must guard it with
+`if (import.meta.client) { ... }`.
+
+### Gotcha — Three.js `camera.aspect` must be applied by hand to frustum math
+`frustumHalfExtents()` in `useHeroScene.ts` originally returned
+`halfWidth === halfHeight` regardless of the camera's actual aspect ratio —
+a stale comment claimed "aspect applied by caller" but no caller ever did.
+This silently under-sized the horizontal spread of every
+fraction-of-frustum shard placement, so star shards kept drifting into the
+headline's text column even after repeatedly widening the intended
+clearance zone in isolation — the clearance zone logic was correct, the
+world-space conversion feeding it wasn't. Fix: multiply `halfHeight` by
+`camera.aspect` inside the function itself, not at each call site. If a
+future scene adds new frustum-relative positioning, verify against this
+helper rather than re-deriving frustum extents ad hoc.
+
+### Gotcha — a shard's world Z depth does not protect it from overlapping 2D HTML text
+Also from `useHeroScene.ts`: placing a "deep background" shard layer at a
+very negative world Z (assuming "it's far away, so it won't visually
+collide with the headline") is wrong when the headline is flat 2D HTML
+composited over the WebGL canvas — only the shard's **projected screen-space
+x/y** determines whether it visually overlaps the text, regardless of how
+far back its Z is. A deep shard ended up sitting directly over "solutions
+for businesses" until this was caught by screenshot. Any new depth layer
+needs the same screen-space clearX/clearY exclusion-box logic the
+foreground starfield already uses, not a Z-based assumption.
+
 ### Gotcha — per-row `ScrollTrigger` instances need their own `useGsapContext`
 `HomeServiceRow.vue`'s scroll-accordion (#17 above) creates one
 `ScrollTrigger` per row instance inside `useGsapContext()`, keyed to that
@@ -455,32 +526,238 @@ behavior), each trigger still needs to stay individually scoped/cleaned up,
 not just batched into one context with a shared teardown that fires only
 once for all five.
 
+19. **Session after #18: Header premium pass, Hero 3D scene (ribbons → crystal
+    shards → wedges/starfield/sphere-shatter), Testimonials built, page
+    transitions, real image assets, About page, WhatsApp CTA routing, Footer/
+    Final CTA/Trust/Service-row/Why-PASTI polish** (no TASK number assigned;
+    commits `db4bd1d` through `b74ea06`, ~49 commits — the largest single
+    session logged here). Read the relevant bullet before touching Header.vue,
+    HeroScene.vue/useHeroScene.ts, SectionCurtain.vue, or Testimonials again.
+    - **Header** (`db4bd1d`, `948ed48`): pinned nav/CTA/toggle cluster to the
+      right edge (`ml-auto`), bumped nav link weight. Then a full "Awwwards-
+      tier" rebuild: fixed + scroll-aware (transparent/borderless over Hero,
+      "activates" — blur + translucent bg + border + height shrink — past
+      ~80px, as one discrete state flip, not a continuous scrub),
+      hide-on-scroll-down/show-on-scroll-up via a delta-tracked
+      `ScrollTrigger`, a thin yellow scroll-progress bar, `useMagnetic` on
+      the CTA, and dim-siblings-on-hover nav (`.header-nav:hover >
+      a:not(:hover)` in `main.css`). Fixing this exposed a real bug: Hero's
+      WebGL shard canvas rendered visually **above** the fixed header even
+      though the header correctly won DOM click-priority at `z-50` (a canvas
+      compositing quirk, not a CSS stacking bug) — fixed at the source in
+      `useHeroScene.ts` via a per-depth world-unit clearance
+      (`clampTopWorldY`) applied to every shard whose position/float-peak
+      could rise into the header band.
+    - **Hero 3D scene — three full iterations, `three` added as a new
+      dependency** (see gotcha above re: the "no extra dependency" policy
+      being deliberately broken here). Built as a standalone HTML mockup
+      first each time, compared against client-picked options, then ported
+      into the real component:
+      1. `71a9e5c`/`9d70297`: "corner-cascade ribbons" — 8 curved blade
+         shapes in two stacks, swaying behind the headline. Superseded.
+      2. `960858b` (`HeroRibbons.vue` renamed to `HeroScene.vue`,
+         `useHeroRibbons.ts` → `useHeroScene.ts`): replaced with two
+         symmetric quadrant clusters of faceted low-poly gem shapes
+         (icosahedron/octahedron/tetrahedron/dodecahedron, glass-
+         transmission + metallic-clearcoat materials), positioned by
+         frustum-fraction (self-correcting across aspect ratios, not
+         hand-tuned world units). `3c07a75` fixed shards clumping into
+         blobs by replacing random scatter with a fixed 3-slot diagonal
+         ladder per quadrant.
+      3. `1384cb8`: added a ~46-shard muted starfield frame in four bands
+         around a text-clearance box, plus a page-load "sphere-shatter"
+         intro (scene opens on one frosted-glass focal sphere, holds,
+         shatters outward into every shard's resting position with a
+         distance-based stagger). Fixed the real frustum-aspect bug here
+         (see gotcha above). `948ed48` added the header-clearance clamp.
+         `6cedb83` fixed a black-flash-on-reload (see GSAP-transform gotcha
+         above), grew the scene (12→16 hero crystals, 46→72 starfield), and
+         added cursor-driven per-shard spin (shards rotate in place per
+         cursor position, not the whole scene rotating). `85d4234` added a
+         lower-fill layer (below the CTA row) and a deep-background depth
+         layer (z -8 to -14, fog-faded) — fixing the Z-depth-doesn't-protect-
+         2D-text bug documented above along the way. `15381c9` added two
+         large sculpted "wedge blade" shapes flanking the Hero (thicker,
+         bolder than the small crystals; positioned by reading the
+         geometry's own computed bounding box against the same clearX
+         boundary the starfield uses, after two wrong-by-hand attempts).
+      4. `aa67280`/`3d2057e`/`b74ea06` (**perf + reload-feel pass, client
+         asked for lighter/more compact, not more "ramai"**): cut total mesh
+         count 132→42, dropped 2 of 5 lights, capped `devicePixelRatio` at
+         1.5, deferred scene construction from synchronous `onMounted` to
+         `requestIdleCallback` then `requestAnimationFrame` (idle-callback
+         timing wasn't guaranteed and still felt like a stuck beat on
+         reload), and retuned Lenis for a snappier response (`duration: 0.9`,
+         cubic ease-out `1 - (1-t)^3`, was a slower quartic curve). `b74ea06` fixed the curtain
+         panel (below) getting stuck permanently covering the destination
+         section — see the GSAP-transform-layering gotcha above, this is
+         where it was found and fixed.
+      Gating pattern throughout (unchanged from the original ribbons
+      version): desktop + fine-pointer + `prefers-reduced-motion:
+      no-preference` only, `enabled` flips true only inside `onMounted`
+      (never during `setup()`, to avoid an SSR/client hydration mismatch),
+      render loop pauses via `IntersectionObserver` once Hero scrolls out of
+      view. **Current perf target per the user's memory note is 42 meshes,
+      deferred build — do not casually add scene density back without
+      re-confirming that's still wanted.**
+    - **Curtain-reveal transition** (`e5b5ae1`, fixed `b74ea06`): Hero's
+      "Explore our work" CTA jumps past 3 sections straight to Selected
+      Work; a full-screen navy panel (`SectionCurtain.vue`, mounted once in
+      `app.vue` like `CustomCursor`/`MobileMenu`) slides up to cover the
+      viewport, jumps scroll to the target while hidden, then slides off to
+      reveal it — reads as an unveiling, not a snap-to-new-spot.
+      `useSectionCurtain()` is a module-level singleton (`playTo('#target')`)
+      so future CTAs can reuse it without prop-drilling.
+      `useLenis.ts.scrollToImmediate()` drives the mid-transition jump
+      through Lenis's own instance instead of fighting it with raw
+      `window.scrollTo` (falls back to native `scrollIntoView` if Lenis
+      never started). Reduced-motion users skip the panel entirely.
+    - **Hero CTA routing churn**: `5145332` pointed "Explore our work" at
+      the on-page `#selected-work` anchor (`/work` doesn't exist) via a
+      plain `<a>` (not `NuxtLink`) so Lenis's anchor-click handling picks it
+      up. `3d2f3e8` added `useWhatsapp()` as the single source of truth for
+      number (+62 821-2549-2299) + prefilled message, and routed the
+      navbar/mobile-menu "Let's Talk" and Hero's "Tell us about it" and
+      Final CTA's yellow button to it (since `/contact` doesn't exist yet
+      and WhatsApp is the real inbound channel) — **Final CTA's large
+      heading-link ("Let's build what matters") stays pointed at
+      `/contact`**, that was an explicit client scoping choice, not an
+      inconsistency to "fix." `58c544f` then **restored** Hero's CTA 01/CTA
+      02 row after it had been dropped in an earlier session (#18) to match
+      Cuberto's no-CTA hero — client reconfirmed both are required per the
+      mapping doc §02. `f89dec6` separately removed the placeholder
+      gradient visual block under the CTA row entirely (doc §02 never
+      defined one; it only existed to mirror Cuberto's own hero video slot) —
+      so "Not built yet" item about the Hero visual block (old #14/#18) is
+      now moot, there's nothing pending there anymore.
+    - **Testimonials — built for the first time** (`a7ccf91`, iterated
+      `2c125af`/`23d8241`/`a384f7f`): previously left unbuilt every session
+      because the mapping doc has no testimonial field and explicitly says
+      not to invent quotes. Client supplied 4 real approved quotes (Rizki
+      Aprianto, Yodi Izharivan, Banu Wimbadi, Calvin Kim) with names/roles/
+      star ratings, now in `useTestimonials.ts`. Iterated to: no avatars
+      (initials-circle removed per feedback), navy cards
+      (`TestimonialCard.vue` `bg-navy-900`) on a **white** section
+      background (not navy — client specifically wanted only the cards
+      dark), oversized decorative corner quote-mark glyph, and a real
+      "stack scatters into grid" scroll animation — each card's actual
+      `getBoundingClientRect()` is measured on mount and set to start
+      exactly at the grid's shared center (not guessed pixel offsets),
+      choreographed as one parent-owned GSAP timeline (cards `defineExpose`
+      their root so the parent drives the transform directly) rather than
+      four independent `useScrollReveal` calls.
+    - **Page transitions** (`6a23cf6`, safelisted `20058fe`): `NuxtPage`
+      wrapped in a keyed `Transition` so routes actually remount (letting
+      reveal composables reset), plus `useLeaveTransition.ts` reversing any
+      still-visible reveal-tagged elements before navigation completes.
+      Vue-injected transition classes (`page-enter-active` etc.) never
+      appear literally in a template, so they had to be added to
+      `tailwind.config.ts`'s safelist or the JIT scanner purged their rules.
+    - **Real image assets wired in** (`9b7e715`): Insights articles,
+      OPEN/e-CORPORATE platform rows, and Selected Work case studies all
+      moved off placeholders — source images kept under `.docs/image/` for
+      reference, optimized copies actually served from `public/images/`.
+      Added the standalone `/insights` page. `236cc48` separately fixed a
+      mislabeled Selected Work card (slot 05 was titled "Universitas
+      Pertamina" but used the JM-Click image — swapped in the correct
+      Pertamina asset and title). **Trust section client logos also
+      populated** (`c44feae`, approved: Google, Microsoft, Meta, Shopify,
+      Shopee, TikTok, WordPress, from `.docs/LOGO/` → `public/logos/`),
+      switched to a flex-wrap horizontal row (fixed-size boxes,
+      `object-contain`) instead of a grid so mismatched native aspect
+      ratios render at consistent visual scale; `f5c4640` then enlarged them
+      and dropped the grayscale/dim-until-hover treatment per client
+      request (full color, full size by default); `0b3366c` added a
+      hover-focus/dim-siblings interaction on top (uses a `:style` binding,
+      not a Tailwind class, since the entrance `ScrollTrigger` leaves an
+      inline opacity style that a class can't override). **So the old
+      "Trust section client logos" and "Selected Work project imagery"
+      items in "Not built yet" below are done — removed from that list.**
+    - **About page added** (`a812826`): new standalone `/about` route with
+      a GSAP count-up stat animation (`useCountUp.ts`, SSR-guarded like the
+      other motion composables) and an `about/Stat.vue` component. Footer
+      now links to it instead of a placeholder anchor.
+    - **Production 500 fixed** (`af2e227`): see the SSR `registerPlugin`
+      gotcha above. Also added `.vercel/` to `.gitignore`.
+    - **Reload scroll position** (`34e440`): `history.scrollRestoration =
+      'manual'` + scroll to `(0,0)` before Lenis initializes, so a reload
+      always starts at the top instead of the browser restoring the
+      previous scroll position.
+    - **Favicon wired up** (`aea8b11`): the `.docs/LOGO/PASTI PUTIH LOGO
+      biru.png` "P." mark noted as unwired in old entry #18 is now
+      `public/favicon.png`, referenced via an explicit `<link rel="icon">`
+      in `nuxt.config.ts` (the scaffolded `favicon.ico` is left in place,
+      unreferenced, as a legacy fallback). **So the "Favicon" item in "Not
+      built yet" below is done — removed from that list.**
+    - **Logo, Footer, Final CTA, Service rows, Why PASTI — visual polish**
+      (`8b02b30`, `c4a0a32`, `a3ec6e5`, `c190c99`, `c66a653`, `0ce4205`,
+      `ae9b9ba`, `d4ccc0a`, `c63fdd2`, `79f16cf`, `bdafd92`, `a9f4c48`):
+      - Logo's inverted-dot crop math (documented in old #18) was re-derived
+        from **measured pixel coordinates** (Playwright canvas pixel-scan —
+        left 87.8%, top 9.3%, 113×113px of the 1205×527 source) instead of
+        eyeballed em-units, and switched from a crop-and-recreate approach
+        to an aspect-ratio-locked wrapper with width/height set as separate
+        percentages (9.38%/21.44% — not 1:1, since the source image is far
+        wider than tall). If the source PNG is ever replaced, re-measure the
+        same way, not by reusing these numbers.
+      - Footer rebuilt into a fuller 3-column grid (logo scaled via
+        `scale()` on a `w-fit origin-left` wrapper, not font-size — the old
+        em-based crop broke at large sizes), column dividers, ambient glow,
+        yellow platform-link dots to match nav/mobile-menu.
+      - Final CTA got a solid `btn-accent` button (reusing
+        `useNavigation().primaryCta.label`), two slow-drifting ambient glow
+        circles, and its underline switched from `text-decoration` (broke
+        into disconnected dashes under `useMaskedReveal`'s per-word inline-
+        block spans) to a `border-b-2` on the link itself.
+      - Fixed a white-notch seam between adjacent dark sections by moving
+        `rounded-t-[2.5rem]` from Insights to Platforms (the section that
+        actually transitions light→dark) — Insights/Platforms should have
+        the rounding happen exactly once, on the section entering dark.
+      - Service rows: Cuberto-matched striped/glow accent bar (yellow, not
+        the original radial glow), larger open-state typography/padding,
+        Lenis-wide smoother easing, narrowed to `max-w-5xl` centered
+        (was full-width).
+      - Why PASTI: **reverted back to a card grid** (icon + value + label,
+        alternating navy-50/yellow-50 backgrounds) after an earlier session
+        (#8) had deliberately replaced Cuberto's card grid with an
+        editorial metric list — client compared against Cuberto's actual
+        cards and asked to go back. `c168a47` separately dropped the
+        "2020/Established" metric and bumped projects delivered 70+ → 100+.
+    - Every 3D-scene/animation commit above was independently verified via
+      Playwright across 1280/1440/1920 desktop and a mobile viewport
+      (canvas correctly gated off), checking for text/CTA overlap, console
+      errors, and no horizontal scroll — per the working-process step 4
+      above, not just visually eyeballed once.
+
 ## Not built yet (homepage sections remaining per the mapping doc)
-- All 15 mapped homepage sections (00 through Footer) are now built. What's
-  left is asset/content, not structure:
-  - Trust section client logos (empty grid, see #6 above)
-  - Selected Work project imagery + named-case-study-to-slot pairing (#7)
-  - Insights real article data: thumbnails, dates, authors, categories (#9)
-  - PASTI contact email / office address (#10, gates Footer's email row too)
-  - OPEN / e-CORPORATE product visuals, and e-CORPORATE's real positioning
-    copy once a product brief is approved (#11)
-  - Hero's product/device mockup image (#14, currently a placeholder —
-    Hero's own text content and structure changed substantially since
-    #14 was written, see #18, but the visual block itself is still the
-    same gradient placeholder)
-  - Favicon: `.docs/LOGO/PASTI PUTIH LOGO biru.png` (a "P." icon mark)
-    was supplied alongside the wordmark logo in #18 and looks intended
-    for this, but hasn't been wired up — `public/favicon.ico` is still
-    whatever was scaffolded in TASK 00. Ask before changing it in case
-    the client has an opinion on format/sizing.
-- Testimonials: **do not build** unless real approved quotes are supplied —
-  the doc says to hide the component rather than invent quotes.
-- Technology/Creative/Work/About/Insights/Contact — all currently 404 (no
-  pages exist yet, only referenced as nav links). Out of scope until a task
-  asks for them explicitly.
+- All 15 mapped homepage sections (00 through Footer) are built, and as of
+  session #19 most of the asset/content gaps tracked here in earlier
+  sessions are now resolved — see #19 above for the commits. **Done, remove
+  from your mental TODO**: Trust section client logos (7 real approved
+  logos, `c44feae`/`f5c4640`), Selected Work project imagery + case-study
+  titles (real client names matched to real images — `ikea-indonesia`,
+  `jm-click`, `powerhours`, `hdi-healthy-lifestyle`, `pertamina`,
+  `octo-mobile`, per `app/composables/useSelectedWork.ts`), OPEN/
+  e-CORPORATE product visuals **and** e-CORPORATE's real positioning copy
+  (client-approved, replacing the old "Coming soon" placeholder — see
+  `app/composables/usePlatforms.ts`), Testimonials (real approved quotes,
+  `a7ccf91`), Favicon (`aea8b11`), Hero's placeholder visual block (removed
+  entirely, `f89dec6` — not filled in, just no longer needed).
+  **Still open:**
+  - Insights real article metadata: cards now have real titles + real
+    images (`app/composables/useInsights.ts`), but still no publish dates,
+    authors, or categories — don't invent them, matches the doc's original
+    constraint.
+  - PASTI contact email / office address — `useFinalCta.ts`'s `email` is
+    still `null` (doc's replacement email is truncated, no complete address
+    exists anywhere in the doc or repo). Gates the email row in both
+    `FinalCta.vue` and `Footer.vue`; set it once confirmed and both
+    activate automatically.
+- Technology/Creative/Work/Contact — still 404 (no pages exist, only
+  referenced as nav links). `/about` and `/insights` now exist (added in
+  #19) so those two are no longer in this list.
 - No further TASK numbers have been assigned past TASK 13 as of this
-  writing — check with the user for what's next (likely: real assets as
-  they become available, then individual sub-pages for the 404 routes).
+  writing — check with the user for what's next.
 
 ## Visual verification setup (Playwright, ad hoc)
 No `chromium-cli` exists in this environment. The reliable pattern used
