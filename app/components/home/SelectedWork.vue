@@ -26,9 +26,12 @@ useMaskedReveal(headingRef, { by: 'word' })
       </div>
 
       <div class="mt-16 flex justify-center md:mt-20">
-        <span class="inline-flex items-center justify-center gap-2 rounded-full border border-navy-700 px-7 py-3.5 font-display text-sm font-semibold text-paper">
+        <NuxtLink
+          to="/work"
+          class="inline-flex items-center justify-center gap-2 rounded-full border border-navy-700 px-7 py-3.5 font-display text-sm font-semibold text-paper transition-colors duration-300 ease-editorial hover:border-yellow-500"
+        >
           {{ cta }}
-        </span>
+        </NuxtLink>
       </div>
     </BaseContainer>
   </BaseSection>
