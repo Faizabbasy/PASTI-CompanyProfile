@@ -28,31 +28,26 @@ useScrollReveal(companyRef, { y: 16 })
 </script>
 
 <template>
-  <BaseSection as="section" class="pb-16 pt-32 md:pb-24 md:pt-40">
+  <BaseSection as="section" class="bg-paper pb-16 pt-32 md:pb-24 md:pt-40">
     <BaseContainer>
-      <div class="mx-auto max-w-4xl text-center">
-        <p class="eyebrow">{{ eyebrow }}</p>
-        <h1 ref="heroRef" class="mt-4 text-display-xl font-extrabold leading-[1.04] tracking-tight text-ink">
-          {{ heading }}
-        </h1>
-      </div>
+      <p class="eyebrow">{{ eyebrow }}</p>
+      <h1 ref="heroRef" class="mt-4 max-w-3xl text-display-lg text-ink">
+        {{ heading }}
+      </h1>
+      <h2 ref="introRef" class="mt-8 max-w-2xl text-display-sm font-semibold text-ink">
+        {{ introHeading }}
+      </h2>
+      <p class="mt-4 max-w-xl text-body-lg text-muted">
+        {{ introBody }}
+      </p>
     </BaseContainer>
   </BaseSection>
 
-  <BaseSection as="section" tight>
+  <BaseSection as="section" tight class="bg-paper">
     <BaseContainer>
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
-        <h2 ref="introRef" class="text-display-sm font-semibold text-ink md:col-span-8 md:col-start-1 lg:col-span-7">
-          {{ introHeading }}
-        </h2>
-        <p class="text-body-lg text-muted md:col-span-4 md:col-start-9 lg:col-span-4 lg:col-start-9">
-          {{ introBody }}
-        </p>
-      </div>
-
       <div
         ref="statsRef"
-        class="mt-16 grid grid-cols-1 divide-y divide-navy-100 sm:grid-cols-2 sm:divide-y-0 lg:flex lg:flex-wrap lg:items-start lg:justify-between lg:gap-8 lg:divide-x lg:divide-navy-100 md:mt-20"
+        class="grid grid-cols-1 divide-y divide-navy-100 sm:grid-cols-2 sm:divide-y-0 lg:flex lg:flex-wrap lg:items-start lg:justify-between lg:gap-8 lg:divide-x lg:divide-navy-100"
       >
         <div
           v-for="stat in stats"
