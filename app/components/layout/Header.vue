@@ -128,40 +128,34 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <header
-    ref="headerRef"
-    class="fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-500 ease-editorial"
-    :class="
-      activated
-        ? 'border-b border-navy-900/10 bg-paper/80 backdrop-blur-md'
-        : 'border-b border-transparent bg-transparent'
-    "
-  >
+  <header ref="headerRef" class="fixed inset-x-0 top-0 z-50 px-4 pt-4 md:px-6 md:pt-5">
     <div
-      class="container-page flex items-center transition-[height] duration-500 ease-editorial"
+      class="container-page rounded-2xl border border-navy-900/10 bg-paper shadow-[0_8px_30px_-12px_rgba(11,22,32,0.18)] transition-[height] duration-500 ease-editorial"
       :class="activated ? 'h-14 md:h-16' : 'h-16 md:h-20'"
     >
-      <div ref="logoRef" class="transition-transform duration-300 ease-editorial hover:scale-[1.03]">
-        <LayoutLogo />
-      </div>
+      <div class="flex h-full items-center px-5 md:px-7">
+        <div ref="logoRef" class="transition-transform duration-300 ease-editorial hover:scale-[1.03]">
+          <LayoutLogo />
+        </div>
 
-      <nav ref="navRef" class="header-nav ml-auto hidden items-center gap-10 lg:flex">
-        <LayoutNavLink v-for="item in navItems" :key="item.to" :item="item" />
-      </nav>
+        <nav ref="navRef" class="header-nav ml-auto hidden items-center gap-10 lg:flex">
+          <LayoutNavLink v-for="item in navItems" :key="item.to" :item="item" />
+        </nav>
 
-      <div ref="ctaRef" class="ml-10 hidden lg:block">
-        <div ref="ctaLinkRef" class="inline-block">
-          <a :href="whatsappLink" target="_blank" rel="noopener noreferrer" class="btn-primary">
-            {{ primaryCta.label }}
-          </a>
+        <div ref="ctaRef" class="ml-10 hidden lg:block">
+          <div ref="ctaLinkRef" class="inline-block">
+            <a :href="whatsappLink" target="_blank" rel="noopener noreferrer" class="btn-primary">
+              {{ primaryCta.label }}
+            </a>
+          </div>
+        </div>
+
+        <div ref="toggleRef" class="ml-auto lg:hidden">
+          <LayoutMenuToggle :open="mobileOpen" @toggle="toggleMobile" />
         </div>
       </div>
 
-      <div ref="toggleRef" class="ml-auto lg:hidden">
-        <LayoutMenuToggle :open="mobileOpen" @toggle="toggleMobile" />
-      </div>
+      <div ref="progressRef" class="h-px w-full origin-left rounded-b-2xl bg-yellow-500" aria-hidden="true" />
     </div>
-
-    <div ref="progressRef" class="h-px w-full origin-left bg-yellow-500" aria-hidden="true" />
   </header>
 </template>
