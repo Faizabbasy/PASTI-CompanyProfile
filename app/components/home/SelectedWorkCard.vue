@@ -76,8 +76,9 @@ useGsapContext(() => {
         class="h-full w-full object-cover transition-transform duration-600 ease-editorial group-hover:scale-105"
       >
     </div>
-    <p class="mt-6 text-body-md text-navy-100">
-      {{ project.title }}
+    <p class="mt-6 flex items-baseline gap-3 text-body-sm text-navy-300">
+      <span class="font-mono text-navy-500">{{ project.index }}</span>
+      <span class="text-navy-100">{{ project.title }}</span>
     </p>
   </div>
 </template>
