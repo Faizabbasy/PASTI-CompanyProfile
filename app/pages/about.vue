@@ -30,16 +30,24 @@ useScrollReveal(companyRef, { y: 16 })
 <template>
   <BaseSection as="section" class="bg-paper pb-16 pt-32 md:pb-24 md:pt-40">
     <BaseContainer>
-      <p class="eyebrow">{{ eyebrow }}</p>
-      <h1 ref="heroRef" class="mt-4 max-w-3xl text-display-lg text-ink">
-        {{ heading }}
-      </h1>
-      <h2 ref="introRef" class="mt-8 max-w-2xl text-display-sm font-semibold text-ink">
-        {{ introHeading }}
-      </h2>
-      <p class="mt-4 max-w-xl text-body-lg text-muted">
-        {{ introBody }}
-      </p>
+      <div class="flex items-center justify-between gap-12">
+        <div>
+          <p class="eyebrow">{{ eyebrow }}</p>
+          <h1 ref="heroRef" class="mt-4 max-w-3xl text-display-lg text-ink">
+            {{ heading }}
+          </h1>
+          <h2 ref="introRef" class="mt-8 max-w-2xl text-display-sm font-semibold text-ink">
+            {{ introHeading }}
+          </h2>
+          <p class="mt-4 max-w-xl text-body-lg text-muted">
+            {{ introBody }}
+          </p>
+        </div>
+
+        <div class="hidden w-48 shrink-0 lg:block xl:w-56">
+          <DoodleAbout />
+        </div>
+      </div>
     </BaseContainer>
   </BaseSection>
 

@@ -48,13 +48,21 @@ watch(showMore, async (isOpen) => {
 <template>
   <BaseSection as="section" class="bg-paper pb-16 pt-32 md:pb-24 md:pt-40">
     <BaseContainer>
-      <p class="eyebrow">{{ eyebrow }}</p>
-      <h1 ref="heroRef" class="mt-4 max-w-3xl text-display-lg text-ink">
-        {{ heading }}
-      </h1>
-      <p ref="introRef" class="mt-6 max-w-xl text-body-lg text-muted">
-        {{ intro }}
-      </p>
+      <div class="flex items-center justify-between gap-12">
+        <div>
+          <p class="eyebrow">{{ eyebrow }}</p>
+          <h1 ref="heroRef" class="mt-4 max-w-3xl text-display-lg text-ink">
+            {{ heading }}
+          </h1>
+          <p ref="introRef" class="mt-6 max-w-xl text-body-lg text-muted">
+            {{ intro }}
+          </p>
+        </div>
+
+        <div class="hidden w-48 shrink-0 lg:block xl:w-56">
+          <DoodleWork />
+        </div>
+      </div>
     </BaseContainer>
   </BaseSection>
 
