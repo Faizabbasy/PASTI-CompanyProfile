@@ -12,6 +12,11 @@ const viewLessLabel = 'Show less'
 
 const { primary, more } = useWorkPortfolio()
 
+const heroStats = [
+  { value: `${primary.length}`, label: 'Client projects featured' },
+  { value: `${primary.length + more.length}`, label: 'Case studies total' }
+]
+
 const showMore = ref(false)
 
 const heroRef = ref<HTMLElement | null>(null)
@@ -46,21 +51,21 @@ watch(showMore, async (isOpen) => {
 </script>
 
 <template>
-  <BaseSection as="section" class="bg-paper pb-16 pt-32 md:pb-24 md:pt-40">
+  <BaseSection as="section" class="relative bg-paper pb-16 pt-32 md:pb-24 md:pt-40">
+    <BaseHeroBackdrop />
     <BaseContainer>
-      <div class="flex items-center justify-between gap-12">
-        <div>
-          <p class="eyebrow">{{ eyebrow }}</p>
-          <h1 ref="heroRef" class="mt-4 max-w-3xl text-display-lg text-ink">
-            {{ heading }}
-          </h1>
-          <p ref="introRef" class="mt-6 max-w-xl text-body-lg text-muted">
-            {{ intro }}
-          </p>
-        </div>
+      <p class="eyebrow">{{ eyebrow }}</p>
+      <h1 ref="heroRef" class="mt-4 max-w-3xl text-display-lg text-ink">
+        {{ heading }}
+      </h1>
+      <p ref="introRef" class="mt-6 max-w-xl text-body-lg text-muted">
+        {{ intro }}
+      </p>
 
-        <div class="hidden w-48 shrink-0 lg:block xl:w-56">
-          <DoodleWork />
+      <div class="mt-12 flex flex-wrap gap-x-12 gap-y-6 border-t border-navy-100 pt-8">
+        <div v-for="stat in heroStats" :key="stat.label">
+          <p class="font-display text-display-sm font-semibold text-ink">{{ stat.value }}</p>
+          <p class="mt-1 text-body-sm text-muted">{{ stat.label }}</p>
         </div>
       </div>
     </BaseContainer>
