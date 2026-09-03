@@ -48,21 +48,26 @@ export function useMaskedReveal(target: Ref<HTMLElement | null>, options: Masked
       outer.style.display = 'inline-block'
       outer.style.verticalAlign = 'top'
 
+      // Compensating negative margin on `outer` / positive padding on
+      // `inner` (same trick as Hero.vue's wrapWord) — always applied, not
+      // just under `blur`. The site's editorial type scale (see
+      // tailwind.config.ts `text-display-*`) uses deliberately tight
+      // line-heights (1.02-1.15) for headline density; a descender (g, y,
+      // p, q, j) on the last word of any masked heading extends past that
+      // tight line box and was getting hard-clipped by `outer`'s
+      // `overflow: clip` — normal text lets a descender overflow its line
+      // box harmlessly, but a clipped inline-block doesn't. Reproduced on
+      // /insights' "Ideas worth reading" (the g in "reading" cut off) and
+      // is the same underlying bug on every masked-reveal heading site-wide
+      // whose last rendered word ends in a descender.
+      outer.style.margin = blur ? '-0.15em' : '-0.2em'
+
       const inner = document.createElement('span')
       inner.style.display = 'inline-block'
+      inner.style.padding = blur ? '0.15em' : '0.2em'
       inner.textContent = unit
       inner.dataset.revealEl = ''
       inner.dataset.revealKind = 'mask'
-
-      if (blur) {
-        // The blur filter's halo extends past the glyphs' sharp edges — a
-        // tight clip on `outer` would hard-cut that halo mid-blur and look
-        // like a visible seam. Compensating margin/padding (same trick as
-        // Hero's wrapWord for descenders) gives the halo room without
-        // shifting the settled, unblurred layout.
-        outer.style.margin = '-0.15em'
-        inner.style.padding = '0.15em'
-      }
 
       outer.appendChild(inner)
       el.appendChild(outer)
