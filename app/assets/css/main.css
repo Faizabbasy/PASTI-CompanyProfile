@@ -113,27 +113,24 @@
     }
   }
 
-  /* Route transition (nuxt.config.ts app.pageTransition: { name: 'page' }).
-     Plain CSS opacity fade, deliberately outside Lenis/GSAP — no scroll or
-     ScrollTrigger involvement, so it can't fight the per-page motion
-     composables. `mode: 'out-in'` in the config guarantees the leaving page
-     fully fades out before the entering page starts fading in, so it never
-     overlaps in both directions (forward or back navigation). */
+  /* Route transition (app.vue's <Transition name="page" mode="out-in">).
+     No visible CSS animation here on purpose — the actual transition is the
+     white LayoutRouteCurtain sliding over the viewport (see
+     useRouteCurtain.ts), which fully hides the swap. This class pair only
+     needs to exist so `mode="out-in"` has something to key off; an instant
+     opacity cut is invisible under the curtain, and under
+     prefers-reduced-motion (where the curtain skips its own animation too)
+     an instant cut is the correct fallback anyway rather than a lingering
+     400ms cross-fade peeking out from under a curtain that isn't there to
+     hide it. */
   .page-enter-active,
   .page-leave-active {
-    transition: opacity 400ms ease;
+    transition: none;
   }
 
   .page-enter-from,
   .page-leave-to {
     opacity: 0;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .page-enter-active,
-    .page-leave-active {
-      transition: none;
-    }
   }
 
   /* Accent-colored text layer revealed only in a hard-edged circle around

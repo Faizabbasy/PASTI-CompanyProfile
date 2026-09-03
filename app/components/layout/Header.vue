@@ -10,6 +10,7 @@ const route = useRoute()
 watch(() => route.path, closeMobile)
 
 const { introReady } = useIntroReady()
+const { coverTrigger, revealTrigger } = useRouteCurtain()
 
 const headerRef = ref<HTMLElement | null>(null)
 const logoRef = ref<HTMLElement | null>(null)
@@ -39,28 +40,44 @@ useGsapContext(() => {
     gsap.set(targets, { opacity: 0, y: -12 })
   }
 
+  function playEntrance() {
+    if (prefersReducedMotion) {
+      gsap.set(targets, { opacity: 1, y: 0 })
+      return
+    }
+
+    gsap.to(targets, {
+      opacity: 1,
+      y: 0,
+      duration: 0.6,
+      stagger: 0.05,
+      ease: 'power3.out'
+    })
+  }
+
   watch(
     introReady,
     (ready) => {
-      if (!ready) return
-
-      if (prefersReducedMotion) {
-        gsap.set(targets, { opacity: 1, y: 0 })
-        return
-      }
-
-      const anim = gsap.to(targets, {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        stagger: 0.05,
-        ease: 'power3.out'
-      })
-
-      return () => anim.kill()
+      if (ready) playEntrance()
     },
     { immediate: true }
   )
+
+  // Every page-to-page navigation now plays as LayoutRouteCurtain sliding a
+  // white panel over the viewport (see useRouteCurtain.ts) — the header
+  // resets to its hidden pre-entrance state the instant the curtain starts
+  // covering, then replays the same stagger-in it uses on first load once
+  // the curtain lifts, so the navbar reads as arriving fresh with each new
+  // page rather than just sitting there static underneath the curtain.
+  if (!prefersReducedMotion) {
+    watch(coverTrigger, () => {
+      gsap.set(targets, { opacity: 0, y: -12 })
+    })
+  }
+
+  watch(revealTrigger, () => {
+    playEntrance()
+  })
 
   if (prefersReducedMotion || !headerRef.value) return
 

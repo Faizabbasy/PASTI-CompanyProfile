@@ -10,19 +10,28 @@ if (import.meta.client && 'scrollRestoration' in window.history) {
 
 useLenis()
 
-// Play the reveal-tagged elements' un-reveal tween before a page-to-page
-// navigation actually swaps the route, so text/cards visibly retreat
-// instead of the page just cutting away mid-reveal. Awaiting inside the
-// guard (rather than redirecting) simply holds the pending navigation
-// until the tween resolves.
 const router = useRouter()
+const { playCover, playReveal } = useRouteCurtain()
 
+// Every page-to-page navigation now plays as a white curtain sliding up to
+// fully cover the viewport, then sliding away up and off the top once the
+// destination page has mounted — same motion as the in-page "Explore our
+// work" jump (LayoutSectionCurtain), reused here for route changes. The
+// in-page reveal-tagged elements' un-reveal tween (useLeaveTransition) still
+// runs alongside it: the curtain takes 0.55s to fully cover, so without this
+// the outgoing page would visibly retreat/cut away for the first stretch of
+// that slide rather than the curtain hiding it cleanly throughout.
 router.beforeEach(async (to, from) => {
   const isFirstNavigation = from.matched.length === 0
   if (isFirstNavigation || to.path === from.path) return true
 
   const { playLeave } = useLeaveTransition()
-  await playLeave()
+  await Promise.all([playLeave(), playCover()])
+
+  if ('scrollRestoration' in window.history) {
+    window.scrollTo(0, 0)
+  }
+
   return true
 })
 
@@ -39,10 +48,14 @@ router.beforeEach(async (to, from) => {
 // its ScrollTriggers in the first place — haven't necessarily run yet
 // either. @after-enter below is Vue's own hook for "this Transition's enter
 // animation has actually finished," which both waits out that CSS
-// transition and guarantees the new page component is fully mounted.
+// transition and guarantees the new page component is fully mounted — so
+// the curtain's reveal (which un-hides the header and destination page) is
+// deliberately kicked off from here too, after the new page is actually
+// ready to be shown, not the instant the route object changes.
 async function onPageAfterEnter() {
   const { ScrollTrigger } = await import('gsap/ScrollTrigger')
   ScrollTrigger.refresh()
+  await playReveal()
 }
 </script>
 
@@ -51,6 +64,7 @@ async function onPageAfterEnter() {
     <NuxtRouteAnnouncer />
     <LayoutCustomCursor />
     <LayoutSectionCurtain />
+    <LayoutRouteCurtain />
     <LayoutHeader />
     <LayoutMobileMenu />
     <NuxtPage v-slot="{ Component }">
