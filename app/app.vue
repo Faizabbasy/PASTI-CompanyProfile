@@ -25,6 +25,25 @@ router.beforeEach(async (to, from) => {
   await playLeave()
   return true
 })
+
+// Persistent elements outside <NuxtPage> (the footer, most notably) never
+// remount across navigation, so their ScrollTrigger instances keep whatever
+// start/end pixel positions they were created with on the *previous* page.
+// If the destination page has a different height, those triggers are now
+// stale — the footer's entrance (un-revealed by playLeave above if it was
+// in view when the link was clicked) may never re-fire, leaving it stuck
+// invisible until a manual reload recreates everything. router.afterEach +
+// nextTick fires far too early to fix this: the .page-enter-active CSS
+// transition (400ms, see main.css) is still running, and the entering
+// page's own useScrollReveal/useMaskedReveal onMounted hooks — which create
+// its ScrollTriggers in the first place — haven't necessarily run yet
+// either. @after-enter below is Vue's own hook for "this Transition's enter
+// animation has actually finished," which both waits out that CSS
+// transition and guarantees the new page component is fully mounted.
+async function onPageAfterEnter() {
+  const { ScrollTrigger } = await import('gsap/ScrollTrigger')
+  ScrollTrigger.refresh()
+}
 </script>
 
 <template>
@@ -35,7 +54,7 @@ router.beforeEach(async (to, from) => {
     <LayoutHeader />
     <LayoutMobileMenu />
     <NuxtPage v-slot="{ Component }">
-      <Transition name="page" mode="out-in">
+      <Transition name="page" mode="out-in" @after-enter="onPageAfterEnter">
         <div :key="$route.fullPath">
           <component :is="Component" />
         </div>
