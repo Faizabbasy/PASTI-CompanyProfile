@@ -60,7 +60,7 @@ useGsapContext(() => {
 <template>
   <div ref="rowRef">
     <NuxtLink
-      to="/technology"
+      :to="service.category === 'creative' ? '/creative' : '/technology'"
       class="group relative block overflow-hidden rounded-2xl p-10 transition-colors duration-600 ease-editorial md:p-16"
       :class="isOpen ? 'bg-navy-800' : 'bg-navy-50'"
       @mouseenter="setState('link')"

@@ -18,23 +18,31 @@ const servicesHeadingRef = ref<HTMLElement | null>(null)
 const servicesListRef = ref<HTMLElement | null>(null)
 const companyRef = ref<HTMLElement | null>(null)
 
-// Stats woven into one editorial sentence instead of a card grid — order
-// matches useAbout.ts's `stats` array (Support Given, Project Done, Get
-// Awards, Cup of Coffee), one count-up ref per position.
-const [supportStat, projectStat, awardsStat, coffeeStat] = stats
-const supportValueRef = ref<HTMLElement | null>(null)
-const projectValueRef = ref<HTMLElement | null>(null)
-const awardsValueRef = ref<HTMLElement | null>(null)
-const coffeeValueRef = ref<HTMLElement | null>(null)
-const statsSentenceRef = ref<HTMLElement | null>(null)
+// Stats shown as a tilted, overlapping stack of uniform cards (same size,
+// same style — no card singled out as "the important one"). Each card gets
+// its own cursor-tilt + hover-lift ref via useCardTilt, and CSS hover:z-20
+// brings the hovered card to the front of the stack.
+const statsStackRef = ref<HTMLElement | null>(null)
+const cardRefs = stats.map(() => ref<HTMLElement | null>(null))
+
+// Rotation/offset per card position, tuned by hand against a screenshot so
+// every card stays fully clear of its neighbours and the container edges.
+// `rotate` is handed to useCardTilt as `baseRotate` rather than set via CSS
+// — GSAP needs to own the transform it's animating on top of.
+const cardStyles = [
+  { rotate: -6, x: '2%', y: '4%' },
+  { rotate: 5, x: '36%', y: '-6%' },
+  { rotate: -3, x: '68%', y: '10%' },
+  { rotate: 4, x: '20%', y: '52%' }
+]
+
+cardRefs.forEach((cardRef, i) => {
+  useCardTilt(cardRef, { strength: 8, lift: 1.05, baseRotate: cardStyles[i]!.rotate })
+})
 
 useMaskedReveal(heroRef, { by: 'word', trigger: false })
 useMaskedReveal(introRef, { by: 'word' })
-useScrollReveal(statsSentenceRef, { y: 16 })
-useCountUp(supportValueRef, { value: supportStat!.numericValue, format: (n) => `${Math.round(n)}${supportStat!.suffix}` })
-useCountUp(projectValueRef, { value: projectStat!.numericValue, format: (n) => `${Math.round(n)}${projectStat!.suffix}` })
-useCountUp(awardsValueRef, { value: awardsStat!.numericValue, format: (n) => `${Math.round(n)}${awardsStat!.suffix}` })
-useCountUp(coffeeValueRef, { value: coffeeStat!.numericValue, format: (n) => `${Math.round(n)}${coffeeStat!.suffix}` })
+useScrollReveal(statsStackRef, { y: 24, children: '.about-stat-card', stagger: 0.12 })
 useMaskedReveal(servicesHeadingRef, { by: 'word' })
 useScrollReveal(servicesListRef, { y: 24, children: '.about-service', stagger: 0.1 })
 useScrollReveal(companyRef, { y: 16 })
@@ -62,17 +70,32 @@ useScrollReveal(companyRef, { y: 16 })
 
   <BaseSection as="section" tight class="bg-paper">
     <BaseContainer>
-      <p ref="statsSentenceRef" class="max-w-4xl font-display text-display-sm font-semibold leading-snug text-ink">
-        We've supported
-        <span class="whitespace-nowrap text-navy-700"><span ref="supportValueRef">0{{ supportStat!.suffix }}</span> businesses</span>,
-        shipped
-        <span class="whitespace-nowrap text-navy-700"><span ref="projectValueRef">0{{ projectStat!.suffix }}</span> projects</span>,
-        won
-        <span class="whitespace-nowrap text-yellow-600"><span ref="awardsValueRef">0{{ awardsStat!.suffix }}</span> in awards</span>
-        — and yes, it took
-        <span class="whitespace-nowrap text-navy-700"><span ref="coffeeValueRef">0{{ coffeeStat!.suffix }}</span> cups of coffee</span>
-        to get here.
-      </p>
+      <!-- Mobile/tablet: plain grid, no rotation/tilt — the tilted overlap
+           and cursor-tilt effect only work with room and a pointer on wide
+           viewports. -->
+      <div class="grid grid-cols-2 gap-4 sm:gap-6 lg:hidden">
+        <div v-for="stat in stats" :key="stat.label" class="about-stat-card rounded-3xl border border-navy-100 bg-paper p-6 shadow-[0_20px_45px_-20px_rgba(11,22,32,0.25)]">
+          <AboutStatCard :stat="stat" />
+        </div>
+      </div>
+
+      <!-- Desktop: tilted overlapping stack of uniform cards, cursor-tilt +
+           hover-lift on each. -->
+      <div ref="statsStackRef" class="relative mt-12 hidden h-[24rem] lg:block">
+        <div
+          v-for="(stat, i) in stats"
+          :key="stat.label"
+          :ref="(el) => (cardRefs[i]!.value = el as HTMLElement)"
+          class="about-stat-card absolute w-56 rounded-3xl border border-navy-100 bg-paper p-6 shadow-[0_20px_45px_-20px_rgba(11,22,32,0.25)] transition-shadow duration-300 ease-editorial will-change-transform hover:z-20 hover:shadow-[0_30px_60px_-20px_rgba(11,22,32,0.4)]"
+          :style="{
+            left: cardStyles[i]!.x,
+            top: cardStyles[i]!.y,
+            transform: `rotate(${cardStyles[i]!.rotate}deg)`
+          }"
+        >
+          <AboutStatCard :stat="stat" />
+        </div>
+      </div>
     </BaseContainer>
   </BaseSection>
 
