@@ -63,3 +63,106 @@ export function buildSheetGeometry(profile: SheetProfile): THREE.ExtrudeGeometry
   geometry.computeVertexNormals()
   return geometry
 }
+
+export interface SheetMaterialOptions {
+  metalness: number
+  roughness: number
+  clearcoat: number
+  clearcoatRoughness: number
+  /** 0 disables the micro-noise normal perturbation entirely — used by
+   * the mobile tier to cut shader cost. */
+  microNoiseStrength: number
+  /** Rim highlight color mixed in at grazing angles on the beveled edge
+   * — this is the ONLY place yellow may appear on a sheet, per the
+   * design spec's accent-only color discipline. 0 disables it (used by
+   * the background layer, which must not carry the accent). */
+  rimAccentColor: THREE.Color | null
+  rimAccentStrength: number
+}
+
+/**
+ * Builds one sheet's material: MeshPhysicalMaterial with Three.js's own
+ * PBR lighting pipeline left fully intact (per the design spec — this is
+ * an extension via onBeforeCompile, not a shader replacement). The
+ * injected GLSL adds two things, both additive on top of the stock
+ * physical shader:
+ *  1. A tiny-amplitude 3D noise perturbation to the normal, for
+ *     brushed/satin micro-surface richness — shape-changing noise is
+ *     explicitly forbidden by the spec, so this only nudges shading, it
+ *     never displaces geometry.
+ *  2. A rim/fresnel-driven mix toward `rimAccentColor` (yellow), so the
+ *     accent only ever shows as a thin edge highlight, never a fill.
+ */
+export function buildSheetMaterial(tint: THREE.Color, options: SheetMaterialOptions): THREE.MeshPhysicalMaterial {
+  const material = new THREE.MeshPhysicalMaterial({
+    color: tint,
+    metalness: options.metalness,
+    roughness: options.roughness,
+    clearcoat: options.clearcoat,
+    clearcoatRoughness: options.clearcoatRoughness,
+    fog: true
+  })
+
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uMicroNoiseStrength = { value: options.microNoiseStrength }
+    shader.uniforms.uRimAccentColor = { value: options.rimAccentColor ?? new THREE.Color(0x000000) }
+    shader.uniforms.uRimAccentStrength = { value: options.rimAccentColor ? options.rimAccentStrength : 0 }
+
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        '#include <common>',
+        `#include <common>
+        uniform float uMicroNoiseStrength;
+        uniform vec3 uRimAccentColor;
+        uniform float uRimAccentStrength;
+
+        // Cheap hash-based 3D noise — micro-surface imperfection only,
+        // amplitude is kept tiny by uMicroNoiseStrength (typically < 0.05).
+        float hash3(vec3 p) {
+          p = fract(p * 0.3183099 + 0.1);
+          p *= 17.0;
+          return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+        }`
+      )
+      .replace(
+        '#include <normal_fragment_maps>',
+        `#include <normal_fragment_maps>
+        {
+          float n = hash3(vWorldPosition * 40.0) - 0.5;
+          normal = normalize(normal + vec3(n, n, n) * uMicroNoiseStrength);
+        }`
+      )
+      .replace(
+        '#include <dithering_fragment>',
+        `#include <dithering_fragment>
+        {
+          float fresnel = pow(1.0 - max(dot(normalize(vViewPosition), normal), 0.0), 3.0);
+          gl_FragColor.rgb = mix(gl_FragColor.rgb, uRimAccentColor, fresnel * uRimAccentStrength);
+        }`
+      )
+
+    // vWorldPosition isn't declared in the stock fragment shader — add it
+    // and populate it from the vertex shader so the noise hash has a
+    // stable world-space input (screen-space would make the noise swim
+    // as the camera drifts, which reads as animated texture, not a
+    // static material imperfection).
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <common>',
+      `#include <common>
+      varying vec3 vWorldPosition;`
+    )
+    shader.vertexShader = shader.vertexShader
+      .replace(
+        '#include <common>',
+        `#include <common>
+        varying vec3 vWorldPosition;`
+      )
+      .replace(
+        '#include <worldpos_vertex>',
+        `#include <worldpos_vertex>
+        vWorldPosition = worldPosition.xyz;`
+      )
+  }
+
+  return material
+}
