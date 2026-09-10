@@ -56,22 +56,12 @@ useGsapContext(() => {
       if (inner?.length) gsap.set(inner, { opacity: 0, y: 10 })
     })
 
+    // Scrolling back up past the section reverses this same timeline
+    // (toggleActions' "reverse") — cards sink back down, rotate back to
+    // their off-screen angle, and fade out, mirroring the entrance rather
+    // than a separate blur effect.
     const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: grid,
-        start: 'top 75%',
-        toggleActions: 'restart none restart reverse',
-        onLeaveBack: () => {
-          // Reinforces the reverse-on-scroll-up exit with a soft blur pass
-          // on top of the timeline's own reverse, so leaving the section
-          // upward reads as a deliberate "focus pulls away" beat rather
-          // than a bare opacity fade.
-          gsap.fromTo(cards, { filter: 'blur(0px)' }, { filter: 'blur(6px)', duration: 0.4, ease: motionEase.exit, overwrite: 'auto' })
-        },
-        onEnterBack: () => {
-          gsap.to(cards, { filter: 'blur(0px)', duration: 0.5, ease: motionEase.standard, overwrite: 'auto' })
-        }
-      }
+      scrollTrigger: { trigger: grid, start: 'top 75%', toggleActions: 'restart none restart reverse' }
     })
 
     tl.to(cards, {
@@ -141,7 +131,7 @@ useGsapContext(() => {
   })
 
   mm.add('(prefers-reduced-motion: reduce)', () => {
-    gsap.set(cards, { opacity: 1, scale: 1, x: 0, y: 0, rotateY: 0, rotateX: 0, rotate: 0, filter: 'blur(0px)' })
+    gsap.set(cards, { opacity: 1, scale: 1, x: 0, y: 0, rotateY: 0, rotateX: 0, rotate: 0 })
     const innerAll = cardComponents.value.flatMap((c) => [c?.scoreRef, c?.quoteRef, c?.footerRef].filter((el): el is HTMLElement => !!el))
     gsap.set(innerAll, { opacity: 1, y: 0 })
   })

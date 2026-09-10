@@ -28,32 +28,53 @@ const ratingDisplay = props.testimonial.rating.toFixed(1)
 // value so its own hover tween composes on top of that resting rotation
 // instead of fighting it — see useCardTilt's baseRotate doc for why a
 // plain CSS `hover:rotate-0` utility can't be used here.
-useCardTilt(cardRef, { strength: 5, lift: 1.02, baseRotate: props.tiltDeg ?? 0 })
+useCardTilt(cardRef, { strength: 7, lift: 1.035, baseRotate: props.tiltDeg ?? 0 })
 
-// Cursor-following spotlight: a radial glow tracks the pointer inside the
-// card via CSS custom properties updated per pointermove, cheaper than a
-// GSAP tween since it's just two custom-property writes per frame.
+const shineRef = ref<HTMLElement | null>(null)
+
+// Depth + shine: on top of useCardTilt's 3D tilt, the card's own shadow
+// grows into a much heavier, more diffuse cast on hover (reads as
+// "lifting off the page" rather than just scaling up), and a diagonal
+// light band sweeps across following the cursor — the glass/premium-card
+// treatment common to 2025-era product UI. Driven by CSS custom
+// properties written on pointermove rather than a GSAP tween per frame,
+// since it's just property writes, no interpolation needed.
 function handlePointerMove(event: PointerEvent) {
   const el = cardRef.value
   if (!el) return
   const rect = el.getBoundingClientRect()
-  el.style.setProperty('--spotlight-x', `${event.clientX - rect.left}px`)
-  el.style.setProperty('--spotlight-y', `${event.clientY - rect.top}px`)
+  const px = event.clientX - rect.left
+  const py = event.clientY - rect.top
+  el.style.setProperty('--spotlight-x', `${px}px`)
+  el.style.setProperty('--spotlight-y', `${py}px`)
+  // Shine band angle/position tracks horizontal cursor position across
+  // the card width, so it reads as sweeping with the pointer.
+  el.style.setProperty('--shine-pos', `${(px / rect.width) * 160 - 30}%`)
 }
+
+const REST_SHADOW = '0 30px 60px -30px rgba(0,0,0,0.5)'
+const HOVER_SHADOW = '0 50px 90px -25px rgba(0,0,0,0.65)'
 
 onMounted(() => {
   if (!import.meta.client) return
-  if (!window.matchMedia('(pointer: fine)').matches) return
 
   const el = cardRef.value
   if (!el) return
 
+  gsap.set(el, { boxShadow: REST_SHADOW })
+
+  if (!window.matchMedia('(pointer: fine)').matches) return
+
   el.addEventListener('pointermove', handlePointerMove)
   el.addEventListener('pointerenter', () => {
     gsap.to(glowRef.value, { opacity: 1, duration: 0.3 })
+    gsap.to(shineRef.value, { opacity: 1, duration: 0.3 })
+    gsap.to(el, { boxShadow: HOVER_SHADOW, duration: 0.4, ease: motionEase.standard })
   })
   el.addEventListener('pointerleave', () => {
     gsap.to(glowRef.value, { opacity: 0, duration: 0.4 })
+    gsap.to(shineRef.value, { opacity: 0, duration: 0.4 })
+    gsap.to(el, { boxShadow: REST_SHADOW, duration: 0.5, ease: motionEase.soft })
   })
 
   onBeforeUnmount(() => {
@@ -65,8 +86,8 @@ onMounted(() => {
 <template>
   <div
     ref="cardRef"
-    class="testimonial-card group relative flex h-full flex-col gap-6 overflow-hidden rounded-3xl border border-navy-800 bg-navy-900 p-8 shadow-[0_30px_60px_-30px_rgba(0,0,0,0.5)] transition-[border-color] duration-500 ease-editorial hover:border-yellow-500/40 md:p-10"
-    style="--spotlight-x: 50%; --spotlight-y: 50%"
+    class="testimonial-card group relative flex h-full flex-col gap-6 overflow-hidden rounded-3xl border border-navy-800 bg-navy-900 p-8 transition-[border-color] duration-500 ease-editorial hover:border-yellow-500/40 md:p-10"
+    style="--spotlight-x: 50%; --spotlight-y: 50%; --shine-pos: 50%"
     @mouseenter="setState('view')"
     @mouseleave="setState('default')"
   >
@@ -76,7 +97,16 @@ onMounted(() => {
       ref="glowRef"
       aria-hidden="true"
       class="pointer-events-none absolute inset-0 opacity-0"
-      style="background: radial-gradient(360px circle at var(--spotlight-x) var(--spotlight-y), rgba(250, 204, 21, 0.08), transparent 70%)"
+      style="background: radial-gradient(360px circle at var(--spotlight-x) var(--spotlight-y), rgba(250, 204, 21, 0.1), transparent 70%)"
+    />
+
+    <!-- Diagonal shine band, sweeping horizontally with the cursor — the
+         glass/premium-card highlight treatment. -->
+    <div
+      ref="shineRef"
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 opacity-0"
+      style="background: linear-gradient(115deg, transparent calc(var(--shine-pos) - 12%), rgba(255,255,255,0.06) var(--shine-pos), transparent calc(var(--shine-pos) + 12%))"
     />
 
     <span
