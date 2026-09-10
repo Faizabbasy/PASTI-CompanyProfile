@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+if (import.meta.client) {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
 // Copy sourced from .docs/PASTI_Cuberto_Template_Content_Mapping.docx, section 15 —
 // FOOTER / PLATFORM LINKS.
 const { navLinks, platformLinks } = useFooter()
@@ -10,6 +17,39 @@ const footerRef = ref<HTMLElement | null>(null)
 useScrollReveal(footerRef, { y: 16, children: '.footer-reveal', stagger: 0.08 })
 
 const { setState } = useCustomCursor()
+
+const cornerRefs = ref<HTMLElement[]>([])
+
+// Brand Afterglow / Closing Field: four thin lines converge from the
+// footer's corners toward the center (roughly the logo), then stop and
+// remain as a subtle static frame — a resolved end-state, triggered once,
+// not a repeating ambient loop (LARGE_SCALE_MOTION_PLAN.md section 12).
+useGsapContext(() => {
+  const footer = footerRef.value
+  const corners = cornerRefs.value
+  if (!footer || !corners.length) return
+
+  const mm = gsap.matchMedia()
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    gsap.set(corners, { scaleX: 0, scaleY: 0 })
+
+    const anim = gsap.to(corners, {
+      scaleX: 1,
+      scaleY: 1,
+      duration: spatialDuration.cinematic,
+      ease: spatialEase.settle,
+      stagger: motionStagger.loose,
+      scrollTrigger: { trigger: footer, start: 'top 75%', once: true }
+    })
+
+    return () => anim.kill()
+  })
+
+  mm.add('(prefers-reduced-motion: reduce)', () => {
+    gsap.set(corners, { scaleX: 1, scaleY: 1 })
+  })
+})
 </script>
 
 <template>
@@ -17,6 +57,23 @@ const { setState } = useCustomCursor()
     <div
       aria-hidden="true"
       class="pointer-events-none absolute -left-1/4 -top-1/2 h-[32rem] w-[32rem] rounded-full bg-yellow-500/[0.06] blur-3xl"
+    />
+
+    <!-- Structural line collapse: 4 corner lines converging toward the
+         center logo, secondary blueprint language matching WhatWeDo/
+         Services/corner-brackets. -->
+    <span
+      v-for="corner in ['tl', 'tr', 'bl', 'br']"
+      :key="corner"
+      ref="cornerRefs"
+      aria-hidden="true"
+      class="pointer-events-none absolute h-10 w-10 border-navy-500/20"
+      :class="{
+        'left-6 top-6 origin-top-left border-l border-t': corner === 'tl',
+        'right-6 top-6 origin-top-right border-r border-t': corner === 'tr',
+        'bottom-6 left-6 origin-bottom-left border-b border-l': corner === 'bl',
+        'bottom-6 right-6 origin-bottom-right border-b border-r': corner === 'br'
+      }"
     />
 
     <BaseContainer class="relative">
