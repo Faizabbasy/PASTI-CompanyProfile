@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import gsap from 'gsap'
+
 const eyebrow = 'Portfolio'
 const heading = 'Selected work'
 const intro = 'A closer look at how we work with our clients — the brief, and the result. Explore a project to read the full story.'

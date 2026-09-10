@@ -25,3 +25,9 @@ logs
 
 .vercel
 .env*
+
+# Git worktrees (per-plan isolated workspaces)
+.worktrees
+
+# Subagent-driven-development scratch workspaces
+.superpowers

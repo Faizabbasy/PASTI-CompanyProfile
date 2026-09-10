@@ -62,6 +62,7 @@ async function onPageAfterEnter() {
 <template>
   <div>
     <NuxtRouteAnnouncer />
+    <LayoutIntroOverlay />
     <LayoutCustomCursor />
     <LayoutSectionCurtain />
     <LayoutRouteCurtain />

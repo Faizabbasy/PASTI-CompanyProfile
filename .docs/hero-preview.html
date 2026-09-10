@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PASTI Hero Concept</title>
+<style>
+  :root{
+    --navy-900:#051B28; --navy-700:#0B3954; --navy-500:#1C5E7C; --navy-300:#6FA2B7; --navy-100:#CFE0E7;
+    --yellow-500:#FBBA00; --yellow-400:#FDC81F;
+    --paper:#FFFFFF; --muted:#5C7280; --ink:#0B3954;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',ui-sans-serif,system-ui,sans-serif;}
+  h1,.display{font-family:'Manrope',ui-sans-serif,system-ui,sans-serif;}
+
+  .hero{
+    position:relative;
+    min-height:100vh;
+    width:100%;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--paper);
+  }
+
+  .hero-stage{
+    position:relative;
+    width:100%;
+    max-width:1200px;
+    margin:0 auto;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 24px;
+  }
+
+  /* ---- Center content: always top layer, always centered ---- */
+  .hero-content{
+    position:relative;
+    z-index:20;
+    max-width:640px;
+    margin:0 auto;
+    text-align:center;
+  }
+
+  .hero-eyebrow{
+    display:inline-block;
+    font-family:'Manrope',sans-serif;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--navy-500);
+    margin-bottom:20px;
+  }
+
+  .hero-headline{
+    font-weight:800;
+    line-height:1.05;
+    letter-spacing:-0.02em;
+    font-size:clamp(2.5rem, 6vw, 5.5rem);
+    margin:0;
+  }
+
+  .hero-word-swap{
+    position:relative;
+    display:inline-block;
+    height:1.1em;
+    overflow:hidden;
+    vertical-align:top;
+    width:100%;
+  }
+  .hero-word{
+    position:absolute;
+    inset:0;
+    display:block;
+    color:var(--yellow-500);
+    opacity:0;
+    transform:translateY(100%);
+    transition:transform .55s cubic-bezier(.65,0,.35,1), opacity .55s cubic-bezier(.65,0,.35,1);
+  }
+  .hero-word.is-active{
+    opacity:1;
+    transform:translateY(0);
+  }
+  .hero-word.is-leaving{
+    opacity:0;
+    transform:translateY(-100%);
+  }
+
+  .hero-sub{
+    margin:24px auto 0;
+    max-width:460px;
+    font-size:clamp(1rem, 1.4vw, 1.2rem);
+    line-height:1.55;
+    color:var(--muted);
+  }
+
+  .hero-ctas{
+    margin-top:32px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+  }
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    border-radius:9999px;
+    padding:14px 28px;
+    font-family:'Manrope',sans-serif;
+    font-size:14px;
+    font-weight:600;
+    text-decoration:none;
+    transition:all .35s cubic-bezier(.65,0,.35,1);
+    cursor:pointer;
+    border:1px solid transparent;
+  }
+  .btn-primary{
+    background:var(--navy-700);
+    color:#fff;
+  }
+  .btn-primary:hover{
+    background:var(--yellow-500);
+    color:var(--ink);
+  }
+  .btn-outline{
+    background:transparent;
+    color:var(--ink);
+    border-color:var(--navy-100);
+  }
+  .btn-outline:hover{
+    border-color:var(--yellow-500);
+    color:#A97B00;
+  }
+
+  /* ---- Floating cards: pinned to the 4 corners of the stage, always
+         behind the text layer, capped size so they can never crowd the
+         center on any viewport ---- */
+  .hero-card{
+    position:absolute;
+    z-index:10;
+    width:100%;
+    max-width:170px;
+    overflow:hidden;
+    border-radius:16px;
+    border:1px solid var(--navy-100);
+    background:var(--paper);
+    box-shadow:0 20px 50px -20px rgba(11,57,84,.25);
+    text-decoration:none;
+    display:block;
+    animation:float 6s ease-in-out infinite;
+  }
+  .hero-card:hover{
+    transform:scale(1.06) rotate(0deg) !important;
+    z-index:30;
+    box-shadow:0 30px 60px -20px rgba(11,57,84,.35);
+  }
+  .hero-card .thumb{
+    display:block;
+    width:100%;
+    aspect-ratio:4/3;
+    transition:transform .5s cubic-bezier(.65,0,.35,1);
+  }
+  .hero-card:hover .thumb{ transform:scale(1.1); }
+
+  /* Placeholder thumbnails: CSS gradients, zero network request, so they
+     always render — swap each .thumb-N for a real project <img> later. */
+  .thumb-1{ background:linear-gradient(135deg,#0B3954,#1C5E7C); }
+  .thumb-2{ background:linear-gradient(135deg,#FBBA00,#FDC81F); }
+  .thumb-3{ background:linear-gradient(135deg,#082A3E,#0B3954); }
+  .thumb-4{ background:linear-gradient(135deg,#6FA2B7,#1C5E7C); }
+  .thumb-5{ background:linear-gradient(135deg,#D69C00,#FBBA00); }
+  .thumb-6{ background:linear-gradient(135deg,#051B28,#082A3E); }
+
+  .hero-card-label{
+    position:absolute;
+    inset:auto 0 0 0;
+    padding:10px 12px;
+    font-family:'Manrope',sans-serif;
+    font-size:11px;
+    font-weight:600;
+    color:#fff;
+    background:linear-gradient(to top, rgba(5,27,40,.85), transparent);
+    opacity:0;
+    transition:opacity .3s ease;
+  }
+  .hero-card:hover .hero-card-label{ opacity:1; }
+
+  .card-tl{ top:6%;    left:0;   max-width:150px; transform:rotate(-6deg); animation-duration:6s;   animation-delay:0s; }
+  .card-tr{ top:10%;   right:0;  max-width:190px; transform:rotate(4deg);  animation-duration:7s;   animation-delay:-2s; }
+  .card-bl{ bottom:8%; left:2%;  max-width:130px; transform:rotate(3deg);  animation-duration:5.5s; animation-delay:-3.5s; }
+  .card-br{ bottom:6%; right:2%; max-width:170px; transform:rotate(-4deg);animation-duration:6.5s; animation-delay:-1s; }
+  .card-tm{ top:0;     left:34%; max-width:110px; transform:rotate(2deg); animation-duration:6.2s; animation-delay:-4.2s; }
+  .card-bm{ bottom:0;  right:32%;max-width:120px; transform:rotate(-3deg);animation-duration:5.8s; animation-delay:-0.6s; }
+
+  @keyframes float{
+    0%, 100% { translate: 0 0; }
+    50% { translate: 0 -10px; }
+  }
+
+  /* ---- Scroll indicator ---- */
+  .hero-scroll{
+    position:absolute;
+    left:50%;
+    bottom:32px;
+    z-index:20;
+    transform:translateX(-50%);
+    text-align:center;
+  }
+  .hero-scroll-line{
+    margin:0 auto;
+    width:1px;
+    height:40px;
+    background:var(--navy-300);
+    animation:scrollPulse 2s ease-in-out infinite;
+  }
+  .hero-scroll-label{
+    display:block;
+    margin-top:8px;
+    font-family:'Manrope',sans-serif;
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  @keyframes scrollPulse{
+    0%   { transform:scaleY(0); transform-origin:top; opacity:0; }
+    40%  { transform:scaleY(1); transform-origin:top; opacity:1; }
+    60%  { transform:scaleY(1); transform-origin:bottom; opacity:1; }
+    100% { transform:scaleY(0); transform-origin:bottom; opacity:0; }
+  }
+
+  /* ---- Responsive: shrink/hide cards on mobile so nothing crowds text ---- */
+  @media (max-width: 767px){
+    .card-tm, .card-bm, .card-bl { display:none; }
+    .card-tl{ max-width:96px; top:4%; }
+    .card-tr{ max-width:100px; top:6%; }
+    .card-br{ max-width:96px; bottom:4%; }
+    .hero-headline{ font-size:clamp(2.1rem, 9vw, 3rem); }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .hero-card{ animation:none; }
+    .hero-scroll-line{ animation:none; }
+    .hero-word{ transition:opacity .3s ease; }
+  }
+</style>
+</head>
+<body>
+
+<section class="hero" aria-label="Hero">
+  <div class="hero-stage">
+
+    <!-- Floating work-preview cards — pinned to stage corners, z-index 10,
+         strictly behind the text layer (z-index 20). Gradient placeholders
+         (no external image request) so they always render with zero
+         network dependency — swap .thumb-N for a real <img> per project
+         when wiring this into the actual site. -->
+    <a class="hero-card card-tl" href="#" aria-label="Project preview 1">
+      <div class="thumb thumb-1" role="img" aria-label="Fintech Platform preview"></div>
+      <span class="hero-card-label">Fintech Platform</span>
+    </a>
+    <a class="hero-card card-tr" href="#" aria-label="Project preview 2">
+      <div class="thumb thumb-2" role="img" aria-label="Brand Identity preview"></div>
+      <span class="hero-card-label">Brand Identity</span>
+    </a>
+    <a class="hero-card card-bl" href="#" aria-label="Project preview 3">
+      <div class="thumb thumb-3" role="img" aria-label="CRM System preview"></div>
+      <span class="hero-card-label">CRM System</span>
+    </a>
+    <a class="hero-card card-br" href="#" aria-label="Project preview 4">
+      <div class="thumb thumb-4" role="img" aria-label="E-commerce App preview"></div>
+      <span class="hero-card-label">E-commerce App</span>
+    </a>
+    <a class="hero-card card-tm" href="#" aria-label="Project preview 5">
+      <div class="thumb thumb-5" role="img" aria-label="Data Dashboard preview"></div>
+      <span class="hero-card-label">Data Dashboard</span>
+    </a>
+    <a class="hero-card card-bm" href="#" aria-label="Project preview 6">
+      <div class="thumb thumb-6" role="img" aria-label="Mobile App preview"></div>
+      <span class="hero-card-label">Mobile App</span>
+    </a>
+
+    <!-- Center content -->
+    <div class="hero-content">
+      <span class="hero-eyebrow">PASTI</span>
+      <h1 class="hero-headline">
+        We build
+        <span class="hero-word-swap" id="wordSwap"></span>
+      </h1>
+      <p class="hero-sub">PASTI — technology and creative partner for businesses ready to move forward.</p>
+      <div class="hero-ctas">
+        <a href="#" class="btn btn-primary">Explore our work</a>
+        <a href="#" class="btn btn-outline">Tell us about it</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="hero-scroll" aria-hidden="true">
+    <div class="hero-scroll-line"></div>
+    <span class="hero-scroll-label">Scroll</span>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var words = ['technology.', 'creativity.', 'impact.'];
+    var container = document.getElementById('wordSwap');
+    var index = 0;
+
+    function renderInitial() {
+      var span = document.createElement('span');
+      span.className = 'hero-word is-active';
+      span.textContent = words[0];
+      container.appendChild(span);
+    }
+
+    function swap() {
+      var current = container.querySelector('.hero-word.is-active');
+      var nextIndex = (index + 1) % words.length;
+
+      var incoming = document.createElement('span');
+      incoming.className = 'hero-word';
+      incoming.textContent = words[nextIndex];
+      container.appendChild(incoming);
+
+      // force layout so the transition actually runs
+      void incoming.offsetWidth;
+      incoming.classList.add('is-active');
+
+      if (current) {
+        current.classList.remove('is-active');
+        current.classList.add('is-leaving');
+        current.addEventListener('transitionend', function handler() {
+          current.removeEventListener('transitionend', handler);
+          if (current.parentNode) current.parentNode.removeChild(current);
+        });
+      }
+
+      index = nextIndex;
+    }
+
+    renderInitial();
+
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduceMotion) {
+      setInterval(swap, 2200);
+    }
+  })();
+</script>
+
+</body>
+</html>
