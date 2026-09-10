@@ -7,7 +7,7 @@ if (import.meta.client) {
 }
 
 interface MaskedRevealOptions {
-  by?: 'word' | 'line'
+  by?: 'word' | 'line' | 'letter'
   stagger?: number
   trigger?: boolean
   delay?: number
@@ -33,7 +33,11 @@ export function useMaskedReveal(target: Ref<HTMLElement | null>, options: Masked
     if (!el) return
 
     const text = el.textContent ?? ''
-    const units = by === 'word' ? text.split(/(\s+)/).filter((u) => u.length) : [text]
+    const units = by === 'word'
+      ? text.split(/(\s+)/).filter((u) => u.length)
+      : by === 'letter'
+        ? text.split(/(\s+)/).filter((u) => u.length).flatMap((u) => (/^\s+$/.test(u) ? [u] : [...u]))
+        : [text]
 
     el.textContent = ''
     const innerSpans: HTMLSpanElement[] = []
