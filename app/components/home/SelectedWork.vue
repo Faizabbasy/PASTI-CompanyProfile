@@ -13,59 +13,80 @@ const cta = 'View all projects'
 const { projects } = useSelectedWork()
 
 const sectionRef = ref<HTMLElement | null>(null)
-const curtainRef = ref<HTMLElement | null>(null)
+const risingRef = ref<HTMLElement | null>(null)
 const headingRef = ref<HTMLElement | null>(null)
 useMaskedReveal(headingRef, { by: 'word' })
 
-// Per direct feedback: back to the original 2-column grid (each
-// SelectedWorkCard.vue playing its own independent clip-reveal + parallax
-// entrance, untouched throughout all of this section's motion experiments)
-// — the pinned cinematic takeover sequence tried afterward is retired
-// entirely. `id="selected-work"` and the `/work` link stay (Hero's
-// "Explore our work" CTA jumps here via LayoutSectionCurtain, and /work is
-// a real destination page), even though the grid itself matches the
-// section's very first version before any curtain existed.
+// "Selimut ditarik" — per direct feedback: NOT a separate neutral curtain
+// panel that covers then reveals the section behind it (that was the
+// previous, now-retired approach, and it read wrong — see git history for
+// the reference screenshot). The section itself is the sheet: it arrives,
+// holds briefly, then on further scroll input rises bodily from below the
+// viewport and covers whatever's behind it (Trust) — same physical-sheet
+// language as Hero's "Explore our work" click-curtain, just driven by
+// scroll instead of a click, and it's the destination content doing the
+// covering rather than a neutral panel handing off to it. Per explicit
+// confirmation, the WHOLE section (heading through every grid card, one
+// long board) rises together as a single unit — not just a viewport-tall
+// "window" at the top with the grid staying put underneath.
 //
-// A curtain-sweep entrance is added on top, styled after that same
-// click-triggered "Explore our work" motion (LayoutSectionCurtain.vue /
-// useSectionCurtain.ts: a full panel rises to cover the viewport, then
-// lifts away to reveal the destination) — but scroll-triggered here rather
-// than click-triggered, and without the scroll jump (the user is already
-// arriving here naturally, so there's nothing to jump to mid-cover).
-// `navy-700` with a `yellow-500` leading edge, not `navy-950` — a curtain
-// the exact same color as the section behind it never visibly moves; this
-// exact bug shipped once already (see git history) and was caught only by
-// recording the animation frame-by-frame, so the color choice here is
-// deliberate, not decorative.
+// Mechanically: pin the section the moment its top reaches the viewport
+// top (the "diem dulu" hold), then scrub `risingRef`'s own `y` from one
+// viewport height (fully below-viewport, Trust still fully visible) to 0
+// (the whole board settled at its natural position) across a short, fixed
+// scroll distance — driven by the user's continued scroll, not a timer.
+// Pin releases once the rise completes; because the board is now sitting
+// at its natural y:0, normal scrolling continues straight into the grid
+// below with no extra jump.
 useGsapContext(() => {
   const section = sectionRef.value
-  const curtain = curtainRef.value
-  if (!section || !curtain) return
+  const rising = risingRef.value
+  if (!section || !rising) return
 
   const mm = gsap.matchMedia()
 
   mm.add('(prefers-reduced-motion: reduce)', () => {
-    gsap.set(curtain, { autoAlpha: 0 })
+    gsap.set(rising, { y: 0 })
   })
 
-  mm.add('(prefers-reduced-motion: no-preference)', () => {
-    gsap.set(curtain, { yPercent: 0 })
+  // Mobile skips the pin (pinning inside a short viewport tends to feel
+  // forced) and falls back to a plain scroll-triggered rise at 'top 90%',
+  // no hold/scrub.
+  mm.add('(prefers-reduced-motion: no-preference) and (min-width: 768px)', () => {
+    // `y` in pixels (viewport height), not `yPercent` — `rising` wraps the
+    // WHOLE section's content (heading through every grid card, several
+    // thousand px tall), so a percentage-based offset would translate it
+    // by that same multi-thousand-px height rather than one screen's worth.
+    // A fixed viewport-height rise reads as "the sheet rises one full
+    // screen to cover what's behind it", not a many-screens-long throw.
+    const riseDistance = window.innerHeight
 
-    // Starts earlier than useMaskedReveal's own trigger on the heading
-    // ('top 85%') so the curtain is already fully covering the section
-    // before any content underneath begins revealing — the heading/cards
-    // should never be visible "through" a gap before the curtain lifts.
+    gsap.set(rising, { y: riseDistance })
+
+    const pin = ScrollTrigger.create({
+      trigger: section,
+      start: 'top top',
+      end: '+=70%',
+      pin: true,
+      pinSpacing: true,
+      scrub: 0.5,
+      onUpdate: (self) => gsap.set(rising, { y: riseDistance * (1 - self.progress) })
+    })
+
+    return () => pin.kill()
+  })
+
+  mm.add('(prefers-reduced-motion: no-preference) and (max-width: 767px)', () => {
+    const riseDistance = window.innerHeight * 0.4
+
+    gsap.set(rising, { y: riseDistance })
+
     const trigger = ScrollTrigger.create({
       trigger: section,
-      start: 'top 95%',
+      start: 'top 90%',
       once: true,
       onEnter: () => {
-        gsap.to(curtain, {
-          yPercent: -100,
-          duration: 0.8,
-          ease: 'power3.inOut',
-          delay: 0.15
-        })
+        gsap.to(rising, { y: 0, duration: 0.8, ease: spatialEase.settle })
       }
     })
 
@@ -75,43 +96,44 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <BaseSection id="selected-work" as="section" class="relative overflow-hidden rounded-t-[2.5rem] bg-navy-950">
+  <BaseSection id="selected-work" as="section" class="relative overflow-hidden">
     <div ref="sectionRef" class="relative">
-      <!-- Fixed viewport height, not inset-0 relative to the section (which
-           spans the full card grid — several thousand px tall): the curtain
-           only needs to cover what's actually visible in the viewport when
-           the section first scrolls into view, not the section's entire
-           length. An inset-0 curtain that tall still visually reads as
-           "covering everything" at rest, but a -100% lift then travels its
-           own full (multi-thousand-px) height in the same 0.8s duration —
-           reading as a near-instant snap rather than a deliberate wipe. -->
-      <div ref="curtainRef" aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 z-20 h-screen bg-navy-700">
-        <div class="absolute inset-x-0 bottom-0 h-[3px] bg-yellow-500" />
+      <!-- bg-navy-950 and rounded-t-[2.5rem] live on `risingRef`, not the
+           section itself: the section's own box already occupies its
+           natural document-flow position the moment its top reaches the
+           viewport (that's what trips the pin), so a background/shape
+           painted directly on it would solidly cover Trust immediately,
+           before the content had actually risen — reproduced once already
+           (see the referenced screenshot: a flat navy frame with nothing
+           visible underneath, well before any rise had actually happened).
+           Keeping both on the translated element means Trust stays
+           genuinely visible, rounded top edge included, until the sheet
+           physically arrives. -->
+      <div ref="risingRef" class="relative rounded-t-[2.5rem] bg-navy-950">
+        <BaseContainer>
+          <h2 ref="headingRef" class="text-display-lg text-paper">
+            {{ heading }}
+          </h2>
+
+          <div class="mt-16 grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2">
+            <HomeSelectedWorkCard
+              v-for="(project, index) in projects"
+              :key="project.index"
+              :project="project"
+              :offset="index % 2 === 1"
+            />
+          </div>
+
+          <div class="mt-16 flex justify-center md:mt-20">
+            <NuxtLink
+              to="/work"
+              class="inline-flex items-center justify-center gap-2 rounded-full border border-navy-700 px-7 py-3.5 font-display text-sm font-semibold text-paper transition-colors duration-300 ease-editorial hover:border-yellow-500"
+            >
+              {{ cta }}
+            </NuxtLink>
+          </div>
+        </BaseContainer>
       </div>
-
-      <BaseContainer>
-        <h2 ref="headingRef" class="text-display-lg text-paper">
-          {{ heading }}
-        </h2>
-
-        <div class="mt-16 grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-2">
-          <HomeSelectedWorkCard
-            v-for="(project, index) in projects"
-            :key="project.index"
-            :project="project"
-            :offset="index % 2 === 1"
-          />
-        </div>
-
-        <div class="mt-16 flex justify-center md:mt-20">
-          <NuxtLink
-            to="/work"
-            class="inline-flex items-center justify-center gap-2 rounded-full border border-navy-700 px-7 py-3.5 font-display text-sm font-semibold text-paper transition-colors duration-300 ease-editorial hover:border-yellow-500"
-          >
-            {{ cta }}
-          </NuxtLink>
-        </div>
-      </BaseContainer>
     </div>
   </BaseSection>
 </template>
