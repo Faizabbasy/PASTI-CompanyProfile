@@ -131,21 +131,40 @@ useGsapContext(() => {
   }
   parent.addEventListener('pointermove', onPointerMove)
 
+  // Pause the render loop entirely when the scene isn't visible — tab in
+  // the background, or (should this ever sit lower on the page) scrolled
+  // out of the viewport — instead of relying on unmount alone, per the
+  // "pause expensive effects when off-screen" performance rule.
+  let isVisible = true
+  const intersectionObserver = new IntersectionObserver(
+    (entries) => { isVisible = entries[0]?.isIntersecting ?? true },
+    { threshold: 0 }
+  )
+  intersectionObserver.observe(parent)
+
+  let isTabVisible = document.visibilityState === 'visible'
+  const handleVisibilityChange = () => { isTabVisible = document.visibilityState === 'visible' }
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+
   const clock = new THREE.Clock()
   function tick() {
+    raf = requestAnimationFrame(tick)
+    if (!isVisible || !isTabVisible) return
+
     const elapsed = clock.getElapsedTime()
     uniforms.uTime.value = prefersReducedMotion ? 0 : elapsed
     uniforms.uPointer.value.set(pointer.x, pointer.y)
     mesh.rotation.y = elapsed * 0.08
     mesh.rotation.x = Math.sin(elapsed * 0.1) * 0.15
     renderer.render(scene, camera)
-    raf = requestAnimationFrame(tick)
   }
   raf = requestAnimationFrame(tick)
 
   return () => {
     cancelAnimationFrame(raf)
     resizeObserver.disconnect()
+    intersectionObserver.disconnect()
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
     parent.removeEventListener('pointermove', onPointerMove)
     geometry.dispose()
     material.dispose()

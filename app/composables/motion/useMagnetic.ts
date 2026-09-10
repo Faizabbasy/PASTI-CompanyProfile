@@ -23,14 +23,19 @@ export function useMagnetic(target: Ref<HTMLElement | null>, options: MagneticOp
     if (!window.matchMedia('(pointer: fine)').matches) return
     if (!window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return
 
+    // Gentler pull on tablet-width viewports — same reasoning as
+    // useCardTilt: a fine-pointer tablet still qualifies, but full
+    // desktop-strength attraction is too much movement for the screen size.
+    const pullStrength = tabletScaled(strength)
+
     const handleMove = (event: PointerEvent) => {
       const rect = el.getBoundingClientRect()
       const relX = event.clientX - (rect.left + rect.width / 2)
       const relY = event.clientY - (rect.top + rect.height / 2)
 
       gsap.to(el, {
-        x: relX * strength,
-        y: relY * strength,
+        x: relX * pullStrength,
+        y: relY * pullStrength,
         duration: motionDuration.medium,
         ease: motionEase.standard
       })

@@ -38,14 +38,19 @@ export function useCardTilt(target: Ref<HTMLElement | null>, options: CardTiltOp
     if (!window.matchMedia('(pointer: fine)').matches) return
     if (!window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return
 
+    // Tablet-width devices with a fine pointer (trackpad, stylus) still get
+    // the tilt, just gentler — a full desktop-strength 3D tilt reads as too
+    // much on a smaller, closer-held screen.
+    const tiltStrength = tabletScaled(strength)
+
     const handleMove = (event: PointerEvent) => {
       const rect = el.getBoundingClientRect()
       const relX = (event.clientX - rect.left) / rect.width - 0.5
       const relY = (event.clientY - rect.top) / rect.height - 0.5
 
       gsap.to(el, {
-        rotateX: relY * -strength,
-        rotateY: relX * strength,
+        rotateX: relY * -tiltStrength,
+        rotateY: relX * tiltStrength,
         rotate: baseRotate,
         scale: lift,
         duration: motionDuration.fast,

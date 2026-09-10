@@ -32,6 +32,10 @@ export function useScrollVelocitySkew(target: Ref<HTMLElement | null>, options: 
     const lenis = getLenisInstance()
     if (!lenis) return
 
+    // Tablet viewports get a smaller skew ceiling — the same clamp logic,
+    // just a lower cap, per the reduced-parallax tablet tier.
+    const skewCeiling = tabletScaled(maxSkew)
+
     const skewTo = gsap.quickTo(el, 'skewY', { duration: motionDuration.medium, ease: motionEase.standard })
     let resetTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -39,7 +43,7 @@ export function useScrollVelocitySkew(target: Ref<HTMLElement | null>, options: 
       // Lenis velocity is roughly px/frame; normalize and clamp rather than
       // chase its raw scale, which varies with wheel/trackpad input.
       const normalized = gsap.utils.clamp(-1, 1, instance.velocity / 12)
-      skewTo(normalized * maxSkew)
+      skewTo(normalized * skewCeiling)
 
       clearTimeout(resetTimer)
       resetTimer = setTimeout(() => skewTo(0), 120)

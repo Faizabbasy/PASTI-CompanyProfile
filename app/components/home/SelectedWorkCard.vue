@@ -42,14 +42,21 @@ useGsapContext(() => {
     // (odd rows, per SelectedWork.vue's md:mt-20 stagger) drift roughly 2x
     // further/faster than the base rate (-24 vs -12), matching the light
     // "cards move at slightly different speeds" effect referenced in the spec.
-    const parallax = gsap.matchMedia().add('(min-width: 768px)', () => {
-      const parallaxTween = gsap.to(card, {
-        y: props.offset ? -24 : -12,
-        ease: 'none',
-        scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: true }
-      })
-      return () => parallaxTween.kill()
-    })
+    // Tablet widths (768-1024px) get a reduced-distance version rather than
+    // the full desktop parallax throw.
+    const baseDistance = props.offset ? -24 : -12
+    const parallax = gsap.matchMedia().add(
+      { isTablet: '(min-width: 768px) and (max-width: 1024px)', isDesktop: '(min-width: 1025px)' },
+      (context) => {
+        const { isTablet } = context.conditions as { isTablet: boolean }
+        const parallaxTween = gsap.to(card, {
+          y: isTablet ? baseDistance * 0.5 : baseDistance,
+          ease: 'none',
+          scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: true }
+        })
+        return () => parallaxTween.kill()
+      }
+    )
 
     return () => {
       entrance.kill()
