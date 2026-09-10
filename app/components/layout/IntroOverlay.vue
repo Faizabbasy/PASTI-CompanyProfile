@@ -76,9 +76,13 @@ const introGroups: IntroGroup[] = [
   }
 ]
 
-const activeIntro = ref<IntroOption>('none')
+const activeIntro = ref<IntroOption>('agency-counter-logostack')
 const openGroup = ref('')
-const isDev = import.meta.dev
+// Dev switcher panel disabled: the intro direction is decided
+// ('agency-counter-logostack' — Counter grid, then Logo stack cycle), so
+// the picker no longer needs to render even in dev. Flip back to
+// `import.meta.dev` if comparing directions again becomes necessary.
+const isDev = false
 const replayKey = ref(0)
 
 // Explicit visibility flag for the intro overlay — set to false the moment
@@ -109,7 +113,7 @@ const prefersReducedMotion = ref(false)
 onMounted(() => {
   prefersReducedMotion.value = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  if (import.meta.dev) {
+  if (isDev) {
     const stored = sessionStorage.getItem('intro-preview')
     const allValues = introGroups.flatMap((g) => g.options.map((o) => o.value))
     if (stored && allValues.includes(stored as IntroOption)) {
