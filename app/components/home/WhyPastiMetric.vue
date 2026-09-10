@@ -9,6 +9,9 @@ const valueRef = ref<HTMLElement | null>(null)
 const iconRef = ref<HTMLElement | null>(null)
 
 const accent = props.tone === 'navy' ? 'border-navy-700' : 'border-yellow-600'
+const cardTone = props.tone === 'navy'
+  ? 'bg-gradient-to-br from-navy-50 via-navy-50 to-navy-100/80 shadow-[0_20px_45px_-25px_rgba(15,30,60,0.35)] ring-1 ring-navy-900/[0.04]'
+  : 'bg-gradient-to-br from-yellow-50 via-yellow-50 to-yellow-100/70 shadow-[0_20px_45px_-25px_rgba(120,90,0,0.25)] ring-1 ring-yellow-900/[0.05]'
 const numericMatch = props.metric.value?.match(/^(\d+)(.*)$/)
 const numericValue = numericMatch ? Number.parseInt(numericMatch[1]!, 10) : null
 const suffix = numericMatch ? numericMatch[2]! : ''
@@ -73,8 +76,8 @@ useGsapContext(() => {
 <template>
   <div
     ref="cardRef"
-    class="group relative flex h-full flex-col justify-between gap-8 overflow-hidden rounded-3xl p-8"
-    :class="tone === 'navy' ? 'bg-navy-50' : 'bg-yellow-50'"
+    class="group relative flex h-full flex-col justify-between gap-8 overflow-hidden rounded-3xl p-8 transition-shadow duration-500 ease-editorial"
+    :class="cardTone"
   >
     <span
       aria-hidden="true"
@@ -90,12 +93,12 @@ useGsapContext(() => {
     <span ref="iconRef" class="text-navy-700" aria-hidden="true" v-html="metric.icon" />
 
     <div>
-      <p v-if="metric.value" ref="valueRef" class="font-display text-display-md font-semibold text-ink">
+      <p v-if="metric.value" ref="valueRef" class="font-display text-display-xl font-bold leading-none tracking-tight text-ink">
         {{ metric.value }}
       </p>
       <p
         class="text-body-sm uppercase tracking-widest text-navy-500"
-        :class="metric.value ? 'mt-2' : 'text-body-lg normal-case tracking-normal text-ink'"
+        :class="metric.value ? 'mt-4' : 'text-body-lg normal-case tracking-normal text-ink'"
       >
         {{ metric.label }}
       </p>
