@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
 // Always start a fresh page load at the top instead of the browser's
 // default scroll-restoration (which keeps the last scroll position across
 // a reload). Runs before Lenis initializes so there's no smooth-scroll
@@ -12,37 +14,27 @@ useLenis()
 
 // Every ScrollTrigger created during initial mount (Hero, WhatWeDo, Service
 // rows, etc.) computes its start/end pixel positions against whatever the
-// page's layout is at that instant. That layout keeps shifting for a beat
-// after mount from several independent, hard-to-enumerate causes (web
-// fonts swapping in, a pinned section's spacer landing on ScrollTrigger's
-// own next internal refresh pass rather than synchronously, images without
-// reserved dimensions) — nothing self-heals a trigger whose start/end was
-// cached against a since-changed document height. Reproduced concretely:
-// Services' scroll-to-open accordion rows stopped opening at all once the
-// page's total height changed ~1s after mount. Rather than chase each
-// individual cause (tried a one-shot refresh on document.fonts.ready
-// first — didn't cover the pin-spacer case), watch the document's actual
-// height and refresh whenever it changes during the first few seconds
-// after mount, then stop watching — steady-state scroll interactions
-// don't need this, and onPageAfterEnter below already covers subsequent
-// route changes.
+// page's layout is at that instant. That layout keeps growing for a beat
+// after mount — each section's own onMounted hook creates more of the page
+// synchronously as Vue works down the tree, so an early trigger (e.g. the
+// first Service row) gets measured against a document that's still much
+// shorter than its final height. Nothing self-heals that: the row's
+// start/end stay cached against the too-short document forever unless
+// something calls refresh() afterwards.
+//
+// The global `ScrollTrigger.refresh()` was tried first and doesn't fix
+// this — on this page (pinned Hero + triggers created inside
+// gsap.matchMedia()) it actively recalculates every trigger back to its
+// original, too-early value instead of the current, correct one. Verified
+// by comparing it directly against each trigger's own instance
+// `.refresh()`, which *does* recompute correctly. Per-instance refresh on
+// every existing ScrollTrigger sidesteps whatever the global call gets
+// wrong. onPageAfterEnter below still uses the global call for subsequent
+// route changes, where this discrepancy hasn't been observed.
 if (import.meta.client) {
-  import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
-    let lastHeight = document.documentElement.scrollHeight
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined
-
-    const observer = new ResizeObserver(() => {
-      const height = document.documentElement.scrollHeight
-      if (height === lastHeight) return
-      lastHeight = height
-
-      clearTimeout(debounceTimer)
-      debounceTimer = setTimeout(() => ScrollTrigger.refresh(), 50)
-    })
-    observer.observe(document.body)
-
-    setTimeout(() => observer.disconnect(), 5000)
-  })
+  setTimeout(() => {
+    for (const trigger of ScrollTrigger.getAll()) trigger.refresh()
+  }, 2000)
 }
 
 const router = useRouter()
