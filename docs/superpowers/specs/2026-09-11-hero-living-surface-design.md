@@ -81,19 +81,59 @@ scope for this task.
 
 ## Scene architecture
 
-**Geometry**: one `PlaneGeometry`, subdivided (tier-dependent — see
-Responsive), sized to roughly 115–125% of the Hero's visible camera frustum
-at rest, refit on every resize from the current camera FOV/aspect/distance
-so the oversize ratio stays constant across viewport sizes. This margin
-exists so pointer deformation and scroll-driven depth/camera movement never
-expose the plane's edge, and so the surface reads as continuous beyond the
-viewport — not so large that shader detail/resolution is wasted. The plane
-is a Three.js object positioned behind Hero's DOM content; it never causes
-DOM overflow, since sizing is computed entirely in camera/world space inside
-the WebGL canvas, not via CSS transforms that could expand the container.
+**Geometry**: one `PlaneGeometry` per depth band (see Depth treatment below),
+subdivided (tier-dependent — see Responsive). 115–125% of the Hero's visible
+camera frustum at rest is the *starting* overscan range, not a fixed/hard
+maximum — see Dynamic overscan below for how the real per-band size is
+computed. Refit on every resize. The plane(s) are Three.js objects
+positioned behind Hero's DOM content; they never cause DOM overflow, since
+sizing is computed entirely in camera/world space inside the WebGL canvas,
+not via CSS transforms that could expand the container.
 
-**Material**: single custom `ShaderMaterial` (vertex + fragment), no
+**Dynamic overscan** (hard constraint — no fixed-edge case is acceptable):
+overscan is not a constant; it is computed at setup and on every resize from:
+- current camera FOV and aspect ratio (determines the base visible frustum
+  at each band's depth),
+- maximum possible pointer displacement (the shader's clamped max
+  displacement magnitude, converted to world-space units at that depth),
+- maximum possible scroll-depth displacement (the largest offset any band
+  reaches across `uScrollProgress` 0→1, including any per-band parallax
+  offset — see Depth treatment),
+- maximum camera movement (the largest `uCameraProgress`-driven camera
+  translation/FOV change across the scroll range).
+
+The plane size for each band = base frustum-at-depth + sum of the above
+displacement/movement budgets + a small fixed safety margin. This must be
+computed once analytically (not tuned by eyeballing a fixed percentage) so
+that no combination of pointer position, scroll position, and viewport size
+can ever expose a plane edge. The 115–125% figure from the original brief is
+the expected *result* of this computation at a typical desktop viewport, not
+an input to hardcode.
+
+**Material**: custom `ShaderMaterial` (vertex + fragment), no
 post-processing, no bloom.
+
+**Depth treatment** (hard constraint — must read as real spatial depth, not
+a flat plane with displacement): a single fullscreen plane with only
+vertex displacement is not sufficient on its own to produce foreground/mid/
+background separation, perspective evolution, or a "camera entering the
+material" read as scroll progresses — displacement alone reads as relief on
+a flat surface, not depth. The scene therefore uses a small number of
+depth bands (2–3 planes, e.g. `near`/`mid`/`far`), each:
+- positioned at a different world-space Z,
+- using the same shared shader (uniforms driven per-instance via
+  per-mesh uniform overrides, not duplicated shader code),
+- given a distinct `uLayerSeparation`-driven offset/scale/opacity response
+  to `uScrollProgress`, so bands visibly separate (move at different
+  rates, offset directionally) as scroll progresses — this is what produces
+  perspective evolution and spatial opening, not a single band's
+  displacement amplitude alone,
+- composited back-to-front, still all within the one WebGL canvas — no new
+  DOM elements, no change to Hero's layout or element count.
+
+This stays a single background canvas / single mounted component
+(`HeroLivingSurface.vue`) — "multi-band" here means multiple meshes inside
+one Three.js scene, not multiple canvases or DOM layers.
 
 **Vertex shader** — low-amplitude displacement, three additive terms:
 1. Pointer term: directional falloff from `uPointer`, biased along
@@ -210,6 +250,9 @@ Mirrors the lifecycle pattern already proven in the deleted component:
 - `IntersectionObserver` on the Hero section — pauses the RAF loop when
   scrolled out of view.
 - `visibilitychange` listener — pauses the RAF loop when the tab is hidden.
+- `matchMedia('(prefers-reduced-motion: reduce)')` `change` listener — live
+  toggles between the normal and reduced-motion branches for the lifetime of
+  the mount (see Reduced motion below); removed in cleanup.
 - DPR capped: 2 on desktop, 1.5 on tablet (`isTabletViewport()`), 1 on
   mobile.
 - Single RAF loop; no duplicate loops across HMR/remount (loop id tracked
@@ -218,8 +261,11 @@ Mirrors the lifecycle pattern already proven in the deleted component:
   pre-allocated `THREE.Vector2`/scalar holders mutated in place; uniform
   values are written directly, never replaced with new objects.
 - Full disposal in the composable's returned cleanup (`useGsapContext`
-  pattern): `geometry.dispose()`, `material.dispose()`, `renderer.dispose()`,
-  `ScrollTrigger.kill()`, observers disconnected, listeners removed.
+  pattern): every band's `geometry.dispose()` and `material.dispose()`
+  (materials are per-band instances or shared-program uniform-override
+  instances — either way, each is disposed individually), `renderer.
+  dispose()`, `ScrollTrigger.kill()`, observers disconnected, listeners
+  removed (including the `matchMedia` change listener above).
 
 ## Responsive
 
@@ -235,9 +281,12 @@ Mirrors the lifecycle pattern already proven in the deleted component:
 
 ## Reduced motion
 
-Under `prefers-reduced-motion: reduce` (checked once at setup, same as the
-deleted component's `window.matchMedia` check — no live-updating branch
-needed since this doesn't change mid-session):
+Under `prefers-reduced-motion: reduce`, checked via a `matchMedia('(prefers-
+reduced-motion: reduce)')` listener (`change` event) set up at mount and
+removed in cleanup — not a one-time check at setup. The OS-level setting can
+change mid-session (a real, if rare, path: user opens system settings while
+the tab is open), and the surface must respond to that live, switching
+between the two branches below without a remount:
 
 - No RAF loop for ambient/idle motion.
 - Pointer deformation disabled entirely (uniforms held at rest values).
@@ -261,11 +310,13 @@ the pointer while the headline is still revealing.
 
 ## Definition of done
 
-- Navbar, headline (text/font/size/line-height/tracking/position), subtext,
-  CTA labels/position/styles, content max-width/alignment/spacing/grid,
-  section height, and every other homepage section: byte-for-byte unchanged.
-- Existing Hero GSAP timeline (mask reveal, cursor spotlight, shine-sweep):
-  unchanged.
+- All Hero foreground/layout/content code must remain unchanged except the
+  single background component mount replacement (`Hero.vue:133-135`, see
+  Replacement above). This covers: navbar, headline (text/font/size/
+  line-height/tracking/position), subtext, CTA labels/position/styles,
+  content max-width/alignment/spacing/grid, section height, every other
+  homepage section, and the existing Hero GSAP timeline (mask reveal,
+  cursor spotlight, shine-sweep).
 - `HeroBgThreeNucleusOrigin.vue` deleted; `HeroLivingSurface.vue` mounted in
   its place via the same `ClientOnly` wrapper.
 - No centerpiece object silhouette — the background reads as one continuous
@@ -275,14 +326,21 @@ the pointer while the headline is still revealing.
 - Scroll drives global depth/layer-separation/camera-progress uniforms via
   a non-pinned, non-hijacking `ScrollTrigger` scoped to the Hero section;
   native scroll (including backward scroll) works normally.
+- Depth reads as real spatial depth (foreground/mid/background separation,
+  perspective evolution, camera-entering-material feel) via the multi-band
+  treatment — not a flat plane with displacement.
 - Colors are the exact existing navy/yellow/paper values, centralized as
   constants — no new palette, no approximation.
-- Plane oversize stays in the 115–125% range, refit on resize; no exposed
-  edges during pointer/scroll movement, no DOM overflow.
+- Overscan is computed dynamically per band from FOV/aspect/max pointer
+  displacement/max scroll-depth displacement/max camera movement (115–125%
+  is the expected desktop result, not a hardcoded constant) — no viewport
+  size, pointer position, or scroll position exposes a plane edge.
 - Mobile: no pointer dependency, ambient + scroll-depth motion intentional
   and present, lowest-tier subdivision/DPR.
-- Reduced motion: static resolved frame, no ambient/pointer/large-scroll
-  animation.
+- Reduced motion: responds live to `prefers-reduced-motion` changes via a
+  `matchMedia` listener (not a one-time setup check); shows a static
+  resolved frame with no ambient/pointer/large-scroll animation while
+  active.
 - No per-frame allocation, no duplicate RAF loops, full resource disposal,
   no WebGL leaks, no hydration mismatch, no console errors.
 - Production build + typecheck pass.
