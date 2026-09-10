@@ -4,7 +4,7 @@
 
 **Goal:** Replace the Hero's centerpiece-object background (`HeroBgThreeNucleusOrigin.vue`) with a single full-bleed, pointer+scroll-driven WebGL "Living Surface" — a multi-band shader plane system that reads as one responsive spatial material, not an object floating behind the text.
 
-**Architecture:** A thin Vue mount wrapper (`HeroLivingSurface.vue`) delegates all Three.js scene setup, uniform-driven animation, and lifecycle management to a composable (`useHeroLivingSurface.ts`). A separate generic composable (`usePointerVelocity.ts`) turns raw pointer events into a damped position/velocity/direction/strength signal with no Vue reactivity in the hot path; it tracks the tracked element's document-space top (immune to scroll) and derives the current viewport-space top from `window.scrollY` on every move, so pointer normalization stays correct as the non-pinned Hero moves relative to the viewport during scroll, without a layout read in the hot path. The scene renders 3 depth-band planes (near/mid/far) sharing one GLSL program via per-mesh uniform instances, alpha-composited (transparent, `depthWrite: false`, depth-dependent opacity) so all three bands visually coexist as one layered material rather than the nearest plane occluding the others, driven by pointer uniforms (local tension) and a non-pinned `ScrollTrigger` (global depth). The RAF loop is genuinely started/stopped (not just early-returned) by intersection/visibility/reduced-motion state, and pointer listener attach/detach targets the exact element it was attached to. The mobile/tablet/desktop tier is re-evaluated on every resize (not captured once at setup) — crossing a breakpoint mid-session live-updates DPR, pointer listener attachment and max speed, and geometry subdivision (rebuilt only when the tier's segment count actually changes, with the old geometry/material disposed). Only `Hero.vue`'s background mount tag changes; all foreground content, layout, and its existing GSAP timeline stay untouched.
+**Architecture:** A thin Vue mount wrapper (`HeroLivingSurface.vue`) delegates all Three.js scene setup, uniform-driven animation, and lifecycle management to a composable (`useHeroLivingSurface.ts`). A separate generic composable (`usePointerVelocity.ts`) turns raw pointer events into a damped position/velocity/direction/strength signal with no Vue reactivity in the hot path; it tracks the tracked element's document-space top (immune to scroll) and derives the current viewport-space top from `window.scrollY` on every move, so pointer normalization stays correct as the non-pinned Hero moves relative to the viewport during scroll, without a layout read in the hot path. The scene renders 3 depth-band planes (near/mid/far) sharing one GLSL program via per-mesh uniform instances, alpha-composited (transparent, `depthWrite: false`, low per-band opacity) so all three bands visually coexist as one layered material rather than the nearest plane occluding the others. Fragment color is **paper-dominant**: each band mixes from the existing paper white toward a navy gradient by a small per-band `uNavyMix` factor (max 0.22), so three composited bands never darken into a navy wash and the locked navy headline/CTA keep full contrast. Depth response is asymmetric by design — the near band is the most spatially responsive to both pointer and scroll (matching "foreground reacts most, background feels deeper/slower"), driven by pointer uniforms (local tension) and a non-pinned `ScrollTrigger` (global depth). The RAF loop is genuinely started/stopped (not just early-returned) by intersection/visibility/reduced-motion state, and pointer listener attach/detach targets the exact element it was attached to. The mobile/tablet/desktop tier is re-evaluated on every resize (not captured once at setup) — crossing a breakpoint mid-session live-updates DPR, pointer listener attachment and max speed, and geometry subdivision (rebuilt only when the tier's segment count actually changes, with the old geometry/material disposed); when a rebuild happens under reduced motion (no RAF loop to otherwise correct the freshly-created bands' default uniforms), one `renderFrame()` call explicitly resyncs them from current state without restarting continuous animation. Only `Hero.vue`'s background mount tag changes; all foreground content, layout, and its existing GSAP timeline stay untouched.
 
 **Tech Stack:** Nuxt 4, Vue 3 `<script setup lang="ts">`, TypeScript, Three.js, custom GLSL `ShaderMaterial`, GSAP + `ScrollTrigger`, Tailwind CSS (colors only, no new classes needed).
 
@@ -15,8 +15,10 @@
 - Only these files may change: create `app/components/home/HeroLivingSurface.vue`, `app/composables/motion/useHeroLivingSurface.ts`, `app/composables/motion/usePointerVelocity.ts`; modify `app/components/home/Hero.vue` (lines 133-135 only — swap the mounted component tag, nothing else); delete `app/components/home/hero-bg/HeroBgThreeNucleusOrigin.vue`. No other file touches this task.
 - All Hero foreground/layout/content code (navbar, headline, subtext, CTAs, spacing, section height, existing GSAP timeline including cursor-spotlight and shine-sweep) must remain byte-for-byte unchanged.
 - No centerpiece-object silhouette — the result must read as one continuous surface, never an object sitting behind the text.
-- Colors: use exactly `navy-700 #0B3954`, `navy-500 #1C5E7C`, `navy-900 #051B28`, `yellow-500 #FBBA00`, `paper #FFFFFF` (from `tailwind.config.ts`) as `THREE.Color` constants — no new/approximated colors.
+- Colors: use exactly `navy-700 #0B3954`, `navy-500 #1C5E7C`, `navy-900 #051B28`, `yellow-500 #FBBA00`, `paper #FFFFFF` (from `tailwind.config.ts`) as `THREE.Color` constants — no new/approximated colors. Every declared color constant must be actually used in the shader (no dead `COLOR_*` constants).
+- Color/brightness integrity: the composited surface must stay paper-dominant so the locked navy headline/subtext/CTA keep their existing contrast — navy appears only as translucent structural/depth modulation (capped `uNavyMix` per band), never as a fullscreen dark wash from three stacked navy planes.
 - Depth must read as real spatial depth via 2-3 depth-band planes (near/mid/far), not a single flat plane with displacement.
+- Depth-response hierarchy: the NEAR band must be the most spatially responsive to both pointer and scroll (foreground reacts most), MID moderate, FAR the most restrained (background feels deeper/slower) — not the reverse on either input axis.
 - Overscan per band is computed dynamically from FOV/aspect/max pointer displacement/max scroll displacement/max camera movement — never a hardcoded percentage.
 - `prefers-reduced-motion` is checked via a live `matchMedia` `change` listener, removed on cleanup — never a one-time check.
 - No scroll hijack: `ScrollTrigger` is scoped to the Hero `<section>`, `scrub` only, never `pin: true`.
@@ -24,6 +26,7 @@
 - Mobile (`max-width: 767px`): no pointer listener attached; ambient + scroll-depth motion still run; surface stays visually present, never a static gradient.
 - Responsive tier (mobile/tablet/desktop) is re-evaluated live on every resize, not captured once at setup — crossing a breakpoint updates DPR, pointer listener attach/detach, pointer max speed, and geometry subdivision (rebuilt only on an actual tier change, old geometry disposed) without a page reload, a duplicate listener, or an unnecessary rebuild.
 - Pointer bounds tracking must stay correct while the (non-pinned) Hero scrolls: no `getBoundingClientRect()` call inside the `pointermove` handler itself — only at `start()`/`updateBounds()` (called from resize), with the current viewport-space top derived from a cached document-space top plus `window.scrollY` on every move.
+- When a responsive-tier change triggers a geometry rebuild while `prefers-reduced-motion` is active, the freshly-created bands' uniforms must be explicitly resynced from current state (one `renderFrame()` call) — never left at their zeroed defaults, and never by restarting the continuous RAF loop.
 
 ---
 
@@ -416,12 +419,19 @@ void main() {
   pos.z += pointerAmp;
 
   // --- Scroll term: broad, low-frequency, larger wavelength than pointer.
-  // Far band uses a different phase/frequency than near so bands visibly
-  // separate (move differently) as scroll progresses, not just fade. ---
+  // Frequency/phase still differ per band (far uses a different phase/freq
+  // than near) so bands visibly separate — move differently, not in
+  // lockstep — as scroll progresses. Amplitude uses uDeformAmplitude (same
+  // near=1.0/mid=0.6/far=0.3 scale as the pointer term above), NOT an
+  // inverted band-depth mix: near must be the MOST spatially responsive
+  // band on scroll too, matching "foreground reacts most, background feels
+  // deeper/slower" — a far band that moved more than near (the old
+  // mix(0.5,1.0,uBandDepth), which gave far up to 1.0 and near only 0.5)
+  // was backwards from the intended depth hierarchy. ---
   float freq = mix(2.2, 1.3, uBandDepth);
   float phase = uScrollProgress * (3.14159 * mix(1.0, 1.6, uBandDepth));
   float scrollWave = sin(uv.x * freq + phase) * cos(uv.y * 1.6 - uBandDepth * 0.8);
-  pos.z += scrollWave * uLayerSeparation * 0.12 * mix(0.5, 1.0, uBandDepth);
+  pos.z += scrollWave * uLayerSeparation * 0.12 * uDeformAmplitude;
 
   // --- Ambient term: slow, continuous, low amplitude, per-band phase offset
   // so bands don't breathe in lockstep. ---
@@ -434,6 +444,7 @@ void main() {
 `
 
 const FRAGMENT_SHADER = `
+uniform vec3 uColorPaper;
 uniform vec3 uColorDeep;
 uniform vec3 uColorMid;
 uniform vec3 uColorLight;
@@ -442,6 +453,7 @@ uniform float uPointerStrength;
 uniform float uDepth;
 uniform float uBandDepth;
 uniform float uBandOpacity;
+uniform float uNavyMix;
 uniform float uTime;
 varying float vElevation;
 varying vec2 vUv;
@@ -449,25 +461,32 @@ varying vec2 vUv;
 ${NOISE_GLSL}
 
 void main() {
-  // Base tonal gradient, modulated by depth and local elevation. Far band
-  // is tonally cooler/darker (mixed further toward uColorDeep) than near,
-  // reinforcing atmospheric depth rather than three identical tints.
-  vec3 base = mix(uColorDeep, uColorMid, smoothstep(0.0, 1.0, vUv.y + uDepth * 0.2));
-  base = mix(base, uColorLight, clamp(vElevation * 2.5 + 0.15, 0.0, 0.35) * (1.0 - uBandDepth * 0.5));
-  base = mix(base, uColorDeep, uBandDepth * 0.25);
+  // Paper-dominant base: the Hero's existing background is white/paper, and
+  // the foreground (navy headline, navy/paper CTAs) is locked and must not
+  // read as recolored. So navy is a STRUCTURAL/DEPTH MODULATION on top of a
+  // paper base here, never a fullscreen dark wash — uNavyMix (per-band, see
+  // BAND_NAVY_MIX below) caps how far any band can pull away from paper
+  // before compositing, which is the real lever on perceived brightness
+  // (independent of uBandOpacity, which only controls how much of this
+  // band's own gradient shows through to the band behind it).
+  vec3 navyGradient = mix(uColorMid, uColorLight, smoothstep(0.0, 1.0, vUv.y + uDepth * 0.2));
+  navyGradient = mix(navyGradient, uColorDeep, uBandDepth * 0.3);
+  navyGradient = mix(navyGradient, uColorLight, clamp(vElevation * 2.5 + 0.15, 0.0, 0.35) * (1.0 - uBandDepth * 0.5));
+
+  vec3 base = mix(uColorPaper, navyGradient, uNavyMix);
 
   // Thin fresnel-like edge falloff (screen-space approximation via uv distance to center).
   float edge = smoothstep(0.15, 0.55, length(vUv - 0.5));
-  base += uColorLight * edge * 0.05 * (1.0 - uBandDepth * 0.4);
+  base = mix(base, uColorLight, edge * 0.04 * (1.0 - uBandDepth * 0.4) * uNavyMix);
 
-  // Static-frequency micro grain.
-  float grain = snoise(vec3(vUv * 220.0, 1.0)) * 0.02;
+  // Static-frequency micro grain, kept very subtle against the paper base.
+  float grain = snoise(vec3(vUv * 220.0, 1.0)) * 0.012;
   base += grain;
 
   // Restrained yellow accent, gated by high pointer velocity only, strongest
   // on the near band (the band closest to the cursor's implied depth).
   float accentGate = smoothstep(0.6, 1.0, uPointerStrength) * (1.0 - uBandDepth * 0.7);
-  base = mix(base, uColorAccent, accentGate * 0.04);
+  base = mix(base, uColorAccent, accentGate * 0.035);
 
   gl_FragColor = vec4(base, uBandOpacity);
 }
@@ -486,12 +505,27 @@ interface Band {
 // just three evenly-spaced translucent duplicates.
 const BAND_DEPTHS_T = [0, 0.55, 1] as const
 // Per-band base opacity: alpha-composited back-to-front so all three bands
-// visually coexist (fix for the "opaque planes occlude each other" issue) —
-// near is most opaque/present, far is the faintest, giving a real sense of
-// atmospheric recession without additive/neon blending.
-const BAND_BASE_OPACITY = [0.85, 0.5, 0.28] as const
-// Per-band deformation amplitude multiplier — near band reacts most to
-// pointer/scroll, far band barely moves, reinforcing "near is close".
+// visually coexist (fix for the "opaque planes occlude each other" issue).
+// Kept deliberately low across all three bands — this is NOT the lever for
+// "near feels more present" (that's BAND_NAVY_MIX below); it only controls
+// how much of a band's own gradient shows through to the band behind it,
+// so three stacked bands never compound into a dark wash over the Hero.
+const BAND_BASE_OPACITY = [0.55, 0.4, 0.3] as const
+// Per-band navy mix: how far this band's fragment color is pulled from the
+// paper base toward the navy gradient (see FRAGMENT_SHADER's uNavyMix). This
+// is the real brightness lever — kept low on every band (max 0.22 on the
+// near band) so the composited Hero background stays paper-dominant and the
+// locked navy headline keeps full contrast against it, never reading as a
+// fullscreen navy wash. Near is the most present structurally, far the most
+// atmospheric/faint — same ordering as before, just at a brightness budget
+// that preserves the existing Hero's perceived brightness.
+const BAND_NAVY_MIX = [0.22, 0.14, 0.08] as const
+// Per-band deformation amplitude multiplier — see Task-2-review fix #2:
+// NEAR must be the most spatially responsive band (strongest reaction to
+// both pointer AND scroll), far the most restrained, so depth reads as
+// "foreground reacts most, background feels deeper/slower" rather than the
+// reverse. Reused for both the pointer term (already correct pre-review)
+// and now also the scroll term (previously inverted — see VERTEX_SHADER).
 const BAND_DEFORM_AMPLITUDE = [1.0, 0.6, 0.3] as const
 
 export function useHeroLivingSurface(
@@ -531,12 +565,14 @@ export function useHeroLivingSurface(
   // Max possible per-uniform displacement magnitudes, matching the shader's
   // own coefficients above — used to compute dynamic overscan analytically
   // rather than guessing a fixed percentage (spec: Dynamic overscan).
-  // These mirror the shader's own coefficients exactly (pointerAmp's 0.06 *
-  // uDeformAmplitude, scrollWave's 0.12 * mix(0.5,1.0,uBandDepth)) — kept as
-  // named constants here so overscan math and the shader can't silently
-  // drift apart if either is tuned later.
-  const MAX_POINTER_DISPLACEMENT = 0.06 * 1.0 // uDeformAmplitude maxes out at 1.0 (near band)
-  const MAX_SCROLL_DISPLACEMENT = 0.12 * 1.0 // mix(0.5,1.0,uBandDepth) maxes out at 1.0 (far band)
+  // Both the pointer term (pointerAmp's 0.06 coefficient) and the scroll
+  // term (scrollWave's 0.12 coefficient) are now scaled by the SAME
+  // uDeformAmplitude per band (near=1.0/mid=0.6/far=0.3 — see the fixed
+  // scroll term above), so both max out on the near band, not split across
+  // two different bands as before. Kept as named constants here so overscan
+  // math and the shader can't silently drift apart if either is tuned later.
+  const MAX_POINTER_DISPLACEMENT = 0.06 // uDeformAmplitude maxes out at 1.0 (near band)
+  const MAX_SCROLL_DISPLACEMENT = 0.12 // uDeformAmplitude maxes out at 1.0 (near band) — was mix(0.5,1.0,uBandDepth) maxing on far; fixed to match the corrected scroll term
   const MAX_CAMERA_Z_SHIFT = 0.6 // see uCameraProgress camera dolly below
 
   function segmentsFor(tier: Tier): number {
@@ -586,6 +622,8 @@ export function useHeroLivingSurface(
           uDepth: { value: depthT },
           uBandOpacity: { value: BAND_BASE_OPACITY[i] },
           uDeformAmplitude: { value: BAND_DEFORM_AMPLITUDE[i] },
+          uNavyMix: { value: BAND_NAVY_MIX[i] },
+          uColorPaper: { value: COLOR_PAPER },
           uColorDeep: { value: COLOR_NAVY_900 },
           uColorMid: { value: COLOR_NAVY_700 },
           uColorLight: { value: COLOR_NAVY_500 },
@@ -630,13 +668,16 @@ export function useHeroLivingSurface(
 
       // Displacement/camera budgets converted to world units at this depth,
       // plus a small fixed safety margin — analytically sized, not eyeballed.
-      // Uses this band's own uDeformAmplitude/scroll-factor so near and far
-      // bands (which deform by different amounts, per fix #7) each get an
-      // accurately sized overscan rather than a shared worst case.
+      // Uses this band's own uDeformAmplitude for BOTH the pointer and
+      // scroll budget (matching the corrected VERTEX_SHADER, where both
+      // terms now share the same near=1.0/mid=0.6/far=0.3 amplitude scale)
+      // so each band gets an accurately sized overscan rather than a shared
+      // worst case — and, since near is now the largest-amplitude band on
+      // both axes, near also gets the largest overscan budget, correctly
+      // reflecting that it's the band with the most possible displacement.
       const deformAmplitude = BAND_DEFORM_AMPLITUDE[BAND_DEPTHS_T.indexOf(band.depthT as typeof BAND_DEPTHS_T[number])] ?? 1
-      const scrollFactor = 0.5 + band.depthT * 0.5 // mirrors mix(0.5,1.0,uBandDepth) in the shader
       const displacementBudget =
-        MAX_POINTER_DISPLACEMENT * deformAmplitude + MAX_SCROLL_DISPLACEMENT * scrollFactor + MAX_CAMERA_Z_SHIFT
+        (MAX_POINTER_DISPLACEMENT + MAX_SCROLL_DISPLACEMENT) * deformAmplitude + MAX_CAMERA_Z_SHIFT
       const safetyMargin = 0.15
 
       const width = frustumWidth + (displacementBudget + safetyMargin) * 2
@@ -666,8 +707,17 @@ export function useHeroLivingSurface(
   // were last built with — never on every resize). Called once at setup
   // and again only when resize() below detects the tier has actually
   // changed, so crossing breakpoints mid-session updates everything live
-  // without duplicating listeners or rebuilding geometry needlessly. ---
-  function applyTier(tier: Tier) {
+  // without duplicating listeners or rebuilding geometry needlessly.
+  //
+  // Returns whether a geometry rebuild happened, so the caller (resize(),
+  // and the initial setup call further down) can resync uniforms on the
+  // freshly-created bands afterward. This function itself does NOT call
+  // renderFrame()/resync uniforms — it's declared and first invoked before
+  // renderFrame/surfaceTensionProxy/scrollProgress exist further down in
+  // this file, so it cannot reference them. The resync happens at each
+  // call site instead, once those are available (see the two call sites
+  // below and the tier-change branch in resize()). ---
+  function applyTier(tier: Tier): boolean {
     const { clientWidth, clientHeight } = parent
     if (clientWidth > 0 && clientHeight > 0) {
       renderer.setPixelRatio(dprFor(tier))
@@ -675,8 +725,10 @@ export function useHeroLivingSurface(
     }
 
     const segments = segmentsFor(tier)
+    let rebuilt = false
     if (segments !== builtSegments) {
       createBands(segments) // disposes the old geometry/material internally
+      rebuilt = true
     }
 
     pointerOptions.maxSpeed = tier === 'tablet' ? 6 : 4
@@ -692,25 +744,17 @@ export function useHeroLivingSurface(
     }
 
     fitBands()
+    return rebuilt
   }
 
-  function resize() {
-    const nextTier = getTier()
-    if (nextTier !== currentTier) {
-      currentTier = nextTier
-      applyTier(currentTier) // covers DPR + geometry + pointer attach/detach + fitBands
-    } else {
-      const { clientWidth, clientHeight } = parent
-      if (clientWidth > 0 && clientHeight > 0) {
-        renderer.setPixelRatio(dprFor(currentTier))
-        renderer.setSize(clientWidth, clientHeight)
-      }
-      fitBands()
-    }
-    pointer.updateBounds()
-  }
+  // `resize` is declared as a mutable `let` (a no-op placeholder for now)
+  // and its real body assigned further down, right after `renderFrame`
+  // exists — its tier-change branch needs `renderFrame()` to resync
+  // freshly-rebuilt bands' uniforms under reduced motion. See the resync
+  // comment at that assignment.
+  let resize: () => void = () => {}
 
-  applyTier(currentTier) // initial tier-dependent setup (DPR, pointer attach, fitBands)
+  applyTier(currentTier) // initial tier-dependent setup (DPR, pointer attach, fitBands) — bands are fresh from createBands() above so there is nothing to resync yet at this point
   const resizeObserver = new ResizeObserver(() => resize())
   resizeObserver.observe(parent)
 
@@ -763,6 +807,40 @@ export function useHeroLivingSurface(
     }
 
     renderer.render(scene, camera)
+  }
+
+  // Real body of `resize` (declared as a no-op `let` above, before
+  // `renderFrame` existed) — assigned here now that `renderFrame` is
+  // available, since a tier change's geometry rebuild needs it to resync
+  // uniforms on the freshly-created bands. Fix: under reduced motion there
+  // is no continuous RAF loop to pick up the new bands' default (zeroed)
+  // uniforms on its own, so a rebuild must explicitly push one resolved
+  // frame afterward — never restarting the continuous loop.
+  resize = () => {
+    const nextTier = getTier()
+    if (nextTier !== currentTier) {
+      currentTier = nextTier
+      const rebuilt = applyTier(currentTier) // covers DPR + geometry + pointer attach/detach + fitBands
+      if (rebuilt && reducedMotion) {
+        // New bands' materials start with default (zeroed) uniforms; with
+        // no RAF loop running under reduced motion, nothing else will ever
+        // push the current resolved surface-tension/scroll state into them.
+        // One renderFrame() call resyncs every uniform (uTime, uScrollProgress,
+        // uLayerSeparation, uDepth, uSurfaceTension, and — since reducedMotion
+        // is true — it skips the pointer uniforms, which is correct, they
+        // stay at rest) from the existing scrollProgress/surfaceTensionProxy/
+        // elapsed state, without scheduling any further frames.
+        renderFrame()
+      }
+    } else {
+      const { clientWidth, clientHeight } = parent
+      if (clientWidth > 0 && clientHeight > 0) {
+        renderer.setPixelRatio(dprFor(currentTier))
+        renderer.setSize(clientWidth, clientHeight)
+      }
+      fitBands()
+    }
+    pointer.updateBounds()
   }
 
   function tick() {
@@ -923,8 +1001,17 @@ The mobile/tablet/desktop tier is re-evaluated on every resize
 (never captured once) via applyTier(), which updates DPR, pointer
 listener attach/detach, pointer max speed, and geometry subdivision
 (rebuilt only on an actual tier change, old geometry/material
-disposed) so crossing a breakpoint mid-session stays fully correct.
-Full disposal lifecycle on cleanup.
+disposed) so crossing a breakpoint mid-session stays fully correct;
+a rebuild under reduced motion explicitly resyncs the fresh bands'
+uniforms with one renderFrame() call instead of leaving them at
+zeroed defaults or restarting the continuous loop. Fragment color
+is paper-dominant (mixes from the existing paper white toward a
+capped per-band navy amount) so three composited bands never darken
+into a wash and the locked navy headline/CTA keep full contrast.
+Depth response is asymmetric by design: the near band is the most
+spatially responsive to both pointer and scroll, matching
+"foreground reacts most, background feels deeper/slower". Full
+disposal lifecycle on cleanup.
 
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 EOF
@@ -1047,6 +1134,16 @@ Responsive-tier and scroll-bounds QA (added for the live-tier and scroll-safe po
 - **Correct DPR after tier change** — after each resize above, the surface should render crisply without visible aliasing/blur inconsistent with the new tier's expected DPR cap.
 - **No stale geometry/resources** — after multiple tier changes, open DevTools Memory or just confirm no console warnings about disposed/leaked WebGL resources; the surface should look identical in detail level to a fresh page load at the same final viewport width (confirming old geometry was actually disposed and replaced, not accumulated).
 
+Color/readability QA (added for the paper-dominant compositing fix):
+- **Headline contrast** — with the Living Surface mounted, confirm the navy headline text is exactly as readable/high-contrast as it was against the old background (or against a plain paper background) — no perceptible darkening or muddying of the area directly behind the text.
+- **Subtext and CTA contrast** — same check for the subtext paragraph and both CTA buttons (including the outlined "Tell us about it" CTA, which relies on the paper background showing through its interior).
+- **Overall Hero brightness** — at rest (no pointer/scroll), the Hero should read as a bright, paper-dominant surface with subtle navy structure — not a navy/dark background with paper text floating on it. Compare a screenshot side-by-side with the pre-change Hero if in doubt.
+- **No visible "wash"** — scroll slowly through the Hero and confirm the surface never darkens into a flat navy fill at any scroll position; navy should always read as structural/directional modulation on the paper base, even at `uScrollProgress` near 1.
+
+Reduced-motion + tier-rebuild QA (added for the uniform-resync-on-rebuild fix):
+- **Reduced motion ON, then desktop → mobile → tablet → desktop** — with OS-level reduced motion enabled from the start, resize through every tier in sequence. At each stop, confirm: (a) the surface shows a static, resolved frame with no visible flash/reset to a "blank" or default-uniform state right after each resize (this is the specific bug being fixed — a rebuild's fresh bands would otherwise briefly or permanently show zeroed uniforms since no RAF loop exists to correct them), (b) the surface's visual character (surface tension, scroll depth) stays consistent with wherever the page was scrolled to before resizing, (c) confirm via DevTools Performance recording that no continuous RAF loop starts as a side effect of any of these resizes.
+- **Reduced motion ON, scrolled partway down the Hero, then resize across a tier boundary** — confirm the resolved static frame after the resize still reflects the scrolled-to depth state (not reset to the Hero's top-of-page resting state).
+
 - [ ] **Step 6: Commit**
 
 ```bash
@@ -1074,6 +1171,9 @@ EOF
 - Files created/modified/deleted → Tasks 1-3. ✓
 - Scene architecture (geometry, dynamic overscan, material, depth treatment, vertex/fragment shaders, uniforms) → Task 2 Step 1. ✓
 - Depth-band compositing (bands must visibly coexist, not occlude) → Task 2 Step 1 (`transparent: true`, `depthWrite: false`, per-band `uBandOpacity`, `renderOrder`). ✓
+- Color/brightness integrity (paper-dominant, no dark wash, headline contrast preserved) → Task 2 Step 1 (`uColorPaper`, `uNavyMix`, `BAND_NAVY_MIX`). ✓
+- Depth-response hierarchy (near most responsive on both pointer and scroll) → Task 2 Step 1 (`uDeformAmplitude` used symmetrically in both the pointer and scroll vertex-shader terms). ✓
+- Reduced-motion uniform resync after a tier-triggered rebuild → Task 2 Step 1 (`applyTier()` returns `rebuilt`, `resize()`'s tier-change branch calls `renderFrame()` once when `rebuilt && reducedMotion`). ✓
 - Pointer listener cleanup (detach from the exact attached element, cached bounds) → Task 1 Step 1 (`attachedEl`, `cachedRect`, `updateBounds`). ✓
 - Color source (centralized exact palette constants) → Task 2 Step 1 (`COLOR_*` constants). ✓
 - Pointer data flow → Task 1 (usePointerVelocity) + Task 2 (wiring into uniforms). ✓
@@ -1106,6 +1206,11 @@ EOF
 9. **Live responsive tier** — `isMobile`/`isTabletViewport()` were previously captured once (`const`) at setup, which would go stale if the viewport crossed a breakpoint via ordinary resize without a remount. Replaced with a `Tier` type, `getTier()`, and `let currentTier`, re-evaluated on every `resize()` call. `applyTier(tier)` centralizes every tier-dependent side effect — DPR (`dprFor`), pointer listener attach/detach (`pointer.start()`/`pointer.stop()`, both now idempotent — `start()` no-ops if already attached to the same element, guarding against a duplicate listener even if called from multiple paths), pointer `maxSpeed` (via the live-read fix below), and geometry subdivision (`createBands(segments)`, called only when `segmentsFor(tier) !== builtSegments`, with the old geometry/material disposed inside `createBands` itself before rebuilding). `resize()` calls `applyTier()` only when `getTier()` actually differs from `currentTier`; an ordinary same-tier resize takes a cheaper path (DPR set once more — a no-op set, not a rebuild — plus `fitBands()`) without touching geometry or the pointer listener.
 10. **Pointer options read live, not captured once** — found while wiring `applyTier()`'s per-tier `maxSpeed`: Task 1's original `usePointerVelocity` captured `const maxSpeed = options.maxSpeed ?? 4` once at construction, so `applyTier` mutating `pointerOptions.maxSpeed` afterward would have silently done nothing. Fixed by changing `dampingSpeed`/`maxSpeed` to functions (`() => options.dampingSpeed ?? 6`) called fresh inside `tick()`, so mutating the same options object passed at construction takes effect on the next tick — no need to reconstruct the composable per tier, and no duplicate `usePointerVelocity()` instances (which would have risked duplicate listeners).
 11. **Pointer bounds correctness during scroll** — the Hero is not pinned, so a cached `DOMRect` (with its viewport-space `top`) captured once at `start()`/resize would go stale the moment the user scrolls, since the Hero's position relative to the viewport changes continuously while its position in the *document* does not. Fixed by caching `cachedDocumentTop = rect.top + window.scrollY` (document-space, stable across scroll) alongside the genuinely-stable `width`/`height`/`left`, then deriving `currentTop = cachedDocumentTop - window.scrollY` inside `handlePointerMove` on every move — `window.scrollY` is a plain property read (no layout), so this adds no cost to the high-frequency handler while keeping normalization correct at any scroll position. Verified via the new QA checks (pointer behavior at 25%/50%/75% scroll through the Hero).
+
+**Fourth-pass corrections (final visual/runtime review), verified fixed:**
+12. **Hero color/readability integrity** — the original fragment shader mixed between navy-only tones (`uColorDeep`/`uColorMid`/`uColorLight`) with per-band opacity 0.85/0.5/0.28, which composites three fullscreen navy planes into a genuinely dark background — enough to threaten contrast against the locked navy headline and reads as a recolored Hero, not a background treatment. Fixed by making the base color **paper-dominant**: `base = mix(uColorPaper, navyGradient, uNavyMix)`, where `uNavyMix` is a small per-band constant (`BAND_NAVY_MIX = [0.22, 0.14, 0.08]`, near/mid/far) capping how far any band can pull away from white before compositing — this, not `uBandOpacity`, is now the real brightness lever. `uBandOpacity` was also lowered (`[0.55, 0.4, 0.3]`) so it only controls how much of a band's own gradient shows through to the band behind it, never how dark the Hero gets overall. `COLOR_PAPER` (previously declared but unused — a real issue on its own, since an unused constant is dead code) is now wired into every band's uniforms as `uColorPaper` and is the dominant term in the mix. Grain and fresnel-edge contributions were also reduced/gated by `uNavyMix` so they can't reintroduce darkening independently. New QA section added (headline/subtext/CTA contrast checks, overall brightness comparison, no-wash-at-full-scroll check).
+13. **Scroll depth response direction** — the original scroll term used `uLayerSeparation * 0.12 * mix(0.5, 1.0, uBandDepth)`, which gives the FAR band (uBandDepth=1) the largest scroll-driven displacement (up to 1.0×) and the NEAR band (uBandDepth=0) the smallest (0.5×) — backwards from the intended depth hierarchy where the foreground should feel the most spatially alive and the background the most restrained/atmospheric. Fixed by replacing that inverted factor with the same `uDeformAmplitude` already used for the pointer term (near=1.0/mid=0.6/far=0.3), so both pointer AND scroll now correctly make the near band the most responsive and the far band the calmest, while frequency/phase still differ per band so layers don't move in lockstep. The dynamic-overscan math in `fitBands()` was updated to match: `MAX_POINTER_DISPLACEMENT`/`MAX_SCROLL_DISPLACEMENT` both now scale by the same per-band `deformAmplitude`, correctly giving the near band (now the largest-displacement band on both axes) the largest overscan budget instead of splitting the worst case across two different bands as before.
+14. **Reduced motion + tier-rebuild uniform resync** — `applyTier()`'s `createBands()` call replaces all band meshes/materials on an actual tier change, and fresh `ShaderMaterial` instances start with the uniform default values given in their `uniforms` object at construction (0 for `uSurfaceTension`/`uScrollProgress`/`uTime`/etc.) — with no continuous RAF loop running under `prefers-reduced-motion`, nothing would otherwise push the Hero's actual current resolved state (surface tension already ramped in, current clamped scroll position) into these new bands, leaving them visually reset. Fixed by having `applyTier()` return whether it actually rebuilt geometry, and having `resize()`'s tier-change branch call `renderFrame()` exactly once, only when `rebuilt && reducedMotion`, to resync every relevant uniform from the existing `scrollProgress`/`surfaceTensionProxy`/`elapsed` state — without scheduling any further frames or restarting the continuous loop (pointer uniforms are correctly skipped in that call too, same as every other reduced-motion `renderFrame()` call in the file). This required restructuring `resize` from a `const` defined before `renderFrame` existed into a `let` whose real body is assigned after `renderFrame` is available, since the resync could not otherwise reference it. New QA section added (reduced-motion-on, tier-crossing-in-sequence check; scrolled-then-resized check).
 
 ---
 
