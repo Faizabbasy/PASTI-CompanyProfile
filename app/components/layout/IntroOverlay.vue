@@ -77,7 +77,7 @@ const introGroups: IntroGroup[] = [
 ]
 
 const activeIntro = ref<IntroOption>('none')
-const openGroup = ref('Agency')
+const openGroup = ref('')
 const isDev = import.meta.dev
 const replayKey = ref(0)
 

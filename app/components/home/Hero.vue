@@ -355,7 +355,7 @@ const bgGroups: BgGroup[] = [
 ]
 
 const activeBg = ref<HeroBgOption>('3d-nucleus-origin')
-const openGroup = ref<string>('3D')
+const openGroup = ref<string>('')
 const isDev = import.meta.dev
 
 onMounted(() => {
