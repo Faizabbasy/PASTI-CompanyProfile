@@ -640,5 +640,15 @@ export function useHeroLivingSurface(
       band.material.dispose()
     }
     renderer.dispose()
+    // renderer.dispose() only frees Three.js-side resources — it does not
+    // release the underlying WebGL context back to the browser/GPU driver.
+    // Without forceContextLoss(), every remount (HMR during development,
+    // or any future SPA navigation back to this component) leaks a WebGL
+    // context; browsers cap the number of live contexts, and once that cap
+    // is hit the next context creation is silently dropped by the driver
+    // (surfaces as "WebGL: CONTEXT_LOST_WEBGL" / a D3D11 allocation error
+    // on Windows/ANGLE), leaving the canvas blank with no error the user
+    // can act on. This call actually returns the context to the pool.
+    renderer.forceContextLoss()
   }
 }
