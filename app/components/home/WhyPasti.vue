@@ -52,9 +52,11 @@ useGsapContext(() => {
   mm.add('(prefers-reduced-motion: no-preference)', () => {
     const words = Array.from(el.querySelectorAll<HTMLElement>('[data-intro-word]'))
     const accentWords = Array.from(el.querySelectorAll<HTMLElement>('[data-intro-accent]'))
+    const accentGlows = Array.from(el.querySelectorAll<HTMLElement>('[data-intro-glow]'))
 
     gsap.set(words, { yPercent: 120 })
     gsap.set(accentWords, { color: 'currentColor' })
+    gsap.set(accentGlows, { opacity: 0 })
     if (line) gsap.set(line, { scaleY: 0, transformOrigin: '0% 0%' })
 
     const tl = gsap.timeline({
@@ -63,7 +65,11 @@ useGsapContext(() => {
 
     tl.to(words, { yPercent: 0, duration: motionDuration.editorial, ease: motionEase.standard, stagger: motionStagger.base })
     if (line) tl.to(line, { scaleY: 1, duration: motionDuration.slow, ease: spatialEase.settle }, 0.1)
+    // Highlighted phrases light up like they've been caught by a spotlight
+    // — color shift plus a soft glow blooming in behind the word, not just
+    // a flat color swap.
     tl.to(accentWords, { color: '#eab308', duration: motionDuration.medium, ease: motionEase.standard, stagger: motionStagger.loose }, '-=0.3')
+    tl.to(accentGlows, { opacity: 1, duration: motionDuration.slow, ease: spatialEase.drift, stagger: motionStagger.loose }, '<')
 
     return () => tl.kill()
   })
@@ -71,8 +77,10 @@ useGsapContext(() => {
   mm.add('(prefers-reduced-motion: reduce)', () => {
     const words = el.querySelectorAll<HTMLElement>('[data-intro-word]')
     const accentWords = el.querySelectorAll<HTMLElement>('[data-intro-accent]')
+    const accentGlows = el.querySelectorAll<HTMLElement>('[data-intro-glow]')
     gsap.set(words, { yPercent: 0 })
     gsap.set(accentWords, { color: '#eab308' })
+    gsap.set(accentGlows, { opacity: 1 })
     if (line) gsap.set(line, { scaleY: 1 })
   })
 })
@@ -82,7 +90,7 @@ useGsapContext(() => {
   <BaseSection as="section">
     <BaseContainer>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
-        <p ref="labelRef" class="eyebrow text-base font-bold tracking-wider md:col-span-3 md:text-lg">
+        <p ref="labelRef" class="font-display text-2xl font-bold uppercase tracking-wide text-navy-700 md:col-span-3 md:text-3xl">
           {{ label }}
         </p>
 
@@ -97,12 +105,17 @@ useGsapContext(() => {
           />
 
           <p ref="introRef" class="text-display-sm font-medium leading-snug text-ink">
-            <template v-for="(item, i) in introWords" :key="i"><span class="inline-block -my-[0.2em] overflow-clip align-top"><span
+            <template v-for="(item, i) in introWords" :key="i"><span class="relative inline-block align-top"><span
+              v-if="item.accent"
+              data-intro-glow
+              aria-hidden="true"
+              class="pointer-events-none absolute -inset-x-2 -inset-y-3 -z-10 rounded-full bg-yellow-400/40 blur-xl"
+            /><span class="inline-block -my-[0.2em] overflow-clip align-top"><span
               data-intro-word
               :data-intro-accent="item.accent ? '' : null"
               class="inline-block py-[0.2em]"
               :class="item.accent ? 'font-semibold' : ''"
-            >{{ item.word }}</span></span>{{ i < introWords.length - 1 ? ' ' : '' }}</template>
+            >{{ item.word }}</span></span></span>{{ i < introWords.length - 1 ? ' ' : '' }}</template>
           </p>
         </div>
       </div>
