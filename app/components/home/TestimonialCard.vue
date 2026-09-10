@@ -5,12 +5,16 @@ defineProps<{ testimonial: Testimonial }>()
 
 const cardRef = ref<HTMLElement | null>(null)
 defineExpose({ cardRef })
+
+const { setState } = useCustomCursor()
 </script>
 
 <template>
   <div
     ref="cardRef"
     class="testimonial-card relative flex h-full flex-col gap-6 overflow-hidden rounded-3xl border border-navy-800 bg-navy-900 p-8 shadow-[0_30px_60px_-30px_rgba(0,0,0,0.5)] transition-transform duration-500 ease-editorial hover:!rotate-0 md:p-10"
+    @mouseenter="setState('view')"
+    @mouseleave="setState('default')"
   >
     <span
       aria-hidden="true"

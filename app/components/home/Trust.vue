@@ -13,6 +13,8 @@ const trackRef = ref<HTMLElement | null>(null)
 const hoveredClient = ref<string | null>(null)
 const paused = ref(false)
 
+const { setState } = useCustomCursor()
+
 useMaskedReveal(headingRef, { by: 'word' })
 
 useGsapContext(() => {
@@ -58,7 +60,8 @@ useGsapContext(() => {
           class="trust-logo flex h-24 w-56 shrink-0 items-center justify-center transition-all duration-400 ease-editorial"
           :class="[i >= clients.length ? 'motion-reduce:hidden' : '', hoveredClient === client.name ? 'scale-110' : 'scale-100']"
           :style="{ opacity: hoveredClient && hoveredClient !== client.name ? 0.3 : 1 }"
-          @mouseenter="hoveredClient = client.name"
+          @mouseenter="hoveredClient = client.name; setState('view')"
+          @mouseleave="setState('default')"
         >
           <img
             :src="client.logo"

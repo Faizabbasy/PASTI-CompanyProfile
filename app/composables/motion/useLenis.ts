@@ -43,6 +43,16 @@ export function useLenis() {
 }
 
 /**
+ * Read-only access to the shared Lenis instance, for composables that need
+ * to subscribe to its 'scroll' event (e.g. useScrollVelocitySkew) without
+ * starting a second instance. Returns undefined if Lenis hasn't started
+ * (prefers-reduced-motion, or called before useLenis()).
+ */
+export function getLenisInstance() {
+  return lenis
+}
+
+/**
  * Jumps to a target with no scroll animation — used by useSectionCurtain to
  * reposition the page while a full-screen panel hides the viewport, so the
  * jump itself is never seen. Falls back to native scrollIntoView when Lenis

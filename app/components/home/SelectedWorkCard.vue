@@ -13,6 +13,7 @@ const cardRef = ref<HTMLElement | null>(null)
 const mediaRef = ref<HTMLElement | null>(null)
 
 const { setState } = useCustomCursor()
+useScrollVelocitySkew(mediaRef, { maxSkew: 1.5 })
 
 useGsapContext(() => {
   const card = cardRef.value
