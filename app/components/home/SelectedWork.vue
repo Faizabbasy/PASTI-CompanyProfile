@@ -18,24 +18,17 @@ const risingRef = ref<HTMLElement | null>(null)
 const headingRef = ref<HTMLElement | null>(null)
 useMaskedReveal(headingRef, { by: 'word' })
 
-// A curtain wipe that reveals the section the first time it's scrolled
-// into view — the same "hidden behind a panel, then unveiled" language as
-// Hero's "Explore our work" CTA jump (LayoutSectionCurtain), but scroll-
-// triggered here rather than click-triggered, and without the scroll jump
-// (the user is already arriving here naturally). Per direct feedback, the
-// content block itself (heading/grid/CTA, `risingRef`) now rises into
-// place under the panel rather than just sitting static behind it — so
-// the moment reads as the whole block surfacing, not merely a curtain
-// sliding off inert content. Once the curtain finishes lifting away, all
-// cards currently in the grid reveal together in one coordinated stagger.
-// This force-resets each card to its SelectedWorkCard.vue-authored hidden
-// state right before the reveal regardless of whether that card's own
-// `top 88%` ScrollTrigger already fired while still behind the curtain —
-// harmless, since the opaque curtain panel (z-20, h-screen) fully hides
-// the grid underneath either way, so re-triggering the reveal in sync
-// with the lift is indistinguishable from the card never having fired.
-// Cards scrolled to later keep playing their own independent entrance in
-// SelectedWorkCard.vue as they come into view normally.
+// A brief scroll-pinned curtain reveal, per direct feedback: the section
+// should hold still the moment it's reached (not auto-play immediately),
+// then the content block (heading/grid/CTA, `risingRef`) rises into place
+// — under the lifting curtain panel — driven by the user's own continued
+// scroll input (scrubbed), not a timer. Only once that short pinned rise
+// completes does the pin release and normal scrolling resume; cards then
+// reveal together in one coordinated stagger. This is a short, one-shot
+// pin (not the earlier dominant-card cinematic pin that was reverted —
+// that one cycled through cards for 150-200vh of scroll and was reverted
+// for feeling "stuck"; this pin only covers the single rise gesture, a
+// small fixed scroll distance, then gets out of the way).
 useGsapContext(() => {
   const section = sectionRef.value
   const curtain = curtainRef.value
@@ -51,37 +44,70 @@ useGsapContext(() => {
     gsap.set(rising, { y: 0, autoAlpha: 1 })
   })
 
+  // Mobile skips the pin entirely (per the plan's global mobile-adaptation
+  // rule: pins feel forced in a short mobile viewport) and falls back to a
+  // plain scroll-triggered reveal at 'top 85%', no scrub/hold. Nested inside
+  // the outer '(prefers-reduced-motion: no-preference)' branch below, so
+  // only the viewport width needs to be queried here.
   mm.add('(prefers-reduced-motion: no-preference)', () => {
+    const isDesktop = window.matchMedia('(min-width: 768px)').matches
+
     gsap.set(curtain, { yPercent: 0 })
-    gsap.set(rising, { y: 48, autoAlpha: 0 })
+    gsap.set(rising, { y: 120, autoAlpha: 0 })
+    gsap.set(cards, { opacity: 0, scale: 1.08, clipPath: 'inset(6% round 16px)' })
 
-    // Starts earlier than useMaskedReveal's own trigger on the heading
-    // ('top 85%') so the curtain is already fully covering the section
-    // before any content underneath begins revealing — the heading/cards
-    // should never be visible "through" a gap before the curtain lifts.
-    const trigger = ScrollTrigger.create({
+    const revealCards = () =>
+      gsap.to(cards, {
+        opacity: 1,
+        scale: 1,
+        clipPath: 'inset(0% round 16px)',
+        duration: 1,
+        ease: motionEase.standard,
+        stagger: motionStagger.wide
+      })
+
+    if (!isDesktop) {
+      const trigger = ScrollTrigger.create({
+        trigger: section,
+        start: 'top 85%',
+        once: true,
+        onEnter: () => {
+          gsap.to(rising, { y: 0, autoAlpha: 1, duration: 0.8, ease: spatialEase.enter })
+          gsap.to(curtain, { yPercent: -100, duration: 0.8, ease: 'power3.inOut' })
+          revealCards()
+        }
+      })
+      return () => trigger.kill()
+    }
+
+    // Desktop/tablet: pin the section right as it reaches the top of the
+    // viewport (the "hold still" moment), then scrub the rise/lift across
+    // a short, fixed scroll distance (60% of viewport height) driven by
+    // the user's own continued scroll — not an auto-playing timeline.
+    let cardsRevealed = false
+    const pin = ScrollTrigger.create({
       trigger: section,
-      start: 'top 95%',
-      once: true,
-      onEnter: () => {
+      start: 'top top',
+      end: `+=${window.innerHeight * 0.6}`,
+      pin: true,
+      pinSpacing: true,
+      scrub: 0.4,
+      onUpdate: (self) => {
+        gsap.set(rising, { y: 120 * (1 - self.progress), autoAlpha: self.progress })
+        gsap.set(curtain, { yPercent: -100 * self.progress })
+      },
+      onLeave: () => {
+        if (cardsRevealed) return
+        cardsRevealed = true
+        revealCards()
+      },
+      onLeaveBack: () => {
+        cardsRevealed = false
         gsap.set(cards, { opacity: 0, scale: 1.08, clipPath: 'inset(6% round 16px)' })
-
-        const tl = gsap.timeline()
-
-        tl.to(rising, { y: 0, autoAlpha: 1, duration: 0.8, ease: spatialEase.enter, delay: 0.15 })
-          .to(curtain, { yPercent: -100, duration: 0.8, ease: 'power3.inOut' }, '<')
-          .to(cards, {
-            opacity: 1,
-            scale: 1,
-            clipPath: 'inset(0% round 16px)',
-            duration: 1,
-            ease: motionEase.standard,
-            stagger: motionStagger.wide
-          }, '-=0.35')
       }
     })
 
-    return () => trigger.kill()
+    return () => pin.kill()
   })
 })
 </script>
