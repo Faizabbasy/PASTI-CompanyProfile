@@ -1,15 +1,55 @@
 <script setup lang="ts">
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { FaqItem } from '~/composables/useFaq'
+
+if (import.meta.client) {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 defineProps<{ item: FaqItem }>()
 
 const open = ref(false)
 const rowRef = ref<HTMLElement | null>(null)
+const dividerRef = ref<HTMLElement | null>(null)
 useScrollReveal(rowRef)
+
+// Structural Expansion: the top divider grows outward from its center
+// point as the item enters the viewport, reading as a structural line
+// rather than a CSS border fading in (LARGE_SCALE_MOTION_PLAN.md section 10).
+useGsapContext(() => {
+  const divider = dividerRef.value
+  const row = rowRef.value
+  if (!divider || !row) return
+
+  const mm = gsap.matchMedia()
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    gsap.set(divider, { scaleX: 0, transformOrigin: '50% 50%' })
+
+    const anim = gsap.to(divider, {
+      scaleX: 1,
+      duration: motionDuration.editorial,
+      ease: spatialEase.settle,
+      scrollTrigger: { trigger: row, start: 'top 90%', toggleActions: 'restart none restart reverse' }
+    })
+
+    return () => anim.kill()
+  })
+
+  mm.add('(prefers-reduced-motion: reduce)', () => {
+    gsap.set(divider, { scaleX: 1 })
+  })
+})
 </script>
 
 <template>
-  <div ref="rowRef" class="group/row relative border-t border-navy-800 pl-6">
+  <div ref="rowRef" class="group/row relative pl-6">
+    <span
+      ref="dividerRef"
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-x-0 top-0 h-px bg-navy-800"
+    />
     <span
       aria-hidden="true"
       class="absolute -left-px top-0 h-full w-0.5 origin-top scale-y-0 bg-yellow-400 transition-transform duration-500 ease-editorial group-hover/row:scale-y-100"
