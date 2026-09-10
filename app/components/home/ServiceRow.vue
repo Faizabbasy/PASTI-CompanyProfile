@@ -24,23 +24,30 @@ useGsapContext(() => {
     gsap.set(body, { height: 0, opacity: 0 })
     gsap.set(bodyText, { y: 16, opacity: 0 })
 
+    // Widened from the original 'top 75%'/'bottom 35%' (a ~40vh window) to
+    // 'top 85%'/'bottom 20%' (~65vh) — a fast wheel/trackpad flick could
+    // carry a row's whole active window in under one scroll event, so the
+    // open tween never got a chance to visibly land before the row closed
+    // again. The wider window plus the shorter durations below make the
+    // open/close state robust at realistic human scroll speeds, not just
+    // slow deliberate ones — same one-row-open-at-a-time logic, unchanged.
     const st = ScrollTrigger.create({
       trigger: row,
-      start: 'top 75%',
-      end: 'bottom 35%',
+      start: 'top 85%',
+      end: 'bottom 20%',
       onToggle: (self) => {
         isOpen.value = self.isActive
         gsap.to(body, {
           height: self.isActive ? 'auto' : 0,
           opacity: self.isActive ? 1 : 0,
-          duration: 0.85,
+          duration: 0.5,
           ease: 'cubic-bezier(0.16, 1, 0.3, 1)'
         })
         gsap.to(bodyText, {
           y: self.isActive ? 0 : 16,
           opacity: self.isActive ? 1 : 0,
-          duration: 0.65,
-          delay: self.isActive ? 0.2 : 0,
+          duration: 0.4,
+          delay: self.isActive ? 0.1 : 0,
           ease: 'cubic-bezier(0.16, 1, 0.3, 1)'
         })
       }
