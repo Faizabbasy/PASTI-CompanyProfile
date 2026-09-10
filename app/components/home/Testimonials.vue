@@ -60,7 +60,7 @@ useGsapContext(() => {
       rotate: 0,
       duration: 1.1,
       ease: 'cubic-bezier(0.16, 1, 0.3, 1)',
-      stagger: 0.15
+      stagger: motionStagger.wide
     })
 
     return () => tl.kill()

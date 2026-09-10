@@ -22,7 +22,7 @@ interface ScrollRevealOptions {
 export function useScrollReveal(target: Ref<HTMLElement | null>, options: ScrollRevealOptions = {}) {
   if (!import.meta.client) return
 
-  const { y = 32, scale, stagger = 0.08, children } = options
+  const { y = 32, scale, stagger = motionStagger.loose, children } = options
 
   onMounted(() => {
     const el = target.value
@@ -40,7 +40,7 @@ export function useScrollReveal(target: Ref<HTMLElement | null>, options: Scroll
 
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       const fromVars: gsap.TweenVars = { opacity: 0, y }
-      const toVars: gsap.TweenVars = { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger }
+      const toVars: gsap.TweenVars = { opacity: 1, y: 0, duration: motionDuration.editorial, ease: motionEase.standard, stagger }
 
       if (scale) {
         fromVars.scale = scale

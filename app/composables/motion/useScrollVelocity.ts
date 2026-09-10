@@ -32,7 +32,7 @@ export function useScrollVelocitySkew(target: Ref<HTMLElement | null>, options: 
     const lenis = getLenisInstance()
     if (!lenis) return
 
-    const skewTo = gsap.quickTo(el, 'skewY', { duration: 0.5, ease: 'power3.out' })
+    const skewTo = gsap.quickTo(el, 'skewY', { duration: motionDuration.medium, ease: motionEase.standard })
     let resetTimer: ReturnType<typeof setTimeout> | undefined
 
     const handleScroll: ScrollCallback = (instance) => {

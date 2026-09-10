@@ -47,8 +47,8 @@ export function useAmbientLight(canvasRef: Ref<HTMLCanvasElement | null>) {
     let velocity = { x: 0, y: 0 }
     let hasPointer = false
 
-    const dampedTween = gsap.quickTo(damped, 'x', { duration: 0.9, ease: 'power3.out' })
-    const dampedTweenY = gsap.quickTo(damped, 'y', { duration: 0.9, ease: 'power3.out' })
+    const dampedTween = gsap.quickTo(damped, 'x', { duration: motionDuration.slow, ease: motionEase.standard })
+    const dampedTweenY = gsap.quickTo(damped, 'y', { duration: motionDuration.slow, ease: motionEase.standard })
 
     const handleMove = (event: PointerEvent) => {
       raw.x = event.clientX

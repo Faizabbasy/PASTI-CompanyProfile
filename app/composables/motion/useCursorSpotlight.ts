@@ -40,8 +40,8 @@ export function useCursorSpotlight(target: Ref<HTMLElement | null>, overlay: Ref
       gsap.to(pos, {
         x,
         y,
-        duration: 0.3,
-        ease: 'power2.out',
+        duration: motionDuration.hover,
+        ease: motionEase.soft,
         onUpdate: () => {
           glow.style.setProperty('--spotlight-x', `${pos.x}px`)
           glow.style.setProperty('--spotlight-y', `${pos.y}px`)
@@ -53,8 +53,8 @@ export function useCursorSpotlight(target: Ref<HTMLElement | null>, overlay: Ref
       gsap.to(pos, {
         x: -9999,
         y: -9999,
-        duration: 0.4,
-        ease: 'power2.out',
+        duration: motionDuration.fast,
+        ease: motionEase.soft,
         onUpdate: () => {
           glow.style.setProperty('--spotlight-x', `${pos.x}px`)
           glow.style.setProperty('--spotlight-y', `${pos.y}px`)

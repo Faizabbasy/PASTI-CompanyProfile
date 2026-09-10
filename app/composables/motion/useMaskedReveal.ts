@@ -26,7 +26,7 @@ interface MaskedRevealOptions {
 export function useMaskedReveal(target: Ref<HTMLElement | null>, options: MaskedRevealOptions = {}) {
   if (!import.meta.client) return
 
-  const { by = 'word', stagger = 0.05, trigger = true, delay = 0, blur = false } = options
+  const { by = 'word', stagger = motionStagger.base, trigger = true, delay = 0, blur = false } = options
 
   onMounted(() => {
     const el = target.value
@@ -82,8 +82,8 @@ export function useMaskedReveal(target: Ref<HTMLElement | null>, options: Masked
       const anim = gsap.to(innerSpans, {
         yPercent: 0,
         ...(blur ? { filter: 'blur(0px)' } : {}),
-        duration: 0.8,
-        ease: 'power3.out',
+        duration: motionDuration.editorial,
+        ease: motionEase.standard,
         stagger,
         delay,
         scrollTrigger: trigger

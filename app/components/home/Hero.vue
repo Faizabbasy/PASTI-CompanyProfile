@@ -92,12 +92,12 @@ useGsapContext(() => {
         if (ctaRowRef.value) gsap.set(ctaRowRef.value, { opacity: 0, y: 12 })
         if (shineRef.value) gsap.set(shineRef.value, { opacity: 0, backgroundPosition: '130% 130%' })
 
-        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
+        const tl = gsap.timeline({ defaults: { ease: motionEase.standard } })
 
-        tl.to(allHeadingWords, { yPercent: 0, duration: 0.9, stagger: 0.08 })
+        tl.to(allHeadingWords, { yPercent: 0, duration: motionDuration.slow, stagger: motionStagger.loose })
         tl.addLabel('shineStart')
-        if (subtextRef.value) tl.to(subtextRef.value, { opacity: 1, y: 0, duration: 0.6 }, 'shineStart+=0.1')
-        if (ctaRowRef.value) tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: 0.6 }, 'shineStart+=0.2')
+        if (subtextRef.value) tl.to(subtextRef.value, { opacity: 1, y: 0, duration: motionDuration.mediumSlow }, 'shineStart+=0.1')
+        if (ctaRowRef.value) tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: motionDuration.mediumSlow }, 'shineStart+=0.2')
 
         // Shine sweep: a one-off "kinclong" touch on the headline once its
         // own word reveal has settled — a diagonal light band travels

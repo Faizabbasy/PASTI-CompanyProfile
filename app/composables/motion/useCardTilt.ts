@@ -47,13 +47,13 @@ export function useCardTilt(target: Ref<HTMLElement | null>, options: CardTiltOp
         rotateY: relX * strength,
         rotate: baseRotate,
         scale: lift,
-        duration: 0.4,
-        ease: 'power3.out'
+        duration: motionDuration.fast,
+        ease: motionEase.standard
       })
     }
 
     const handleLeave = () => {
-      gsap.to(el, { rotateX: 0, rotateY: 0, rotate: baseRotate, scale: 1, duration: 0.6, ease: 'power2.out' })
+      gsap.to(el, { rotateX: 0, rotateY: 0, rotate: baseRotate, scale: 1, duration: motionDuration.mediumSlow, ease: motionEase.soft })
     }
 
     el.addEventListener('pointermove', handleMove)

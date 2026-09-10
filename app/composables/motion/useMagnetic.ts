@@ -30,13 +30,13 @@ export function useMagnetic(target: Ref<HTMLElement | null>, options: MagneticOp
       gsap.to(el, {
         x: relX * strength,
         y: relY * strength,
-        duration: 0.5,
-        ease: 'power3.out'
+        duration: motionDuration.medium,
+        ease: motionEase.standard
       })
     }
 
     const handleLeave = () => {
-      gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: 'power2.out' })
+      gsap.to(el, { x: 0, y: 0, duration: motionDuration.mediumSlow, ease: motionEase.soft })
     }
 
     el.addEventListener('pointermove', handleMove)

@@ -39,10 +39,10 @@ export function useLeaveTransition() {
       const tl = gsap.timeline({ onComplete: resolve })
 
       if (maskEls.length) {
-        tl.to(maskEls, { yPercent: 120, duration: 0.35, ease: 'power2.in', stagger: 0.015 }, 0)
+        tl.to(maskEls, { yPercent: 120, duration: motionDuration.exit, ease: motionEase.exit, stagger: motionStagger.tight }, 0)
       }
       if (scrollEls.length) {
-        tl.to(scrollEls, { opacity: 0, y: 24, duration: 0.35, ease: 'power2.in', stagger: 0.02 }, 0)
+        tl.to(scrollEls, { opacity: 0, y: 24, duration: motionDuration.exit, ease: motionEase.exit, stagger: motionStagger.exitGroup }, 0)
       }
     })
   }

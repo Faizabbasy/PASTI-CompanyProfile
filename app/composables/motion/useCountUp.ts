@@ -38,7 +38,7 @@ export function useCountUp(target: Ref<HTMLElement | null>, options: CountUpOpti
       const anim = gsap.to(counter, {
         n: value,
         duration,
-        ease: 'sine.out',
+        ease: motionEase.count,
         onUpdate: () => {
           el.textContent = format(counter.n)
         },
