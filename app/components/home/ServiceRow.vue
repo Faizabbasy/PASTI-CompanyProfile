@@ -59,12 +59,9 @@ useGsapContext(() => {
 
 <template>
   <div ref="rowRef">
-    <NuxtLink
-      :to="service.category === 'creative' ? '/creative' : '/technology'"
-      class="group relative block overflow-hidden rounded-2xl p-10 transition-colors duration-600 ease-editorial md:p-16"
+    <div
+      class="group relative overflow-hidden rounded-2xl p-10 transition-colors duration-600 ease-editorial md:p-16"
       :class="isOpen ? 'bg-navy-800' : 'bg-navy-50'"
-      @mouseenter="setState('link')"
-      @mouseleave="setState('default')"
     >
       <div
         aria-hidden="true"
@@ -94,18 +91,20 @@ useGsapContext(() => {
         </p>
       </div>
 
-      <span
-        aria-hidden="true"
+      <NuxtLink
+        :to="service.category === 'creative' ? '/creative' : '/technology'"
         class="relative mt-6 inline-flex items-center gap-2 font-display text-sm font-semibold transition-colors duration-400 ease-editorial"
-        :class="isOpen ? 'text-paper' : 'text-ink'"
+        :class="isOpen ? 'text-paper hover:text-yellow-400' : 'text-ink hover:text-navy-500'"
+        @mouseenter="setState('link')"
+        @mouseleave="setState('default')"
       >
         {{ service.cta }}
         <span
           class="inline-block transition-all duration-400 ease-editorial"
           :class="isOpen ? 'translate-x-1 opacity-100' : 'translate-x-0 opacity-0'"
         >→</span>
-      </span>
-    </NuxtLink>
+      </NuxtLink>
+    </div>
   </div>
 </template>
 

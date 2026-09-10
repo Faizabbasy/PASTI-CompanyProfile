@@ -12,17 +12,36 @@ useLenis()
 
 // Every ScrollTrigger created during initial mount (Hero, WhatWeDo, Service
 // rows, etc.) computes its start/end pixel positions against whatever the
-// page's layout is at that instant — which can still be mid-reflow (web
-// fonts swapping in via the Google Fonts `display=swap` link, images
-// without reserved dimensions). Nothing self-heals that: a trigger created
-// against a too-short document keeps its stale start/end forever unless
-// something calls refresh(). onPageAfterEnter below already refreshes on
-// every subsequent route change; this is the equivalent one-time refresh
-// for the very first load, once fonts have actually finished swapping in.
+// page's layout is at that instant. That layout keeps shifting for a beat
+// after mount from several independent, hard-to-enumerate causes (web
+// fonts swapping in, a pinned section's spacer landing on ScrollTrigger's
+// own next internal refresh pass rather than synchronously, images without
+// reserved dimensions) — nothing self-heals a trigger whose start/end was
+// cached against a since-changed document height. Reproduced concretely:
+// Services' scroll-to-open accordion rows stopped opening at all once the
+// page's total height changed ~1s after mount. Rather than chase each
+// individual cause (tried a one-shot refresh on document.fonts.ready
+// first — didn't cover the pin-spacer case), watch the document's actual
+// height and refresh whenever it changes during the first few seconds
+// after mount, then stop watching — steady-state scroll interactions
+// don't need this, and onPageAfterEnter below already covers subsequent
+// route changes.
 if (import.meta.client) {
-  document.fonts.ready.then(async () => {
-    const { ScrollTrigger } = await import('gsap/ScrollTrigger')
-    ScrollTrigger.refresh()
+  import('gsap/ScrollTrigger').then(({ ScrollTrigger }) => {
+    let lastHeight = document.documentElement.scrollHeight
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined
+
+    const observer = new ResizeObserver(() => {
+      const height = document.documentElement.scrollHeight
+      if (height === lastHeight) return
+      lastHeight = height
+
+      clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => ScrollTrigger.refresh(), 50)
+    })
+    observer.observe(document.body)
+
+    setTimeout(() => observer.disconnect(), 5000)
   })
 }
 
