@@ -126,12 +126,14 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
 
 <template>
   <BaseSection as="section" class="relative flex min-h-[100svh] items-center overflow-hidden pb-16 pt-24 md:pt-28">
-    <!-- Background treatment — Nucleus/Origin System, the chosen direction
-         (see .docs/context/LARGE_SCALE_MOTION_PLAN.md section 1). Wrapped
-         in ClientOnly so server + first client paint agree (both render
-         nothing here) — avoids a hydration mismatch on the WebGL canvas. -->
+    <!-- Background treatment — Living Surface, a single responsive
+         pointer+scroll-driven WebGL material (see
+         docs/superpowers/specs/2026-09-11-hero-living-surface-design.md).
+         Wrapped in ClientOnly so server + first client paint agree (both
+         render nothing here) — avoids a hydration mismatch on the WebGL
+         canvas. -->
     <ClientOnly>
-      <HomeHeroBgThreeNucleusOrigin class="z-[3]" />
+      <HomeHeroLivingSurface class="z-[3]" />
     </ClientOnly>
 
     <!-- Scrim: soft light pool behind the headline/CTA text, sits above the
