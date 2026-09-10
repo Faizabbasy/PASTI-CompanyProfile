@@ -1,17 +1,55 @@
 <script setup lang="ts">
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { InsightArticle } from '~/composables/useInsights'
+
+if (import.meta.client) {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 defineProps<{ article: InsightArticle }>()
 
 const cardRef = ref<HTMLElement | null>(null)
-useScrollReveal(cardRef, { y: 24 })
+const mediaRef = ref<HTMLElement | null>(null)
 
 const { setState } = useCustomCursor()
+
+// Media clip-path reveal (category C, per the reveal-hierarchy spec) —
+// same technique as SelectedWorkCard, replacing this card's previous plain
+// fade-up so Insights isn't the only section using generic reveal for
+// every element.
+useGsapContext(() => {
+  const media = mediaRef.value
+  if (!media) return
+
+  const mm = gsap.matchMedia()
+
+  mm.add('(prefers-reduced-motion: reduce)', () => {
+    gsap.set(media, { opacity: 1, scale: 1, clipPath: 'inset(0% round 16px)' })
+  })
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    gsap.set(media, { opacity: 0, scale: 1.08, clipPath: 'inset(6% round 16px)' })
+
+    const entrance = gsap.to(media, {
+      opacity: 1,
+      scale: 1,
+      clipPath: 'inset(0% round 16px)',
+      duration: 1,
+      ease: motionEase.standard,
+      scrollTrigger: { trigger: media, start: 'top 88%', toggleActions: 'restart none restart reverse' }
+    })
+
+    return () => entrance.kill()
+  })
+
+  onBeforeUnmount(() => mm.revert())
+})
 </script>
 
 <template>
   <div ref="cardRef" class="group" @mouseenter="setState('view')" @mouseleave="setState('default')">
-    <div class="aspect-[4/3] w-full overflow-hidden rounded-2xl">
+    <div ref="mediaRef" class="aspect-[4/3] w-full overflow-hidden rounded-2xl">
       <img
         :src="article.image"
         :alt="article.title"

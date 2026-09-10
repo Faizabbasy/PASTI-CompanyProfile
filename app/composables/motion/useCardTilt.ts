@@ -36,6 +36,7 @@ export function useCardTilt(target: Ref<HTMLElement | null>, options: CardTiltOp
     gsap.set(el, { rotate: baseRotate, transformPerspective: 600 })
 
     if (!window.matchMedia('(pointer: fine)').matches) return
+    if (!window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return
 
     const handleMove = (event: PointerEvent) => {
       const rect = el.getBoundingClientRect()

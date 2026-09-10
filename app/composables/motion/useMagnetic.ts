@@ -21,6 +21,7 @@ export function useMagnetic(target: Ref<HTMLElement | null>, options: MagneticOp
     const el = target.value
     if (!el) return
     if (!window.matchMedia('(pointer: fine)').matches) return
+    if (!window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return
 
     const handleMove = (event: PointerEvent) => {
       const rect = el.getBoundingClientRect()

@@ -7,7 +7,7 @@ const { articles } = useInsights()
 const featuredArticles = articles.slice(0, 3)
 
 const headingRef = ref<HTMLElement | null>(null)
-useScrollReveal(headingRef, { y: 24 })
+useMaskedReveal(headingRef, { by: 'word' })
 </script>
 
 <template>

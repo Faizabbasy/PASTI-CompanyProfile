@@ -26,6 +26,7 @@ export function useCursorSpotlight(target: Ref<HTMLElement | null>, overlay: Ref
     const glow = overlay.value
     if (!el || !glow) return
     if (!window.matchMedia('(pointer: fine)').matches) return
+    if (!window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return
 
     glow.style.setProperty('--spotlight-radius', `${radius}px`)
 
