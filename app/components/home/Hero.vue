@@ -518,6 +518,19 @@ onMounted(() => {
       class="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_60%_50%_at_50%_45%,theme(colors.paper/0.4),transparent_70%)]"
     />
 
+    <!-- Swiss/editorial corner-bracket accents — same treatment as Why
+         PASTI's cards, echoed here in the Hero's own whitespace corners so
+         the motif reads as a consistent detail across the page rather than
+         a one-off. Purely decorative, low-opacity, never affects layout. -->
+    <span
+      aria-hidden="true"
+      class="pointer-events-none absolute left-6 top-24 z-[6] hidden h-8 w-8 border-l-2 border-t-2 border-navy-700/20 sm:block md:left-10 md:top-28"
+    />
+    <span
+      aria-hidden="true"
+      class="pointer-events-none absolute bottom-10 right-6 z-[6] hidden h-8 w-8 border-b-2 border-r-2 border-navy-700/20 sm:block md:bottom-14 md:right-10"
+    />
+
     <div
       v-if="isDev"
       class="fixed bottom-4 right-4 z-50 flex max-h-[80vh] w-64 flex-col overflow-y-auto rounded-2xl border border-navy-100 bg-paper/95 p-2 text-xs shadow-lg backdrop-blur"
