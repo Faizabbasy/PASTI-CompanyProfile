@@ -287,7 +287,132 @@ depth-scale at all.
 
 ---
 
-### 5. SELECTED WORK — "Cinematic Project Sequence" (2nd scroll-pin)
+### 5. SELECTED WORK — "Pinned Cinematic Takeover Scroll" (2nd scroll-pin, REVISED)
+
+**Status: revised per explicit follow-up brief (superseding the "dominant card scales
+forward within a static grid" version below this note) — a prior attempt at the *old*
+version of this section (dominant-card scale within the grid) shipped, was judged to feel
+like "grid cards with a scale animation" rather than a real takeover, and was reverted twice.
+This revision is a structurally different mechanic, not a tuning pass on the old one.**
+
+**Concept**: Selected Work becomes a pinned sequence of full-viewport project "scenes", not a
+scrolling grid. Each of the 6 projects (`useSelectedWork.ts`, unchanged) rises from below as a
+physical sheet/layer, takes over the viewport, then is itself covered by the next project
+rising from below — a stacked-cover sequence, not a carousel, not a grid, not a hard snap.
+
+**Scroll-progress timeline (locked, drives everything below via one pinned ScrollTrigger with
+`scrub`, progress 0→1 over the pin's scroll distance)** — 6 projects, so after the fixed 0–8%
+entry hold and 92–100% exit hold, the remaining 84% splits into 6 equal per-project spans of
+14% each (rise + hold, no separate "cover" span — project N's rise *is* project N-1's cover):
+
+| Progress | Phase |
+|---|---|
+| 0% – 8% | Selected Work enters and settles (arrival hold — section pins, nothing rises yet) |
+| 8% – 22% | Project 01 rises into dominant/near-full-viewport position |
+| 22% – 30% | Project 01 holds/breathes (idle micro-motion only, no rise) |
+| 30% – 44% | Project 02 rises from below, covers Project 01 |
+| 44% – 52% | Project 02 holds/breathes |
+| 52% – 66% | Project 03 rises, covers Project 02 |
+| 66% – 74% | Project 03 holds/breathes |
+| 74% – 88% | Project 04 rises, covers Project 03 |
+| 88% – 92% | Project 04 holds/breathes (shortened — see below) |
+| 92% – 96% | Project 05 rises, covers Project 04 |
+| 96% – 100% | Project 06 rises, covers Project 05 — final project settles, pin releases |
+
+Note: 6 equal 14% rise+hold spans don't fit evenly in the 84% middle budget (6×14%=84% exactly
+for the *rises*, leaving no room for holds on the last two) — projects 05/06 compress their
+hold phase to keep the total at exactly 100%; this is a deliberate pacing taper (the sequence
+accelerates slightly toward the end, reading as the gallery "wrapping up") rather than a bug.
+Exact percentages above are the implementation contract; do not re-derive per build.
+
+**Pin mechanics (per explicit constraint — no wheel hijacking)**: standard
+`ScrollTrigger.create({ trigger, pin: true, scrub: <smoothing>, start: 'top top', end: '+=<N>vh' })`.
+Scroll progress IS the timeline; no `preventDefault`, no manual scroll lock, no fake scroll, no
+forced snapping. Scrolling backward reverses the same scrub timeline smoothly (native
+`scrub` behavior, not a separate reverse animation). Pin distance (`end: '+=Nvh'`) target:
+~500–600vh desktop (enough room for 6 projects to each read as a distinct beat, not a blur) —
+exact value tuned during implementation against real scroll-speed testing, not fixed in this
+plan.
+
+**Stacking / z-order**: project N's DOM z-index = N (later projects always paint over earlier
+ones — no z-index animation needed, only position/scale/opacity). All 6 project layers are
+absolutely positioned within one pinned stage (not the current CSS grid — grid is retired for
+this section only, per the "not cards scrolling together as a grid" constraint). Previous
+project on cover: scale 1 → ~0.96–0.98, brightness/contrast reduced slightly (CSS `filter`,
+small delta only — no heavy blur), a few px vertical shift — subtle recede, not a hidden/faded
+layer (still visible peeking behind, reinforcing "physical sheet stack" depth).
+
+**Active-project composition (not "just moving the image")**: image/media, title, index/
+metadata move as one spatial scene per project — image `scale: 1.04 → 1` + a small internal
+parallax as it settles, title/metadata get their own secondary choreography (masked reveal,
+small y-offset, delayed settle relative to the image) using the existing `useMaskedReveal`
+pattern. No content is added or changed — same title/index/image per project as today.
+
+**Technical approach**: one pinned stage component owns a single `ScrollTrigger` with
+`scrub` driving a derived progress value; each project scene's transform/opacity is computed
+from that shared progress (not per-scene ScrollTriggers) so there is one source of truth and
+no drift between layers. Transform/opacity/clip-path only — never animate `width`/`height`
+(layout thrashing) and never trigger document reflow; if a rise needs to originate from an
+existing element's bounds, use FLIP-style transform math (compute once, animate via
+transform), not live layout reads per frame. Cache all layout metrics once on mount and on
+resize (`ResizeObserver`), matching the read-once/batch-write discipline already established
+for Trust's per-frame logo positioning.
+
+**Interaction behavior**: existing `view` cursor state and hover tilt apply to whichever
+project is currently the dominant/active scene (Level 3, unchanged from the old version).
+
+**Performance notes**: highest-risk item in the whole plan (unchanged from the prior version's
+assessment, now more so — 6 full-viewport image layers instead of grid cards). Required:
+`ScrollTrigger.normalizeScroll` evaluation (same consideration as Hero's pin), lazy-load
+project images not yet needed, preload the next project's image shortly before its rise
+begins, pause any video media on non-active projects, kill the pin's ScrollTrigger on
+unmount, call `ScrollTrigger.refresh()` after images/fonts settle (not mid-tween — see the
+documented `LayoutSectionCurtain` refresh-timing pitfall in `SelectedWork.vue`'s git history
+for why), verify continued Lenis stability (`useLenis.ts`'s existing `scroll` → `ScrollTrigger.
+update` sync).
+
+**Mobile adaptation**: keep the "layer covers layer" identity, but do not force the identical
+desktop pin. Prefer CSS `position: sticky` stacked-card behavior (each project section is
+sticky within its own scroll block, naturally covered by the next as the user scrolls) with
+GSAP enhancement for the reveal choreography, if that proves more stable than a full pin on
+mobile viewports/Safari address-bar-resize quirks — falls back to a real short pinned sequence
+only if sticky-stacking can't be made to read correctly. Either way: shorter total scroll
+distance, smaller depth-transform amplitude, lighter parallax than desktop/tablet.
+
+**Tablet**: same mechanic as desktop, shorter pin duration, smaller depth-transform amplitude,
+lighter parallax.
+
+**Reduced motion**: no pin at all — all 6 projects render in a natural static stacked/listed
+state (simple vertical list, each fully visible, no depth transforms, no takeover) so content
+remains fully accessible without relying on the choreography.
+
+**QA (mandatory before this section is considered done)**: slow scroll forward, fast scroll
+forward, scroll backward (must reverse smoothly, no jump), stop mid-sequence, resize before
+the section has ever activated, resize after it has activated, desktop, tablet, mobile, route
+away/back navigation. Verify: no jump cuts, pin never gets stuck, no card flicker, z-index
+always correct, project order always correct (01→06), no blank frame between projects, no
+horizontal overflow, the next section (Testimonials) remains reachable by continued scrolling
+after the pin releases.
+
+**Definition of done**: the experience must read as — user reaches Selected Work → section
+holds → project 01 takes over the screen → project 02 rises and covers project 01 → ... →
+project 06 settles → pin releases → page continues naturally. If the result still reads as
+"grid cards with a scale animation", it is not done.
+
+**Relationship to prev/next**: from this pinned cinematic peak, Testimonials that follows
+brings a calmer, quieter depth sensation (drift, not pin) — a deliberate tempo drop after the
+homepage's most intense moment.
+
+**Non-negotiable constraints reaffirmed for this section specifically**: do not change
+section order, project content, project titles/copy, the global container system, the navbar,
+or any section after Selected Work — this is a motion/presentation change only, the
+underlying `useSelectedWork.ts` data stays the source of truth.
+
+---
+
+<details>
+<summary>Superseded — original "dominant card scales within static grid" version (kept for
+history; do not implement this version)</summary>
 
 **Concept**: projects feel like passing through a gallery, not scrolling a grid.
 
@@ -320,6 +445,8 @@ scaling.
 **Relationship to prev/next**: from this pinned "gallery" peak, Testimonials that follows
 brings a calmer, quieter depth sensation (drift, not pin) — a deliberate tempo drop after the
 homepage's most intense moment.
+
+</details>
 
 ---
 
