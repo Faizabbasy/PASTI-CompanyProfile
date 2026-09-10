@@ -1,12 +1,55 @@
 <script setup lang="ts">
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Platform } from '~/composables/usePlatforms'
 
-defineProps<{ platform: Platform }>()
+if (import.meta.client) {
+  gsap.registerPlugin(ScrollTrigger)
+}
+
+const props = defineProps<{ platform: Platform; variant: 'open' | 'corporate' }>()
 
 const rowRef = ref<HTMLElement | null>(null)
+const imageRef = ref<HTMLElement | null>(null)
 useScrollReveal(rowRef)
 
 const { setState } = useCustomCursor()
+
+// Dual Product Worlds: OPEN gets a larger-amplitude, more expansive window-
+// parallax; e-CORPORATE gets a smaller-amplitude, tighter-eased one — same
+// technical basis (overflow:hidden container + moving image inside), only
+// the motion parameters differ (LARGE_SCALE_MOTION_PLAN.md section 8). The
+// tighter easing must still read as perfectly smooth, never stuttery.
+useGsapContext(() => {
+  const image = imageRef.value
+  if (!image) return
+
+  const mm = gsap.matchMedia()
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    const isMobile = window.matchMedia('(max-width: 767px)').matches
+    const amplitude = props.variant === 'open' ? (isMobile ? 10 : 20) : (isMobile ? 6 : 12)
+    const ease = props.variant === 'open' ? 'power3.out' : 'power2.out'
+
+    gsap.set(image, { yPercent: -amplitude / 2, scale: 1.08 })
+
+    const trigger = ScrollTrigger.create({
+      trigger: rowRef.value,
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: props.variant === 'open' ? 0.6 : 0.35,
+      onUpdate: (self) => {
+        gsap.to(image, { yPercent: -amplitude / 2 + amplitude * self.progress, duration: 0.1, ease, overwrite: 'auto' })
+      }
+    })
+
+    return () => trigger.kill()
+  })
+
+  mm.add('(prefers-reduced-motion: reduce)', () => {
+    gsap.set(image, { yPercent: 0, scale: props.variant === 'corporate' ? 1.02 : 1.05 })
+  })
+})
 </script>
 
 <template>
@@ -36,13 +79,22 @@ const { setState } = useCustomCursor()
       </div>
 
       <div class="md:col-span-7">
-        <div class="aspect-[16/10] w-full overflow-hidden rounded-2xl">
+        <div
+          class="relative w-full overflow-hidden rounded-2xl"
+          :class="variant === 'open' ? 'aspect-[16/10]' : 'aspect-[16/10] md:aspect-[4/3] md:mx-auto md:max-w-[85%]'"
+        >
           <img
+            ref="imageRef"
             :src="platform.image"
             :alt="platform.name"
             loading="lazy"
             class="h-full w-full object-cover transition-transform duration-600 ease-editorial group-hover:scale-105"
           >
+          <span
+            v-if="variant === 'corporate'"
+            aria-hidden="true"
+            class="pointer-events-none absolute inset-3 rounded-xl border border-navy-500/20"
+          />
         </div>
       </div>
     </NuxtLink>

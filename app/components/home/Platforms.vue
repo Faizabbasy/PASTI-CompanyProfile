@@ -19,7 +19,12 @@ useMaskedReveal(labelRef, { by: 'word' })
       </p>
 
       <div class="mt-8">
-        <HomePlatformRow v-for="platform in platforms" :key="platform.index" :platform="platform" />
+        <HomePlatformRow
+          v-for="(platform, i) in platforms"
+          :key="platform.index"
+          :platform="platform"
+          :variant="i === 0 ? 'open' : 'corporate'"
+        />
       </div>
     </BaseContainer>
   </BaseSection>
