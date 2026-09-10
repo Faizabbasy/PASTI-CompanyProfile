@@ -54,7 +54,11 @@ useGsapContext(() => {
     const logos = Array.from(track.querySelectorAll<HTMLElement>('.trust-logo'))
     const isMobile = window.matchMedia('(max-width: 767px)').matches
     const scaleRange = isMobile ? [1, 1.15] : [1, 1.3] as const
-    const opacityRange = isMobile ? [0.55, 1] : [0.4, 1] as const
+    // Raised the far-from-focus floor from 0.4/0.55 to 0.75/0.85 — logos
+    // outside the focal zone still recede, but read as clearly visible
+    // brand marks rather than washed out, per feedback that the marquee
+    // overall needed to feel brighter.
+    const opacityRange = isMobile ? [0.85, 1] : [0.75, 1] as const
     const focalHalfWidth = () => window.innerWidth * 0.1 // ~20% width zone, centered
 
     interface LogoMetrics { name: string; offset: number; scaleTo: (v: number) => void; opacityTo: (v: number) => void; yTo: (v: number) => void }
@@ -114,7 +118,7 @@ useGsapContext(() => {
         const isHovered = hoveredName === m.name
         const isDimmed = hoveredName !== null && !isHovered
         m.scaleTo(isHovered ? depthScale * 1.08 : depthScale)
-        m.opacityTo(isDimmed ? depthOpacity * 0.4 : depthOpacity)
+        m.opacityTo(isDimmed ? depthOpacity * 0.6 : depthOpacity)
         // Subtle mutual vertical pull as a pair approaches the focal zone
         // from both sides, hinting at lens compression without touching
         // horizontal marquee spacing.
