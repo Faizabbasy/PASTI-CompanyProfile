@@ -7,17 +7,26 @@ if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-defineProps<{ article: InsightArticle }>()
+const props = defineProps<{ article: InsightArticle; index?: number }>()
 
 const cardRef = ref<HTMLElement | null>(null)
 const mediaRef = ref<HTMLElement | null>(null)
 
 const { setState } = useCustomCursor()
 
-// Media clip-path reveal (category C, per the reveal-hierarchy spec) —
-// same technique as SelectedWorkCard, replacing this card's previous plain
-// fade-up so Insights isn't the only section using generic reveal for
-// every element.
+// Editorial directional flow: a magazine-page-opening wipe, not a generic
+// inset fade — reveal direction alternates per card (index modulo 3) for
+// rhythmic variation within the section (LARGE_SCALE_MOTION_PLAN.md
+// section 9). Each direction's clip-path starts fully hidden from that
+// edge and opens to the full rect.
+const FULL_RECT = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)'
+const DIRECTIONS = [
+  { from: 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)', to: FULL_RECT }, // left->right
+  { from: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)', to: FULL_RECT }, // right->left
+  { from: 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)', to: FULL_RECT }, // top->bottom
+  { from: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)', to: FULL_RECT } // bottom->top (mobile)
+]
+
 useGsapContext(() => {
   const media = mediaRef.value
   if (!media) return
@@ -25,17 +34,21 @@ useGsapContext(() => {
   const mm = gsap.matchMedia()
 
   mm.add('(prefers-reduced-motion: reduce)', () => {
-    gsap.set(media, { opacity: 1, scale: 1, clipPath: 'inset(0% round 16px)' })
+    gsap.set(media, { opacity: 1, scale: 1, clipPath: FULL_RECT })
   })
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
-    gsap.set(media, { opacity: 0, scale: 1.08, clipPath: 'inset(6% round 16px)' })
+    const isMobile = window.matchMedia('(max-width: 767px)').matches
+    // Mobile simplifies to one consistent bottom->top direction for clarity.
+    const dirIndex = isMobile ? 3 : (props.index ?? 0) % 3
+    const { from, to } = DIRECTIONS[dirIndex]!
+
+    gsap.set(media, { opacity: 1, scale: 1.08, clipPath: from })
 
     const entrance = gsap.to(media, {
-      opacity: 1,
       scale: 1,
-      clipPath: 'inset(0% round 16px)',
-      duration: 1,
+      clipPath: to,
+      duration: 1.1,
       ease: motionEase.standard,
       scrollTrigger: { trigger: media, start: 'top 88%', toggleActions: 'restart none restart reverse' }
     })

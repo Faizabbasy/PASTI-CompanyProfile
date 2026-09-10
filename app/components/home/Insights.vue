@@ -18,7 +18,7 @@ useMaskedReveal(headingRef, { by: 'word' })
       </h2>
 
       <div class="mt-16 grid grid-cols-1 gap-x-8 gap-y-16 md:grid-cols-3 md:mt-20">
-        <HomeInsightsCard v-for="article in featuredArticles" :key="article.index" :article="article" />
+        <HomeInsightsCard v-for="(article, i) in featuredArticles" :key="article.index" :article="article" :index="i" />
       </div>
 
       <div class="mt-16 flex justify-center md:mt-20">
