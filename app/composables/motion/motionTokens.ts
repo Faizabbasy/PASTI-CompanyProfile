@@ -50,3 +50,26 @@ export const motionStagger = {
   /** Wide stagger for a small number of large elements (Testimonials cards). */
   wide: 0.15
 } as const
+
+/**
+ * Spatial-depth motion language, added for the large-scale spatial motion
+ * pass (see .docs/context/LARGE_SCALE_MOTION_PLAN.md). Kept alongside the
+ * groups above rather than merged into them — these three eases carry a
+ * specific narrative meaning ("approaching focus" / "arriving and
+ * stopping" / "ambient loop") that's reused consistently across Hero,
+ * Trust, Testimonials, Footer, so the *feel* of movement stays unified
+ * even though each section's mechanic differs.
+ */
+export const spatialEase = {
+  /** Element approaching camera / coming into focus. */
+  enter: 'power4.out',
+  /** Camera/viewpoint arriving and stopping (pin exits, footer collapse). */
+  settle: 'expo.out',
+  /** Ambient looping motion (glows, idle breathing). */
+  drift: 'sine.inOut'
+} as const
+
+export const spatialDuration = {
+  /** Large depth transitions: Hero exit, Selected Work pin handoff. */
+  cinematic: 1.6
+} as const

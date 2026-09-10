@@ -136,6 +136,7 @@ type HeroBgOption =
   // Line-art, reimagined in 3D (same compositions as 'lines' variants above, rebuilt as living geometry)
   | 'lines-3d-curves-floating' | 'lines-3d-grid-constellation' | 'lines-3d-minimal-ribbon'
   // 3D (Three.js)
+  | '3d-nucleus-origin'
   | '3d-sphere' | '3d-particles' | '3d-glass' | '3d-fluid' | '3d-wiregrid'
   | '3d-volumetric' | '3d-holographic' | '3d-terrain' | '3d-shards' | '3d-depth-parallax'
   | '3d-blob-liquid-magnet' | '3d-blob-glass-refraction' | '3d-blob-cell-cluster'
@@ -181,6 +182,7 @@ const bgGroups: BgGroup[] = [
   {
     label: '3D',
     options: [
+      { value: '3d-nucleus-origin', label: 'Nucleus / Origin system (current default)' },
       { value: '3d-sphere', label: 'Distorted sphere' },
       { value: '3d-particles', label: 'Particle field' },
       { value: '3d-glass', label: 'Glass prism' },
@@ -352,7 +354,7 @@ const bgGroups: BgGroup[] = [
   }
 ]
 
-const activeBg = ref<HeroBgOption>('3d-sphere')
+const activeBg = ref<HeroBgOption>('3d-nucleus-origin')
 const openGroup = ref<string>('3D')
 const isDev = import.meta.dev
 
@@ -375,7 +377,8 @@ onMounted(() => {
          nothing here) — avoids a hydration mismatch on the WebGL canvas. -->
     <ClientOnly>
       <!-- 3D -->
-      <HomeHeroBgThreeDistortedSphere v-if="activeBg === '3d-sphere'" class="z-[3]" />
+      <HomeHeroBgThreeNucleusOrigin v-if="activeBg === '3d-nucleus-origin'" class="z-[3]" />
+      <HomeHeroBgThreeDistortedSphere v-else-if="activeBg === '3d-sphere'" class="z-[3]" />
       <HomeHeroBgThreeParticleField v-else-if="activeBg === '3d-particles'" class="z-[3]" />
       <HomeHeroBgThreeGlassPrism v-else-if="activeBg === '3d-glass'" class="z-[3]" />
       <HomeHeroBgThreeFluidPlane v-else-if="activeBg === '3d-fluid'" class="z-[3]" />
