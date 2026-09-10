@@ -4,7 +4,7 @@
 
 **Goal:** Replace the Hero's centerpiece-object background (`HeroBgThreeNucleusOrigin.vue`) with a single full-bleed, pointer+scroll-driven WebGL "Living Surface" — a multi-band shader plane system that reads as one responsive spatial material, not an object floating behind the text.
 
-**Architecture:** A thin Vue mount wrapper (`HeroLivingSurface.vue`) delegates all Three.js scene setup, uniform-driven animation, and lifecycle management to a composable (`useHeroLivingSurface.ts`). A separate generic composable (`usePointerVelocity.ts`) turns raw pointer events into a damped position/velocity/direction/strength signal with no Vue reactivity in the hot path. The scene renders 3 depth-band planes (near/mid/far) sharing one GLSL program via per-mesh uniform instances, alpha-composited (transparent, `depthWrite: false`, depth-dependent opacity) so all three bands visually coexist as one layered material rather than the nearest plane occluding the others, driven by pointer uniforms (local tension) and a non-pinned `ScrollTrigger` (global depth). The RAF loop is genuinely started/stopped (not just early-returned) by intersection/visibility/reduced-motion state, and pointer listener attach/detach targets the exact element it was attached to. Only `Hero.vue`'s background mount tag changes; all foreground content, layout, and its existing GSAP timeline stay untouched.
+**Architecture:** A thin Vue mount wrapper (`HeroLivingSurface.vue`) delegates all Three.js scene setup, uniform-driven animation, and lifecycle management to a composable (`useHeroLivingSurface.ts`). A separate generic composable (`usePointerVelocity.ts`) turns raw pointer events into a damped position/velocity/direction/strength signal with no Vue reactivity in the hot path; it tracks the tracked element's document-space top (immune to scroll) and derives the current viewport-space top from `window.scrollY` on every move, so pointer normalization stays correct as the non-pinned Hero moves relative to the viewport during scroll, without a layout read in the hot path. The scene renders 3 depth-band planes (near/mid/far) sharing one GLSL program via per-mesh uniform instances, alpha-composited (transparent, `depthWrite: false`, depth-dependent opacity) so all three bands visually coexist as one layered material rather than the nearest plane occluding the others, driven by pointer uniforms (local tension) and a non-pinned `ScrollTrigger` (global depth). The RAF loop is genuinely started/stopped (not just early-returned) by intersection/visibility/reduced-motion state, and pointer listener attach/detach targets the exact element it was attached to. The mobile/tablet/desktop tier is re-evaluated on every resize (not captured once at setup) — crossing a breakpoint mid-session live-updates DPR, pointer listener attachment and max speed, and geometry subdivision (rebuilt only when the tier's segment count actually changes, with the old geometry/material disposed). Only `Hero.vue`'s background mount tag changes; all foreground content, layout, and its existing GSAP timeline stay untouched.
 
 **Tech Stack:** Nuxt 4, Vue 3 `<script setup lang="ts">`, TypeScript, Three.js, custom GLSL `ShaderMaterial`, GSAP + `ScrollTrigger`, Tailwind CSS (colors only, no new classes needed).
 
@@ -22,6 +22,8 @@
 - No scroll hijack: `ScrollTrigger` is scoped to the Hero `<section>`, `scrub` only, never `pin: true`.
 - Performance: DPR capped (2 desktop / 1.5 tablet / 1 mobile), `IntersectionObserver` + `visibilitychange` pause the RAF loop, no per-frame allocations, full `geometry`/`material`/`renderer`/`ScrollTrigger` disposal on unmount.
 - Mobile (`max-width: 767px`): no pointer listener attached; ambient + scroll-depth motion still run; surface stays visually present, never a static gradient.
+- Responsive tier (mobile/tablet/desktop) is re-evaluated live on every resize, not captured once at setup — crossing a breakpoint updates DPR, pointer listener attach/detach, pointer max speed, and geometry subdivision (rebuilt only on an actual tier change, old geometry disposed) without a page reload, a duplicate listener, or an unnecessary rebuild.
+- Pointer bounds tracking must stay correct while the (non-pinned) Hero scrolls: no `getBoundingClientRect()` call inside the `pointermove` handler itself — only at `start()`/`updateBounds()` (called from resize), with the current viewport-space top derived from a cached document-space top plus `window.scrollY` on every move.
 
 ---
 
@@ -59,9 +61,9 @@ The scene composable is large in scope (shader source, 3-band geometry, dynamic 
   }
 
   export interface UsePointerVelocityOptions {
-    /** Damping factor per second, 0-1 exclusive; higher = snappier. Default 6. */
+    /** Damping factor per second, 0-1 exclusive; higher = snappier. Default 6. Read live from the options object on every tick — mutate the same object passed to usePointerVelocity() to change it at runtime (e.g. per responsive tier) without recreating the composable. */
     dampingSpeed?: number
-    /** Max raw velocity magnitude (in normalized units/sec) that maps to strength=1. Default 4. */
+    /** Max raw velocity magnitude (in normalized units/sec) that maps to strength=1. Default 4. Also read live, same as dampingSpeed. */
     maxSpeed?: number
   }
 
@@ -76,11 +78,11 @@ The scene composable is large in scope (shader source, 3-band geometry, dynamic 
     start: () => void
     /** Removes the pointermove listener from the element start() attached to (not necessarily target.value's current value). No-op if not started. */
     stop: () => void
-    /** Re-reads the attached element's bounds (getBoundingClientRect). Call from the owner's resize handler — bounds are never re-read inside handlePointerMove. */
+    /** Re-reads the attached element's width/height/left and its document-space top (getBoundingClientRect once, plus window.scrollY). Call from the owner's resize handler — never needed on scroll alone, since handlePointerMove derives the current viewport-space top from the cached document-space top and window.scrollY on every move, with no layout read. */
     updateBounds: () => void
   }
   ```
-  `state` is a single stable object (not reassigned) whose fields are mutated in place by `tick()` — callers read `state.position.x` etc. every frame without re-subscribing, and `tick()` never allocates. Element bounds are cached at `start()`/`updateBounds()` time, not read on every `pointermove`, since `getBoundingClientRect()` forces layout and pointermove can fire at high frequency.
+  `state` is a single stable object (not reassigned) whose fields are mutated in place by `tick()` — callers read `state.position.x` etc. every frame without re-subscribing, and `tick()` never allocates. Element bounds (width/height/left) are cached at `start()`/`updateBounds()` time, not read on every `pointermove`, since `getBoundingClientRect()` forces layout and pointermove can fire at high frequency. The element's top is cached in document space (immune to scroll) and combined with `window.scrollY` (a cheap property read, not a layout read) on every `pointermove` to derive the correct viewport-space top even though the Hero is not pinned and moves relative to the viewport as the page scrolls.
 
 - [ ] **Step 1: Write the composable**
 
@@ -115,8 +117,12 @@ export function usePointerVelocity(
   target: Ref<HTMLElement | null>,
   options: UsePointerVelocityOptions = {}
 ) {
-  const dampingSpeed = options.dampingSpeed ?? 6
-  const maxSpeed = options.maxSpeed ?? 4
+  // Read live from `options` on every tick rather than captured once into a
+  // local const, so a caller that mutates the same options object it passed
+  // in (e.g. to lower maxSpeed on a tablet/mobile tier change) takes effect
+  // immediately without reconstructing this composable.
+  const dampingSpeed = () => options.dampingSpeed ?? 6
+  const maxSpeed = () => options.maxSpeed ?? 4
 
   const state: PointerVelocityState = {
     position: { x: 0, y: 0 },
@@ -136,15 +142,40 @@ export function usePointerVelocity(
 
   // Cached bounds, refreshed on resize/attach rather than read on every
   // high-frequency pointermove (getBoundingClientRect forces layout).
-  let cachedRect: DOMRect | null = null
+  //
+  // The Hero is not pinned, so its viewport-space top changes continuously
+  // as the page scrolls — a plain cached DOMRect.top would go stale the
+  // moment the user scrolls past the point it was captured. Rather than
+  // re-reading getBoundingClientRect() on every pointermove (a layout read
+  // in a high-frequency handler), cache the element's DOCUMENT-space top
+  // (a value that doesn't change as the page scrolls) alongside its stable
+  // width/height/left, and derive the current viewport-space top on each
+  // move from `window.scrollY` — a plain property read, no layout.
+  let cachedWidth = 0
+  let cachedHeight = 0
+  let cachedLeft = 0
+  let cachedDocumentTop = 0 // rect.top + window.scrollY at the moment of caching
   function refreshRect() {
-    cachedRect = attachedEl ? attachedEl.getBoundingClientRect() : null
+    if (!attachedEl) {
+      cachedWidth = 0
+      cachedHeight = 0
+      return
+    }
+    const rect = attachedEl.getBoundingClientRect()
+    cachedWidth = rect.width
+    cachedHeight = rect.height
+    cachedLeft = rect.left
+    cachedDocumentTop = rect.top + window.scrollY
   }
 
   function handlePointerMove(event: PointerEvent) {
-    if (!cachedRect || cachedRect.width === 0 || cachedRect.height === 0) return
-    rawTarget.x = ((event.clientX - cachedRect.left) / cachedRect.width) * 2 - 1
-    rawTarget.y = -(((event.clientY - cachedRect.top) / cachedRect.height) * 2 - 1)
+    if (cachedWidth === 0 || cachedHeight === 0) return
+    // Current viewport-space top, derived from the cached document-space
+    // top and the current scroll offset — correct at any scroll position
+    // without a layout read.
+    const currentTop = cachedDocumentTop - window.scrollY
+    rawTarget.x = ((event.clientX - cachedLeft) / cachedWidth) * 2 - 1
+    rawTarget.y = -(((event.clientY - currentTop) / cachedHeight) * 2 - 1)
   }
 
   function tick(dt: number) {
@@ -152,7 +183,7 @@ export function usePointerVelocity(
     prevPosition.y = state.position.y
 
     // Exponential damping toward rawTarget, framerate-independent.
-    const t = 1 - Math.exp(-dampingSpeed * dt)
+    const t = 1 - Math.exp(-dampingSpeed() * dt)
     state.position.x += (rawTarget.x - state.position.x) * t
     state.position.y += (rawTarget.y - state.position.y) * t
 
@@ -172,11 +203,13 @@ export function usePointerVelocity(
       state.direction.x = 0
       state.direction.y = 0
     }
-    state.strength = Math.min(speed / maxSpeed, 1)
+    state.strength = Math.min(speed / maxSpeed(), 1)
   }
 
   function start() {
     if (!import.meta.client || !target.value) return
+    if (attachedEl === target.value) return // already attached to this element — no duplicate listener
+    if (attachedEl) stop() // attached to a stale element — detach before reattaching
     attachedEl = target.value
     refreshRect()
     attachedEl.addEventListener('pointermove', handlePointerMove, { passive: true })
@@ -186,7 +219,8 @@ export function usePointerVelocity(
     if (!import.meta.client || !attachedEl) return
     attachedEl.removeEventListener('pointermove', handlePointerMove)
     attachedEl = null
-    cachedRect = null
+    cachedWidth = 0
+    cachedHeight = 0
   }
 
   /** Recompute cached bounds — call from the owner's resize handler. */
@@ -236,7 +270,13 @@ direction -> strength pipeline with no Vue reactivity in the hot
 path, for the Hero Living Surface background. Caches the attached
 element and its bounds explicitly so cleanup always detaches from
 the same element start() used, and pointermove never forces a
-layout read.
+layout read. Tracks the element's document-space top (immune to
+scroll) and derives the current viewport-space top from
+window.scrollY on every move, so normalization stays correct while
+a non-pinned tracked element scrolls, still without a layout read.
+dampingSpeed/maxSpeed are read live from the passed options object
+each tick rather than captured once, so a caller can retune them
+(e.g. per responsive tier) without recreating the composable.
 
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 EOF
@@ -464,7 +504,21 @@ export function useHeroLivingSurface(
   const parent = canvas.parentElement!
   const sectionEl = options.sectionEl.value ?? parent.closest('section') ?? parent
 
-  const isMobile = window.matchMedia('(max-width: 767px)').matches
+  // --- Responsive tier: must be re-evaluated live, not captured once at
+  // setup, since the viewport can cross the mobile/tablet/desktop
+  // breakpoints during an ordinary window resize without a remount. All
+  // tier-dependent behavior (pointer listener attach/removal, DPR cap,
+  // pointer influence/maxSpeed, geometry subdivision) is re-derived from
+  // `currentTier` inside the resize handler below, never read once and
+  // frozen in a `const`. ---
+  type Tier = 'mobile' | 'tablet' | 'desktop'
+  function getTier(): Tier {
+    if (window.matchMedia('(max-width: 767px)').matches) return 'mobile'
+    if (isTabletViewport()) return 'tablet'
+    return 'desktop'
+  }
+  let currentTier: Tier = getTier()
+
   const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   let reducedMotion = reducedMotionQuery.matches
 
@@ -485,18 +539,28 @@ export function useHeroLivingSurface(
   const MAX_SCROLL_DISPLACEMENT = 0.12 * 1.0 // mix(0.5,1.0,uBandDepth) maxes out at 1.0 (far band)
   const MAX_CAMERA_Z_SHIFT = 0.6 // see uCameraProgress camera dolly below
 
-  const segmentsForTier = () => (isMobile ? 24 : isTabletViewport() ? 40 : 64)
+  function segmentsFor(tier: Tier): number {
+    return tier === 'mobile' ? 24 : tier === 'tablet' ? 40 : 64
+  }
 
   const bands: Band[] = []
-  function createBands() {
+  // Tracks the segment count bands were last built with, so a tier change
+  // that doesn't change segment count (there isn't one currently, since
+  // each tier maps to a distinct value, but this guards against a future
+  // tuning change collapsing two tiers to the same count) doesn't trigger
+  // an unnecessary rebuild — see `applyTier` below, which only calls
+  // `createBands()` when `segmentsFor(tier)` actually differs from this.
+  let builtSegments = -1
+
+  function createBands(segments: number) {
     for (const b of bands) {
       scene.remove(b.mesh)
       b.geometry.dispose()
       b.material.dispose()
     }
     bands.length = 0
+    builtSegments = segments
 
-    const segments = segmentsForTier()
     BAND_DEPTHS_T.forEach((depthT, i) => {
       const geometry = new THREE.PlaneGeometry(1, 1, segments, segments)
       // transparent + depthWrite:false is the fix for bands occluding each
@@ -542,7 +606,11 @@ export function useHeroLivingSurface(
       bands.push({ mesh, geometry, material, depth: worldZ, depthT })
     })
   }
-  createBands()
+  // Initial build at the current tier's segment count. `applyTier` below
+  // (called once at setup, further down) will see `segmentsFor(currentTier)
+  // === builtSegments` and correctly skip rebuilding here — this call exists
+  // only so `bands` is populated before `fitBands()`/`applyTier` need it.
+  createBands(segmentsFor(currentTier))
 
   // --- Dynamic overscan: fit each band's plane to its own frustum at its
   // depth, plus displacement/camera budgets, so no edge is ever exposed. ---
@@ -578,20 +646,71 @@ export function useHeroLivingSurface(
     }
   }
 
-  // `resize` is reassigned once `pointer` exists below (see
-  // `resizeObserver` wiring after the pointer section) so the same
-  // ResizeObserver callback also refreshes the pointer's cached bounds —
-  // declared as a mutable binding here to avoid a forward-reference to
-  // `pointer` before it's constructed.
-  let resize = () => {
+  function dprFor(tier: Tier): number {
+    return tier === 'mobile' ? 1 : tier === 'tablet' ? 1.5 : Math.min(window.devicePixelRatio, 2)
+  }
+
+  // --- Pointer wiring (Task 1's composable). Declared before `applyTier`/
+  // `resize` below since both need to attach/detach it live as the tier
+  // changes — `maxSpeed` is re-set per tier via the options object's
+  // mutable fields rather than recreating the composable instance, so
+  // there's exactly one `usePointerVelocity` instance for this scene's
+  // whole lifetime (no duplicate listeners from ever calling it twice). ---
+  const sectionRef = ref<HTMLElement | null>(sectionEl as HTMLElement)
+  const pointerOptions = { dampingSpeed: 6, maxSpeed: currentTier === 'tablet' ? 6 : 4 }
+  const pointer = usePointerVelocity(sectionRef, pointerOptions)
+
+  // --- Applies every tier-dependent behavior for `tier`: DPR, pointer
+  // listener attach/detach, pointer maxSpeed, and geometry subdivision
+  // (rebuilt only when segmentsFor(tier) actually differs from what bands
+  // were last built with — never on every resize). Called once at setup
+  // and again only when resize() below detects the tier has actually
+  // changed, so crossing breakpoints mid-session updates everything live
+  // without duplicating listeners or rebuilding geometry needlessly. ---
+  function applyTier(tier: Tier) {
     const { clientWidth, clientHeight } = parent
-    if (clientWidth === 0 || clientHeight === 0) return
-    const dpr = isMobile ? 1 : isTabletViewport() ? 1.5 : Math.min(window.devicePixelRatio, 2)
-    renderer.setPixelRatio(dpr)
-    renderer.setSize(clientWidth, clientHeight)
+    if (clientWidth > 0 && clientHeight > 0) {
+      renderer.setPixelRatio(dprFor(tier))
+      renderer.setSize(clientWidth, clientHeight)
+    }
+
+    const segments = segmentsFor(tier)
+    if (segments !== builtSegments) {
+      createBands(segments) // disposes the old geometry/material internally
+    }
+
+    pointerOptions.maxSpeed = tier === 'tablet' ? 6 : 4
+    const pointerShouldRun = tier !== 'mobile' && !reducedMotion
+    // pointer.start()/stop() are both idempotent-safe (start() no-ops if
+    // already attached to the same element; stop() no-ops if not attached)
+    // so calling start() every time the tier stays non-mobile, or stop()
+    // every time it's mobile, never creates a duplicate listener.
+    if (pointerShouldRun) {
+      pointer.start()
+    } else {
+      pointer.stop()
+    }
+
     fitBands()
   }
-  resize()
+
+  function resize() {
+    const nextTier = getTier()
+    if (nextTier !== currentTier) {
+      currentTier = nextTier
+      applyTier(currentTier) // covers DPR + geometry + pointer attach/detach + fitBands
+    } else {
+      const { clientWidth, clientHeight } = parent
+      if (clientWidth > 0 && clientHeight > 0) {
+        renderer.setPixelRatio(dprFor(currentTier))
+        renderer.setSize(clientWidth, clientHeight)
+      }
+      fitBands()
+    }
+    pointer.updateBounds()
+  }
+
+  applyTier(currentTier) // initial tier-dependent setup (DPR, pointer attach, fitBands)
   const resizeObserver = new ResizeObserver(() => resize())
   resizeObserver.observe(parent)
 
@@ -600,22 +719,6 @@ export function useHeroLivingSurface(
   // temporal-dead-zone risk regardless of whether ScrollTrigger invokes
   // onUpdate synchronously during creation/refresh). ---
   let scrollProgress = 0
-
-  // --- Pointer wiring (Task 1's composable). Not attached on mobile. Bounds
-  // are refreshed from the same resize() that already runs on ResizeObserver
-  // — see the updated resize() below. ---
-  const sectionRef = ref<HTMLElement | null>(sectionEl as HTMLElement)
-  const pointerMaxSpeed = isTabletViewport() ? 6 : 4
-  const pointer = usePointerVelocity(sectionRef, { dampingSpeed: 6, maxSpeed: pointerMaxSpeed })
-  if (!isMobile && !reducedMotion) pointer.start()
-
-  // Now that `pointer` exists, fold its bounds refresh into the same
-  // resize handler the ResizeObserver above already calls.
-  const baseResize = resize
-  resize = () => {
-    baseResize()
-    pointer.updateBounds()
-  }
 
   // --- RAF lifecycle: a single loop that is genuinely started and stopped
   // (not left running with an early-return body) by intersection/tab
@@ -718,7 +821,7 @@ export function useHeroLivingSurface(
       stopLoop()
       renderFrame() // one resolved static frame, no further RAF scheduling
     } else {
-      if (!isMobile) pointer.start()
+      if (currentTier !== 'mobile') pointer.start()
       syncLoopState()
     }
   }
@@ -816,6 +919,11 @@ motion state (never just early-returns mid-loop); a single elapsed-
 time accumulator avoids double-reading the clock per frame. Reduced
 motion renders one resolved static frame with no continuous RAF and
 responds live to OS-level setting changes via a matchMedia listener.
+The mobile/tablet/desktop tier is re-evaluated on every resize
+(never captured once) via applyTier(), which updates DPR, pointer
+listener attach/detach, pointer max speed, and geometry subdivision
+(rebuilt only on an actual tier change, old geometry/material
+disposed) so crossing a breakpoint mid-session stays fully correct.
 Full disposal lifecycle on cleanup.
 
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
@@ -930,6 +1038,15 @@ Also verify:
 - Mobile-width viewport (DevTools device toolbar, ≤767px) — surface still visible and animated (ambient + scroll depth), no pointer-reactive behavior, no console errors.
 - Scroll the Hero out of view, then back into view — RAF loop should stop while out of view (confirm via Performance recording, same as the reduced-motion check) and resume cleanly on return, with no duplicate loop (elapsed time should not jump or double-speed after resuming).
 
+Responsive-tier and scroll-bounds QA (added for the live-tier and scroll-safe pointer fixes):
+- **Desktop → tablet resize** (drag the window from >1024px to the 768-1024px range, or use DevTools device toolbar) — pointer influence should visibly reduce (higher maxSpeed denominator = harder to reach full strength), DPR should drop to 1.5 (check `renderer.getPixelRatio()` in the console or visually confirm no change in sharpness at the same zoom), pointer should remain active (tablet still has hover/pointer in the DevTools emulation case), no console errors.
+- **Desktop → mobile resize** (drag below 767px width) — pointer listener must be removed (confirm by moving the mouse over the Hero after resize: no local deformation should appear, only ambient/scroll motion), DPR should drop to 1, geometry segment count should drop (visually: surface may look slightly less detailed up close, though this is subtle), no console errors, no duplicate listeners (moving the pointer rapidly should not cause any visible double-response or console warnings).
+- **Mobile → desktop resize** (drag back above 1024px from a mobile-width start) — pointer listener must reattach (moving the mouse over the Hero should now produce local deformation again), DPR should return to desktop cap, geometry should rebuild to the higher desktop segment count, no duplicate listeners.
+- **Pointer behavior after scrolling the Hero 25%, 50%, and 75%** through its own height — at each scroll position, move the pointer over the Hero and confirm the local deformation still tracks the actual cursor position correctly relative to the Hero's current on-screen position (not offset upward/downward as if using a stale bounds cache from before scrolling started). This directly exercises the document-space-top + `window.scrollY` derivation in `usePointerVelocity`.
+- **No duplicate pointer listeners** — after several resize cycles crossing tiers back and forth (desktop→mobile→tablet→desktop), confirm in DevTools (Elements panel → Event Listeners on the Hero `<section>`, or by checking pointer response is not "doubled"/jittery) that exactly one `pointermove` listener is attached at any time.
+- **Correct DPR after tier change** — after each resize above, the surface should render crisply without visible aliasing/blur inconsistent with the new tier's expected DPR cap.
+- **No stale geometry/resources** — after multiple tier changes, open DevTools Memory or just confirm no console warnings about disposed/leaked WebGL resources; the surface should look identical in detail level to a fresh page load at the same final viewport width (confirming old geometry was actually disposed and replaced, not accumulated).
+
 - [ ] **Step 6: Commit**
 
 ```bash
@@ -962,7 +1079,8 @@ EOF
 - Pointer data flow → Task 1 (usePointerVelocity) + Task 2 (wiring into uniforms). ✓
 - Scroll data flow (non-pinned ScrollTrigger, scoped, backward-safe) → Task 2 Step 1 (`scrollTrigger`). ✓
 - Lifecycle & performance (ResizeObserver, IntersectionObserver, visibilitychange, matchMedia listener, DPR caps, single genuinely start/stopped RAF loop, no per-frame allocation, full disposal) → Task 2 Step 1 (`startLoop`/`stopLoop`/`syncLoopState`). ✓
-- Responsive (desktop/tablet/mobile) → Task 2 Step 1 (`isMobile`, `isTabletViewport()`, `segmentsForTier()`, DPR branch in `resize()`). ✓
+- Responsive (desktop/tablet/mobile), re-evaluated live on resize, not once at setup → Task 2 Step 1 (`getTier()`, `currentTier`, `applyTier()`, `resize()`'s tier-change branch). ✓
+- Pointer bounds stay correct while the non-pinned Hero scrolls, no layout read in the hot path → Task 1 Step 1 (`cachedDocumentTop`, `window.scrollY` derivation in `handlePointerMove`). ✓
 - Reduced motion (live listener, static resolved frame, RAF genuinely stopped not just early-returned) → Task 2 Step 1 (`handleReducedMotionChange`, `syncLoopState`'s `!reducedMotion` gate, single-frame `renderFrame()` calls on scroll/intro-ready while reduced). ✓
 - Entry choreography sync (introReady, motionDuration.slow, no hook into Hero's timeline) → Task 2 Step 1 (`stopIntroWatch`/`tensionTween`). ✓
 - Definition of done items → covered by Task 3 Step 4-5 (build/typecheck/manual QA) plus the constraints baked into Task 2's implementation. ✓
@@ -970,7 +1088,7 @@ EOF
 
 **Placeholder scan:** No TBD/TODO, no "add appropriate X" phrasing, no unshown code steps. All code blocks are complete, runnable content.
 
-**Type consistency:** `usePointerVelocity` returns `{ state, tick, start, stop, updateBounds }` in Task 1 — Task 2 consumes exactly that shape (`pointer.tick(dt)`, `pointer.start()`, `pointer.stop()`, `pointer.updateBounds()`, `pointer.state.position/direction/strength`). `useHeroLivingSurface(canvasEl, { sectionEl })` in Task 2 — Task 3 calls it with exactly that signature. No naming drift found.
+**Type consistency:** `usePointerVelocity` returns `{ state, tick, start, stop, updateBounds }` in Task 1 — Task 2 consumes exactly that shape (`pointer.tick(dt)`, `pointer.start()`, `pointer.stop()`, `pointer.updateBounds()`, `pointer.state.position/direction/strength`). `UsePointerVelocityOptions` (`dampingSpeed`/`maxSpeed`) is now read live from the passed object each tick rather than captured once — Task 2's `pointerOptions` const object is mutated in place (`pointerOptions.maxSpeed = ...`) in `applyTier()`, matching that contract exactly (mutating a captured-by-reference options object works only because Task 1 reads `options.maxSpeed` live; a stale local `const maxSpeed` would have silently ignored the mutation — this was checked line-by-line against Task 1's final implementation, not assumed). `useHeroLivingSurface(canvasEl, { sectionEl })` in Task 2 — Task 3 calls it with exactly that signature. No naming drift found.
 
 **Verified against `package.json`:** confirmed only `build`, `dev`, `generate`, `preview`, `postinstall` scripts exist (no `typecheck`) — both typecheck steps use `npx nuxi typecheck` directly rather than a nonexistent npm script.
 
@@ -983,6 +1101,11 @@ EOF
 6. **Pointer listener cleanup** — `usePointerVelocity` now records `attachedEl` at `start()` time and `stop()` always removes the listener from that exact element, never re-reading `target.value` (which could have changed or gone null by cleanup time). `getBoundingClientRect()` is called only in `start()`/`updateBounds()` (the latter wired into the composable's existing `resize()` path), never inside the `pointermove` handler itself — `handlePointerMove` only reads the cached `DOMRect`.
 7. **Depth bands are not flat duplicates** — near/mid/far now differ in: world-space Z spacing (unequal: 0/0.55/1 → 0/-0.88/-1.6, not evenly spaced), `uDeformAmplitude` (1.0/0.6/0.3 — near reacts most to pointer/scroll), scroll-wave frequency/phase (`mix(2.2,1.3,uBandDepth)` and a depth-dependent phase offset, so bands move differently, not just at different amplitudes), tonal mix (far is pulled further toward `uColorDeep`, cooler/darker), fresnel edge strength, and yellow-accent gating (near-only-dominant). This is deliberate differentiation per band, not a shared formula with only opacity varied.
 8. **Locked foreground** — re-confirmed: no task touches any line of `Hero.vue` outside 129-135 (the background comment + mount tag), no task touches the existing GSAP timeline, spotlight, shine-sweep, navbar, or any other section.
+
+**Third-pass corrections (final review), verified fixed:**
+9. **Live responsive tier** — `isMobile`/`isTabletViewport()` were previously captured once (`const`) at setup, which would go stale if the viewport crossed a breakpoint via ordinary resize without a remount. Replaced with a `Tier` type, `getTier()`, and `let currentTier`, re-evaluated on every `resize()` call. `applyTier(tier)` centralizes every tier-dependent side effect — DPR (`dprFor`), pointer listener attach/detach (`pointer.start()`/`pointer.stop()`, both now idempotent — `start()` no-ops if already attached to the same element, guarding against a duplicate listener even if called from multiple paths), pointer `maxSpeed` (via the live-read fix below), and geometry subdivision (`createBands(segments)`, called only when `segmentsFor(tier) !== builtSegments`, with the old geometry/material disposed inside `createBands` itself before rebuilding). `resize()` calls `applyTier()` only when `getTier()` actually differs from `currentTier`; an ordinary same-tier resize takes a cheaper path (DPR set once more — a no-op set, not a rebuild — plus `fitBands()`) without touching geometry or the pointer listener.
+10. **Pointer options read live, not captured once** — found while wiring `applyTier()`'s per-tier `maxSpeed`: Task 1's original `usePointerVelocity` captured `const maxSpeed = options.maxSpeed ?? 4` once at construction, so `applyTier` mutating `pointerOptions.maxSpeed` afterward would have silently done nothing. Fixed by changing `dampingSpeed`/`maxSpeed` to functions (`() => options.dampingSpeed ?? 6`) called fresh inside `tick()`, so mutating the same options object passed at construction takes effect on the next tick — no need to reconstruct the composable per tier, and no duplicate `usePointerVelocity()` instances (which would have risked duplicate listeners).
+11. **Pointer bounds correctness during scroll** — the Hero is not pinned, so a cached `DOMRect` (with its viewport-space `top`) captured once at `start()`/resize would go stale the moment the user scrolls, since the Hero's position relative to the viewport changes continuously while its position in the *document* does not. Fixed by caching `cachedDocumentTop = rect.top + window.scrollY` (document-space, stable across scroll) alongside the genuinely-stable `width`/`height`/`left`, then deriving `currentTop = cachedDocumentTop - window.scrollY` inside `handlePointerMove` on every move — `window.scrollY` is a plain property read (no layout), so this adds no cost to the high-frequency handler while keeping normalization correct at any scroll position. Verified via the new QA checks (pointer behavior at 25%/50%/75% scroll through the Hero).
 
 ---
 
