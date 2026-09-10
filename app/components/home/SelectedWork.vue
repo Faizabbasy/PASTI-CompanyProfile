@@ -97,7 +97,6 @@ if (import.meta.client) {
         if (!section || !stage || scenes.length === 0) return
 
         const sceneEls = scenes.map((s) => s.sceneRef).filter((el): el is HTMLElement => !!el)
-        const mediaEls = scenes.map((s) => s.mediaRef).filter((el): el is HTMLElement => !!el)
         const contentEls = scenes.map((s) => s.contentRef).filter((el): el is HTMLElement => !!el)
         if (sceneEls.length !== projects.length) return
 
@@ -124,7 +123,6 @@ if (import.meta.client) {
               const riseDistanceVh = isTablet ? 60 : 100
               const pinDistanceVh = isTablet ? 420 : 560
 
-              gsap.set(mediaEls, { scale: 1.04 })
               gsap.set(contentEls, { y: 24, autoAlpha: 0 })
 
               // Locked timeline (see plan): 0-8% entry hold, then 6 rise
@@ -147,7 +145,6 @@ if (import.meta.client) {
               function applyProgress(progress: number) {
                 riseSpans.forEach(([start, end], i) => {
                   const scene = sceneEls[i]
-                  const media = mediaEls[i]
                   const content = contentEls[i]
                   if (!scene) return
 
@@ -156,7 +153,16 @@ if (import.meta.client) {
 
                   // This project's own rise: from off-screen below
                   // (riseDistanceVh) to its resting position (0), easing in
-                  // as progress crosses its span.
+                  // as progress crosses its span. Per direct feedback, this
+                  // transform lives on `scene` (the whole card — image,
+                  // title and index together) so the WHOLE CARD is what
+                  // visibly rises and covers the previous one, not just the
+                  // image inside a static frame. The image itself
+                  // (mediaEls) gets no separate scale tween any more — it
+                  // just sits still inside the card, filling its frame via
+                  // object-cover the same way SelectedWorkCard.vue's grid
+                  // cards always did ("gambar-nya biarin aja berjajar kaya
+                  // biasanya").
                   const yPercent = i === 0 ? 0 : riseDistanceVh * (1 - eased)
 
                   // Receding under the NEXT project's rise: as project i+1
@@ -175,9 +181,6 @@ if (import.meta.client) {
                     filter: `brightness(${gsap.utils.interpolate(1, recedeBrightness, coverProgress)})`
                   })
 
-                  if (media) {
-                    gsap.set(media, { scale: gsap.utils.interpolate(1.04, 1, eased) })
-                  }
                   if (content) {
                     gsap.set(content, { y: gsap.utils.interpolate(24, 0, eased), autoAlpha: eased })
                   }

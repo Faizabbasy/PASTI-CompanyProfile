@@ -77,18 +77,29 @@ defineExpose({ wrapperRef, sceneRef, mediaRef, contentRef })
     </div>
   </div>
 
+  <!-- 'pinned' layout: `sceneRef` still spans the whole stage (absolute
+       inset-0) so it can carry the rise/cover transform as one full-stage
+       layer, exactly like before — but per direct feedback, what visibly
+       "takes over the screen" must read as a normal-sized project card
+       (the same aspect-[4/5] proportions as the old grid card), not the
+       image blown up to fill the viewport. The card sits centered inside
+       the stage via flex, at a fixed max width, and the image inside it no
+       longer gets its own separate scale tween — it just sits still inside
+       the card's frame ("berjajar kaya biasanya"), the same object-cover
+       treatment SelectedWorkCard.vue always used. The whole card (image +
+       title + index together) is what rises/recedes as one unit. -->
   <div
     v-else
     ref="sceneRef"
     class="flex items-center justify-center overflow-hidden"
-    :class="layout === 'pinned' ? 'absolute inset-0' : 'relative'"
+    :class="layout === 'pinned' ? 'absolute inset-0 px-6' : 'relative'"
     :style="layout === 'pinned' ? { zIndex: index + 1 } : undefined"
     @mouseenter="setState('view')"
     @mouseleave="setState('default')"
   >
     <div
       class="relative w-full overflow-hidden"
-      :class="layout === 'static' ? 'aspect-[4/5] rounded-2xl md:aspect-[16/9]' : 'h-full'"
+      :class="layout === 'pinned' ? 'aspect-[4/5] max-w-md rounded-2xl md:aspect-[16/9] md:max-w-2xl' : 'aspect-[4/5] rounded-2xl md:aspect-[16/9]'"
     >
       <div ref="mediaRef" class="absolute inset-0">
         <img
@@ -102,8 +113,7 @@ defineExpose({ wrapperRef, sceneRef, mediaRef, contentRef })
 
       <div
         ref="contentRef"
-        class="absolute inset-x-0 bottom-0"
-        :class="layout === 'static' ? 'p-6' : 'container-page pb-16 md:pb-20'"
+        class="absolute inset-x-0 bottom-0 p-6"
       >
         <p class="flex items-baseline gap-3 text-body-sm text-navy-200">
           <span class="font-mono text-yellow-500">{{ project.index }}</span>
