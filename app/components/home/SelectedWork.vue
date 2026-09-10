@@ -96,8 +96,15 @@ useGsapContext(() => {
            length. An inset-0 curtain that tall still visually reads as
            "covering everything" at rest, but a -100% lift then travels its
            own full (multi-thousand-px) height in the same 0.8s duration —
-           reading as a near-instant snap rather than a deliberate wipe. -->
-      <div ref="curtainRef" aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 z-20 h-screen bg-navy-950" />
+           reading as a near-instant snap rather than a deliberate wipe.
+           `navy-700` (not `navy-950`, matching the section's own resting
+           background) plus a `yellow-500` leading edge — a curtain the
+           exact same color as what it's covering never visibly moves; the
+           lift needs contrast against the section to read as a panel
+           pulling away rather than the background just sitting there. -->
+      <div ref="curtainRef" aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-0 z-20 h-screen bg-navy-700">
+        <div class="absolute inset-x-0 bottom-0 h-[3px] bg-yellow-500" />
+      </div>
 
       <BaseContainer>
         <div ref="risingRef">
