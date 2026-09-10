@@ -1,37 +1,64 @@
 <script setup lang="ts">
+import gsap from 'gsap'
+
 // Copy sourced verbatim from .docs/PASTI_Cuberto_Template_Content_Mapping.docx, section 05 — TRUST.
 const heading = 'Trusted by leading organizations'
 
 const { clients } = useTrustedClients()
+// Marquee needs a duplicated run so the loop can wrap seamlessly at -50%.
+const marqueeClients = [...clients, ...clients]
 
 const headingRef = ref<HTMLElement | null>(null)
-const gridRef = ref<HTMLElement | null>(null)
+const trackRef = ref<HTMLElement | null>(null)
 const hoveredClient = ref<string | null>(null)
+const paused = ref(false)
 
 useMaskedReveal(headingRef, { by: 'word' })
-useScrollReveal(gridRef, { y: 16, children: '.trust-logo', stagger: 0.06 })
+
+useGsapContext(() => {
+  if (!trackRef.value) return
+  const mm = gsap.matchMedia()
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    const tween = gsap.to(trackRef.value, {
+      xPercent: -50,
+      duration: 32,
+      ease: 'none',
+      repeat: -1
+    })
+
+    watch(paused, (isPaused) => {
+      if (isPaused) tween.pause()
+      else tween.play()
+    })
+
+    return () => tween.kill()
+  })
+})
 </script>
 
 <template>
-  <BaseSection as="section">
+  <BaseSection as="section" class="overflow-hidden">
     <BaseContainer>
       <h2 ref="headingRef" class="text-center text-display-sm">
         {{ heading }}
       </h2>
+    </BaseContainer>
 
+    <div v-if="clients.length" class="relative mt-16 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
       <div
-        v-if="clients.length"
-        ref="gridRef"
-        class="mx-auto mt-16 flex max-w-6xl flex-wrap items-center justify-center gap-x-16 gap-y-14"
+        ref="trackRef"
+        class="flex w-max flex-wrap items-center justify-center gap-x-16 gap-y-14 motion-safe:flex-nowrap motion-safe:justify-start md:gap-x-24"
+        @mouseenter="paused = true"
+        @mouseleave="paused = false; hoveredClient = null"
       >
         <div
-          v-for="client in clients"
-          :key="client.name"
-          class="trust-logo flex h-24 w-56 items-center justify-center transition-all duration-400 ease-editorial"
-          :class="hoveredClient === client.name ? 'scale-110' : 'scale-100'"
+          v-for="(client, i) in marqueeClients"
+          :key="`${client.name}-${i}`"
+          class="trust-logo flex h-24 w-56 shrink-0 items-center justify-center transition-all duration-400 ease-editorial"
+          :class="[i >= clients.length ? 'motion-reduce:hidden' : '', hoveredClient === client.name ? 'scale-110' : 'scale-100']"
           :style="{ opacity: hoveredClient && hoveredClient !== client.name ? 0.3 : 1 }"
           @mouseenter="hoveredClient = client.name"
-          @mouseleave="hoveredClient = null"
         >
           <img
             :src="client.logo"
@@ -45,7 +72,7 @@ useScrollReveal(gridRef, { y: 16, children: '.trust-logo', stagger: 0.06 })
           />
         </div>
       </div>
-    </BaseContainer>
+    </div>
   </BaseSection>
 </template>
 

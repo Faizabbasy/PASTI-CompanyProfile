@@ -9,7 +9,13 @@ useScrollReveal(rowRef)
 </script>
 
 <template>
-  <div ref="rowRef" class="border-t border-navy-800">
+  <div ref="rowRef" class="group/row relative border-t border-navy-800 pl-6">
+    <span
+      aria-hidden="true"
+      class="absolute -left-px top-0 h-full w-0.5 origin-top scale-y-0 bg-yellow-400 transition-transform duration-500 ease-editorial group-hover/row:scale-y-100"
+      :class="{ 'scale-y-100': open }"
+    />
+
     <details class="group" :open="open" @toggle="open = ($event.target as HTMLDetailsElement).open">
       <summary
         class="flex cursor-pointer list-none items-center justify-between gap-6 py-8 font-display text-body-lg font-medium text-paper marker:content-none transition-colors duration-400 ease-editorial hover:text-yellow-400 md:py-10 md:text-display-sm"
@@ -31,7 +37,10 @@ useScrollReveal(rowRef)
         :style="{ gridTemplateRows: open ? '1fr' : '0fr' }"
       >
         <div class="overflow-hidden">
-          <p class="max-w-3xl pb-8 text-body-md text-navy-200 md:pb-10 md:text-body-lg">
+          <p
+            class="max-w-3xl pb-8 text-body-md text-navy-200 transition-all duration-400 ease-editorial md:pb-10 md:text-body-lg"
+            :class="open ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'"
+          >
             {{ item.answer }}
           </p>
         </div>
