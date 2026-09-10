@@ -237,6 +237,12 @@ export function useHeroLivingSurface(
   const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   let reducedMotion = reducedMotionQuery.matches
 
+  // Hoisted early so every handler below (registered before its own later
+  // usage sites) can close over these without a forward-reference.
+  let scrollProgress = 0
+  const surfaceTensionProxy = { value: 0 }
+  let scrollTriggerInstance: ScrollTrigger | null = null
+
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
   const scene = new THREE.Scene()
   const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100)
@@ -393,11 +399,10 @@ export function useHeroLivingSurface(
   // Returns whether a geometry rebuild happened, so the caller (resize(),
   // and the initial setup call further down) can resync uniforms on the
   // freshly-created bands afterward. This function itself does NOT call
-  // renderFrame()/resync uniforms — it's declared and first invoked before
-  // renderFrame/surfaceTensionProxy/scrollProgress exist further down in
-  // this file, so it cannot reference them. The resync happens at each
-  // call site instead, once those are available (see the two call sites
-  // below and the tier-change branch in resize()). ---
+  // renderFrame() — it's declared and first invoked before `renderFrame`
+  // exists further down in this file. The resync happens at each call site
+  // instead, once `renderFrame` is available (see the tier-change branch
+  // in `resize()` below). ---
   function applyTier(tier: Tier): boolean {
     const { clientWidth, clientHeight } = parent
     if (clientWidth > 0 && clientHeight > 0) {
@@ -438,12 +443,7 @@ export function useHeroLivingSurface(
   applyTier(currentTier) // initial tier-dependent setup (DPR, pointer attach, fitBands) — bands are fresh from createBands() above so there is nothing to resync yet at this point
   const resizeObserver = new ResizeObserver(() => resize())
   resizeObserver.observe(parent)
-
-  // --- scrollProgress declared and initialized before ScrollTrigger.create()
-  // below, so onUpdate never closes over a not-yet-initialized binding (no
-  // temporal-dead-zone risk regardless of whether ScrollTrigger invokes
-  // onUpdate synchronously during creation/refresh). ---
-  let scrollProgress = 0
+  resizeObserver.observe(sectionEl)
 
   // --- RAF lifecycle: a single loop that is genuinely started and stopped
   // (not left running with an early-return body) by intersection/tab
@@ -454,13 +454,6 @@ export function useHeroLivingSurface(
   const clock = new THREE.Clock()
 
   // Camera dolly driven by scroll (bounded by MAX_CAMERA_Z_SHIFT above).
-  // Declared ahead of `renderFrame` (which calls it) since `renderFrame` can
-  // run synchronously during setup — see the `watch(introReady, ..., {
-  // immediate: true })` block below, which may call it before setup
-  // finishes if `introReady` is already true at mount. `surfaceTensionProxy`
-  // (used inside `renderFrame` too) is declared just above that same watch,
-  // so it's always initialized by the time any `renderFrame()` call in this
-  // file actually executes — confirmed by tracing every call site below.
   function cameraProgressZ(p: number): number {
     return CAMERA_REST_Z - THREE.MathUtils.smoothstep(p, 0, 1) * MAX_CAMERA_Z_SHIFT
   }
@@ -581,7 +574,7 @@ export function useHeroLivingSurface(
       renderFrame() // one resolved static frame, no further RAF scheduling
     } else {
       if (currentTier !== 'mobile') pointer.start()
-      scrollProgress = scrollTrigger.progress
+      scrollProgress = scrollTriggerInstance?.progress ?? scrollProgress
       renderFrame()
       syncLoopState()
     }
@@ -592,7 +585,6 @@ export function useHeroLivingSurface(
   // timed off the existing motionDuration.slow token (Hero's own reveal
   // duration) rather than hooking into Hero.vue's timeline object. ---
   const { introReady } = useIntroReady()
-  const surfaceTensionProxy = { value: 0 }
   let tensionTween: gsap.core.Tween | null = null
   const stopIntroWatch = watch(
     introReady,
@@ -612,10 +604,8 @@ export function useHeroLivingSurface(
     { immediate: true }
   )
 
-  // --- Scroll: non-pinned ScrollTrigger scoped to the Hero section.
-  // scrollProgress (declared above, before this call) is only ever
-  // reassigned here — never read before this point in the setup. ---
-  const scrollTrigger = ScrollTrigger.create({
+  // --- Scroll: non-pinned ScrollTrigger scoped to the Hero section. ---
+  scrollTriggerInstance = ScrollTrigger.create({
     trigger: sectionEl,
     start: 'top top',
     end: 'bottom top',
@@ -644,7 +634,7 @@ export function useHeroLivingSurface(
     pointer.stop()
     stopIntroWatch()
     tensionTween?.kill()
-    scrollTrigger.kill()
+    scrollTriggerInstance?.kill()
     for (const band of bands) {
       band.geometry.dispose()
       band.material.dispose()
