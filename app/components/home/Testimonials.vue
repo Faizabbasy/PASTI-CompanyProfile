@@ -17,6 +17,12 @@ const cardComponents = ref<{ cardRef: HTMLElement | null }[]>([])
 
 const tilts = [-8, 6, 7, -6]
 
+// Fixed, non-random focal order (never repeats the same card twice in a
+// row) so the cycle is reproducible for visual QA and identical every
+// reload — see LARGE_SCALE_MOTION_PLAN.md section 6's deterministic-
+// sequence guardrail.
+const FOCAL_ORDER = [2, 0, 3, 1, 2, 0, 3, 1]
+
 useGsapContext(() => {
   const grid = gridRef.value
   const cards = cardComponents.value.map((c) => c?.cardRef).filter((el): el is HTMLElement => !!el)
@@ -61,6 +67,45 @@ useGsapContext(() => {
       duration: 1.1,
       ease: 'cubic-bezier(0.16, 1, 0.3, 1)',
       stagger: motionStagger.wide
+    })
+
+    // Focal cycling: once the entrance settles, one card at a time
+    // approaches the focal plane (scale up, stronger shadow, foreground
+    // depth) while the others recede slightly — a slow "refocusing", not a
+    // carousel/snap. Hovering a card overrides the cycle to make it focal
+    // instantly (see below); the cycle timeline itself just keeps looping
+    // in the background.
+    const isMobile = window.matchMedia('(max-width: 767px)').matches
+    const focalScale = isMobile ? 1.02 : 1.04
+    const restScale = isMobile ? 0.98 : 0.97
+    let hovering = false
+
+    const focalCycle = gsap.timeline({ repeat: -1, delay: 0.4 })
+
+    FOCAL_ORDER.forEach((focalIndex) => {
+      focalCycle.call(() => {
+        if (hovering) return
+        cards.forEach((card, i) => {
+          gsap.to(card, {
+            scale: i === focalIndex ? focalScale : restScale,
+            opacity: i === focalIndex ? 1 : 0.85,
+            y: i === focalIndex ? -4 : 0,
+            boxShadow: i === focalIndex
+              ? '0 40px 70px -30px rgba(0,0,0,0.6)'
+              : '0 30px 60px -30px rgba(0,0,0,0.5)',
+            duration: 3.5,
+            ease: spatialEase.drift
+          })
+        })
+      })
+      focalCycle.to({}, { duration: 2.5 })
+    })
+
+    tl.add(focalCycle, '+=0.2')
+
+    cards.forEach((card) => {
+      card.addEventListener('mouseenter', () => { hovering = true })
+      card.addEventListener('mouseleave', () => { hovering = false })
     })
 
     return () => tl.kill()
