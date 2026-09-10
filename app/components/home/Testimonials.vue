@@ -13,7 +13,7 @@ const labelRef = ref<HTMLElement | null>(null)
 useMaskedReveal(labelRef, { by: 'word' })
 
 const gridRef = ref<HTMLElement | null>(null)
-const cardComponents = ref<{ cardRef: HTMLElement | null }[]>([])
+const cardComponents = ref<{ cardRef: HTMLElement | null; scoreRef: HTMLElement | null; quoteRef: HTMLElement | null; footerRef: HTMLElement | null }[]>([])
 
 const tilts = [-8, 6, 7, -6]
 
@@ -40,6 +40,12 @@ useGsapContext(() => {
     const gridCenterX = gridRect.left + gridRect.width / 2
     const gridCenterY = gridRect.top + gridRect.height / 2
 
+    // Each card's inner elements (score, quote, footer) reveal in their own
+    // short staggered beat once the card itself has mostly settled — the
+    // entrance reads as "choreographed" rather than the whole card just
+    // fading in as one flat block.
+    const innerGroups = cardComponents.value.map((c) => [c?.scoreRef, c?.quoteRef, c?.footerRef].filter((el): el is HTMLElement => !!el))
+
     cards.forEach((card, i) => {
       const cardRect = card.getBoundingClientRect()
       const cardCenterX = cardRect.left + cardRect.width / 2
@@ -52,10 +58,27 @@ useGsapContext(() => {
         y: gridCenterY - cardCenterY,
         rotate: tilts[i % tilts.length]
       })
+
+      const inner = innerGroups[i]
+      if (inner?.length) gsap.set(inner, { opacity: 0, y: 10 })
     })
 
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: grid, start: 'top 75%', toggleActions: 'restart none restart reverse' }
+      scrollTrigger: {
+        trigger: grid,
+        start: 'top 75%',
+        toggleActions: 'restart none restart reverse',
+        onLeaveBack: () => {
+          // Reinforces the reverse-on-scroll-up exit with a soft blur pass
+          // on top of the stack timeline's own reverse, so leaving the
+          // section upward reads as a deliberate "focus pulls away" beat
+          // rather than a bare opacity fade.
+          gsap.fromTo(cards, { filter: 'blur(0px)' }, { filter: 'blur(6px)', duration: 0.4, ease: motionEase.exit, overwrite: 'auto' })
+        },
+        onEnterBack: () => {
+          gsap.to(cards, { filter: 'blur(0px)', duration: 0.5, ease: motionEase.standard, overwrite: 'auto' })
+        }
+      }
     })
 
     tl.to(cards, {
@@ -67,6 +90,18 @@ useGsapContext(() => {
       duration: 1.1,
       ease: 'cubic-bezier(0.16, 1, 0.3, 1)',
       stagger: motionStagger.wide
+    })
+
+    cards.forEach((_, i) => {
+      const inner = innerGroups[i]
+      if (!inner?.length) return
+      tl.to(inner, {
+        opacity: 1,
+        y: 0,
+        duration: motionDuration.editorial,
+        ease: motionEase.standard,
+        stagger: motionStagger.base
+      }, `<${motionStagger.wide * 0.6}`)
     })
 
     // Focal cycling: once the entrance settles, one card at a time
@@ -112,7 +147,9 @@ useGsapContext(() => {
   })
 
   mm.add('(prefers-reduced-motion: reduce)', () => {
-    gsap.set(cards, { opacity: 1, scale: 1, x: 0, y: 0, rotate: 0 })
+    gsap.set(cards, { opacity: 1, scale: 1, x: 0, y: 0, rotate: 0, filter: 'blur(0px)' })
+    const innerAll = cardComponents.value.flatMap((c) => [c?.scoreRef, c?.quoteRef, c?.footerRef].filter((el): el is HTMLElement => !!el))
+    gsap.set(innerAll, { opacity: 1, y: 0 })
   })
 })
 </script>
