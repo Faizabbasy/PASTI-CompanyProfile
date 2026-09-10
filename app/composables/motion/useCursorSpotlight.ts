@@ -69,6 +69,7 @@ export function useCursorSpotlight(target: Ref<HTMLElement | null>, overlay: Ref
     onBeforeUnmount(() => {
       el.removeEventListener('pointermove', handleMove)
       el.removeEventListener('pointerleave', handleLeave)
+      gsap.killTweensOf(pos)
     })
   })
 }

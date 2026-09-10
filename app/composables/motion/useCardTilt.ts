@@ -68,6 +68,7 @@ export function useCardTilt(target: Ref<HTMLElement | null>, options: CardTiltOp
     onBeforeUnmount(() => {
       el.removeEventListener('pointermove', handleMove)
       el.removeEventListener('pointerleave', handleLeave)
+      gsap.killTweensOf(el)
     })
   })
 }

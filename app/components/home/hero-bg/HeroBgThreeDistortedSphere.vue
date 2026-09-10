@@ -63,7 +63,6 @@ useGsapContext(() => {
   const canvas = canvasRef.value
   const parent = canvas.parentElement!
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
 
   const scene = new THREE.Scene()
   const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 100)
@@ -115,6 +114,10 @@ useGsapContext(() => {
 
   function resize() {
     const { clientWidth, clientHeight } = parent
+    // Re-applied on every resize, not just once at setup — covers a
+    // monitor/DPR change mid-session (e.g. dragging the window to a
+    // different-DPI display), not just the initial size.
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     renderer.setSize(clientWidth, clientHeight)
     camera.aspect = clientWidth / clientHeight
     camera.updateProjectionMatrix()

@@ -51,6 +51,7 @@ export function useMagnetic(target: Ref<HTMLElement | null>, options: MagneticOp
     onBeforeUnmount(() => {
       el.removeEventListener('pointermove', handleMove)
       el.removeEventListener('pointerleave', handleLeave)
+      gsap.killTweensOf(el)
     })
   })
 }

@@ -37,7 +37,7 @@ onMounted(() => {
   <div
     v-if="enabled"
     ref="cursorRef"
-    class="pointer-events-none fixed left-0 top-0 z-[100] -translate-x-1/2 -translate-y-1/2"
+    class="pointer-events-none fixed left-0 top-0 z-[55] -translate-x-1/2 -translate-y-1/2"
     :data-cursor-state="state"
     aria-hidden="true"
   >
