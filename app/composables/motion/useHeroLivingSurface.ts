@@ -253,7 +253,7 @@ export function useHeroLivingSurface(
   // two different bands as before. Kept as named constants here so overscan
   // math and the shader can't silently drift apart if either is tuned later.
   const MAX_POINTER_DISPLACEMENT = 0.06 // uDeformAmplitude maxes out at 1.0 (near band)
-  const MAX_SCROLL_DISPLACEMENT = 0.12 // uDeformAmplitude maxes out at 1.0 (near band) — was mix(0.5,1.0,uBandDepth) maxing on far; fixed to match the corrected scroll term
+  const MAX_SCROLL_DISPLACEMENT = 0.12 // uDeformAmplitude maxes out at 1.0 (near band); uLayerSeparation is a pure scrollProgress signal (maxing at 1.0 for every band), so this is the shader's true max scroll displacement per band once scaled by deformAmplitude below — was mix(0.5,1.0,uBandDepth) maxing on far, then briefly a depth-weighted uLayerSeparation compressing the near:far ratio; both fixed to match the corrected scroll term
   const MAX_CAMERA_Z_SHIFT = 0.6 // see uCameraProgress camera dolly below
 
   function segmentsFor(tier: Tier): number {
@@ -477,7 +477,7 @@ export function useHeroLivingSurface(
       const u = band.material.uniforms
       u.uTime!.value = elapsed
       u.uScrollProgress!.value = scrollProgress
-      u.uLayerSeparation!.value = scrollProgress * (0.5 + band.depthT * 0.5)
+      u.uLayerSeparation!.value = scrollProgress
       u.uDepth!.value = band.depthT + scrollProgress * 0.15
       u.uSurfaceTension!.value = surfaceTensionProxy.value
       if (!reducedMotion) {
@@ -581,6 +581,8 @@ export function useHeroLivingSurface(
       renderFrame() // one resolved static frame, no further RAF scheduling
     } else {
       if (currentTier !== 'mobile') pointer.start()
+      scrollProgress = scrollTrigger.progress
+      renderFrame()
       syncLoopState()
     }
   }
