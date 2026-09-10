@@ -15,7 +15,7 @@ useMaskedReveal(labelRef, { by: 'word' })
 const gridRef = ref<HTMLElement | null>(null)
 const cardComponents = ref<{ cardRef: HTMLElement | null; scoreRef: HTMLElement | null; quoteRef: HTMLElement | null; footerRef: HTMLElement | null }[]>([])
 
-const tilts = [-8, 6, 7, -6]
+const tilts = [-3, 2, 2.5, -2]
 
 // Fixed, non-random focal order (never repeats the same card twice in a
 // row) so the cycle is reproducible for visual QA and identical every
@@ -31,32 +31,25 @@ useGsapContext(() => {
   const mm = gsap.matchMedia()
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
-    // Measure each card's own center relative to the grid's center, then
-    // start it stacked exactly on top of that shared center point (like one
-    // deck of cards) and animate it back to its natural grid position — the
-    // vector is computed from real layout, not guessed offsets, so the
-    // "stack" always lands dead-center regardless of grid/column width.
-    const gridRect = grid.getBoundingClientRect()
-    const gridCenterX = gridRect.left + gridRect.width / 2
-    const gridCenterY = gridRect.top + gridRect.height / 2
-
     // Each card's inner elements (score, quote, footer) reveal in their own
     // short staggered beat once the card itself has mostly settled — the
     // entrance reads as "choreographed" rather than the whole card just
     // fading in as one flat block.
     const innerGroups = cardComponents.value.map((c) => [c?.scoreRef, c?.quoteRef, c?.footerRef].filter((el): el is HTMLElement => !!el))
 
+    // Cards fly up from below with a 3D Y-axis rotation (reads as each card
+    // "flipping in" out of the floor, not sliding) and settle with an
+    // elastic overshoot — a deliberate departure from a plain fade/slide.
     cards.forEach((card, i) => {
-      const cardRect = card.getBoundingClientRect()
-      const cardCenterX = cardRect.left + cardRect.width / 2
-      const cardCenterY = cardRect.top + cardRect.height / 2
-
       gsap.set(card, {
         opacity: 0,
-        scale: 0.55,
-        x: gridCenterX - cardCenterX,
-        y: gridCenterY - cardCenterY,
-        rotate: tilts[i % tilts.length]
+        y: 90,
+        rotateY: i % 2 === 0 ? -28 : 28,
+        rotateX: 6,
+        rotate: tilts[i % tilts.length],
+        scale: 0.92,
+        transformPerspective: 1000,
+        transformOrigin: '50% 100%'
       })
 
       const inner = innerGroups[i]
@@ -70,9 +63,9 @@ useGsapContext(() => {
         toggleActions: 'restart none restart reverse',
         onLeaveBack: () => {
           // Reinforces the reverse-on-scroll-up exit with a soft blur pass
-          // on top of the stack timeline's own reverse, so leaving the
-          // section upward reads as a deliberate "focus pulls away" beat
-          // rather than a bare opacity fade.
+          // on top of the timeline's own reverse, so leaving the section
+          // upward reads as a deliberate "focus pulls away" beat rather
+          // than a bare opacity fade.
           gsap.fromTo(cards, { filter: 'blur(0px)' }, { filter: 'blur(6px)', duration: 0.4, ease: motionEase.exit, overwrite: 'auto' })
         },
         onEnterBack: () => {
@@ -83,12 +76,13 @@ useGsapContext(() => {
 
     tl.to(cards, {
       opacity: 1,
-      scale: 1,
-      x: 0,
       y: 0,
-      rotate: 0,
-      duration: 1.1,
-      ease: 'cubic-bezier(0.16, 1, 0.3, 1)',
+      rotateY: 0,
+      rotateX: 0,
+      rotate: (i: number) => tilts[i % tilts.length] ?? 0,
+      scale: 1,
+      duration: 1.3,
+      ease: 'back.out(1.6)',
       stagger: motionStagger.wide
     })
 
@@ -147,7 +141,7 @@ useGsapContext(() => {
   })
 
   mm.add('(prefers-reduced-motion: reduce)', () => {
-    gsap.set(cards, { opacity: 1, scale: 1, x: 0, y: 0, rotate: 0, filter: 'blur(0px)' })
+    gsap.set(cards, { opacity: 1, scale: 1, x: 0, y: 0, rotateY: 0, rotateX: 0, rotate: 0, filter: 'blur(0px)' })
     const innerAll = cardComponents.value.flatMap((c) => [c?.scoreRef, c?.quoteRef, c?.footerRef].filter((el): el is HTMLElement => !!el))
     gsap.set(innerAll, { opacity: 1, y: 0 })
   })
@@ -163,10 +157,11 @@ useGsapContext(() => {
 
       <div ref="gridRef" class="mt-16 grid grid-cols-1 gap-8 md:mt-20 md:grid-cols-2">
         <HomeTestimonialCard
-          v-for="testimonial in testimonials"
+          v-for="(testimonial, i) in testimonials"
           ref="cardComponents"
           :key="testimonial.name"
           :testimonial="testimonial"
+          :tilt-deg="tilts[i % tilts.length]"
         />
       </div>
     </BaseContainer>
