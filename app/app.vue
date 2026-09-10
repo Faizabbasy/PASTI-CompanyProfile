@@ -10,6 +10,22 @@ if (import.meta.client && 'scrollRestoration' in window.history) {
 
 useLenis()
 
+// Every ScrollTrigger created during initial mount (Hero, WhatWeDo, Service
+// rows, etc.) computes its start/end pixel positions against whatever the
+// page's layout is at that instant — which can still be mid-reflow (web
+// fonts swapping in via the Google Fonts `display=swap` link, images
+// without reserved dimensions). Nothing self-heals that: a trigger created
+// against a too-short document keeps its stale start/end forever unless
+// something calls refresh(). onPageAfterEnter below already refreshes on
+// every subsequent route change; this is the equivalent one-time refresh
+// for the very first load, once fonts have actually finished swapping in.
+if (import.meta.client) {
+  document.fonts.ready.then(async () => {
+    const { ScrollTrigger } = await import('gsap/ScrollTrigger')
+    ScrollTrigger.refresh()
+  })
+}
+
 const router = useRouter()
 const { playCover, playReveal } = useRouteCurtain()
 
