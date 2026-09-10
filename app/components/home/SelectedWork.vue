@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import gsap from 'gsap'
+
 // Copy sourced from .docs/PASTI_Cuberto_Template_Content_Mapping.docx, section 06 — SELECTED WORK.
 const heading = 'Selected work'
 const cta = 'View all projects'
@@ -12,11 +14,40 @@ const { projects } = useSelectedWork()
 // reveal every other homepage section already uses.
 const headingRef = ref<HTMLElement | null>(null)
 useMaskedReveal(headingRef, { by: 'word' })
+
+const glowRef = ref<HTMLElement | null>(null)
+
+useGsapContext(() => {
+  if (!glowRef.value) return
+  const mm = gsap.matchMedia()
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    const anim = gsap.to(glowRef.value, {
+      x: 35,
+      y: -25,
+      duration: 10,
+      ease: spatialEase.drift,
+      yoyo: true,
+      repeat: -1
+    })
+    return () => anim.kill()
+  })
+})
 </script>
 
 <template>
-  <BaseSection id="selected-work" as="section" class="rounded-t-[2.5rem] bg-navy-950">
-    <BaseContainer>
+  <BaseSection id="selected-work" as="section" class="relative overflow-hidden rounded-t-[2.5rem] bg-navy-950">
+    <div
+      ref="glowRef"
+      aria-hidden="true"
+      class="pointer-events-none absolute -right-1/4 top-1/3 h-[30rem] w-[30rem] rounded-full bg-yellow-500/[0.06] blur-3xl"
+    />
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute -bottom-1/4 -left-1/4 h-[26rem] w-[26rem] rounded-full bg-navy-600/[0.15] blur-3xl"
+    />
+
+    <BaseContainer class="relative">
       <h2 ref="headingRef" class="text-display-lg text-paper">
         {{ heading }}
       </h2>

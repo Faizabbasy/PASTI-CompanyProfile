@@ -14,6 +14,7 @@ const mediaRef = ref<HTMLElement | null>(null)
 
 const { setState } = useCustomCursor()
 useScrollVelocitySkew(mediaRef, { maxSkew: 1.5 })
+useCardTilt(cardRef, { strength: 4, lift: 1.015 })
 
 useGsapContext(() => {
   const card = cardRef.value
@@ -76,13 +77,41 @@ useGsapContext(() => {
     @mouseenter="setState('view')"
     @mouseleave="setState('default')"
   >
-    <div ref="mediaRef" class="aspect-[4/5] w-full overflow-hidden rounded-2xl">
+    <div ref="mediaRef" class="relative aspect-[4/5] w-full overflow-hidden rounded-2xl">
       <img
         :src="project.image"
         :alt="project.title"
         loading="lazy"
-        class="h-full w-full object-cover transition-transform duration-600 ease-editorial group-hover:scale-105"
+        class="h-full w-full object-cover grayscale-[60%] transition-[transform,filter] duration-600 ease-editorial group-hover:scale-105 group-hover:grayscale-0"
       >
+
+      <!-- Bottom scrim so the large index numeral stays legible over any
+           photo, and to ground the corner-bracket accents. -->
+      <span
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-navy-950/70 to-transparent opacity-0 transition-opacity duration-500 ease-editorial group-hover:opacity-100"
+      />
+
+      <!-- Large index numeral, editorial/gallery accent — the small mono
+           index in the caption below stays as the technical metadata
+           label; this is the decorative counterpart, fading in on hover. -->
+      <span
+        aria-hidden="true"
+        class="pointer-events-none absolute bottom-4 right-5 font-display text-6xl font-bold text-paper/0 transition-all duration-500 ease-editorial group-hover:translate-y-0 group-hover:text-paper/90"
+        style="transform: translateY(0.5rem)"
+      >{{ project.index }}</span>
+
+      <!-- Swiss/editorial corner-bracket accent, same motif as Hero/Why
+           PASTI/FAQ, fading in on hover to tie this section into the
+           site's shared visual language. -->
+      <span
+        aria-hidden="true"
+        class="pointer-events-none absolute left-4 top-4 h-8 w-8 border-l-2 border-t-2 border-yellow-400/0 transition-all duration-500 ease-editorial group-hover:border-yellow-400/70"
+      />
+      <span
+        aria-hidden="true"
+        class="pointer-events-none absolute right-4 top-4 h-8 w-8 border-r-2 border-t-2 border-yellow-400/0 transition-all duration-500 ease-editorial group-hover:border-yellow-400/70"
+      />
     </div>
     <p class="mt-6 flex items-baseline gap-3 text-body-sm text-navy-300">
       <span class="font-mono text-navy-500">{{ project.index }}</span>
