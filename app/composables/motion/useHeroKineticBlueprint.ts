@@ -46,9 +46,6 @@ export function useHeroKineticBlueprint(
   const NS = 'http://www.w3.org/2000/svg'
 
   const facetsGroup = svg.querySelector('[data-blueprint-group="facets"]') as SVGGElement
-  const railGroup = svg.querySelector('[data-blueprint-group="rail"]') as SVGGElement
-  const bandGroup = svg.querySelector('[data-blueprint-group="band"]') as SVGGElement
-  const nodesGroup = svg.querySelector('[data-blueprint-group="nodes"]') as SVGGElement
   const voidClipPath = svg.querySelector('[data-void-clip]') as SVGPathElement
 
   let composition: SignalComposition = getComposition(currentTier)
@@ -56,15 +53,6 @@ export function useHeroKineticBlueprint(
 
   function facetEls(): SVGGElement[] {
     return Array.from(facetsGroup.children) as SVGGElement[]
-  }
-  function railEl(): SVGLineElement | null {
-    return railGroup.querySelector('[data-blueprint-id="primary-rail"]')
-  }
-  function bandEl(): SVGPathElement | null {
-    return bandGroup.querySelector('[data-blueprint-id="secondary-band"]')
-  }
-  function nodeEls(): SVGCircleElement[] {
-    return Array.from(nodesGroup.children) as SVGCircleElement[]
   }
   function facetById(id: string): SVGGElement | undefined {
     return facetEls().find((el) => el.dataset.blueprintId === id)
@@ -105,6 +93,15 @@ export function useHeroKineticBlueprint(
     path.setAttribute('fill', `url(#${def.gradientId})`)
     path.setAttribute('class', 'signal-architecture__facet')
     g.appendChild(path)
+    // A second copy of the same shape, filtered with fractal noise and
+    // blended on top via CSS mix-blend-mode (see main.css) — a cheap way
+    // to give the flat gradient fill a grain/material texture without
+    // touching the base path's own fill or animating anything new.
+    const grain = document.createElementNS(NS, 'path')
+    grain.setAttribute('d', def.d)
+    grain.setAttribute('filter', 'url(#signal-grain)')
+    grain.setAttribute('class', 'signal-architecture__grain')
+    g.appendChild(grain)
     return g
   }
 
@@ -118,35 +115,6 @@ export function useHeroKineticBlueprint(
       facetsGroup.appendChild(makeFacet(def))
     }
     buildGradients(composition.gradients)
-
-    railGroup.replaceChildren()
-    const rail = document.createElementNS(NS, 'line')
-    const [, x1, y1, , x2, y2] = composition.rail.d.match(/M ([-.\d]+) ([-.\d]+) L ([-.\d]+) ([-.\d]+)/) ?? []
-    rail.setAttribute('x1', x1 ?? '0')
-    rail.setAttribute('y1', y1 ?? '0')
-    rail.setAttribute('x2', x2 ?? '0')
-    rail.setAttribute('y2', y2 ?? '0')
-    rail.dataset.blueprintId = composition.rail.id
-    rail.setAttribute('class', 'signal-architecture__rail')
-    railGroup.appendChild(rail)
-
-    bandGroup.replaceChildren()
-    const band = document.createElementNS(NS, 'path')
-    band.setAttribute('d', composition.band.d)
-    band.dataset.blueprintId = composition.band.id
-    band.setAttribute('class', 'signal-architecture__band')
-    bandGroup.appendChild(band)
-
-    nodesGroup.replaceChildren()
-    for (const def of composition.nodes) {
-      const circle = document.createElementNS(NS, 'circle')
-      circle.setAttribute('cx', String(def.cx))
-      circle.setAttribute('cy', String(def.cy))
-      circle.setAttribute('r', String(def.r))
-      circle.dataset.blueprintId = def.id
-      circle.setAttribute('class', 'signal-architecture__node')
-      nodesGroup.appendChild(circle)
-    }
   }
 
   buildFacets(currentTier)
@@ -206,78 +174,48 @@ export function useHeroKineticBlueprint(
     return el ? (Array.from(el.children) as SVGStopElement[]) : []
   }
 
+  // Facet drift: continuous, larger-amplitude, faster-cycling translate +
+  // rotate + scale wander, so the structure clearly "breathes" without
+  // needing to stare — amplitude/speed intentionally pushed past the first
+  // pass (which read as too static/faint).
   function startFacetDrift() {
     for (const facet of facetEls()) {
       const runDrift = () => {
         if (idleStopped) return
-        const distance = gsap.utils.random(15, 30)
+        const distance = gsap.utils.random(28, 55)
         const angleRad = gsap.utils.random(0, 360) * (Math.PI / 180)
         idleTweens.push(
           gsap.to(facet, {
             x: Math.cos(angleRad) * distance,
             y: Math.sin(angleRad) * distance,
-            rotation: gsap.utils.random(-1.5, 1.5),
-            duration: gsap.utils.random(8, 16),
+            rotation: gsap.utils.random(-3, 3),
+            scale: gsap.utils.random(0.97, 1.06),
+            duration: gsap.utils.random(5, 10),
             ease: 'sine.inOut',
             onComplete: runDrift
           })
         )
       }
-      idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(0, 4), runDrift))
+      idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(0, 2), runDrift))
     }
-  }
-
-  function startRailSweep() {
-    const rail = railEl()
-    if (!rail) return
-    const length = rail.getTotalLength()
-    rail.style.strokeDasharray = String(length)
-    const runSweep = () => {
-      if (idleStopped) return
-      idleTweens.push(
-        gsap.fromTo(
-          rail,
-          { strokeDashoffset: length },
-          { strokeDashoffset: 0, duration: gsap.utils.random(10, 14), ease: 'sine.inOut', onComplete: runSweep }
-        )
-      )
-    }
-    runSweep()
-  }
-
-  function startBandShift() {
-    const band = bandEl()
-    if (!band) return
-    const runShift = () => {
-      if (idleStopped) return
-      idleTweens.push(
-        gsap.to(band, {
-          x: gsap.utils.random(-15, 15),
-          duration: gsap.utils.random(12, 20),
-          ease: 'sine.inOut',
-          onComplete: runShift
-        })
-      )
-    }
-    runShift()
   }
 
   // Self-rescheduling gradient-stop drift for one facet's <stop> elements.
   // Shared by startGradientDrift() (idle loop) and runFacetLock()'s
   // restart-after-overwrite path, so the two never drift out of sync with
   // each other's scheduling logic.
-  function scheduleGradientDrift(stops: SVGStopElement[], initialDelay: [number, number] = [0, 5]) {
+  function scheduleGradientDrift(stops: SVGStopElement[], initialDelay: [number, number] = [0, 3]) {
     const runDrift = () => {
       if (idleStopped) return
       const tl = gsap.timeline({ onComplete: runDrift })
       stops.forEach((stop) => {
         const base = Number(stop.dataset.stopOffset)
-        const jitter = gsap.utils.random(-8, 8)
+        const jitter = gsap.utils.random(-16, 16)
         tl.to(
           stop,
           {
             attr: { offset: `${Math.min(100, Math.max(0, base + jitter))}%` },
-            duration: gsap.utils.random(10, 18),
+            duration: gsap.utils.random(6, 12),
             ease: 'sine.inOut'
           },
           0
@@ -296,44 +234,9 @@ export function useHeroKineticBlueprint(
     }
   }
 
-  function startNodePulse() {
-    for (const node of nodeEls()) {
-      idleTweens.push(
-        gsap.to(node, {
-          scale: 1.25,
-          transformOrigin: 'center',
-          duration: gsap.utils.random(3, 6),
-          delay: gsap.utils.random(0, 3),
-          repeat: -1,
-          yoyo: true,
-          ease: 'sine.inOut'
-        })
-      )
-    }
-  }
-
-  function activateNode(node: SVGCircleElement, duration = 0.4) {
-    node.dataset.active = 'true'
-    idleTweens.push(
-      gsap.to(node, {
-        scale: 1.4,
-        duration: duration * 0.5,
-        yoyo: true,
-        repeat: 1,
-        transformOrigin: 'center',
-        ease: 'power2.out',
-        onComplete: () => {
-          node.dataset.active = 'false'
-        }
-      })
-    )
-  }
-
   function runFacetLock() {
     const facets = facetEls()
     if (facets.length === 0) return
-    const rail = railEl()
-    const nodes = nodeEls()
 
     const tl = gsap.timeline()
     for (const def of composition.facets) {
@@ -350,18 +253,11 @@ export function useHeroKineticBlueprint(
           x: def.lockTarget.x,
           y: def.lockTarget.y,
           rotation: def.lockTarget.rotation,
-          duration: 1.2,
-          ease: 'back.out(1.4)'
+          scale: 1,
+          duration: 1,
+          ease: 'back.out(1.6)'
         },
         0
-      )
-    }
-
-    if (rail) {
-      tl.to(rail, { opacity: 1, strokeWidth: 6, duration: 0.3, ease: 'power2.out' }, 1.0).to(
-        rail,
-        { opacity: 0.75, strokeWidth: 4, duration: 0.6, ease: 'power2.inOut' },
-        1.6
       )
     }
 
@@ -372,7 +268,7 @@ export function useHeroKineticBlueprint(
         stops,
         {
           attr: { offset: (i: number) => `${Math.min(100, Math.max(0, Number(stops[i]?.dataset.stopOffset) - 15))}%` },
-          duration: 0.6,
+          duration: 0.5,
           ease: 'power2.out',
           // GSAP's default overwrite for attr-tweens is false, so a
           // concurrent gradient-drift tween on the same <stop> offset
@@ -381,12 +277,12 @@ export function useHeroKineticBlueprint(
           // same property so the lock's convergence always wins cleanly.
           overwrite: 'auto'
         },
-        1.0
+        0.8
       ).to(
         stops,
         {
           attr: { offset: (i: number) => `${stops[i]?.dataset.stopOffset}%` },
-          duration: 1.2,
+          duration: 1,
           ease: 'sine.inOut',
           overwrite: 'auto',
           // overwrite:'auto' above kills startGradientDrift()'s in-flight
@@ -399,14 +295,8 @@ export function useHeroKineticBlueprint(
             if (!idleStopped) scheduleGradientDrift(stops)
           }
         },
-        2.2
+        1.8
       )
-    }
-
-    if (nodes.length > 0) {
-      tl.call(() => {
-        nodes.slice(0, Math.min(2, nodes.length)).forEach((n) => activateNode(n, 0.5))
-      }, undefined, 1.0)
     }
 
     idleTweens.push(tl as unknown as gsap.core.Tween)
@@ -416,18 +306,15 @@ export function useHeroKineticBlueprint(
     const runLoop = () => {
       if (idleStopped) return
       runFacetLock()
-      idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(8, 14), runLoop))
+      idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(6, 10), runLoop))
     }
-    idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(8, 14), runLoop))
+    idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(6, 10), runLoop))
   }
 
   function startIdleTimelines() {
     idleStopped = false
     startFacetDrift()
-    startRailSweep()
-    startBandShift()
     startGradientDrift()
-    startNodePulse()
     startFacetLockLoop()
   }
 
@@ -553,8 +440,8 @@ export function useHeroKineticBlueprint(
 
     for (const facet of facetEls()) {
       const depthFactor = facet.dataset.blueprintId === 'plate-a' ? 1 : facet.dataset.blueprintId === 'plate-b' ? 0.7 : 0.5
-      const dx = dampedPointer.x * 8 * depthFactor
-      const dy = dampedPointer.y * -8 * depthFactor
+      const dx = dampedPointer.x * 16 * depthFactor
+      const dy = dampedPointer.y * -16 * depthFactor
       facet.style.setProperty('--pointer-tension-x', `${dx}px`)
       facet.style.setProperty('--pointer-tension-y', `${dy}px`)
     }
@@ -605,12 +492,8 @@ export function useHeroKineticBlueprint(
     for (const def of composition.facets) {
       const el = facetById(def.id)
       if (!el) continue
-      gsap.set(el, { x: def.lockTarget.x, y: def.lockTarget.y, rotation: def.lockTarget.rotation })
+      gsap.set(el, { x: def.lockTarget.x, y: def.lockTarget.y, rotation: def.lockTarget.rotation, scale: 1 })
     }
-    const nodes = nodeEls()
-    nodes.slice(0, Math.min(2, nodes.length)).forEach((n) => {
-      n.dataset.active = 'true'
-    })
   }
 
   const handleReducedMotionChange = (e: MediaQueryListEvent) => {
@@ -621,16 +504,6 @@ export function useHeroKineticBlueprint(
       applyReducedMotionRestingState()
     } else {
       syncRunState()
-      // The entry timeline only ever plays once (gated on introReady, which
-      // already fired while reducedMotion was true, so its watcher callback
-      // already early-returned and will never run again). Apply the entry
-      // timeline's end-state opacity for rail/band directly so turning
-      // reduced-motion off live doesn't leave them at their build-time
-      // default instead of the intended resting values.
-      const rail = railEl()
-      const band = bandEl()
-      if (rail) gsap.set(rail, { opacity: 0.75 })
-      if (band) gsap.set(band, { opacity: 1 })
     }
     reconcilePointerState()
     buildScrollTimeline() // no pin at all when reducedMotion is true; rebuilt fresh when it turns false
@@ -655,34 +528,19 @@ export function useHeroKineticBlueprint(
       if (reducedMotion) return // resting state already applied above; no entry animation under reduced motion
 
       const facets = facetEls()
-      const rail = railEl()
-      const band = bandEl()
-
-      gsap.set(facets, { opacity: 0, scale: 0.9 })
-      if (rail) gsap.set(rail, { opacity: 0 })
-      if (band) gsap.set(band, { opacity: 0 })
+      gsap.set(facets, { opacity: 0, scale: 0.85 })
 
       entryTimeline = gsap.timeline()
       entryTimeline
         .to(facets, {
-          // The preceding gsap.set(facets, { opacity: 0 }) means
-          // target.style.opacity is always 0 (falsy) here, so a
-          // Number(target.style.opacity) first operand would never
-          // contribute — dropped as dead code (finding #7).
           opacity: (i, target) => composition.facets.find((f) => f.id === (target as SVGGElement).dataset.blueprintId)?.opacity || 0.3,
           scale: 1,
           duration: motionDuration.slow,
           ease: motionEase.standard,
           stagger: { each: motionStagger.loose, ease: 'power2.out' }
         })
-        .to(rail ? [rail] : [], { opacity: 0.75, duration: motionDuration.editorial, ease: motionEase.standard }, '-=0.4')
-        .to(band ? [band] : [], { opacity: 1, duration: motionDuration.editorial, ease: motionEase.standard }, '-=0.5')
         .call(() => {
-          const nodes = nodeEls()
-          nodes.slice(0, Math.min(2, nodes.length)).forEach((n) => activateNode(n, 0.5))
-        })
-        .call(() => {
-          syncRunState() // starts idle motion (Task 5-6 systems) once entry completes
+          syncRunState() // starts idle motion once entry completes
         })
     },
     { immediate: true }
@@ -739,20 +597,6 @@ export function useHeroKineticBlueprint(
         if (typeof target.opacity === 'number') vars.opacity = target.opacity
         tl.to(el, vars, phaseName)
       }
-    }
-
-    const rail = railEl()
-    if (rail) {
-      const length = rail.getTotalLength()
-      rail.style.strokeDasharray = String(length)
-      tl.fromTo(rail, { strokeDashoffset: length * 0.4 }, { strokeDashoffset: 0, duration: 0.25, ease: 'none' }, 'expansion')
-      tl.to(rail, { opacity: 0, duration: 0.1, ease: 'none' }, 'handoff')
-    }
-
-    const band = bandEl()
-    if (band) {
-      tl.to(band, { scaleX: 1.04, transformOrigin: 'center', duration: 0.25, ease: 'none' }, 'expansion')
-      tl.to(band, { y: 120, opacity: 0, duration: 0.1, ease: 'none' }, 'handoff')
     }
 
     scrollTimeline = tl

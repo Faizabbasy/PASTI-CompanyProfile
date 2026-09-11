@@ -34,23 +34,6 @@ export interface FacetDef {
   phases?: Partial<Record<ScrollPhaseName, FacetPhaseState>>
 }
 
-export interface RailDef {
-  id: 'primary-rail'
-  d: string
-}
-
-export interface BandDef {
-  id: 'secondary-band'
-  d: string
-}
-
-export interface NodeDef {
-  id: string
-  cx: number
-  cy: number
-  r: number
-}
-
 export interface GradientStopDef {
   offset: number
   color: string
@@ -68,9 +51,6 @@ export interface GradientDef {
 export interface SignalComposition {
   viewBox: string
   facets: FacetDef[]
-  rail: RailDef
-  band: BandDef
-  nodes: NodeDef[]
   gradients: GradientDef[]
 }
 
@@ -88,15 +68,50 @@ const VIEWBOX = '0 0 1600 900'
 // imperatively-created SVG attributes).
 const NAVY_900 = '#051B28'
 const NAVY_700 = '#0B3954'
+const NAVY_600 = '#124A64'
 const NAVY_500 = '#1C5E7C'
+const NAVY_400 = '#3F839F'
 const NAVY_300 = '#6FA2B7'
 const YELLOW_600 = '#D69C00'
 const YELLOW_500 = '#FBBA00'
+const YELLOW_300 = '#FFDA4D'
 
+// Three-stop gradients (rather than a flat two-color fade) so each facet
+// reads as a material surface catching a light source at one edge — a
+// brighter mid-stop simulates a highlight/reflection band instead of a
+// uniform vector wash.
 const desktopGradients: GradientDef[] = [
-  { id: 'grad-plate-a', type: 'linear', angle: 128, stops: [{ offset: 0, color: NAVY_900 }, { offset: 100, color: NAVY_500 }] },
-  { id: 'grad-plate-b', type: 'linear', angle: 42, stops: [{ offset: 0, color: NAVY_700 }, { offset: 100, color: NAVY_300 }] },
-  { id: 'grad-plate-c', type: 'radial', stops: [{ offset: 0, color: YELLOW_600 }, { offset: 100, color: NAVY_500 }] }
+  {
+    id: 'grad-plate-a',
+    type: 'linear',
+    angle: 128,
+    stops: [
+      { offset: 0, color: NAVY_900 },
+      { offset: 45, color: NAVY_600 },
+      { offset: 62, color: NAVY_400 },
+      { offset: 100, color: NAVY_500 }
+    ]
+  },
+  {
+    id: 'grad-plate-b',
+    type: 'linear',
+    angle: 42,
+    stops: [
+      { offset: 0, color: NAVY_700 },
+      { offset: 50, color: NAVY_400 },
+      { offset: 68, color: NAVY_300 },
+      { offset: 100, color: NAVY_500 }
+    ]
+  },
+  {
+    id: 'grad-plate-c',
+    type: 'radial',
+    stops: [
+      { offset: 0, color: YELLOW_300 },
+      { offset: 35, color: YELLOW_600 },
+      { offset: 100, color: NAVY_600 }
+    ]
+  }
 ]
 
 // --- Desktop composition ---
@@ -146,20 +161,11 @@ const desktopComposition: SignalComposition = {
       }
     }
   ],
-  rail: { id: 'primary-rail', d: 'M 100 850 L 1500 80' },
-  band: { id: 'secondary-band', d: 'M -50 760 L 1650 700 L 1650 860 L -50 900 Z' },
-  nodes: [
-    { id: 'node-1', cx: 620, cy: 640, r: 6 },
-    { id: 'node-2', cx: 980, cy: 340, r: 6 },
-    { id: 'node-3', cx: 1500, cy: 80, r: 5 },
-    { id: 'node-4', cx: 100, cy: 850, r: 5 }
-  ],
   gradients: desktopGradients
 }
 
 // --- Tablet composition: same fractured-plate geometry as desktop (still
-// reads as one dominant structure at tablet width via viewBox scaling);
-// only the node count is trimmed by the composable at build time. ---
+// reads as one dominant structure at tablet width via viewBox scaling). ---
 const tabletComposition: SignalComposition = desktopComposition
 
 // --- Mobile composition: repositioned into a narrower/taller effective
@@ -210,12 +216,6 @@ const mobileComposition: SignalComposition = {
         handoff: { x: 60, y: 170, rotation: 6, scale: 0.85, opacity: 0 }
       }
     }
-  ],
-  rail: { id: 'primary-rail', d: 'M 80 860 L 1400 100' },
-  band: { id: 'secondary-band', d: 'M -50 820 L 1650 790 L 1650 870 L -50 900 Z' },
-  nodes: [
-    { id: 'node-1', cx: 500, cy: 700, r: 6 },
-    { id: 'node-2', cx: 880, cy: 360, r: 5 }
   ],
   gradients: desktopGradients
 }

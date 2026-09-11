@@ -186,29 +186,22 @@
   .signal-architecture__facet {
     stroke: none;
   }
-  .signal-architecture__rail {
-    stroke: theme(colors.yellow.500);
-    stroke-width: 5;
-    stroke-linecap: round;
-    fill: none;
-  }
-  .signal-architecture__band {
-    fill: theme(colors.navy.700);
-    fill-opacity: 0.42;
-  }
-  .signal-architecture__node {
-    fill: theme(colors.yellow.500);
-    fill-opacity: 0.85;
-    transition: fill-opacity 0.3s ease;
-  }
-  .signal-architecture__node[data-active='true'] {
-    fill-opacity: 1;
+  /* Fractal-noise grain, overlaid via mix-blend-mode so it modulates the
+     facet's own gradient rather than sitting on top as a flat layer —
+     gives the surface a material/textured read instead of a flat vector
+     fill. */
+  .signal-architecture__grain {
+    mix-blend-mode: overlay;
+    pointer-events: none;
   }
   [data-blueprint-id='plate-a'] .signal-architecture__facet {
-    filter: drop-shadow(0 12px 24px rgba(5, 27, 40, 0.18));
+    filter: drop-shadow(0 18px 36px rgba(5, 27, 40, 0.28));
   }
   [data-blueprint-id='plate-b'] .signal-architecture__facet {
-    filter: drop-shadow(0 6px 14px rgba(5, 27, 40, 0.1));
+    filter: drop-shadow(0 10px 22px rgba(5, 27, 40, 0.18));
+  }
+  [data-blueprint-id='plate-c'] .signal-architecture__facet {
+    filter: drop-shadow(0 6px 14px rgba(5, 27, 40, 0.12));
   }
   [data-blueprint-group='facets'] > g {
     --pointer-tension-x: 0px;
