@@ -262,29 +262,37 @@ export function useHeroKineticBlueprint(
     runShift()
   }
 
+  // Self-rescheduling gradient-stop drift for one facet's <stop> elements.
+  // Shared by startGradientDrift() (idle loop) and runFacetLock()'s
+  // restart-after-overwrite path, so the two never drift out of sync with
+  // each other's scheduling logic.
+  function scheduleGradientDrift(stops: SVGStopElement[], initialDelay: [number, number] = [0, 5]) {
+    const runDrift = () => {
+      if (idleStopped) return
+      const tl = gsap.timeline({ onComplete: runDrift })
+      stops.forEach((stop) => {
+        const base = Number(stop.dataset.stopOffset)
+        const jitter = gsap.utils.random(-8, 8)
+        tl.to(
+          stop,
+          {
+            attr: { offset: `${Math.min(100, Math.max(0, base + jitter))}%` },
+            duration: gsap.utils.random(10, 18),
+            ease: 'sine.inOut'
+          },
+          0
+        )
+      })
+      idleTweens.push(tl as unknown as gsap.core.Tween)
+    }
+    idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(...initialDelay), runDrift))
+  }
+
   function startGradientDrift() {
     for (const facet of composition.facets) {
       const stops = gradientStopEls(facet.gradientId)
       if (stops.length < 2) continue
-      const runDrift = () => {
-        if (idleStopped) return
-        const tl = gsap.timeline({ onComplete: runDrift })
-        stops.forEach((stop, i) => {
-          const base = Number(stop.dataset.stopOffset)
-          const jitter = gsap.utils.random(-8, 8)
-          tl.to(
-            stop,
-            {
-              attr: { offset: `${Math.min(100, Math.max(0, base + jitter))}%` },
-              duration: gsap.utils.random(10, 18),
-              ease: 'sine.inOut'
-            },
-            0
-          )
-        })
-        idleTweens.push(tl as unknown as gsap.core.Tween)
-      }
-      idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(0, 5), runDrift))
+      scheduleGradientDrift(stops)
     }
   }
 
@@ -380,7 +388,16 @@ export function useHeroKineticBlueprint(
           attr: { offset: (i: number) => `${stops[i]?.dataset.stopOffset}%` },
           duration: 1.2,
           ease: 'sine.inOut',
-          overwrite: 'auto'
+          overwrite: 'auto',
+          // overwrite:'auto' above kills startGradientDrift()'s in-flight
+          // timeline for this facet without firing its onComplete, which
+          // is what reschedules the next drift cycle — left alone, that
+          // facet's gradient drift would permanently stop after its first
+          // lock event. Explicitly restart the drift loop for these stops
+          // once the lock's relax finishes, so it always resumes.
+          onComplete: () => {
+            if (!idleStopped) scheduleGradientDrift(stops)
+          }
         },
         2.2
       )
