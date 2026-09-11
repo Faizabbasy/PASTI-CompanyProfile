@@ -182,6 +182,13 @@ export function useHeroKineticBlueprint(
     for (const facet of facetEls()) {
       const runDrift = () => {
         if (idleStopped) return
+        if (pointerControlActive) {
+          // Pointer has control — check back shortly instead of
+          // scheduling a drift leg now, so drift resumes as soon as
+          // control is handed back rather than staying paused forever.
+          idleDelayedCalls.push(gsap.delayedCall(0.3, runDrift))
+          return
+        }
         const distance = gsap.utils.random(28, 55)
         const angleRad = gsap.utils.random(0, 360) * (Math.PI / 180)
         idleTweens.push(
@@ -411,6 +418,8 @@ export function useHeroKineticBlueprint(
 
   function handlePointerMove(event: PointerEvent) {
     if (cachedWidth === 0 || cachedHeight === 0) return
+    pointerControlActive = true
+    armDriftHandback()
     // ScrollTrigger's pin:true takes the section out of normal document
     // flow for the pinned range (position:fixed / pin-spacer equivalent),
     // so its viewport top stays constant while window.scrollY keeps
@@ -426,13 +435,18 @@ export function useHeroKineticBlueprint(
     rawPointer.y = -(((event.clientY - currentTop) / cachedHeight) * 2 - 1)
   }
 
-  // Structure tension: each facet gets a small, capped nudge toward the
-  // pointer — restrained per spec ("no glow, halo, magnetic blob, huge
-  // deformation"). Written to --pointer-tension-x/-y custom properties
-  // consumed by the standalone CSS `translate` property (see main.css),
-  // which composes independently of GSAP's own x/y/rotation tweens (idle
-  // drift, Facet Lock) since those apply via the separate `transform`
-  // property — the two never fight over the same CSS property.
+  function handlePointerLeave() {
+    driftHandbackCall?.kill()
+    pointerControlActive = false
+  }
+
+  // Pointer control takes over the same x/y/rotation properties idle
+  // drift animates. `overwrite: 'auto'` is what hands control away from
+  // any in-flight drift tween on the same facet without a separate pause
+  // call — GSAP kills the conflicting tween on those properties for us.
+  // A short duration (not a hard `gsap.set`) keeps the follow feeling
+  // smoothed rather than snapping to the damped pointer position every
+  // tick.
   function pointerTick() {
     const t = 1 - Math.exp(-6 * gsap.ticker.deltaRatio(60) * (1 / 60))
     dampedPointer.x += (rawPointer.x - dampedPointer.x) * t
@@ -440,10 +454,10 @@ export function useHeroKineticBlueprint(
 
     for (const facet of facetEls()) {
       const depthFactor = facet.dataset.blueprintId === 'plate-a' ? 1 : facet.dataset.blueprintId === 'plate-b' ? 0.7 : 0.5
-      const dx = dampedPointer.x * 16 * depthFactor
-      const dy = dampedPointer.y * -16 * depthFactor
-      facet.style.setProperty('--pointer-tension-x', `${dx}px`)
-      facet.style.setProperty('--pointer-tension-y', `${dy}px`)
+      const dx = dampedPointer.x * 28 * depthFactor
+      const dy = dampedPointer.y * -28 * depthFactor
+      const rot = dampedPointer.x * 2.5 * depthFactor
+      gsap.to(facet, { x: dx, y: dy, rotation: rot, duration: 0.4, ease: 'power2.out', overwrite: 'auto' })
     }
   }
 
@@ -452,19 +466,25 @@ export function useHeroKineticBlueprint(
   const pointerMql = window.matchMedia('(hover: hover) and (pointer: fine)')
   let isPointerActive = false
 
+  // True for as long as the pointer is actively driving facet position
+  // (see pointerTick()). Idle drift checks this before scheduling its
+  // next leg so the two systems hand off cleanly instead of blending.
+  let pointerControlActive = false
+  let driftHandbackCall: gsap.core.Tween | null = null
+
+  // Arms a delayed resume of idle drift once the pointer stops moving.
+  // Re-armed on every pointermove so drift only resumes after a real
+  // settle, not mid-movement.
+  function armDriftHandback() {
+    driftHandbackCall?.kill()
+    driftHandbackCall = gsap.delayedCall(0.9, () => {
+      pointerControlActive = false
+    })
+  }
+
   function pointerShouldBeActive(): boolean {
     if (currentTier === 'mobile' || reducedMotion) return false
     return pointerMql.matches
-  }
-
-  function resetPointerTension() {
-    for (const facet of facetEls()) {
-      gsap.to(facet, { '--pointer-tension-x': '0px', '--pointer-tension-y': '0px', duration: 0.5, ease: 'power2.out' })
-    }
-    rawPointer.x = 0
-    rawPointer.y = 0
-    dampedPointer.x = 0
-    dampedPointer.y = 0
   }
 
   function reconcilePointerState() {
@@ -473,12 +493,15 @@ export function useHeroKineticBlueprint(
       isPointerActive = true
       refreshPointerBounds()
       sectionEl.addEventListener('pointermove', handlePointerMove, { passive: true })
+      sectionEl.addEventListener('pointerleave', handlePointerLeave, { passive: true })
       gsap.ticker.add(pointerTick)
     } else if (!shouldBeActive && isPointerActive) {
       isPointerActive = false
       sectionEl.removeEventListener('pointermove', handlePointerMove)
+      sectionEl.removeEventListener('pointerleave', handlePointerLeave)
       gsap.ticker.remove(pointerTick)
-      resetPointerTension()
+      driftHandbackCall?.kill()
+      pointerControlActive = false
     }
   }
 
