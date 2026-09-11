@@ -184,16 +184,132 @@ export function useHeroKineticBlueprint(
 
   updateVoidClip()
 
-  // --- Idle system start/stop — bodies filled in by Task 5. Declared here
-  // so the visibility/intersection lifecycle wiring in this task has a
-  // stable pair of functions to call; Task 5 replaces these two function
-  // bodies without touching this section. ---
+  // --- Idle motion system (spec "Idle motion") — large-amplitude facet
+  // drift, periodic rail sweep, band micro-shift, gradient stop drift, and
+  // node pulses. `idleStopped` gates every self-rescheduling callback so
+  // stopIdleTimelines() halts the whole system without individually
+  // tracking every future scheduled call — same pattern as the retired
+  // Kinetic Blueprint composable's timescale system. ---
   let idleStopped = true
+  const idleTweens: gsap.core.Tween[] = []
+  const idleDelayedCalls: gsap.core.Tween[] = []
+
+  function gradientStopEls(gradientId: string): SVGStopElement[] {
+    const el = svg.querySelector(`#${gradientId}`)
+    return el ? (Array.from(el.children) as SVGStopElement[]) : []
+  }
+
+  function startFacetDrift() {
+    for (const facet of facetEls()) {
+      const runDrift = () => {
+        if (idleStopped) return
+        const distance = gsap.utils.random(15, 30)
+        const angleRad = gsap.utils.random(0, 360) * (Math.PI / 180)
+        idleTweens.push(
+          gsap.to(facet, {
+            x: Math.cos(angleRad) * distance,
+            y: Math.sin(angleRad) * distance,
+            rotation: gsap.utils.random(-1.5, 1.5),
+            duration: gsap.utils.random(8, 16),
+            ease: 'sine.inOut',
+            onComplete: runDrift
+          })
+        )
+      }
+      idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(0, 4), runDrift))
+    }
+  }
+
+  function startRailSweep() {
+    const rail = railEl()
+    if (!rail) return
+    const length = rail.getTotalLength()
+    rail.style.strokeDasharray = String(length)
+    const runSweep = () => {
+      if (idleStopped) return
+      idleTweens.push(
+        gsap.fromTo(
+          rail,
+          { strokeDashoffset: length },
+          { strokeDashoffset: 0, duration: gsap.utils.random(10, 14), ease: 'sine.inOut', onComplete: runSweep }
+        )
+      )
+    }
+    runSweep()
+  }
+
+  function startBandShift() {
+    const band = bandEl()
+    if (!band) return
+    const runShift = () => {
+      if (idleStopped) return
+      idleTweens.push(
+        gsap.to(band, {
+          x: gsap.utils.random(-15, 15),
+          duration: gsap.utils.random(12, 20),
+          ease: 'sine.inOut',
+          onComplete: runShift
+        })
+      )
+    }
+    runShift()
+  }
+
+  function startGradientDrift() {
+    for (const facet of composition.facets) {
+      const stops = gradientStopEls(facet.gradientId)
+      if (stops.length < 2) continue
+      const runDrift = () => {
+        if (idleStopped) return
+        const tl = gsap.timeline({ onComplete: runDrift })
+        stops.forEach((stop, i) => {
+          const base = Number(stop.dataset.stopOffset)
+          const jitter = gsap.utils.random(-8, 8)
+          tl.to(
+            stop,
+            {
+              attr: { offset: `${Math.min(100, Math.max(0, base + jitter))}%` },
+              duration: gsap.utils.random(10, 18),
+              ease: 'sine.inOut'
+            },
+            0
+          )
+        })
+        idleTweens.push(tl as unknown as gsap.core.Tween)
+      }
+      idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(0, 5), runDrift))
+    }
+  }
+
+  function startNodePulse() {
+    for (const node of nodeEls()) {
+      idleTweens.push(
+        gsap.to(node, {
+          scale: 1.25,
+          transformOrigin: 'center',
+          duration: gsap.utils.random(3, 6),
+          delay: gsap.utils.random(0, 3),
+          repeat: -1,
+          yoyo: true,
+          ease: 'sine.inOut'
+        })
+      )
+    }
+  }
+
   function startIdleTimelines() {
     idleStopped = false
+    startFacetDrift()
+    startRailSweep()
+    startBandShift()
+    startGradientDrift()
+    startNodePulse()
   }
+
   function stopIdleTimelines() {
     idleStopped = true
+    for (const tween of idleTweens.splice(0)) tween.kill()
+    for (const call of idleDelayedCalls.splice(0)) call.kill()
   }
 
   // --- Visibility / intersection pausing: genuinely stop/start idle
