@@ -483,17 +483,13 @@ export function useHeroKineticBlueprint(
     rawPointer.y = -(((event.clientY - currentTop) / cachedHeight) * 2 - 1)
   }
 
-  // Structure tension: each facet's rotation/translate gets a small,
-  // capped nudge toward the pointer — restrained per spec ("no glow, halo,
-  // magnetic blob, huge deformation"). Applied as an additive offset on
-  // top of (not replacing) the idle drift transform, via a separate CSS
-  // custom property consumed by a second transform layer — simplest
-  // correct approach is a small additional GSAP-driven x/y/rotation delta
-  // applied directly, since GSAP's transform cache composes repeated
-  // .to()/.set() calls on the same properties additively is NOT reliable;
-  // instead pointer influence is applied to a dedicated wrapper transform
-  // via CSS custom properties independent of the idle system's direct
-  // x/y/rotation tweens.
+  // Structure tension: each facet gets a small, capped nudge toward the
+  // pointer — restrained per spec ("no glow, halo, magnetic blob, huge
+  // deformation"). Written to --pointer-tension-x/-y custom properties
+  // consumed by the standalone CSS `translate` property (see main.css),
+  // which composes independently of GSAP's own x/y/rotation tweens (idle
+  // drift, Facet Lock) since those apply via the separate `transform`
+  // property — the two never fight over the same CSS property.
   function pointerTick() {
     const t = 1 - Math.exp(-6 * gsap.ticker.deltaRatio(60) * (1 / 60))
     dampedPointer.x += (rawPointer.x - dampedPointer.x) * t
