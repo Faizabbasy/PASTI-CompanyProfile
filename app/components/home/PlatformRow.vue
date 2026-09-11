@@ -11,9 +11,56 @@ const props = defineProps<{ platform: Platform; variant: 'open' | 'corporate' }>
 
 const rowRef = ref<HTMLElement | null>(null)
 const imageRef = ref<HTMLElement | null>(null)
-useScrollReveal(rowRef)
+const indexRef = ref<HTMLElement | null>(null)
+const titleRef = ref<HTMLElement | null>(null)
+const descRef = ref<HTMLElement | null>(null)
+const imageWrapRef = ref<HTMLElement | null>(null)
 
 const { setState } = useCustomCursor()
+
+// Row entrance: text builds in first (index -> title -> description, the
+// arrow rides along inside description's own element), staggered; the
+// image follows as a curtain-style clip-path reveal opening from the top,
+// overlapping the tail of the text stagger rather than waiting for it to
+// finish. Kept as one timeline on one ScrollTrigger so the whole row
+// commits to a single entrance beat instead of each child re-triggering
+// independently.
+useGsapContext(() => {
+  const row = rowRef.value
+  const imageWrap = imageWrapRef.value
+  const textEls = [indexRef.value, titleRef.value, descRef.value].filter(Boolean)
+  if (!row || !imageWrap || !textEls.length) return
+
+  const mm = gsap.matchMedia()
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    gsap.set(textEls, { opacity: 0, y: 24 })
+    gsap.set(imageWrap, { clipPath: 'inset(0 0 100% 0)' })
+
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: row, start: 'top 80%', toggleActions: 'restart none restart reverse' }
+    })
+
+    tl.to(textEls, {
+      opacity: 1,
+      y: 0,
+      duration: motionDuration.editorial,
+      ease: motionEase.standard,
+      stagger: motionStagger.base
+    }).to(imageWrap, {
+      clipPath: 'inset(0 0 0% 0)',
+      duration: motionDuration.slow,
+      ease: spatialEase.settle
+    }, '-=0.35')
+
+    return () => tl.kill()
+  })
+
+  mm.add('(prefers-reduced-motion: reduce)', () => {
+    gsap.set(textEls, { opacity: 1, y: 0 })
+    gsap.set(imageWrap, { clipPath: 'inset(0 0 0% 0)' })
+  })
+})
 
 // Dual Product Worlds: OPEN gets a larger-amplitude, more expansive window-
 // parallax; e-CORPORATE gets a smaller-amplitude, tighter-eased one — same
@@ -61,15 +108,15 @@ useGsapContext(() => {
       @mouseleave="setState('default')"
     >
       <div class="md:col-span-5">
-        <span class="font-display text-sm font-semibold text-navy-400" aria-hidden="true">
+        <span ref="indexRef" class="font-display text-sm font-semibold text-navy-400" aria-hidden="true">
           {{ platform.index }}
         </span>
 
-        <h3 class="mt-4 text-display-md font-display font-semibold text-paper transition-all duration-400 ease-editorial group-hover:translate-x-2 group-hover:text-yellow-400 md:text-display-lg">
+        <h3 ref="titleRef" class="mt-4 text-display-md font-display font-semibold text-paper transition-all duration-400 ease-editorial group-hover:translate-x-2 group-hover:text-yellow-400 md:text-display-lg">
           {{ platform.name }}
         </h3>
 
-        <p class="mt-4 inline-flex items-center gap-2 text-body-lg text-navy-200">
+        <p ref="descRef" class="mt-4 inline-flex items-center gap-2 text-body-lg text-navy-200">
           {{ platform.positioning }}
           <span
             aria-hidden="true"
@@ -80,6 +127,7 @@ useGsapContext(() => {
 
       <div class="md:col-span-7">
         <div
+          ref="imageWrapRef"
           class="relative w-full overflow-hidden rounded-2xl"
           :class="variant === 'open' ? 'aspect-[16/10]' : 'aspect-[16/10] md:aspect-[4/3] md:mx-auto md:max-w-[85%]'"
         >

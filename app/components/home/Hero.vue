@@ -127,19 +127,13 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
 </script>
 
 <template>
-  <BaseSection as="section" class="relative flex min-h-[100svh] items-center overflow-hidden pb-16 pt-24 md:pt-28">
-    <!-- Background treatment — Kinetic Blueprint, a 2D SVG/GSAP graphic
-         motion identity system (see
-         docs/superpowers/specs/2026-09-11-hero-kinetic-blueprint-design.md).
-         Wrapped in ClientOnly so server + first client paint agree (both
-         render nothing here) — avoids a hydration mismatch. -->
+  <BaseSection as="section" class="relative flex min-h-[100svh] items-start overflow-hidden pb-16 pt-32 md:pt-40">
+    <!-- Background treatment — Wire grid, a 3D wireframe terrain plane
+         (restored from the pre-deletion dev background picker). Wrapped in
+         ClientOnly so server + first client paint agree (both render
+         nothing here) — avoids a hydration mismatch on the WebGL canvas. -->
     <ClientOnly>
-      <HomeHeroKineticBlueprint
-        class="z-[3]"
-        :heading-words="headingWordsRef"
-        :subtext-el="subtextRef"
-        :cta-row-el="ctaRowRef"
-      />
+      <HomeHeroBgThreeWireGrid class="z-[3]" />
     </ClientOnly>
 
     <!-- Scrim: soft light pool behind the headline/CTA text, sits above the
@@ -184,7 +178,7 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
           </h1>
         </div>
 
-        <p ref="subtextRef" class="mt-6 max-w-2xl text-body-lg text-muted">
+        <p ref="subtextRef" class="mt-6 max-w-2xl text-body-lg font-bold text-navy-700">
           {{ subtext }}
         </p>
 

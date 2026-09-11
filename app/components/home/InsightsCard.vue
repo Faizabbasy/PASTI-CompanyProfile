@@ -61,7 +61,7 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <div ref="cardRef" class="group" @mouseenter="setState('view')" @mouseleave="setState('default')">
+  <div ref="cardRef" class="group" @mouseenter="setState('view', 'Read')" @mouseleave="setState('default')">
     <div ref="mediaRef" class="aspect-[4/3] w-full overflow-hidden rounded-2xl">
       <img
         :src="article.image"

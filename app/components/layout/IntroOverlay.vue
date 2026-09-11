@@ -67,7 +67,7 @@ const introGroups: IntroGroup[] = [
       { value: 'agency-slabreveal', label: 'Slab reveal' },
       { value: 'agency-glyphcycle', label: 'Glyph cycle' },
       { value: 'agency-slab-glyph', label: 'Slab reveal + glyph decrypt' },
-      { value: 'agency-counter-logostack', label: 'Counter grid → Logo stack cycle' }
+      { value: 'agency-counter-logostack', label: 'Counter grid' }
     ]
   },
   {

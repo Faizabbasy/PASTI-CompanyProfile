@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 
-const { state } = useCustomCursor()
+const { state, label } = useCustomCursor()
 
 const enabled = ref(false)
 const cursorRef = ref<HTMLElement | null>(null)
@@ -41,6 +41,8 @@ onMounted(() => {
     :data-cursor-state="state"
     aria-hidden="true"
   >
-    <div class="cursor-dot" />
+    <div class="cursor-dot">
+      <span v-if="label" class="cursor-label">{{ label }}</span>
+    </div>
   </div>
 </template>
