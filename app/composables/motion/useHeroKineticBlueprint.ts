@@ -364,16 +364,129 @@ export function useHeroKineticBlueprint(
   // template) absorbs same-tier resizes with zero JS. ---
   function reconcileTier() {
     const nextTier = getTier()
-    if (nextTier === currentTier) return
+    if (nextTier === currentTier) {
+      refreshPointerBounds()
+      return
+    }
     currentTier = nextTier
     stopIdleTimelines()
     isRunning = false
     buildElements(currentTier)
     syncRunState()
+    refreshPointerBounds()
+    reconcilePointerState()
   }
 
   const resizeObserver = new ResizeObserver(() => reconcileTier())
   resizeObserver.observe(sectionEl)
+
+  // --- Pointer bounds cached in document space, not viewport space, since
+  // the Hero moves relative to the viewport across the pre-pin/pinned/
+  // post-pin scroll ranges (spec "Performance / lifecycle strategy"). ---
+  let cachedWidth = 0
+  let cachedHeight = 0
+  let cachedLeft = 0
+  let cachedDocumentTop = 0
+
+  function refreshPointerBounds() {
+    const rect = sectionEl.getBoundingClientRect()
+    cachedWidth = rect.width
+    cachedHeight = rect.height
+    cachedLeft = rect.left
+    cachedDocumentTop = rect.top + window.scrollY
+  }
+  refreshPointerBounds()
+
+  // Raw normalized pointer position (-1..1), updated only by the listener.
+  const rawPointer = { x: 0, y: 0 }
+  // Damped pointer position consumed by the gsap.ticker callback.
+  const dampedPointer = { x: 0, y: 0 }
+
+  function handlePointerMove(event: PointerEvent) {
+    if (cachedWidth === 0 || cachedHeight === 0) return
+    const currentTop = cachedDocumentTop - window.scrollY
+    rawPointer.x = ((event.clientX - cachedLeft) / cachedWidth) * 2 - 1
+    rawPointer.y = -(((event.clientY - currentTop) / cachedHeight) * 2 - 1)
+  }
+
+  // Elements currently nudged by pointer proximity, so they can be eased
+  // back to baseline on detach (spec: "tween any pointer-nudged elements
+  // back to their idle-timeline baseline").
+  let nudgedElements: SVGGElement[] = []
+
+  function pointerTick() {
+    const t = 1 - Math.exp(-8 * gsap.ticker.deltaRatio(60) * (1 / 60))
+    dampedPointer.x += (rawPointer.x - dampedPointer.x) * t
+    dampedPointer.y += (rawPointer.y - dampedPointer.y) * t
+
+    // Nudge the 2-3 nearest lines/nodes toward the pointer, capped magnitude.
+    const candidates = [...activeLines(), ...activeNodes()]
+    const withDistance = candidates
+      .map((el) => {
+        const cx = el.getBBox().x + el.getBBox().width / 2
+        const cy = el.getBBox().y + el.getBBox().height / 2
+        const px = (dampedPointer.x * 0.5 + 0.5) * 1600
+        const py = (dampedPointer.y * -0.5 + 0.5) * 900
+        return { el, dist: Math.hypot(cx - px, cy - py) }
+      })
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, 3)
+
+    nudgedElements = withDistance.map((c) => c.el)
+    for (const { el, dist } of withDistance) {
+      const influence = Math.max(0, 1 - dist / 400)
+      const dx = dampedPointer.x * 6 * influence
+      const dy = dampedPointer.y * -6 * influence
+      el.style.setProperty('--pointer-nudge-x', `${dx}px`)
+      el.style.setProperty('--pointer-nudge-y', `${dy}px`)
+      el.style.translate = `var(--pointer-nudge-x, 0px) var(--pointer-nudge-y, 0px)`
+    }
+  }
+
+  // --- Pointer capability: dedicated MediaQueryList with its own change
+  // listener, reconciled alongside (not only inside) tier changes — a
+  // tablet can gain a mouse/trackpad with zero resize event (spec "Pointer
+  // lifecycle"). ---
+  const pointerMql = window.matchMedia('(hover: hover) and (pointer: fine)')
+  let isPointerActive = false
+
+  function pointerShouldBeActive(): boolean {
+    if (currentTier === 'mobile') return false
+    return pointerMql.matches
+  }
+
+  function reconcilePointerState() {
+    const shouldBeActive = pointerShouldBeActive()
+    if (shouldBeActive && !isPointerActive) {
+      isPointerActive = true
+      refreshPointerBounds()
+      sectionEl.addEventListener('pointermove', handlePointerMove, { passive: true })
+      gsap.ticker.add(pointerTick)
+    } else if (!shouldBeActive && isPointerActive) {
+      isPointerActive = false
+      sectionEl.removeEventListener('pointermove', handlePointerMove)
+      gsap.ticker.remove(pointerTick)
+      // Ease nudged elements back to baseline so nothing is left visually
+      // offset with no system driving it back.
+      for (const el of nudgedElements) {
+        gsap.to(el, { '--pointer-nudge-x': '0px', '--pointer-nudge-y': '0px', duration: 0.5, ease: 'power2.out' })
+      }
+      nudgedElements = []
+      rawPointer.x = 0
+      rawPointer.y = 0
+      dampedPointer.x = 0
+      dampedPointer.y = 0
+    }
+    // If state is unchanged: no-op — idempotent, matching usePointerVelocity's
+    // start()/stop() guard pattern, so the two independent triggers below
+    // (tier reconciliation and the pointerMql change event) can never
+    // produce duplicate listeners/ticker callbacks even if they fire close
+    // together.
+  }
+
+  reconcilePointerState() // initial pointer-state evaluation at setup
+
+  pointerMql.addEventListener('change', reconcilePointerState)
 
   syncRunState()
 
@@ -382,5 +495,10 @@ export function useHeroKineticBlueprint(
     intersectionObserver.disconnect()
     resizeObserver.disconnect()
     document.removeEventListener('visibilitychange', handleVisibilityChange)
+    if (isPointerActive) {
+      sectionEl.removeEventListener('pointermove', handlePointerMove)
+      gsap.ticker.remove(pointerTick)
+    }
+    pointerMql.removeEventListener('change', reconcilePointerState)
   }
 }

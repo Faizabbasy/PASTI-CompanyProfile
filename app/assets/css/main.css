@@ -206,4 +206,10 @@
   .kinetic-blueprint__node[data-active='true'] {
     fill: theme(colors.yellow.500);
   }
+  .kinetic-blueprint__mass,
+  .kinetic-blueprint__line,
+  .kinetic-blueprint__node {
+    --pointer-nudge-x: 0px;
+    --pointer-nudge-y: 0px;
+  }
 }
