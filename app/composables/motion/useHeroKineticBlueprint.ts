@@ -36,6 +36,9 @@ export function useHeroKineticBlueprint(
   }
   let currentTier: BlueprintTier = getTier()
 
+  const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+  let reducedMotion = reducedMotionQuery.matches
+
   const NS = 'http://www.w3.org/2000/svg'
 
   function makePath(def: BlueprintElementDef, extraClass: string): SVGGElement {
@@ -325,8 +328,6 @@ export function useHeroKineticBlueprint(
     for (const call of idleDelayedCalls.splice(0)) call.kill()
   }
 
-  const reducedMotion = false // TEMPORARY — Task 7 replaces this with a live prefers-reduced-motion-tracked variable
-
   // --- Visibility / intersection pausing: genuinely stop/start idle
   // timelines, mirroring useHeroLivingSurface.ts's syncLoopState pattern. ---
   let isVisible = true
@@ -451,7 +452,7 @@ export function useHeroKineticBlueprint(
   let isPointerActive = false
 
   function pointerShouldBeActive(): boolean {
-    if (currentTier === 'mobile') return false
+    if (currentTier === 'mobile' || reducedMotion) return false
     return pointerMql.matches
   }
 
@@ -488,7 +489,72 @@ export function useHeroKineticBlueprint(
 
   pointerMql.addEventListener('change', reconcilePointerState)
 
-  syncRunState()
+  // --- Reduced motion: idle timelines never start, no ScrollTrigger pin
+  // (added in Task 8) is created, and a single static fully-composed frame
+  // is shown instead — approximating the Convergence/Resolution visual
+  // target, expressed directly via each element's `idle` values already
+  // applied by `makePath`, so no extra GSAP .set() work is needed beyond
+  // nudging opacity slightly up for a couple of key nodes. ---
+  function applyReducedMotionRestingState() {
+    const nodes = activeNodes()
+    // 2-3 active yellow nodes, per spec.
+    nodes.slice(0, Math.min(3, nodes.length)).forEach((node) => {
+      node.dataset.active = 'true'
+    })
+  }
+
+  const handleReducedMotionChange = (e: MediaQueryListEvent) => {
+    reducedMotion = e.matches
+    if (reducedMotion) {
+      stopIdleTimelines()
+      isRunning = false
+      applyReducedMotionRestingState()
+    } else {
+      syncRunState()
+    }
+    reconcilePointerState()
+  }
+  reducedMotionQuery.addEventListener('change', handleReducedMotionChange)
+
+  if (reducedMotion) {
+    applyReducedMotionRestingState()
+  }
+
+  // --- Entry choreography: gated on introReady, sequenced alongside (not
+  // blocking) Hero.vue's own headline reveal. Uses existing motionDuration/
+  // motionEase tokens so the timing language matches the rest of the page. ---
+  const { introReady } = useIntroReady()
+  let entryTimeline: gsap.core.Timeline | null = null
+  const stopIntroWatch = watch(
+    introReady,
+    (ready) => {
+      if (!ready) return
+      if (reducedMotion) return // resting state already applied above; no entry animation under reduced motion
+
+      entryTimeline = gsap.timeline()
+      entryTimeline
+        .from(activeGridLines(), { opacity: 0, duration: motionDuration.editorial, ease: motionEase.standard, stagger: motionStagger.base })
+        .from(activeMasses(), { opacity: 0, scale: 0.92, duration: motionDuration.slow, ease: motionEase.standard, transformOrigin: 'center' }, '-=0.3')
+        .from(
+          activeLines().map((g) => g.querySelector('path')).filter(Boolean),
+          { opacity: 0, duration: motionDuration.editorial, ease: motionEase.standard, stagger: motionStagger.base },
+          '-=0.4'
+        )
+        .call(() => {
+          const nodes = activeNodes()
+          nodes.slice(0, Math.min(3, nodes.length)).forEach((node) => activateNode(node, 0.5))
+        })
+        .call(() => {
+          syncRunState() // starts idle timelines A-D once entry completes
+        })
+    },
+    { immediate: true }
+  )
+
+  if (reducedMotion) {
+    syncRunState() // no entry animation in this path — start (or rather, confirm not-started) idle state immediately
+  }
+  // Otherwise, syncRunState() is called by the entry timeline's completion above.
 
   return () => {
     stopIdleTimelines()
@@ -500,5 +566,8 @@ export function useHeroKineticBlueprint(
       gsap.ticker.remove(pointerTick)
     }
     pointerMql.removeEventListener('change', reconcilePointerState)
+    reducedMotionQuery.removeEventListener('change', handleReducedMotionChange)
+    stopIntroWatch()
+    entryTimeline?.kill()
   }
 }
