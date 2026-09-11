@@ -126,21 +126,20 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
 
 <template>
   <BaseSection as="section" class="relative flex min-h-[100svh] items-center overflow-hidden pb-16 pt-24 md:pt-28">
-    <!-- Background treatment — Living Surface, a single responsive
-         pointer+scroll-driven WebGL material (see
-         docs/superpowers/specs/2026-09-11-hero-living-surface-design.md).
+    <!-- Background treatment — Kinetic Blueprint, a 2D SVG/GSAP graphic
+         motion identity system (see
+         docs/superpowers/specs/2026-09-11-hero-kinetic-blueprint-design.md).
          Wrapped in ClientOnly so server + first client paint agree (both
-         render nothing here) — avoids a hydration mismatch on the WebGL
-         canvas. -->
+         render nothing here) — avoids a hydration mismatch. -->
     <ClientOnly>
-      <HomeHeroLivingSurface class="z-[3]" />
+      <HomeHeroKineticBlueprint class="z-[3]" />
     </ClientOnly>
 
     <!-- Scrim: soft light pool behind the headline/CTA text, sits above the
          background treatment so text stays readable. -->
     <div
       aria-hidden="true"
-      class="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_60%_50%_at_50%_45%,theme(colors.paper/0.4),transparent_70%)]"
+      class="pointer-events-none absolute inset-0 z-[5] bg-[radial-gradient(ellipse_60%_50%_at_50%_45%,theme(colors.paper/0.25),transparent_70%)]"
     />
 
     <!-- Swiss/editorial corner-bracket accents — same treatment as Why
