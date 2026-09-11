@@ -7,25 +7,25 @@ import gsap from 'gsap'
  * instances across route re-entry and HMR.
  *
  * `setup` may optionally return a plain cleanup function for resources
- * gsap.context() cannot track on its own (e.g. a WebGL renderer, a
- * ResizeObserver, a raw event listener). That function is invoked once on
- * unmount, after `ctx.revert()`. Most existing callers return nothing
- * (undefined), which is a no-op here — this is purely additive.
+ * gsap.context() cannot track via tweens/ScrollTriggers alone (e.g. a WebGL
+ * renderer, a ResizeObserver, a raw event listener). GSAP's own Context
+ * class already captures a returned function from its setup callback and
+ * invokes it as part of revert()/kill() (see gsap-core.js's Context.add()
+ * and Context.prototype.kill) — so passing `setup` straight to
+ * gsap.context() is sufficient; no separate cleanup-tracking is needed
+ * here. Most existing callers return nothing (undefined), which GSAP
+ * simply ignores.
  */
 export function useGsapContext(setup: (ctx: gsap.Context) => void | (() => void)) {
   if (!import.meta.client) return
 
   let ctx: gsap.Context | undefined
-  let extraCleanup: (() => void) | undefined
 
   onMounted(() => {
-    ctx = gsap.context(() => {
-      extraCleanup = setup(ctx as gsap.Context) ?? undefined
-    })
+    ctx = gsap.context(setup)
   })
 
   onBeforeUnmount(() => {
     ctx?.revert()
-    extraCleanup?.()
   })
 }
