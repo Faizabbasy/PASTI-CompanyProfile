@@ -325,9 +325,62 @@ export function useHeroKineticBlueprint(
     for (const call of idleDelayedCalls.splice(0)) call.kill()
   }
 
-  startIdleTimelines()
+  const reducedMotion = false // TEMPORARY — Task 7 replaces this with a live prefers-reduced-motion-tracked variable
+
+  // --- Visibility / intersection pausing: genuinely stop/start idle
+  // timelines, mirroring useHeroLivingSurface.ts's syncLoopState pattern. ---
+  let isVisible = true
+  let isTabVisible = document.visibilityState === 'visible'
+  let isRunning = false
+
+  function syncRunState() {
+    const shouldRun = isVisible && isTabVisible && !reducedMotion
+    if (shouldRun && !isRunning) {
+      isRunning = true
+      startIdleTimelines()
+    } else if (!shouldRun && isRunning) {
+      isRunning = false
+      stopIdleTimelines()
+    }
+  }
+
+  const intersectionObserver = new IntersectionObserver(
+    (entries) => {
+      isVisible = entries[0]?.isIntersecting ?? true
+      syncRunState()
+    },
+    { threshold: 0 }
+  )
+  intersectionObserver.observe(sectionEl)
+
+  const handleVisibilityChange = () => {
+    isTabVisible = document.visibilityState === 'visible'
+    syncRunState()
+  }
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+
+  // --- Resize: rebuild the element set only on an actual tier crossing.
+  // viewBox + preserveAspectRatio (set in HeroKineticBlueprint.vue's
+  // template) absorbs same-tier resizes with zero JS. ---
+  function reconcileTier() {
+    const nextTier = getTier()
+    if (nextTier === currentTier) return
+    currentTier = nextTier
+    stopIdleTimelines()
+    isRunning = false
+    buildElements(currentTier)
+    syncRunState()
+  }
+
+  const resizeObserver = new ResizeObserver(() => reconcileTier())
+  resizeObserver.observe(sectionEl)
+
+  syncRunState()
 
   return () => {
     stopIdleTimelines()
+    intersectionObserver.disconnect()
+    resizeObserver.disconnect()
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
   }
 }
