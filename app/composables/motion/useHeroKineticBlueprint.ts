@@ -184,9 +184,82 @@ export function useHeroKineticBlueprint(
 
   updateVoidClip()
 
+  // --- Idle system start/stop — bodies filled in by Task 5. Declared here
+  // so the visibility/intersection lifecycle wiring in this task has a
+  // stable pair of functions to call; Task 5 replaces these two function
+  // bodies without touching this section. ---
+  let idleStopped = true
+  function startIdleTimelines() {
+    idleStopped = false
+  }
+  function stopIdleTimelines() {
+    idleStopped = true
+  }
+
+  // --- Visibility / intersection pausing: genuinely stop/start idle
+  // timelines, mirroring the retired composable's syncRunState pattern. ---
+  let isVisible = true
+  let isTabVisible = document.visibilityState === 'visible'
+  let isRunning = false
+
+  function syncRunState() {
+    const shouldRun = isVisible && isTabVisible && !reducedMotion
+    if (shouldRun && !isRunning) {
+      isRunning = true
+      startIdleTimelines()
+    } else if (!shouldRun && isRunning) {
+      isRunning = false
+      stopIdleTimelines()
+    }
+  }
+
+  const intersectionObserver = new IntersectionObserver(
+    (entries) => {
+      isVisible = entries[0]?.isIntersecting ?? true
+      syncRunState()
+    },
+    { threshold: 0 }
+  )
+  intersectionObserver.observe(sectionEl)
+
+  const handleVisibilityChange = () => {
+    isTabVisible = document.visibilityState === 'visible'
+    syncRunState()
+  }
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+
+  // --- Resize: rebuild the facet/rail/band/node set only on an actual
+  // tier crossing. viewBox + preserveAspectRatio absorbs same-tier resizes
+  // with zero JS, except the void clip, which must track the content box
+  // continuously (handled by contentResizeObserver below, independent of
+  // tier). ---
+  function reconcileTier() {
+    const nextTier = getTier()
+    if (nextTier === currentTier) return
+    currentTier = nextTier
+    stopIdleTimelines()
+    isRunning = false
+    buildFacets(currentTier)
+    syncRunState()
+    updateVoidClip()
+  }
+
+  const resizeObserver = new ResizeObserver(() => reconcileTier())
+  resizeObserver.observe(sectionEl)
+
+  let contentResizeObserver: ResizeObserver | null = null
+  if (contentEl) {
+    contentResizeObserver = new ResizeObserver(() => updateVoidClip())
+    contentResizeObserver.observe(contentEl)
+  }
+
+  syncRunState()
+
   return () => {
-    // Cleanup body filled in by later tasks (ResizeObserver,
-    // IntersectionObserver, ScrollTrigger, idle timelines, pointer
-    // listeners, content-resize observer all disconnect here).
+    stopIdleTimelines()
+    intersectionObserver.disconnect()
+    resizeObserver.disconnect()
+    contentResizeObserver?.disconnect()
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
   }
 }
