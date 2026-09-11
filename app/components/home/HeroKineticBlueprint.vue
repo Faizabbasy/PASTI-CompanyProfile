@@ -1,4 +1,10 @@
 <script setup lang="ts">
+const props = defineProps<{
+  headingWords?: HTMLElement[]
+  subtextEl?: HTMLElement | null
+  ctaRowEl?: HTMLElement | null
+}>()
+
 const svgRef = ref<SVGSVGElement | null>(null)
 const sectionRef = ref<HTMLElement | null>(null)
 const contentRef = ref<HTMLElement | null>(null)
@@ -6,7 +12,13 @@ const contentRef = ref<HTMLElement | null>(null)
 useGsapContext(() => {
   sectionRef.value = svgRef.value?.closest('section') ?? null
   contentRef.value = sectionRef.value?.querySelector('[data-hero-content]') ?? null
-  return useHeroKineticBlueprint(svgRef, { sectionEl: sectionRef, contentEl: contentRef })
+  return useHeroKineticBlueprint(svgRef, {
+    sectionEl: sectionRef,
+    contentEl: contentRef,
+    headingWords: computed(() => props.headingWords ?? []),
+    subtextEl: computed(() => props.subtextEl ?? null),
+    ctaRowEl: computed(() => props.ctaRowEl ?? null)
+  })
 })
 </script>
 

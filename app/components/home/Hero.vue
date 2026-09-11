@@ -16,6 +16,7 @@ function goToSelectedWork() {
 }
 
 const headingRef = ref<HTMLElement | null>(null)
+const headingWordsRef = ref<HTMLElement[]>([])
 const headingWrapRef = ref<HTMLElement | null>(null)
 const spotlightRef = ref<HTMLElement | null>(null)
 const shineRef = ref<HTMLElement | null>(null)
@@ -78,6 +79,7 @@ useGsapContext(() => {
           heading.appendChild(outer)
           allHeadingWords.push(inner)
         }
+        headingWordsRef.value = allHeadingWords
         if (subtextRef.value) {
           subtextRef.value.dataset.revealEl = ''
           subtextRef.value.dataset.revealKind = 'scroll'
@@ -132,7 +134,12 @@ useCursorSpotlight(headingWrapRef, spotlightRef, { radius: 110 })
          Wrapped in ClientOnly so server + first client paint agree (both
          render nothing here) — avoids a hydration mismatch. -->
     <ClientOnly>
-      <HomeHeroKineticBlueprint class="z-[3]" />
+      <HomeHeroKineticBlueprint
+        class="z-[3]"
+        :heading-words="headingWordsRef"
+        :subtext-el="subtextRef"
+        :cta-row-el="ctaRowRef"
+      />
     </ClientOnly>
 
     <!-- Scrim: soft light pool behind the headline/CTA text, sits above the

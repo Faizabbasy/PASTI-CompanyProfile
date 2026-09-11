@@ -10,6 +10,7 @@ import {
   type ScrollPhaseName,
   type SignalComposition
 } from './kineticBlueprintPaths'
+import { useHeroHandoff, type HandoffLandingPoint } from './useHeroHandoff'
 
 if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
@@ -18,6 +19,9 @@ if (import.meta.client) {
 export interface UseHeroKineticBlueprintOptions {
   sectionEl: Ref<HTMLElement | null>
   contentEl: Ref<HTMLElement | null>
+  headingWords?: Ref<HTMLElement[]>
+  subtextEl?: Ref<HTMLElement | null>
+  ctaRowEl?: Ref<HTMLElement | null>
 }
 
 export function useHeroKineticBlueprint(
@@ -29,6 +33,10 @@ export function useHeroKineticBlueprint(
   const svg = svgEl.value
   const sectionEl = options.sectionEl.value ?? svg.closest('section') ?? svg.parentElement!
   const contentEl = options.contentEl.value ?? sectionEl.querySelector('[data-hero-content]')
+
+  const headingWordsOption = options.headingWords
+  const subtextElOption = options.subtextEl
+  const ctaRowElOption = options.ctaRowEl
 
   // --- Responsive tier: re-evaluated live (never captured once). Desktop
   // >=1024px, tablet 640-1023px, mobile <640px, matching the retired
@@ -620,6 +628,67 @@ export function useHeroKineticBlueprint(
         if (typeof target.opacity === 'number') vars.opacity = target.opacity
         tl.to(el, vars, phaseName)
       }
+    }
+
+    // Disassembly: each headline word flies toward its paired facet's
+    // handoff position during release→handoff, at a fraction of the
+    // facet's own displacement so it reads as "drawn toward" the facet
+    // rather than overlapping it exactly. Word i pairs with
+    // composition.facets[i] — the headline is always exactly three words
+    // ("Technology." / "Creativity." / "Impact.") matching the three
+    // authored facets 1:1 (see spec "Word ↔ facet mapping"). If the
+    // headline copy ever changes word count, this pairing must be
+    // revisited — it is intentionally index-based, not name-based.
+    const words = headingWordsOption?.value ?? []
+    for (let i = 0; i < words.length && i < composition.facets.length; i++) {
+      const word = words[i]
+      const facetHandoff = composition.facets[i]?.phases?.handoff
+      if (!word || !facetHandoff) continue
+      tl.to(
+        word,
+        {
+          x: (facetHandoff.x ?? 0) * 0.35,
+          y: (facetHandoff.y ?? 0) * 0.6,
+          rotation: (facetHandoff.rotation ?? 0) * 2,
+          duration: 0.2,
+          ease: 'none'
+        },
+        'release'
+      )
+      tl.to(word, { opacity: 0, duration: 0.2, ease: 'none' }, 'release')
+    }
+
+    // Subtext/CTA: simple fade + slight scale-down, finished before the
+    // words/facets fully scatter (they're supporting copy, not part of
+    // the disassembly identity). Uses the exact elements Hero.vue already
+    // has refs to (passed through via options) rather than guessing at a
+    // selector.
+    const subtextAndCta = [subtextElOption?.value, ctaRowElOption?.value].filter(
+      (el): el is HTMLElement => el instanceof HTMLElement
+    )
+    if (subtextAndCta.length > 0) {
+      tl.to(subtextAndCta, { opacity: 0, scale: 0.96, duration: 0.15, ease: 'none' }, 0.71)
+    }
+
+    // Publish landing points for WhatWeDo to read (see useHeroHandoff).
+    // Computed once per timeline build (tier change), not per scroll
+    // frame — viewport-relative so it stays correct regardless of either
+    // section's own layout/scroll offset.
+    if (words.length === 3 && !reducedMotion) {
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
+      const points = words.map((word, i): HandoffLandingPoint => {
+        const facetHandoff = composition.facets[i]?.phases?.handoff
+        const rect = word.getBoundingClientRect()
+        const landedX = rect.left + (facetHandoff?.x ?? 0) * 0.35
+        const landedY = rect.top + (facetHandoff?.y ?? 0) * 0.6
+        return {
+          xVw: (landedX / viewportWidth) * 100,
+          yVh: (landedY / viewportHeight) * 100,
+          rotation: (facetHandoff?.rotation ?? 0) * 2
+        }
+      }) as [HandoffLandingPoint, HandoffLandingPoint, HandoffLandingPoint]
+      useHeroHandoff().setLandingPoints(points)
     }
 
     scrollTimeline = tl
