@@ -7,6 +7,7 @@ import {
   type BlueprintTier,
   type FacetDef,
   type GradientDef,
+  type ScrollPhaseName,
   type SignalComposition
 } from './kineticBlueprintPaths'
 
@@ -445,6 +446,7 @@ export function useHeroKineticBlueprint(
     updateVoidClip()
     refreshPointerBounds()
     reconcilePointerState()
+    buildScrollTimeline()
   }
 
   const resizeObserver = new ResizeObserver(() => reconcileTier())
@@ -567,6 +569,7 @@ export function useHeroKineticBlueprint(
       syncRunState()
     }
     reconcilePointerState()
+    buildScrollTimeline() // no pin at all when reducedMotion is true; rebuilt fresh when it turns false
   }
   reducedMotionQuery.addEventListener('change', handleReducedMotionChange)
 
@@ -622,6 +625,81 @@ export function useHeroKineticBlueprint(
   }
   // Otherwise, syncRunState() is called by the entry timeline's completion above.
 
+  // --- Pinned scroll choreography (spec "Pinned scroll choreography").
+  // One scrubbed timeline per the current tier's pin distance; rebuilt
+  // whenever the tier crosses a breakpoint or reduced-motion toggles, so
+  // distance/presence stays correct without a page reload. Every animated
+  // value is transform (x/y/rotation/scale) / opacity / stroke-dashoffset
+  // only — never a path `d` change. ---
+  let scrollTimeline: gsap.core.Timeline | null = null
+  let scrollTriggerInstance: ScrollTrigger | null = null
+
+  function buildScrollTimeline() {
+    scrollTriggerInstance?.kill()
+    scrollTimeline?.kill()
+
+    if (reducedMotion) {
+      scrollTriggerInstance = null
+      scrollTimeline = null
+      return
+    }
+
+    const pinDistance = `+=${PIN_DISTANCE_VH[currentTier]}vh`
+    const tl = gsap.timeline({ paused: true })
+
+    // Phase labels at the spec's exact fractions.
+    tl.addLabel('wake', 0)
+      .addLabel('expansion', 0.2)
+      .addLabel('lock', 0.45)
+      .addLabel('release', 0.7)
+      .addLabel('handoff', 0.9)
+      .addLabel('end', 1)
+
+    const order: ScrollPhaseName[] = ['wake', 'expansion', 'lock', 'release', 'handoff']
+
+    for (const def of composition.facets) {
+      const el = facetById(def.id)
+      if (!el || !def.phases) continue
+      for (const phaseName of order) {
+        const target = def.phases[phaseName]
+        if (!target) continue
+        const vars: gsap.TweenVars = { duration: 0.2, ease: 'none' }
+        if (typeof target.x === 'number') vars.x = target.x
+        if (typeof target.y === 'number') vars.y = target.y
+        if (typeof target.rotation === 'number') vars.rotation = target.rotation
+        if (typeof target.scale === 'number') vars.scale = target.scale
+        if (typeof target.opacity === 'number') vars.opacity = target.opacity
+        tl.to(el, vars, phaseName)
+      }
+    }
+
+    const rail = railEl()
+    if (rail) {
+      const length = rail.getTotalLength()
+      rail.style.strokeDasharray = String(length)
+      tl.fromTo(rail, { strokeDashoffset: length * 0.4 }, { strokeDashoffset: 0, duration: 0.25, ease: 'none' }, 'expansion')
+      tl.to(rail, { opacity: 0, duration: 0.1, ease: 'none' }, 'handoff')
+    }
+
+    const band = bandEl()
+    if (band) {
+      tl.to(band, { scaleX: 1.04, transformOrigin: 'center', duration: 0.25, ease: 'none' }, 'expansion')
+      tl.to(band, { y: 120, opacity: 0, duration: 0.1, ease: 'none' }, 'handoff')
+    }
+
+    scrollTimeline = tl
+    scrollTriggerInstance = ScrollTrigger.create({
+      trigger: sectionEl,
+      start: 'top top',
+      end: pinDistance,
+      pin: true,
+      scrub: 1,
+      animation: scrollTimeline
+    })
+  }
+
+  buildScrollTimeline()
+
   return () => {
     stopIdleTimelines()
     intersectionObserver.disconnect()
@@ -636,5 +714,7 @@ export function useHeroKineticBlueprint(
     reducedMotionQuery.removeEventListener('change', handleReducedMotionChange)
     stopIntroWatch()
     entryTimeline?.kill()
+    scrollTriggerInstance?.kill()
+    scrollTimeline?.kill()
   }
 }
