@@ -1,45 +1,77 @@
 // app/composables/motion/kineticBlueprintPaths.ts
 //
-// Static SVG path/coordinate data for the Hero Kinetic Blueprint system —
-// see docs/superpowers/specs/2026-09-11-hero-kinetic-blueprint-design.md.
-// Deliberately free of GSAP/DOM code: this module only describes WHAT the
-// composition looks like per tier, never HOW it animates. All `d` strings
-// are fixed for the lifetime of the composable instance — per the spec's
-// "SVG animation technique constraint", nothing here is ever interpolated
-// as a path morph; only `transform`/`opacity`/`stroke-dashoffset` (declared
-// per-phase below) animate.
+// Static SVG path/coordinate/gradient data for the Hero "Signal
+// Architecture" system — see
+// docs/superpowers/specs/2026-09-11-hero-signal-architecture-design.md.
+// Pure data: no GSAP/DOM code. All `d` strings are fixed for the lifetime
+// of the composable instance — nothing here is ever path-morphed; only
+// transform/opacity/gradient-stop-offset/stroke-dashoffset/filter (applied
+// by the composable and CSS) animate.
 
 export type BlueprintTier = 'desktop' | 'tablet' | 'mobile'
 
-export interface BlueprintPhaseState {
-  transform?: string
+export interface FacetPhaseState {
+  x?: number
+  y?: number
+  rotation?: number
+  scale?: number
   opacity?: number
-  strokeDashoffset?: number
 }
 
-export type BlueprintPhaseName = 'calibration' | 'construction' | 'convergence' | 'resolution' | 'handoff'
+export type ScrollPhaseName = 'wake' | 'expansion' | 'lock' | 'release' | 'handoff'
 
-export interface BlueprintElementDef {
-  id: string
+export interface FacetDef {
+  id: 'plate-a' | 'plate-b' | 'plate-c'
   d: string
-  /** 'secondary' elements are skipped entirely (not built) on tablet/mobile. */
-  detail?: 'primary' | 'secondary'
-  /** 'guide' elements fade out during the Resolution phase. */
-  role?: 'guide'
-  /** Idle-state baseline transform/opacity (before any idle timeline runs). */
-  idle?: BlueprintPhaseState
+  gradientId: string
+  /** Idle-state baseline opacity. */
+  opacity: number
+  /** Exact aligned transform this facet animates to for the Facet Lock
+   *  signature event and the scroll "lock" phase — edges meet precisely
+   *  at this position across all three facets. */
+  lockTarget: { x: number; y: number; rotation: number }
   /** Authored target state for each named scroll phase. */
-  phases?: Partial<Record<BlueprintPhaseName, BlueprintPhaseState>>
+  phases?: Partial<Record<ScrollPhaseName, FacetPhaseState>>
 }
 
-export interface BlueprintComposition {
+export interface RailDef {
+  id: 'primary-rail'
+  d: string
+}
+
+export interface BandDef {
+  id: 'secondary-band'
+  d: string
+}
+
+export interface NodeDef {
+  id: string
+  cx: number
+  cy: number
+  r: number
+}
+
+export interface GradientStopDef {
+  offset: number
+  color: string
+}
+
+export interface GradientDef {
+  id: string
+  type: 'linear' | 'radial'
+  /** Angle in degrees for linear gradients, converted to x1/y1/x2/y2 by the
+   *  component template. Ignored for radial gradients. */
+  angle?: number
+  stops: GradientStopDef[]
+}
+
+export interface SignalComposition {
   viewBox: string
-  /** The 3 major masses: left (dominant), right (subordinate fan), bottom (anchor band). */
-  masses: BlueprintElementDef[]
-  constructionLines: BlueprintElementDef[]
-  gridLines: BlueprintElementDef[]
-  registrationMarks: BlueprintElementDef[]
-  nodes: BlueprintElementDef[]
+  facets: FacetDef[]
+  rail: RailDef
+  band: BandDef
+  nodes: NodeDef[]
+  gradients: GradientDef[]
 }
 
 export const PIN_DISTANCE_VH: Record<BlueprintTier, number> = {
@@ -50,142 +82,145 @@ export const PIN_DISTANCE_VH: Record<BlueprintTier, number> = {
 
 const VIEWBOX = '0 0 1600 900'
 
-// --- Desktop composition (full system, spec "Visual composition") ---
-const desktopComposition: BlueprintComposition = {
+// Tailwind navy/yellow scale values (tailwind.config.ts) — hard-coded here
+// since gradient <stop> color attributes must be literal color values, not
+// theme() references (those only resolve in compiled Tailwind CSS, not in
+// imperatively-created SVG attributes).
+const NAVY_900 = '#051B28'
+const NAVY_700 = '#0B3954'
+const NAVY_500 = '#1C5E7C'
+const NAVY_300 = '#6FA2B7'
+const YELLOW_600 = '#D69C00'
+const YELLOW_500 = '#FBBA00'
+
+const desktopGradients: GradientDef[] = [
+  { id: 'grad-plate-a', type: 'linear', angle: 128, stops: [{ offset: 0, color: NAVY_900 }, { offset: 100, color: NAVY_500 }] },
+  { id: 'grad-plate-b', type: 'linear', angle: 42, stops: [{ offset: 0, color: NAVY_700 }, { offset: 100, color: NAVY_300 }] },
+  { id: 'grad-plate-c', type: 'radial', stops: [{ offset: 0, color: YELLOW_600 }, { offset: 100, color: NAVY_500 }] }
+]
+
+// --- Desktop composition ---
+const desktopComposition: SignalComposition = {
   viewBox: VIEWBOX,
-  masses: [
+  facets: [
     {
-      id: 'mass-left',
-      d: 'M -80 120 L 340 40 L 420 260 L 60 420 Z',
-      idle: { transform: 'translate(0px, 0px)', opacity: 0.12 },
+      id: 'plate-a',
+      d: 'M -100 -50 L 680 -30 L 980 340 L 620 640 L -100 400 Z',
+      gradientId: 'grad-plate-a',
+      opacity: 0.42,
+      lockTarget: { x: 0, y: 0, rotation: 0 },
       phases: {
-        calibration: { transform: 'translate(0px, 0px)', opacity: 0.12 },
-        construction: { transform: 'translate(8px, -6px) scale(1.04)', opacity: 0.16 },
-        convergence: { transform: 'translate(14px, -10px) scale(1.08)', opacity: 0.18 },
-        resolution: { transform: 'translate(14px, -10px) scale(1.08)', opacity: 0.18 },
-        handoff: { transform: 'translate(6px, 30px) scale(1.04)', opacity: 0.14 }
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.42 },
+        expansion: { x: -20, y: -10, rotation: -1, scale: 1.12, opacity: 0.46 },
+        lock: { x: 0, y: 0, rotation: 0, scale: 1.12, opacity: 0.5 },
+        release: { x: 10, y: 40, rotation: 1, scale: 1.05, opacity: 0.4 },
+        handoff: { x: 20, y: 140, rotation: 1.5, scale: 1, opacity: 0.2 }
       }
     },
     {
-      id: 'mass-right',
-      d: 'M 1680 60 L 1420 200 L 1560 340 L 1650 180 Z',
-      idle: { transform: 'translate(0px, 0px)', opacity: 0.07 },
+      id: 'plate-b',
+      d: 'M 900 260 L 1720 480 L 1500 900 L 780 620 L 950 400 Z',
+      gradientId: 'grad-plate-b',
+      opacity: 0.32,
+      lockTarget: { x: 0, y: 0, rotation: 0 },
       phases: {
-        calibration: { transform: 'translate(0px, 0px)', opacity: 0.07 },
-        construction: { transform: 'translate(-10px, 8px) scale(1.03)', opacity: 0.09 },
-        convergence: { transform: 'translate(-16px, 12px) scale(1.05)', opacity: 0.1 },
-        resolution: { transform: 'translate(-16px, 12px) scale(1.05)', opacity: 0.1 },
-        handoff: { transform: 'translate(-8px, 26px) scale(1.02)', opacity: 0.08 }
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.32 },
+        expansion: { x: 25, y: -15, rotation: 1, scale: 1.12, opacity: 0.36 },
+        lock: { x: 0, y: 0, rotation: 0, scale: 1.12, opacity: 0.4 },
+        release: { x: -10, y: 35, rotation: -1, scale: 1.05, opacity: 0.3 },
+        handoff: { x: -15, y: 130, rotation: -1.5, scale: 1, opacity: 0.15 }
       }
     },
     {
-      id: 'mass-bottom',
-      d: 'M -40 820 L 1640 780 L 1640 830 L -40 870 Z',
-      idle: { transform: 'translate(0px, 0px)', opacity: 0.06 },
+      id: 'plate-c',
+      d: 'M 1150 40 L 1580 20 L 1620 260 L 1280 300 Z',
+      gradientId: 'grad-plate-c',
+      opacity: 0.22,
+      lockTarget: { x: -15, y: 25, rotation: 0 },
       phases: {
-        calibration: { transform: 'translate(0px, 0px)', opacity: 0.06 },
-        construction: { transform: 'translate(0px, -4px)', opacity: 0.08 },
-        convergence: { transform: 'translate(0px, -8px)', opacity: 0.09 },
-        resolution: { transform: 'translate(0px, -8px)', opacity: 0.09 },
-        handoff: { transform: 'translate(0px, 60px)', opacity: 0.05 }
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.22 },
+        expansion: { x: 10, y: -10, rotation: 2, scale: 1.08, opacity: 0.26 },
+        lock: { x: -15, y: 25, rotation: 0, scale: 1.08, opacity: 0.3 },
+        release: { x: 60, y: 120, rotation: 4, scale: 0.95, opacity: 0.16 },
+        handoff: { x: 90, y: 220, rotation: 6, scale: 0.85, opacity: 0 }
       }
     }
   ],
-  constructionLines: [
-    { id: 'cl-1', d: 'M 40 440 L 380 180', detail: 'primary', idle: { strokeDashoffset: 0, opacity: 0.2 } },
-    { id: 'cl-2', d: 'M 120 460 L 400 300', detail: 'primary', idle: { strokeDashoffset: 0, opacity: 0.16 } },
-    { id: 'cl-3', d: 'M 0 300 L 300 120', detail: 'secondary', role: 'guide', idle: { strokeDashoffset: 400, opacity: 0.12 } },
-    { id: 'cl-4', d: 'M 60 500 L 360 380', detail: 'secondary', role: 'guide', idle: { strokeDashoffset: 400, opacity: 0.1 } },
-    { id: 'cl-5', d: 'M 1600 40 L 1300 260', detail: 'primary', idle: { strokeDashoffset: 0, opacity: 0.14 } },
-    { id: 'cl-6', d: 'M 1600 120 L 1250 340', detail: 'primary', idle: { strokeDashoffset: 0, opacity: 0.12 } },
-    { id: 'cl-7', d: 'M 1600 200 L 1200 420', detail: 'secondary', role: 'guide', idle: { strokeDashoffset: 400, opacity: 0.1 } },
-    { id: 'cl-8', d: 'M 1600 280 L 1150 480', detail: 'secondary', role: 'guide', idle: { strokeDashoffset: 400, opacity: 0.08 } }
-  ],
-  gridLines: [
-    { id: 'grid-v1', d: 'M 533 0 L 533 900', detail: 'primary', idle: { opacity: 0.05 } },
-    { id: 'grid-v2', d: 'M 1066 0 L 1066 900', detail: 'primary', idle: { opacity: 0.05 } },
-    { id: 'grid-h1', d: 'M 0 300 L 1600 300', detail: 'secondary', role: 'guide', idle: { opacity: 0.04 } },
-    { id: 'grid-h2', d: 'M 0 600 L 1600 600', detail: 'secondary', role: 'guide', idle: { opacity: 0.04 } }
-  ],
-  registrationMarks: [
-    { id: 'reg-1', d: 'M 470 220 L 470 236 M 470 220 L 486 220', detail: 'secondary', role: 'guide', idle: { opacity: 0.18 } },
-    { id: 'reg-2', d: 'M 1130 220 L 1130 236 M 1130 220 L 1114 220', detail: 'secondary', role: 'guide', idle: { opacity: 0.18 } },
-    { id: 'reg-3', d: 'M 800 640 L 800 624 M 800 640 L 816 640', detail: 'secondary', role: 'guide', idle: { opacity: 0.14 } }
-  ],
+  rail: { id: 'primary-rail', d: 'M 100 850 L 1500 80' },
+  band: { id: 'secondary-band', d: 'M -50 760 L 1650 700 L 1650 860 L -50 900 Z' },
   nodes: [
-    { id: 'node-1', d: 'M 340 40 m -5 0 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0', idle: { opacity: 1 } },
-    { id: 'node-2', d: 'M 1560 340 m -4 0 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0', idle: { opacity: 1 } },
-    { id: 'node-3', d: 'M 533 300 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0', detail: 'secondary', idle: { opacity: 1 } },
-    { id: 'node-4', d: 'M 1066 600 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0', detail: 'secondary', idle: { opacity: 1 } },
-    { id: 'node-5', d: 'M 800 800 m -4 0 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0', idle: { opacity: 1 } },
-    { id: 'node-6', d: 'M 200 420 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0', detail: 'secondary', idle: { opacity: 1 } },
-    { id: 'node-7', d: 'M 1420 200 m -3 0 a 3 3 0 1 0 6 0 a 3 3 0 1 0 -6 0', detail: 'secondary', idle: { opacity: 1 } }
-  ]
+    { id: 'node-1', cx: 620, cy: 640, r: 6 },
+    { id: 'node-2', cx: 980, cy: 340, r: 6 },
+    { id: 'node-3', cx: 1500, cy: 80, r: 5 },
+    { id: 'node-4', cx: 100, cy: 850, r: 5 }
+  ],
+  gradients: desktopGradients
 }
 
-// --- Tablet composition: same major masses, 'secondary' elements filtered
-// out by the composable at build time (see Task 3's `buildElements`) rather
-// than duplicated here with different coordinates — geometry is identical
-// to desktop for masses/primary lines/nodes, only element SET differs. ---
-const tabletComposition: BlueprintComposition = desktopComposition
+// --- Tablet composition: same fractured-plate geometry as desktop (still
+// reads as one dominant structure at tablet width via viewBox scaling);
+// only the node count is trimmed by the composable at build time. ---
+const tabletComposition: SignalComposition = desktopComposition
 
-// --- Mobile composition: masses repositioned into a narrower/taller
-// coordinate space so the left mass and right fan both stay visible and the
-// bottom band sits below the CTA row, per spec "Responsive art direction". ---
-const mobileComposition: BlueprintComposition = {
+// --- Mobile composition: repositioned into a narrower/taller effective
+// footprint so plate-a stays the dominant visible mass in portrait
+// orientation, with the secondary band anchored below the CTA row. ---
+const mobileComposition: SignalComposition = {
   viewBox: VIEWBOX,
-  masses: [
+  facets: [
     {
-      id: 'mass-left',
-      d: 'M -60 100 L 260 40 L 320 220 L 40 320 Z',
-      idle: { transform: 'translate(0px, 0px)', opacity: 0.14 },
+      id: 'plate-a',
+      d: 'M -100 -50 L 620 -20 L 880 360 L 500 700 L -100 420 Z',
+      gradientId: 'grad-plate-a',
+      opacity: 0.44,
+      lockTarget: { x: 0, y: 0, rotation: 0 },
       phases: {
-        calibration: { transform: 'translate(0px, 0px)', opacity: 0.14 },
-        construction: { transform: 'translate(6px, -4px) scale(1.03)', opacity: 0.17 },
-        convergence: { transform: 'translate(10px, -8px) scale(1.06)', opacity: 0.19 },
-        resolution: { transform: 'translate(10px, -8px) scale(1.06)', opacity: 0.19 },
-        handoff: { transform: 'translate(4px, 20px) scale(1.03)', opacity: 0.15 }
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.44 },
+        expansion: { x: -12, y: -8, rotation: -1, scale: 1.08, opacity: 0.48 },
+        lock: { x: 0, y: 0, rotation: 0, scale: 1.08, opacity: 0.52 },
+        release: { x: 8, y: 30, rotation: 1, scale: 1.03, opacity: 0.4 },
+        handoff: { x: 15, y: 110, rotation: 1.5, scale: 1, opacity: 0.2 }
       }
     },
     {
-      id: 'mass-right',
-      d: 'M 1660 620 L 1440 700 L 1520 800 L 1650 720 Z',
-      idle: { transform: 'translate(0px, 0px)', opacity: 0.08 },
+      id: 'plate-b',
+      d: 'M 780 480 L 1650 640 L 1500 900 L 700 780 L 820 600 Z',
+      gradientId: 'grad-plate-b',
+      opacity: 0.3,
+      lockTarget: { x: 0, y: 0, rotation: 0 },
       phases: {
-        calibration: { transform: 'translate(0px, 0px)', opacity: 0.08 },
-        construction: { transform: 'translate(-6px, 4px) scale(1.02)', opacity: 0.1 },
-        convergence: { transform: 'translate(-10px, 8px) scale(1.04)', opacity: 0.11 },
-        resolution: { transform: 'translate(-10px, 8px) scale(1.04)', opacity: 0.11 },
-        handoff: { transform: 'translate(-4px, 18px) scale(1.02)', opacity: 0.09 }
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.3 },
+        expansion: { x: 15, y: -10, rotation: 1, scale: 1.08, opacity: 0.34 },
+        lock: { x: 0, y: 0, rotation: 0, scale: 1.08, opacity: 0.38 },
+        release: { x: -8, y: 25, rotation: -1, scale: 1.02, opacity: 0.28 },
+        handoff: { x: -12, y: 100, rotation: -1.5, scale: 1, opacity: 0.14 }
       }
     },
     {
-      id: 'mass-bottom',
-      d: 'M -40 860 L 1640 840 L 1640 880 L -40 900 Z',
-      idle: { transform: 'translate(0px, 0px)', opacity: 0.07 },
+      id: 'plate-c',
+      d: 'M 1000 40 L 1560 20 L 1600 220 L 1180 260 Z',
+      gradientId: 'grad-plate-c',
+      opacity: 0.2,
+      lockTarget: { x: -10, y: 18, rotation: 0 },
       phases: {
-        calibration: { transform: 'translate(0px, 0px)', opacity: 0.07 },
-        construction: { transform: 'translate(0px, -3px)', opacity: 0.09 },
-        convergence: { transform: 'translate(0px, -6px)', opacity: 0.1 },
-        resolution: { transform: 'translate(0px, -6px)', opacity: 0.1 },
-        handoff: { transform: 'translate(0px, 40px)', opacity: 0.06 }
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.2 },
+        expansion: { x: 8, y: -8, rotation: 2, scale: 1.05, opacity: 0.24 },
+        lock: { x: -10, y: 18, rotation: 0, scale: 1.05, opacity: 0.28 },
+        release: { x: 40, y: 90, rotation: 4, scale: 0.95, opacity: 0.14 },
+        handoff: { x: 60, y: 170, rotation: 6, scale: 0.85, opacity: 0 }
       }
     }
   ],
-  constructionLines: [
-    { id: 'cl-1', d: 'M 20 320 L 260 140', detail: 'primary', idle: { strokeDashoffset: 0, opacity: 0.18 } },
-    { id: 'cl-5', d: 'M 1600 680 L 1440 780', detail: 'primary', idle: { strokeDashoffset: 0, opacity: 0.12 } }
-  ],
-  gridLines: [],
-  registrationMarks: [],
+  rail: { id: 'primary-rail', d: 'M 80 860 L 1400 100' },
+  band: { id: 'secondary-band', d: 'M -50 820 L 1650 790 L 1650 870 L -50 900 Z' },
   nodes: [
-    { id: 'node-1', d: 'M 260 40 m -5 0 a 5 5 0 1 0 10 0 a 5 5 0 1 0 -10 0', idle: { opacity: 1 } },
-    { id: 'node-2', d: 'M 1520 800 m -4 0 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0', idle: { opacity: 1 } },
-    { id: 'node-5', d: 'M 800 850 m -4 0 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0', idle: { opacity: 1 } }
-  ]
+    { id: 'node-1', cx: 500, cy: 700, r: 6 },
+    { id: 'node-2', cx: 880, cy: 360, r: 5 }
+  ],
+  gradients: desktopGradients
 }
 
-export function getComposition(tier: BlueprintTier): BlueprintComposition {
+export function getComposition(tier: BlueprintTier): SignalComposition {
   if (tier === 'mobile') return mobileComposition
-  return tabletComposition // identical source data to desktop; element filtering happens in the composable
+  return tabletComposition // identical source data to desktop; node count trimmed by the composable
 }
