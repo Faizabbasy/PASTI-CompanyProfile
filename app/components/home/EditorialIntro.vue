@@ -16,6 +16,10 @@ if (import.meta.client) {
 const props = defineProps<{
   label: string
   segments: { text: string; accent?: boolean }[]
+  /** Opt-in: start accent words from Hero's disassembled landing points
+   *  instead of a plain yPercent reveal (see useHeroHandoff). Only the
+   *  WhatWeDo instance of this component passes this. */
+  reconstructFromHero?: boolean
 }>()
 
 const introWords = props.segments.flatMap((segment) =>
@@ -34,6 +38,7 @@ useGsapContext(() => {
   if (!el) return
 
   const mm = gsap.matchMedia()
+  const { landingPoints } = useHeroHandoff()
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
     const words = Array.from(el.querySelectorAll<HTMLElement>('[data-intro-word]'))
@@ -43,11 +48,33 @@ useGsapContext(() => {
     gsap.set(accentWords, { color: 'currentColor' })
     if (line) gsap.set(line, { scaleY: 0, transformOrigin: '0% 0%' })
 
+    // Reconstruction: if this instance opted in and Hero already
+    // published landing points (see useHeroHandoff), start each accent
+    // word from Hero's landed position instead of the plain yPercent
+    // reveal, so it visually continues from where Hero's disassembled
+    // word settled. Falls back to the plain reveal (points is null) when
+    // Hero hasn't run yet — e.g. reduced motion was on when Hero mounted,
+    // or this is WhyPasti's non-opted-in instance.
+    const points = props.reconstructFromHero ? landingPoints.value : null
+    if (points) {
+      accentWords.forEach((word, i) => {
+        const point = points[i]
+        if (!point) return
+        const rect = word.getBoundingClientRect()
+        const targetLeft = (point.xVw / 100) * window.innerWidth
+        const targetTop = (point.yVh / 100) * window.innerHeight
+        gsap.set(word, { x: targetLeft - rect.left, y: targetTop - rect.top, rotation: point.rotation, opacity: 0 })
+      })
+    }
+
     const tl = gsap.timeline({
       scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'restart none restart reverse' }
     })
 
     tl.to(words, { yPercent: 0, duration: motionDuration.editorial, ease: motionEase.standard, stagger: motionStagger.base })
+    if (points) {
+      tl.to(accentWords, { x: 0, y: 0, rotation: 0, opacity: 1, duration: motionDuration.editorial, ease: motionEase.standard, stagger: motionStagger.loose }, '<')
+    }
     if (line) tl.to(line, { scaleY: 1, duration: motionDuration.slow, ease: spatialEase.settle }, 0.1)
     tl.to(accentWords, { color: '#eab308', duration: motionDuration.medium, ease: motionEase.standard, stagger: motionStagger.loose }, '-=0.3')
 

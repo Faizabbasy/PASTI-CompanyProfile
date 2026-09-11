@@ -20,7 +20,7 @@ useScrollReveal(gridRef, { y: 32 })
   <BaseSection as="section">
     <BaseContainer>
       <div ref="gridRef">
-        <HomeEditorialIntro :label="label" :segments="introSegments" />
+        <HomeEditorialIntro :label="label" :segments="introSegments" reconstruct-from-hero />
       </div>
     </BaseContainer>
   </BaseSection>
