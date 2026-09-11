@@ -49,8 +49,7 @@ export function useHeroKineticBlueprint(
   const railGroup = svg.querySelector('[data-blueprint-group="rail"]') as SVGGElement
   const bandGroup = svg.querySelector('[data-blueprint-group="band"]') as SVGGElement
   const nodesGroup = svg.querySelector('[data-blueprint-group="nodes"]') as SVGGElement
-  const voidHoleRect = svg.querySelector('[data-void-hole]') as SVGRectElement
-  voidHoleRect.setAttribute('clip-rule', 'evenodd')
+  const voidClipPath = svg.querySelector('[data-void-clip]') as SVGPathElement
 
   let composition: SignalComposition = getComposition(currentTier)
   let builtTier: BlueprintTier | null = null
@@ -156,7 +155,6 @@ export function useHeroKineticBlueprint(
   // of any facet/band coverage, tracked live against the actual DOM
   // content rather than a fixed guess (spec "Negative-space void"). ---
   const VOID_BUFFER_PX = 32
-  const VOID_RADIUS = 10
 
   function updateVoidClip() {
     if (!contentEl) return
@@ -172,15 +170,23 @@ export function useHeroKineticBlueprint(
 
     const left = (contentRect.left - svgRect.left) * scale - offsetX - VOID_BUFFER_PX
     const top = (contentRect.top - svgRect.top) * scale - offsetY - VOID_BUFFER_PX
-    const width = contentRect.width * scale + VOID_BUFFER_PX * 2
-    const height = contentRect.height * scale + VOID_BUFFER_PX * 2
+    const width = Math.max(0, contentRect.width * scale + VOID_BUFFER_PX * 2)
+    const height = Math.max(0, contentRect.height * scale + VOID_BUFFER_PX * 2)
+    const right = left + width
+    const bottom = top + height
 
-    voidHoleRect.setAttribute('x', String(left))
-    voidHoleRect.setAttribute('y', String(top))
-    voidHoleRect.setAttribute('width', String(Math.max(0, width)))
-    voidHoleRect.setAttribute('height', String(Math.max(0, height)))
-    voidHoleRect.setAttribute('rx', String(VOID_RADIUS))
-    voidHoleRect.setAttribute('ry', String(VOID_RADIUS))
+    // Two-subpath compound path with clip-rule="evenodd" on the <path>
+    // itself (set in the template): the outer subpath is the full-viewBox
+    // rect (clockwise winding), the inner subpath is the hole rect wound
+    // in the OPPOSITE direction (counter-clockwise). Evenodd fill-rule
+    // treats overlapping opposite-wound regions as "outside", carving the
+    // hole out of the outer rect. Plain L/H/V/Z commands (no corner
+    // rounding) per the finding's explicit allowance — correctness of the
+    // hole matters more than rounded corners here.
+    const outer = 'M0 0H1600V900H0Z'
+    const hole = width > 0 && height > 0 ? `M${left} ${top}V${bottom}H${right}V${top}Z` : ''
+
+    voidClipPath.setAttribute('d', `${outer}${hole}`)
   }
 
   updateVoidClip()
@@ -356,9 +362,28 @@ export function useHeroKineticBlueprint(
       if (stops.length === 0) continue
       tl.to(
         stops,
-        { attr: { offset: (i: number) => `${Math.min(100, Math.max(0, Number(stops[i]?.dataset.stopOffset) - 15))}%` }, duration: 0.6, ease: 'power2.out' },
+        {
+          attr: { offset: (i: number) => `${Math.min(100, Math.max(0, Number(stops[i]?.dataset.stopOffset) - 15))}%` },
+          duration: 0.6,
+          ease: 'power2.out',
+          // GSAP's default overwrite for attr-tweens is false, so a
+          // concurrent gradient-drift tween on the same <stop> offset
+          // would keep running alongside this one and yank the value
+          // mid-lock. 'auto' kills any conflicting in-flight tween on the
+          // same property so the lock's convergence always wins cleanly.
+          overwrite: 'auto'
+        },
         1.0
-      ).to(stops, { attr: { offset: (i: number) => `${stops[i]?.dataset.stopOffset}%` }, duration: 1.2, ease: 'sine.inOut' }, 2.2)
+      ).to(
+        stops,
+        {
+          attr: { offset: (i: number) => `${stops[i]?.dataset.stopOffset}%` },
+          duration: 1.2,
+          ease: 'sine.inOut',
+          overwrite: 'auto'
+        },
+        2.2
+      )
     }
 
     if (nodes.length > 0) {
@@ -458,20 +483,22 @@ export function useHeroKineticBlueprint(
     contentResizeObserver.observe(contentEl)
   }
 
-  // --- Pointer bounds cached in document space, not viewport space, since
-  // the Hero moves relative to the viewport across the pre-pin/pinned/
-  // post-pin scroll ranges. ---
+  // --- Pointer bounds: width/height/left are cached (only vertical
+  // position changes across the pre-pin/pinned/post-pin scroll ranges,
+  // since pin:true takes the section out of normal flow for the pinned
+  // range). Top is read live in handlePointerMove instead of being
+  // reconstructed from a cached document-space value, since that
+  // reconstruction assumed normal document flow and went stale for the
+  // entire pinned duration (finding #5). ---
   let cachedWidth = 0
   let cachedHeight = 0
   let cachedLeft = 0
-  let cachedDocumentTop = 0
 
   function refreshPointerBounds() {
     const rect = sectionEl.getBoundingClientRect()
     cachedWidth = rect.width
     cachedHeight = rect.height
     cachedLeft = rect.left
-    cachedDocumentTop = rect.top + window.scrollY
   }
   refreshPointerBounds()
 
@@ -480,7 +507,17 @@ export function useHeroKineticBlueprint(
 
   function handlePointerMove(event: PointerEvent) {
     if (cachedWidth === 0 || cachedHeight === 0) return
-    const currentTop = cachedDocumentTop - window.scrollY
+    // ScrollTrigger's pin:true takes the section out of normal document
+    // flow for the pinned range (position:fixed / pin-spacer equivalent),
+    // so its viewport top stays constant while window.scrollY keeps
+    // changing throughout the pin — reconstructing top from the
+    // document-space cache goes stale for the entire pinned duration.
+    // pointermove is already browser rate-limited (not a per-frame ticker
+    // callback), so a live measurement here does not violate the
+    // "never measure in the ticker hot path" constraint that applies to
+    // pointerTick specifically. Width/height/left stay cached since only
+    // vertical position changes during a pin.
+    const currentTop = sectionEl.getBoundingClientRect().top
     rawPointer.x = ((event.clientX - cachedLeft) / cachedWidth) * 2 - 1
     rawPointer.y = -(((event.clientY - currentTop) / cachedHeight) * 2 - 1)
   }
@@ -567,6 +604,16 @@ export function useHeroKineticBlueprint(
       applyReducedMotionRestingState()
     } else {
       syncRunState()
+      // The entry timeline only ever plays once (gated on introReady, which
+      // already fired while reducedMotion was true, so its watcher callback
+      // already early-returned and will never run again). Apply the entry
+      // timeline's end-state opacity for rail/band directly so turning
+      // reduced-motion off live doesn't leave them at their build-time
+      // default instead of the intended resting values.
+      const rail = railEl()
+      const band = bandEl()
+      if (rail) gsap.set(rail, { opacity: 0.75 })
+      if (band) gsap.set(band, { opacity: 1 })
     }
     reconcilePointerState()
     buildScrollTimeline() // no pin at all when reducedMotion is true; rebuilt fresh when it turns false
@@ -601,7 +648,11 @@ export function useHeroKineticBlueprint(
       entryTimeline = gsap.timeline()
       entryTimeline
         .to(facets, {
-          opacity: (i, target) => Number(target.style.opacity) || composition.facets.find((f) => f.id === (target as SVGGElement).dataset.blueprintId)?.opacity || 0.3,
+          // The preceding gsap.set(facets, { opacity: 0 }) means
+          // target.style.opacity is always 0 (falsy) here, so a
+          // Number(target.style.opacity) first operand would never
+          // contribute — dropped as dead code (finding #7).
+          opacity: (i, target) => composition.facets.find((f) => f.id === (target as SVGGElement).dataset.blueprintId)?.opacity || 0.3,
           scale: 1,
           duration: motionDuration.slow,
           ease: motionEase.standard,
@@ -694,7 +745,20 @@ export function useHeroKineticBlueprint(
       end: pinDistance,
       pin: true,
       scrub: 1,
-      animation: scrollTimeline
+      animation: scrollTimeline,
+      // Idle drift (facet x/y/rotation etc.) writes to the same properties
+      // as this scrubbed timeline for the entire time the section is
+      // intersecting, including while pinned — last-writer-wins jitter.
+      // Stop idle motion for the duration of the pin and let it resume
+      // (via syncRunState's normal isVisible/isTabVisible/reducedMotion
+      // gate) once the user scrolls back above the pin start.
+      onEnter: () => {
+        stopIdleTimelines()
+        isRunning = false
+      },
+      onLeaveBack: () => {
+        syncRunState()
+      }
     })
   }
 

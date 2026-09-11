@@ -22,8 +22,7 @@ useGsapContext(() => {
         <linearGradient id="grad-plate-b" data-gradient-kind="linear" />
         <radialGradient id="grad-plate-c" data-gradient-kind="radial" />
         <clipPath id="signal-void-clip" clipPathUnits="userSpaceOnUse">
-          <rect x="0" y="0" width="1600" height="900" />
-          <rect data-void-hole x="0" y="0" width="0" height="0" rx="10" ry="10" />
+          <path data-void-clip clip-rule="evenodd" d="M0 0H1600V900H0Z" />
         </clipPath>
       </defs>
       <g data-blueprint-group="band" clip-path="url(#signal-void-clip)" />
