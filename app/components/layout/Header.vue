@@ -145,11 +145,12 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <header ref="headerRef" class="fixed inset-x-0 top-0 z-50 px-4 pt-4 md:px-6 md:pt-5">
-    <div
-      class="container-page rounded-2xl border border-navy-900/10 bg-paper shadow-[0_8px_30px_-12px_rgba(11,22,32,0.18)] transition-[height] duration-500 ease-editorial"
-      :class="activated ? 'h-14 md:h-16' : 'h-16 md:h-20'"
-    >
+  <header
+    ref="headerRef"
+    class="fixed inset-x-0 top-0 z-50 border-b border-navy-900/10 bg-paper shadow-[0_8px_30px_-12px_rgba(11,22,32,0.18)] transition-[height] duration-500 ease-editorial"
+    :class="activated ? 'h-14 md:h-16' : 'h-16 md:h-20'"
+  >
+    <div class="container-page h-full">
       <div class="flex h-full items-center px-5 md:px-7">
         <div ref="logoRef" class="transition-transform duration-300 ease-editorial hover:scale-[1.03]">
           <LayoutLogo />
@@ -172,7 +173,7 @@ useGsapContext(() => {
         </div>
       </div>
 
-      <div ref="progressRef" class="h-px w-full origin-left rounded-b-2xl bg-yellow-500" aria-hidden="true" />
+      <div ref="progressRef" class="h-px w-full origin-left bg-yellow-500" aria-hidden="true" />
     </div>
   </header>
 </template>
