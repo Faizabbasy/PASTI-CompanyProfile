@@ -22,9 +22,11 @@ const props = defineProps<{
   reconstructFromHero?: boolean
 }>()
 
-const introWords = props.segments.flatMap((segment) =>
-  segment.text.split(' ').map((word) => ({ word, accent: !!segment.accent }))
-)
+let accentGroupCounter = -1
+const introWords = props.segments.flatMap((segment) => {
+  const accentGroupIndex = segment.accent ? ++accentGroupCounter : null
+  return segment.text.split(' ').map((word) => ({ word, accent: !!segment.accent, accentGroupIndex }))
+})
 
 const labelRef = ref<HTMLElement | null>(null)
 const introRef = ref<HTMLElement | null>(null)
@@ -67,8 +69,10 @@ useGsapContext(() => {
     const applyReconstructionOffsets = () => {
       const points = props.reconstructFromHero ? landingPoints.value : null
       if (!points) return false
-      accentWords.forEach((word, i) => {
-        const point = points[i]
+      accentWords.forEach((word) => {
+        const groupIndex = word.dataset.introAccentGroup
+        if (groupIndex === undefined) return
+        const point = points[Number(groupIndex)]
         if (!point) return
         const rect = word.getBoundingClientRect()
         const targetLeft = (point.xVw / 100) * window.innerWidth
@@ -139,6 +143,7 @@ useGsapContext(() => {
         <template v-for="(item, i) in introWords" :key="i"><span class="inline-block -my-[0.2em] overflow-clip align-top"><span
           data-intro-word
           :data-intro-accent="item.accent ? '' : null"
+          :data-intro-accent-group="item.accentGroupIndex"
           class="inline-block py-[0.2em]"
           :class="item.accent ? 'font-semibold' : ''"
         >{{ item.word }}</span></span>{{ i < introWords.length - 1 ? ' ' : '' }}</template>

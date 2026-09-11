@@ -747,7 +747,9 @@ export function useHeroKineticBlueprint(
     document.removeEventListener('visibilitychange', handleVisibilityChange)
     if (isPointerActive) {
       sectionEl.removeEventListener('pointermove', handlePointerMove)
+      sectionEl.removeEventListener('pointerleave', handlePointerLeave)
       gsap.ticker.remove(pointerTick)
+      driftHandbackCall?.kill()
     }
     pointerMql.removeEventListener('change', reconcilePointerState)
     reducedMotionQuery.removeEventListener('change', handleReducedMotionChange)
