@@ -433,13 +433,18 @@ export function useHeroKineticBlueprint(
   // tier). ---
   function reconcileTier() {
     const nextTier = getTier()
-    if (nextTier === currentTier) return
+    if (nextTier === currentTier) {
+      refreshPointerBounds()
+      return
+    }
     currentTier = nextTier
     stopIdleTimelines()
     isRunning = false
     buildFacets(currentTier)
     syncRunState()
     updateVoidClip()
+    refreshPointerBounds()
+    reconcilePointerState()
   }
 
   const resizeObserver = new ResizeObserver(() => reconcileTier())
@@ -451,6 +456,96 @@ export function useHeroKineticBlueprint(
     contentResizeObserver.observe(contentEl)
   }
 
+  // --- Pointer bounds cached in document space, not viewport space, since
+  // the Hero moves relative to the viewport across the pre-pin/pinned/
+  // post-pin scroll ranges. ---
+  let cachedWidth = 0
+  let cachedHeight = 0
+  let cachedLeft = 0
+  let cachedDocumentTop = 0
+
+  function refreshPointerBounds() {
+    const rect = sectionEl.getBoundingClientRect()
+    cachedWidth = rect.width
+    cachedHeight = rect.height
+    cachedLeft = rect.left
+    cachedDocumentTop = rect.top + window.scrollY
+  }
+  refreshPointerBounds()
+
+  const rawPointer = { x: 0, y: 0 }
+  const dampedPointer = { x: 0, y: 0 }
+
+  function handlePointerMove(event: PointerEvent) {
+    if (cachedWidth === 0 || cachedHeight === 0) return
+    const currentTop = cachedDocumentTop - window.scrollY
+    rawPointer.x = ((event.clientX - cachedLeft) / cachedWidth) * 2 - 1
+    rawPointer.y = -(((event.clientY - currentTop) / cachedHeight) * 2 - 1)
+  }
+
+  // Structure tension: each facet's rotation/translate gets a small,
+  // capped nudge toward the pointer — restrained per spec ("no glow, halo,
+  // magnetic blob, huge deformation"). Applied as an additive offset on
+  // top of (not replacing) the idle drift transform, via a separate CSS
+  // custom property consumed by a second transform layer — simplest
+  // correct approach is a small additional GSAP-driven x/y/rotation delta
+  // applied directly, since GSAP's transform cache composes repeated
+  // .to()/.set() calls on the same properties additively is NOT reliable;
+  // instead pointer influence is applied to a dedicated wrapper transform
+  // via CSS custom properties independent of the idle system's direct
+  // x/y/rotation tweens.
+  function pointerTick() {
+    const t = 1 - Math.exp(-6 * gsap.ticker.deltaRatio(60) * (1 / 60))
+    dampedPointer.x += (rawPointer.x - dampedPointer.x) * t
+    dampedPointer.y += (rawPointer.y - dampedPointer.y) * t
+
+    for (const facet of facetEls()) {
+      const depthFactor = facet.dataset.blueprintId === 'plate-a' ? 1 : facet.dataset.blueprintId === 'plate-b' ? 0.7 : 0.5
+      const dx = dampedPointer.x * 8 * depthFactor
+      const dy = dampedPointer.y * -8 * depthFactor
+      facet.style.setProperty('--pointer-tension-x', `${dx}px`)
+      facet.style.setProperty('--pointer-tension-y', `${dy}px`)
+    }
+  }
+
+  // --- Pointer capability: dedicated MediaQueryList with its own change
+  // listener, reconciled alongside (not only inside) tier changes. ---
+  const pointerMql = window.matchMedia('(hover: hover) and (pointer: fine)')
+  let isPointerActive = false
+
+  function pointerShouldBeActive(): boolean {
+    if (currentTier === 'mobile' || reducedMotion) return false
+    return pointerMql.matches
+  }
+
+  function resetPointerTension() {
+    for (const facet of facetEls()) {
+      gsap.to(facet, { '--pointer-tension-x': '0px', '--pointer-tension-y': '0px', duration: 0.5, ease: 'power2.out' })
+    }
+    rawPointer.x = 0
+    rawPointer.y = 0
+    dampedPointer.x = 0
+    dampedPointer.y = 0
+  }
+
+  function reconcilePointerState() {
+    const shouldBeActive = pointerShouldBeActive()
+    if (shouldBeActive && !isPointerActive) {
+      isPointerActive = true
+      refreshPointerBounds()
+      sectionEl.addEventListener('pointermove', handlePointerMove, { passive: true })
+      gsap.ticker.add(pointerTick)
+    } else if (!shouldBeActive && isPointerActive) {
+      isPointerActive = false
+      sectionEl.removeEventListener('pointermove', handlePointerMove)
+      gsap.ticker.remove(pointerTick)
+      resetPointerTension()
+    }
+  }
+
+  reconcilePointerState()
+  pointerMql.addEventListener('change', reconcilePointerState)
+
   syncRunState()
 
   return () => {
@@ -459,5 +554,10 @@ export function useHeroKineticBlueprint(
     resizeObserver.disconnect()
     contentResizeObserver?.disconnect()
     document.removeEventListener('visibilitychange', handleVisibilityChange)
+    if (isPointerActive) {
+      sectionEl.removeEventListener('pointermove', handlePointerMove)
+      gsap.ticker.remove(pointerTick)
+    }
+    pointerMql.removeEventListener('change', reconcilePointerState)
   }
 }

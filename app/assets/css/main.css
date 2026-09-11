@@ -210,4 +210,9 @@
   [data-blueprint-id='plate-b'] .signal-architecture__facet {
     filter: drop-shadow(0 6px 14px rgba(5, 27, 40, 0.1));
   }
+  [data-blueprint-group='facets'] > g {
+    --pointer-tension-x: 0px;
+    --pointer-tension-y: 0px;
+    translate: var(--pointer-tension-x, 0px) var(--pointer-tension-y, 0px);
+  }
 }
