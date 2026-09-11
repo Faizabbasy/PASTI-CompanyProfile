@@ -182,4 +182,28 @@
       display: none;
     }
   }
+
+  .kinetic-blueprint__mass {
+    fill: theme(colors.navy.700);
+    stroke: theme(colors.navy.500);
+    stroke-width: 1;
+  }
+  .kinetic-blueprint__line,
+  .kinetic-blueprint__grid {
+    fill: none;
+    stroke: theme(colors.navy.700);
+    stroke-width: 1;
+  }
+  .kinetic-blueprint__registration {
+    fill: none;
+    stroke: theme(colors.navy.700);
+    stroke-width: 1.5;
+  }
+  .kinetic-blueprint__node {
+    fill: theme(colors.navy.700);
+    transition: fill 0.3s ease;
+  }
+  .kinetic-blueprint__node[data-active='true'] {
+    fill: theme(colors.yellow.500);
+  }
 }
