@@ -188,17 +188,17 @@
   }
   .signal-architecture__rail {
     stroke: theme(colors.yellow.500);
-    stroke-width: 4;
+    stroke-width: 5;
     stroke-linecap: round;
     fill: none;
   }
   .signal-architecture__band {
     fill: theme(colors.navy.700);
-    fill-opacity: 0.28;
+    fill-opacity: 0.42;
   }
   .signal-architecture__node {
     fill: theme(colors.yellow.500);
-    fill-opacity: 0.6;
+    fill-opacity: 0.85;
     transition: fill-opacity 0.3s ease;
   }
   .signal-architecture__node[data-active='true'] {

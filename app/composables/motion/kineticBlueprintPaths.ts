@@ -107,41 +107,41 @@ const desktopComposition: SignalComposition = {
       id: 'plate-a',
       d: 'M -100 -50 L 680 -30 L 980 340 L 620 640 L -100 400 Z',
       gradientId: 'grad-plate-a',
-      opacity: 0.42,
+      opacity: 0.62,
       lockTarget: { x: 0, y: 0, rotation: 0 },
       phases: {
-        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.42 },
-        expansion: { x: -20, y: -10, rotation: -1, scale: 1.12, opacity: 0.46 },
-        lock: { x: 0, y: 0, rotation: 0, scale: 1.12, opacity: 0.5 },
-        release: { x: 10, y: 40, rotation: 1, scale: 1.05, opacity: 0.4 },
-        handoff: { x: 20, y: 140, rotation: 1.5, scale: 1, opacity: 0.2 }
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.62 },
+        expansion: { x: -20, y: -10, rotation: -1, scale: 1.12, opacity: 0.68 },
+        lock: { x: 0, y: 0, rotation: 0, scale: 1.12, opacity: 0.74 },
+        release: { x: 10, y: 40, rotation: 1, scale: 1.05, opacity: 0.6 },
+        handoff: { x: 20, y: 140, rotation: 1.5, scale: 1, opacity: 0.32 }
       }
     },
     {
       id: 'plate-b',
       d: 'M 900 260 L 1720 480 L 1500 900 L 780 620 L 950 400 Z',
       gradientId: 'grad-plate-b',
-      opacity: 0.32,
+      opacity: 0.48,
       lockTarget: { x: 0, y: 0, rotation: 0 },
       phases: {
-        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.32 },
-        expansion: { x: 25, y: -15, rotation: 1, scale: 1.12, opacity: 0.36 },
-        lock: { x: 0, y: 0, rotation: 0, scale: 1.12, opacity: 0.4 },
-        release: { x: -10, y: 35, rotation: -1, scale: 1.05, opacity: 0.3 },
-        handoff: { x: -15, y: 130, rotation: -1.5, scale: 1, opacity: 0.15 }
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.48 },
+        expansion: { x: 25, y: -15, rotation: 1, scale: 1.12, opacity: 0.54 },
+        lock: { x: 0, y: 0, rotation: 0, scale: 1.12, opacity: 0.6 },
+        release: { x: -10, y: 35, rotation: -1, scale: 1.05, opacity: 0.46 },
+        handoff: { x: -15, y: 130, rotation: -1.5, scale: 1, opacity: 0.24 }
       }
     },
     {
       id: 'plate-c',
       d: 'M 1150 40 L 1580 20 L 1620 260 L 1280 300 Z',
       gradientId: 'grad-plate-c',
-      opacity: 0.22,
+      opacity: 0.36,
       lockTarget: { x: -15, y: 25, rotation: 0 },
       phases: {
-        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.22 },
-        expansion: { x: 10, y: -10, rotation: 2, scale: 1.08, opacity: 0.26 },
-        lock: { x: -15, y: 25, rotation: 0, scale: 1.08, opacity: 0.3 },
-        release: { x: 60, y: 120, rotation: 4, scale: 0.95, opacity: 0.16 },
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.36 },
+        expansion: { x: 10, y: -10, rotation: 2, scale: 1.08, opacity: 0.42 },
+        lock: { x: -15, y: 25, rotation: 0, scale: 1.08, opacity: 0.48 },
+        release: { x: 60, y: 120, rotation: 4, scale: 0.95, opacity: 0.26 },
         handoff: { x: 90, y: 220, rotation: 6, scale: 0.85, opacity: 0 }
       }
     }
@@ -172,41 +172,41 @@ const mobileComposition: SignalComposition = {
       id: 'plate-a',
       d: 'M -100 -50 L 620 -20 L 880 360 L 500 700 L -100 420 Z',
       gradientId: 'grad-plate-a',
-      opacity: 0.44,
+      opacity: 0.64,
       lockTarget: { x: 0, y: 0, rotation: 0 },
       phases: {
-        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.44 },
-        expansion: { x: -12, y: -8, rotation: -1, scale: 1.08, opacity: 0.48 },
-        lock: { x: 0, y: 0, rotation: 0, scale: 1.08, opacity: 0.52 },
-        release: { x: 8, y: 30, rotation: 1, scale: 1.03, opacity: 0.4 },
-        handoff: { x: 15, y: 110, rotation: 1.5, scale: 1, opacity: 0.2 }
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.64 },
+        expansion: { x: -12, y: -8, rotation: -1, scale: 1.08, opacity: 0.7 },
+        lock: { x: 0, y: 0, rotation: 0, scale: 1.08, opacity: 0.76 },
+        release: { x: 8, y: 30, rotation: 1, scale: 1.03, opacity: 0.6 },
+        handoff: { x: 15, y: 110, rotation: 1.5, scale: 1, opacity: 0.32 }
       }
     },
     {
       id: 'plate-b',
       d: 'M 780 480 L 1650 640 L 1500 900 L 700 780 L 820 600 Z',
       gradientId: 'grad-plate-b',
-      opacity: 0.3,
+      opacity: 0.46,
       lockTarget: { x: 0, y: 0, rotation: 0 },
       phases: {
-        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.3 },
-        expansion: { x: 15, y: -10, rotation: 1, scale: 1.08, opacity: 0.34 },
-        lock: { x: 0, y: 0, rotation: 0, scale: 1.08, opacity: 0.38 },
-        release: { x: -8, y: 25, rotation: -1, scale: 1.02, opacity: 0.28 },
-        handoff: { x: -12, y: 100, rotation: -1.5, scale: 1, opacity: 0.14 }
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.46 },
+        expansion: { x: 15, y: -10, rotation: 1, scale: 1.08, opacity: 0.52 },
+        lock: { x: 0, y: 0, rotation: 0, scale: 1.08, opacity: 0.58 },
+        release: { x: -8, y: 25, rotation: -1, scale: 1.02, opacity: 0.44 },
+        handoff: { x: -12, y: 100, rotation: -1.5, scale: 1, opacity: 0.22 }
       }
     },
     {
       id: 'plate-c',
       d: 'M 1000 40 L 1560 20 L 1600 220 L 1180 260 Z',
       gradientId: 'grad-plate-c',
-      opacity: 0.2,
+      opacity: 0.34,
       lockTarget: { x: -10, y: 18, rotation: 0 },
       phases: {
-        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.2 },
-        expansion: { x: 8, y: -8, rotation: 2, scale: 1.05, opacity: 0.24 },
-        lock: { x: -10, y: 18, rotation: 0, scale: 1.05, opacity: 0.28 },
-        release: { x: 40, y: 90, rotation: 4, scale: 0.95, opacity: 0.14 },
+        wake: { x: 0, y: 0, rotation: 0, scale: 1, opacity: 0.34 },
+        expansion: { x: 8, y: -8, rotation: 2, scale: 1.05, opacity: 0.4 },
+        lock: { x: -10, y: 18, rotation: 0, scale: 1.05, opacity: 0.46 },
+        release: { x: 40, y: 90, rotation: 4, scale: 0.95, opacity: 0.24 },
         handoff: { x: 60, y: 170, rotation: 6, scale: 0.85, opacity: 0 }
       }
     }
