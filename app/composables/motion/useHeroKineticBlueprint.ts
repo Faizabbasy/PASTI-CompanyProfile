@@ -297,6 +297,87 @@ export function useHeroKineticBlueprint(
     }
   }
 
+  function activateNode(node: SVGCircleElement, duration = 0.4) {
+    node.dataset.active = 'true'
+    idleTweens.push(
+      gsap.to(node, {
+        scale: 1.4,
+        duration: duration * 0.5,
+        yoyo: true,
+        repeat: 1,
+        transformOrigin: 'center',
+        ease: 'power2.out',
+        onComplete: () => {
+          node.dataset.active = 'false'
+        }
+      })
+    )
+  }
+
+  function runFacetLock() {
+    const facets = facetEls()
+    if (facets.length === 0) return
+    const rail = railEl()
+    const nodes = nodeEls()
+
+    const tl = gsap.timeline()
+    for (const def of composition.facets) {
+      const el = facetById(def.id)
+      if (!el) continue
+      // A single tween using back.out(1.4): GSAP's back-out ease already
+      // overshoots past the target and settles back in one continuous
+      // motion, giving the "mechanical click into place" feel the spec
+      // calls for without layering a second tween on the same properties
+      // (which would fight the first for control of x/y/rotation).
+      tl.to(
+        el,
+        {
+          x: def.lockTarget.x,
+          y: def.lockTarget.y,
+          rotation: def.lockTarget.rotation,
+          duration: 1.2,
+          ease: 'back.out(1.4)'
+        },
+        0
+      )
+    }
+
+    if (rail) {
+      tl.to(rail, { opacity: 1, strokeWidth: 6, duration: 0.3, ease: 'power2.out' }, 1.0).to(
+        rail,
+        { opacity: 0.75, strokeWidth: 4, duration: 0.6, ease: 'power2.inOut' },
+        1.6
+      )
+    }
+
+    for (const facet of composition.facets) {
+      const stops = gradientStopEls(facet.gradientId)
+      if (stops.length === 0) continue
+      tl.to(
+        stops,
+        { attr: { offset: (i: number) => `${Math.min(100, Math.max(0, Number(stops[i]?.dataset.stopOffset) - 15))}%` }, duration: 0.6, ease: 'power2.out' },
+        1.0
+      ).to(stops, { attr: { offset: (i: number) => `${stops[i]?.dataset.stopOffset}%` }, duration: 1.2, ease: 'sine.inOut' }, 2.2)
+    }
+
+    if (nodes.length > 0) {
+      tl.call(() => {
+        nodes.slice(0, Math.min(2, nodes.length)).forEach((n) => activateNode(n, 0.5))
+      }, undefined, 1.0)
+    }
+
+    idleTweens.push(tl as unknown as gsap.core.Tween)
+  }
+
+  function startFacetLockLoop() {
+    const runLoop = () => {
+      if (idleStopped) return
+      runFacetLock()
+      idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(8, 14), runLoop))
+    }
+    idleDelayedCalls.push(gsap.delayedCall(gsap.utils.random(8, 14), runLoop))
+  }
+
   function startIdleTimelines() {
     idleStopped = false
     startFacetDrift()
@@ -304,6 +385,7 @@ export function useHeroKineticBlueprint(
     startBandShift()
     startGradientDrift()
     startNodePulse()
+    startFacetLockLoop()
   }
 
   function stopIdleTimelines() {
