@@ -48,15 +48,25 @@ useGsapContext(() => {
     gsap.set(accentWords, { color: 'currentColor' })
     if (line) gsap.set(line, { scaleY: 0, transformOrigin: '0% 0%' })
 
-    // Reconstruction: if this instance opted in and Hero already
-    // published landing points (see useHeroHandoff), start each accent
-    // word from Hero's landed position instead of the plain yPercent
-    // reveal, so it visually continues from where Hero's disassembled
-    // word settled. Falls back to the plain reveal (points is null) when
-    // Hero hasn't run yet — e.g. reduced motion was on when Hero mounted,
+    // Reconstruction: if this instance opted in and Hero has published
+    // landing points (see useHeroHandoff) by the time this reveal actually
+    // plays, start each accent word from Hero's landed position instead of
+    // the plain yPercent reveal, so it visually continues from where
+    // Hero's disassembled word settled.
+    //
+    // landingPoints.value is deliberately NOT read here at setup time — all
+    // homepage sections mount together on load, long before the user has
+    // scrolled through Hero's pin, so it would still be null. Instead it's
+    // read fresh inside the timeline's onStart, which only fires when the
+    // ScrollTrigger actually starts playback (i.e. when the section
+    // scrolls into view) — by which point Hero, sitting earlier in the
+    // document, has had its chance to publish. Falls back to the plain
+    // reveal (points null) when Hero genuinely hasn't run — e.g. reduced
+    // motion was on during Hero's mount, a direct anchor to this section,
     // or this is WhyPasti's non-opted-in instance.
-    const points = props.reconstructFromHero ? landingPoints.value : null
-    if (points) {
+    const applyReconstructionOffsets = () => {
+      const points = props.reconstructFromHero ? landingPoints.value : null
+      if (!points) return false
       accentWords.forEach((word, i) => {
         const point = points[i]
         if (!point) return
@@ -65,16 +75,31 @@ useGsapContext(() => {
         const targetTop = (point.yVh / 100) * window.innerHeight
         gsap.set(word, { x: targetLeft - rect.left, y: targetTop - rect.top, rotation: point.rotation, opacity: 0 })
       })
+      return true
     }
 
+    let reconstructionTweenAdded = false
+
     const tl = gsap.timeline({
-      scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'restart none restart reverse' }
+      scrollTrigger: { trigger: el, start: 'top 85%', toggleActions: 'restart none restart reverse' },
+      onStart: () => {
+        // Fires each time the timeline actually begins playing (respecting
+        // toggleActions: 'restart'), i.e. right when the section's own
+        // reveal is triggered — not at component-setup time. Inserted at
+        // absolute time 0 (not the '<' shorthand) because by the time this
+        // callback runs the timeline's tween-chaining cursor has already
+        // advanced past every tween added below during setup. Guarded by
+        // reconstructionTweenAdded so re-triggering the reveal (scroll out
+        // and back in) doesn't keep appending duplicate tweens.
+        if (reconstructionTweenAdded) return
+        if (applyReconstructionOffsets()) {
+          reconstructionTweenAdded = true
+          tl.to(accentWords, { x: 0, y: 0, rotation: 0, opacity: 1, duration: motionDuration.editorial, ease: motionEase.standard, stagger: motionStagger.loose }, 0)
+        }
+      }
     })
 
     tl.to(words, { yPercent: 0, duration: motionDuration.editorial, ease: motionEase.standard, stagger: motionStagger.base })
-    if (points) {
-      tl.to(accentWords, { x: 0, y: 0, rotation: 0, opacity: 1, duration: motionDuration.editorial, ease: motionEase.standard, stagger: motionStagger.loose }, '<')
-    }
     if (line) tl.to(line, { scaleY: 1, duration: motionDuration.slow, ease: spatialEase.settle }, 0.1)
     tl.to(accentWords, { color: '#eab308', duration: motionDuration.medium, ease: motionEase.standard, stagger: motionStagger.loose }, '-=0.3')
 
