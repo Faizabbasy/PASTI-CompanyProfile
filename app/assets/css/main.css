@@ -183,33 +183,31 @@
     }
   }
 
-  .kinetic-blueprint__mass {
-    fill: theme(colors.navy.700);
-    stroke: theme(colors.navy.500);
-    stroke-width: 1;
+  .signal-architecture__facet {
+    stroke: none;
   }
-  .kinetic-blueprint__line,
-  .kinetic-blueprint__grid {
+  .signal-architecture__rail {
+    stroke: theme(colors.yellow.500);
+    stroke-width: 4;
+    stroke-linecap: round;
     fill: none;
-    stroke: theme(colors.navy.700);
-    stroke-width: 1;
   }
-  .kinetic-blueprint__registration {
-    fill: none;
-    stroke: theme(colors.navy.700);
-    stroke-width: 1.5;
-  }
-  .kinetic-blueprint__node {
+  .signal-architecture__band {
     fill: theme(colors.navy.700);
-    transition: fill 0.3s ease;
+    fill-opacity: 0.28;
   }
-  .kinetic-blueprint__node[data-active='true'] {
+  .signal-architecture__node {
     fill: theme(colors.yellow.500);
+    fill-opacity: 0.6;
+    transition: fill-opacity 0.3s ease;
   }
-  .kinetic-blueprint__mass,
-  .kinetic-blueprint__line,
-  .kinetic-blueprint__node {
-    --pointer-nudge-x: 0px;
-    --pointer-nudge-y: 0px;
+  .signal-architecture__node[data-active='true'] {
+    fill-opacity: 1;
+  }
+  [data-blueprint-id='plate-a'] .signal-architecture__facet {
+    filter: drop-shadow(0 12px 24px rgba(5, 27, 40, 0.18));
+  }
+  [data-blueprint-id='plate-b'] .signal-architecture__facet {
+    filter: drop-shadow(0 6px 14px rgba(5, 27, 40, 0.1));
   }
 }
