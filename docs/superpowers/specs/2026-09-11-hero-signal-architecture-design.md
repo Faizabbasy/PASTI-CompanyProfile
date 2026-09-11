@@ -23,7 +23,7 @@ Hero.vue's foreground (headline, subtext, CTA row, navbar, corner brackets, sect
 - A periodic signature event — elegant, memorable, structurally meaningful.
 - Pointer interaction stays secondary and subtle: local structure tension / segment offset / mask reveal amount / parallax. No glow, halo, magnetic blob, or large deformation.
 - Character: high-end editorial motion design + architectural graphic design + premium agency identity. Not "technical blueprint."
-- Palette stays within existing tokens (navy scale, yellow-500 accent, paper base) — bolder opacity/layering, not new colors.
+- Palette stays within existing tokens (navy scale, yellow-500 accent, paper base) — explored boldly via gradients/multi-shade layering (see Color System below), not extended with colors outside the brand scale. Craft quality targets an Awwwards-tier feel achieved through GSAP/SVG timing, easing, and layering — not through WebGL/shaders (that technology stays out of scope; see Global Constraints).
 
 ## Composition map
 
@@ -31,10 +31,12 @@ Hero.vue's foreground (headline, subtext, CTA row, navbar, corner brackets, sect
 
 A single large navy structure, deliberately split into three overlapping facets so it reads as one large fractured plate rather than a basic geometric primitive, while remaining animatable as independent segments (required for the Facet Lock signature event). Combined occupation ≈ 55-65% of canvas.
 
-- `plate-a` (navy-700, opacity 0.42) — dominant facet, upper-left to center.
-- `plate-b` (navy-600, opacity 0.32) — second facet, overlapping plate-a's right edge, extending lower-right.
-- `plate-c` (navy-500, opacity 0.22) — small accent facet, separated slightly from a/b, upper-right — reads as a "freshly broken" fragment.
-- `primary-rail` (stroke navy-600, width 4, opacity 0.55) — one long diagonal line crossing through the plates, from lower-left to upper-right, reinforcing the diagonal directional pull of the whole composition.
+- `plate-a` (gradient fill, opacity 0.42) — dominant facet, upper-left to center.
+- `plate-b` (gradient fill, opacity 0.32) — second facet, overlapping plate-a's right edge, extending lower-right.
+- `plate-c` (gradient fill, opacity 0.22) — small accent facet, separated slightly from a/b, upper-right — reads as a "freshly broken" fragment.
+- `primary-rail` (stroke yellow-500, width 4, opacity 0.75) — one long diagonal line crossing through the plates, from lower-left to upper-right, reinforcing the diagonal directional pull of the whole composition. The single most saturated element in the composition — the eye's anchor point.
+
+Exact fill treatment (gradients, not flat colors) is specified in **Color System** below.
 
 The plate's overall footprint intentionally overlaps the center content area — the headline/subtext/CTA void is carved out of it via a dynamic clipPath (see below), producing the effect of content floating inside/against a large structure, not beside a small one.
 
@@ -55,6 +57,26 @@ Approved approach: **SVG `clipPath` with an inverted rect hole, `fill-rule: even
 - Recomputed by a `ResizeObserver` on `[data-hero-content]`, and once more after Hero.vue's existing entry word-reveal timeline completes (heading height changes as words animate in — the observer's own resize firing covers this, but an explicit recompute call right after the timeline's completion avoids a one-frame stale hole during the reveal).
 - This is a coordinate-only recompute (rect x/y/width/height), not a path `d` change — compatible with the existing "no path `d` animation" constraint carried over from the Kinetic Blueprint plan.
 
+## Color System
+
+Palette stays within the existing navy/yellow/paper token scale — no colors are added outside it — but is applied far more boldly than Kinetic Blueprint's flat low-opacity fills, via SVG gradients:
+
+- **`plate-a` gradient:** `linearGradient`, navy-900 → navy-500, angled along the facet's own diagonal (not a fixed 0°/90° axis) — reads as a large metal/glass surface catching light along its length.
+- **`plate-b` gradient:** `linearGradient`, navy-700 → navy-300, angled in the opposite direction from plate-a's gradient — the two facets visibly "catch light" differently, reinforcing that they are distinct fractured surfaces rather than one flat shape.
+- **`plate-c` gradient:** `radialGradient`, navy-500 → yellow-600, focal point at one corner of the facet — a small warm highlight on the accent fragment, the composition's only navy-to-yellow color transition, kept to this one small facet so it reads as an intentional accent rather than diluting the primary navy identity.
+- **`primary-rail`:** solid yellow-500 stroke (opacity 0.75, see above) — the one fully-saturated brand-yellow element, functioning as the composition's focal accent and directional cue.
+- **Micro detail nodes:** yellow-500, matching the rail, at full opacity when active (pulsing per the existing node-pulse mechanism) — small, sharp points of full-saturation color against the softer gradient plates.
+
+**Gradient stop animation:** each gradient's stop `offset` values (not colors) shift subtly during idle drift (desynchronized with the facet's own transform drift, 10-18s, `sine.inOut`) and shift more decisively during the Facet Lock signature event (stops converge toward a tighter, more concentrated arrangement at the moment of lock, then relax back). This keeps the gradients reading as "alive" rather than a static paint job. Animating gradient `offset` is a numeric SVG attribute tween (GSAP handles this natively) — not a path `d` change, so it stays within the existing animation-technique constraint.
+
+## Craft / Motion Quality Bar
+
+The "Awwwards-tier" quality bar is targeted entirely through GSAP/SVG craft — not through WebGL or shaders, which stay out of scope (see Global Constraints). Concretely:
+
+- **Custom easing per motion class**, not one generic ease reused everywhere: continuous facet drift uses a soft organic ease (`sine.inOut`); the Facet Lock's approach uses a decisive `power3.out`; the final few pixels of the lock itself use a small `back.out(1.2)` overshoot so the lock reads as a precise mechanical "click" rather than a soft drift-to-stop.
+- **Depth layering via `filter: drop-shadow(...)`:** `plate-a` (nearest/dominant facet) carries a subtle SVG drop-shadow; `plate-b` a fainter one; `plate-c` and the rail none — a cheap, GPU-friendly depth cue that makes the 2D facets read as occupying layered space rather than sitting flat on one plane.
+- **Refined entry-choreography stagger:** the entry timeline's stagger curve (Task-level detail, carried into the implementation plan) uses an eased stagger distribution rather than uniform linear spacing, so elements arrive with the same "authored, not templated" feel the rest of the motion system targets.
+
 ## Idle motion
 
 Motion targets the primary structure itself, with amplitudes large enough to read clearly (a major change from Kinetic Blueprint's near-imperceptible amplitudes):
@@ -63,15 +85,16 @@ Motion targets the primary structure itself, with amplitudes large enough to rea
 - **Rail sweep (periodic):** `primary-rail`'s `stroke-dashoffset` redraws every ~10-14s (not a one-way loop — draws, holds, redraws), reading as a measurement/calibration action.
 - **Secondary band micro-shift:** independent slow horizontal drift, ±10-15px, 12-20s.
 - **Micro detail:** small opacity/scale pulses on the reduced node set, same mechanism as Kinetic Blueprint's timescale A but applied to far fewer elements.
+- **Gradient stop drift:** each facet's gradient `offset` stops shift subtly (10-18s, `sine.inOut`, desynchronized from that facet's own transform drift) per the Color System section above.
 
 ## Signature idle event — "Facet Lock"
 
 Every 8-14 seconds (3 pre-authored timing/target variants so repeats are not identical, matching Kinetic Blueprint's variant-pool pattern):
 
-1. `plate-a`/`plate-b`/`plate-c` animate (0.8-1.2s, `power2.inOut`) from their current drifted position to a precise aligned target where their edges meet exactly and rotation returns to 0° — "the system locks into its strongest state."
-2. At the moment of lock: `primary-rail` flashes (opacity + stroke-width bump, 0.3s) and 1-2 yellow-500 nodes near the facet junction pulse — marking the moment as the intended signature beat.
+1. `plate-a`/`plate-b`/`plate-c` animate from their current drifted position to a precise aligned target where their edges meet exactly and rotation returns to 0°, using the two-stage ease from the Craft/Motion Quality Bar (`power3.out` approach, `back.out(1.2)` overshoot on the final settle) — "the system locks into its strongest state" with a mechanical "click," not a soft drift-to-stop.
+2. At the moment of lock: `primary-rail` flashes (opacity + stroke-width bump, 0.3s), each facet's gradient stops converge toward their tighter "locked" arrangement, and 1-2 yellow-500 nodes near the facet junction pulse — marking the moment as the intended signature beat.
 3. Hold the locked state ~0.6-1s.
-4. Release back into independent idle drift over 1.5-2s (`sine.inOut`), resuming the continuous drift cycle from new baseline positions.
+4. Release back into independent idle drift over 1.5-2s (`sine.inOut`), gradients relaxing back to their idle drift ranges, resuming the continuous drift cycle from new baseline positions.
 
 This reuses the same `idleStopped`-gated self-rescheduling pattern already proven in the (retired) Kinetic Blueprint composable, applied to facet transforms instead of line/node opacity.
 
@@ -104,7 +127,7 @@ Same approach as the retired Kinetic Blueprint composable: a live `(prefers-redu
 ## Global constraints (carried over from Kinetic Blueprint plan, still binding)
 
 - No Three.js, no WebGL, no shaders.
-- No SVG path `d` attribute is ever animated; all motion uses `transform` (`translate`/`rotate`/`scale`), the clipPath hole's rect coordinates, `stroke-dashoffset`, and `opacity` only. No MorphSVGPlugin or other paid GSAP plugin.
+- No SVG path `d` attribute is ever animated; all motion uses `transform` (`translate`/`rotate`/`scale`), the clipPath hole's rect coordinates, gradient stop `offset` values, `stroke-dashoffset`, `opacity`, and CSS `filter: drop-shadow(...)` only. No MorphSVGPlugin or other paid GSAP plugin.
 - Locked/untouched: everything inside `data-hero-content` (headline, subtext, CTA row, corner brackets), container/max-width, section height, navbar, existing entry timeline, section order, base palette tokens (navy/yellow/paper scale itself — usage is bolder, values are not new).
 - `ClientOnly` wraps the whole component, matching the existing pattern, to avoid SSR/hydration mismatch.
 - Every observer/listener/timeline created must be released in the composable's returned cleanup function.
@@ -113,9 +136,9 @@ Same approach as the retired Kinetic Blueprint composable: a live `(prefers-redu
 
 - **Rewrite (replace contents):** `app/composables/motion/kineticBlueprintPaths.ts` — new facet/rail/band path data per tier (desktop/tablet/mobile), replacing the old masses/constructionLines/gridLines/registrationMarks/nodes data entirely. Filename kept as-is to avoid an unnecessary rename churn across the file that already imports it; only its exported shapes/content change.
 - **Rewrite (large):** `app/composables/motion/useHeroKineticBlueprint.ts` — keep the proven lifecycle scaffolding (tier detection, `IntersectionObserver`/`visibilitychange` pause, `ResizeObserver` tier-crossing rebuild, pointer `MediaQueryList` reconciliation, live reduced-motion listener, pinned `ScrollTrigger` construction/teardown) but replace the idle/scroll/signature-event bodies for the new facet-based structure, and add the `data-hero-content` bounding-box tracking that drives the void clipPath.
-- **Modify (small):** `app/components/home/HeroKineticBlueprint.vue` — add the `<clipPath>` element and adjust SVG group structure for facets/rail/band instead of masses/lines/grid/registration/nodes.
+- **Modify (small):** `app/components/home/HeroKineticBlueprint.vue` — add the `<clipPath>` element, the `<linearGradient>`/`<radialGradient>` `<defs>` for `plate-a`/`plate-b`/`plate-c`, and adjust SVG group structure for facets/rail/band instead of masses/lines/grid/registration/nodes.
 - **Modify (small):** `app/components/home/Hero.vue` — no foreground changes; confirm `data-hero-content` remains a stable ref target the composable can read via `getBoundingClientRect()`. Scrim opacity may be reduced further (from the Kinetic Blueprint-era `paper/0.25`) once the void clipPath is doing the actual protection work, but this is an implementation-time tuning decision, not a locked requirement.
-- **Modify (small):** `app/assets/css/main.css` — replace `.kinetic-blueprint__*` utility classes with fill/stroke rules for the new facet/rail/band/micro-detail element classes.
+- **Modify (small):** `app/assets/css/main.css` — replace `.kinetic-blueprint__*` utility classes with fill/stroke rules for the new facet/rail/band/micro-detail element classes, plus the `filter: drop-shadow(...)` depth-layering rules for `plate-a`/`plate-b` from the Craft/Motion Quality Bar.
 - **No change:** everything else in the retired Kinetic Blueprint plan not listed above (idle lifecycle patterns, pointer lifecycle patterns, reduced-motion listener pattern) carries over conceptually but is reimplemented against the new element set — there is no file this spec leaves as pure legacy code to keep unmodified, since Task 2 (path data) and most of Tasks 4/7/8 (idle, entry, scroll) in the old plan are being replaced outright per the "replace totally" decision.
 
 ## Out of scope / explicitly rejected approaches
