@@ -542,7 +542,85 @@ export function useHeroKineticBlueprint(
   reconcilePointerState()
   pointerMql.addEventListener('change', reconcilePointerState)
 
-  syncRunState()
+  // --- Reduced motion: idle timelines never start, and every facet is set
+  // directly to its authored lockTarget (the Lock phase is the spec's
+  // designated "strongest single frame") with no animation. ---
+  function applyReducedMotionRestingState() {
+    for (const def of composition.facets) {
+      const el = facetById(def.id)
+      if (!el) continue
+      gsap.set(el, { x: def.lockTarget.x, y: def.lockTarget.y, rotation: def.lockTarget.rotation })
+    }
+    const nodes = nodeEls()
+    nodes.slice(0, Math.min(2, nodes.length)).forEach((n) => {
+      n.dataset.active = 'true'
+    })
+  }
+
+  const handleReducedMotionChange = (e: MediaQueryListEvent) => {
+    reducedMotion = e.matches
+    if (reducedMotion) {
+      stopIdleTimelines()
+      isRunning = false
+      applyReducedMotionRestingState()
+    } else {
+      syncRunState()
+    }
+    reconcilePointerState()
+  }
+  reducedMotionQuery.addEventListener('change', handleReducedMotionChange)
+
+  if (reducedMotion) {
+    applyReducedMotionRestingState()
+  }
+
+  // --- Entry choreography: gated on introReady (the same page-load intro
+  // gate Hero.vue's own headline reveal watches), sequenced alongside (not
+  // blocking) that reveal. Uses the project's shared motionDuration/
+  // motionEase tokens so timing matches the rest of the page, with a
+  // refined per-facet stagger curve rather than uniform spacing. ---
+  const { introReady } = useIntroReady()
+  let entryTimeline: gsap.core.Timeline | null = null
+  const stopIntroWatch = watch(
+    introReady,
+    (ready) => {
+      if (!ready) return
+      if (reducedMotion) return // resting state already applied above; no entry animation under reduced motion
+
+      const facets = facetEls()
+      const rail = railEl()
+      const band = bandEl()
+
+      gsap.set(facets, { opacity: 0, scale: 0.9 })
+      if (rail) gsap.set(rail, { opacity: 0 })
+      if (band) gsap.set(band, { opacity: 0 })
+
+      entryTimeline = gsap.timeline()
+      entryTimeline
+        .to(facets, {
+          opacity: (i, target) => Number(target.style.opacity) || composition.facets.find((f) => f.id === (target as SVGGElement).dataset.blueprintId)?.opacity || 0.3,
+          scale: 1,
+          duration: motionDuration.slow,
+          ease: motionEase.standard,
+          stagger: { each: motionStagger.loose, ease: 'power2.out' }
+        })
+        .to(rail ? [rail] : [], { opacity: 0.75, duration: motionDuration.editorial, ease: motionEase.standard }, '-=0.4')
+        .to(band ? [band] : [], { opacity: 1, duration: motionDuration.editorial, ease: motionEase.standard }, '-=0.5')
+        .call(() => {
+          const nodes = nodeEls()
+          nodes.slice(0, Math.min(2, nodes.length)).forEach((n) => activateNode(n, 0.5))
+        })
+        .call(() => {
+          syncRunState() // starts idle motion (Task 5-6 systems) once entry completes
+        })
+    },
+    { immediate: true }
+  )
+
+  if (reducedMotion) {
+    syncRunState() // no entry animation in this path — confirms idle stays stopped
+  }
+  // Otherwise, syncRunState() is called by the entry timeline's completion above.
 
   return () => {
     stopIdleTimelines()
@@ -555,5 +633,8 @@ export function useHeroKineticBlueprint(
       gsap.ticker.remove(pointerTick)
     }
     pointerMql.removeEventListener('change', reconcilePointerState)
+    reducedMotionQuery.removeEventListener('change', handleReducedMotionChange)
+    stopIntroWatch()
+    entryTimeline?.kill()
   }
 }
