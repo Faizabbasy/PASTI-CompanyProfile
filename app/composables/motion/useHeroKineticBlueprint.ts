@@ -717,6 +717,28 @@ export function useHeroKineticBlueprint(
 
   buildScrollTimeline()
 
+  // headingWordsOption is still [] at this point on a normal page load —
+  // Hero.vue only populates it inside its own watch(introReady, ...)
+  // handler, which hasn't fired yet (introReady gates the whole page's
+  // intro overlay, up to ~12s). Without this, the word-target tweens and
+  // landing-point publish above would silently no-op forever, since
+  // nothing else calls buildScrollTimeline() again until a tier change.
+  // Watching the headingWords ref itself (rather than introReady) sidesteps
+  // any watcher-ordering hazard between this composable and Hero.vue's own
+  // introReady handler — this fires exactly when Hero.vue actually assigns
+  // the populated array, whichever order the two components' watchers run
+  // in. Guarded to rebuild only once (words go empty -> populated exactly
+  // one time per page load; a later tier change already gets its own
+  // rebuild via reconcileTier()).
+  let wordsRebuildDone = false
+  const stopWordsReadyWatch = headingWordsOption
+    ? watch(headingWordsOption, (words) => {
+        if (wordsRebuildDone || words.length === 0) return
+        wordsRebuildDone = true
+        buildScrollTimeline()
+      })
+    : () => {}
+
   return () => {
     stopIdleTimelines()
     intersectionObserver.disconnect()
@@ -730,6 +752,7 @@ export function useHeroKineticBlueprint(
     pointerMql.removeEventListener('change', reconcilePointerState)
     reducedMotionQuery.removeEventListener('change', handleReducedMotionChange)
     stopIntroWatch()
+    stopWordsReadyWatch()
     entryTimeline?.kill()
     scrollTriggerInstance?.kill()
     scrollTimeline?.kill()
