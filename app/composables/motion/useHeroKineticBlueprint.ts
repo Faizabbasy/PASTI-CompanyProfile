@@ -376,6 +376,7 @@ export function useHeroKineticBlueprint(
     syncRunState()
     refreshPointerBounds()
     reconcilePointerState()
+    buildScrollTimeline()
   }
 
   const resizeObserver = new ResizeObserver(() => reconcileTier())
@@ -513,6 +514,7 @@ export function useHeroKineticBlueprint(
       syncRunState()
     }
     reconcilePointerState()
+    buildScrollTimeline() // no pin at all when reducedMotion is true; rebuilt fresh when it turns false
   }
   reducedMotionQuery.addEventListener('change', handleReducedMotionChange)
 
@@ -551,6 +553,125 @@ export function useHeroKineticBlueprint(
     { immediate: true }
   )
 
+  // --- Pinned scroll choreography (spec "Scroll choreography"). One
+  // scrubbed timeline per the current tier's pin distance; rebuilt whenever
+  // the tier crosses a breakpoint so distance stays correct without a page
+  // reload. Every animated value is transform/opacity/strokeDashoffset only
+  // — never a path `d` change (spec "SVG animation technique constraint"). ---
+  let scrollTimeline: gsap.core.Timeline | null = null
+  let scrollTriggerInstance: ScrollTrigger | null = null
+
+  function activeRegistrationMarks(): SVGGElement[] {
+    return Array.from(registrationGroup.children) as SVGGElement[]
+  }
+
+  function buildScrollTimeline() {
+    scrollTriggerInstance?.kill()
+    scrollTimeline?.kill()
+
+    if (reducedMotion) {
+      scrollTriggerInstance = null
+      scrollTimeline = null
+      return
+    }
+
+    const pinDistance = `+=${PIN_DISTANCE_VH[currentTier]}vh`
+    const tl = gsap.timeline({ paused: true })
+
+    const massEls = activeMasses()
+    const lineEls = activeLines()
+    const guideEls = [...massEls, ...lineEls, ...activeGridLines(), ...activeRegistrationMarks()].filter(
+      (el) => el.dataset.role === 'guide'
+    )
+
+    function massById(id: string): SVGGElement | undefined {
+      return massEls.find((el) => el.dataset.blueprintId === id)
+    }
+
+    // Phase labels at 0/.2/.45/.7/.9/1 (spec exact fractions).
+    tl.addLabel('calibration', 0)
+      .addLabel('construction', 0.2)
+      .addLabel('convergence', 0.45)
+      .addLabel('resolution', 0.7)
+      .addLabel('handoff', 0.9)
+      .addLabel('end', 1)
+
+    // Drive each mass through its authored per-phase transform/opacity
+    // targets (from kineticBlueprintPaths.ts), one segment per phase
+    // transition, so scrub position always corresponds to an interpolated
+    // point between two authored states — never a jump.
+    for (const def of composition.masses) {
+      const el = massById(def.id)
+      if (!el || !def.phases) continue
+      const order: Array<keyof NonNullable<typeof def.phases>> = [
+        'calibration',
+        'construction',
+        'convergence',
+        'resolution',
+        'handoff'
+      ]
+      for (const phaseName of order) {
+        const target = def.phases[phaseName]
+        if (!target) continue
+        const vars: gsap.TweenVars = { duration: 0.2, ease: 'none' }
+        if (typeof target.opacity === 'number') vars.opacity = target.opacity
+        if (target.transform) {
+          // GSAP can't tween a raw CSS transform string target directly on
+          // an SVG <g> alongside x/y/scale shorthand reliably across
+          // browsers, so instead parse the authored transform string's
+          // translate/scale components into GSAP's own x/y/scale props,
+          // which it tweens natively via its internal CSSPlugin-equivalent
+          // SVG transform handling.
+          const translateMatch = target.transform.match(/translate\(([-.\d]+)px,\s*([-.\d]+)px\)/)
+          const scaleMatch = target.transform.match(/scale\(([-.\d]+)\)/)
+          if (translateMatch) {
+            vars.x = Number(translateMatch[1])
+            vars.y = Number(translateMatch[2])
+          }
+          if (scaleMatch) {
+            vars.scale = Number(scaleMatch[1])
+          }
+        }
+        tl.to(el, vars, phaseName)
+      }
+    }
+
+    // Secondary/guide elements fade out specifically during Resolution
+    // (70-90%), per spec.
+    if (guideEls.length > 0) {
+      tl.to(guideEls, { opacity: 0, duration: 0.2, ease: 'none' }, 'resolution')
+    }
+
+    // Idle-mix crossfade during Calibration (0-20%): idle timelines' visual
+    // influence reduces without killing them, so scrolling back up resumes
+    // idle motion smoothly. Represented as a CSS custom property read by
+    // idle tweens' targets — simplest correct implementation is to scale
+    // down the opacity of non-key nodes during this phase.
+    const nodeEls = activeNodes()
+    const keyNodeIds = new Set(['node-1', 'node-2', 'node-5'])
+    const nonKeyNodes = nodeEls.filter((n) => !keyNodeIds.has(n.dataset.blueprintId ?? ''))
+    if (nonKeyNodes.length > 0) {
+      tl.to(nonKeyNodes, { opacity: 0.3, duration: 0.2, ease: 'none' }, 'calibration')
+    }
+
+    // Handoff (90-100%): bottom band + a couple of lines already animate
+    // downward via their authored 'handoff' phase target above (mass-bottom
+    // translateY). No additional work needed here beyond what the per-mass
+    // loop already applied.
+
+    scrollTimeline = tl
+    scrollTriggerInstance = ScrollTrigger.create({
+      trigger: sectionEl,
+      start: 'top top',
+      end: pinDistance,
+      pin: true,
+      scrub: 1,
+      animation: scrollTimeline
+    })
+  }
+
+  buildScrollTimeline()
+
   if (reducedMotion) {
     syncRunState() // no entry animation in this path — start (or rather, confirm not-started) idle state immediately
   }
@@ -569,5 +690,7 @@ export function useHeroKineticBlueprint(
     reducedMotionQuery.removeEventListener('change', handleReducedMotionChange)
     stopIntroWatch()
     entryTimeline?.kill()
+    scrollTriggerInstance?.kill()
+    scrollTimeline?.kill()
   }
 }
