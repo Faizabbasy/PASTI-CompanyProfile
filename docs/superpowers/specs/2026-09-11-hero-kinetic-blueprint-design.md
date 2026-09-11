@@ -60,12 +60,16 @@ Each timescale runs as independently-scheduled GSAP work (not one master repeati
 Labels at 0 / .2 / .45 / .7 / .9 / 1:
 
 - **0–20% Calibration**: idle timelines' influence crossfades down (global "idle mix" 1→0.3, not killed — resumes cleanly if user scrolls back up); scattered secondary lines animate toward aligned positions; active node count reduces to 2–3 key anchors.
-- **20–45% Construction**: major masses expand toward a "resolved" shape (pre-authored target `d`/transform values, not procedural morphing); more construction lines draw in.
+- **20–45% Construction**: major masses expand toward a "resolved" shape via `transform` (`scale`/`translate`/`rotate`) on each mass's `<g>` wrapper — not a path `d` morph; more construction lines draw in (`stroke-dashoffset`).
 - **45–70% Convergence**: grid, slash geometry, and nodes tween toward one curated tighter "peak" composition (explicit authored target state).
 - **70–90% Resolution**: elements tagged `data-role="guide"` fade out; primary masses/nodes hold at full opacity.
 - **90–100% Handoff**: bottom band + 1–2 lines animate downward/off-canvas, cueing the transition; pin releases past 100%.
 
 Only the background SVG group is targeted — headline/CTA are never touched by this timeline.
+
+### SVG animation technique constraint
+
+The project has only core `gsap` installed (`package.json`) — no MorphSVGPlugin or other paid Club GreenSock plugin, and none is to be added without explicit separate approval. All shape/state changes across idle motion, entry, and scroll choreography (including the "resolved," "peak," and "declutter" target states referenced above) are built exclusively from: `transform` (`scale`/`translate`/`rotate`), `clipPath`/`mask`, `stroke-dashoffset`, and `opacity`. No animation in this spec changes an SVG path's `d` attribute over time. Every major mass and construction line is authored as a fixed-`d` `<path>` wrapped in its own `<g>`, so all "expansion," "convergence," and "retraction" language above refers to transforming that wrapper group, never redrawing the path geometry itself.
 
 ## Responsive art direction
 
@@ -79,14 +83,20 @@ All three tiers keep the same 5 phase labels (0/.2/.45/.7/.9/1) and the same cho
 
 ## Pointer lifecycle
 
-Pointer capability (`matchMedia('(hover: hover) and (pointer: fine)')`) is checked live, on the same resize/tier-reconciliation pass that already re-evaluates `getTier()` — never only once at mount. The composable holds one `isPointerActive` boolean derived from `hover:fine` **and** tier (attached on desktop always-when-capable, attached on tablet only when the device actually reports `hover:fine`, always detached on mobile regardless of capability, per the responsive spec above).
+Pointer capability is tracked via a dedicated `MediaQueryList` created once at setup — `const pointerMql = window.matchMedia('(hover: hover) and (pointer: fine)')` — with a `change` event listener (`pointerMql.addEventListener('change', reconcilePointerState)`), **not** re-queried only inside the resize/tier handler. This matters because pointer capability and viewport tier are independent signals: a tablet can gain a mouse/trackpad (or a 2-in-1 laptop can detach its keyboard) with zero resize event firing.
 
-On each reconciliation pass:
+`reconcilePointerState()` is the single function that decides `isPointerActive`, and it is called from **two** independent triggers:
+- the existing resize/tier-reconciliation pass (tier changed)
+- the `pointerMql` `change` event (capability changed, tier unchanged)
+
+Both call the same idempotent reconciler, so `isPointerActive` is always derived fresh from the current `(pointerMql.matches, tier)` pair regardless of which signal changed:
 - If the new state should be active and it isn't currently: attach the `gsap.ticker` pointer-update callback and the `pointermove` listener.
 - If the new state should be inactive and it currently is: remove the `pointermove` listener and the `gsap.ticker` callback, and tween any pointer-nudged elements back to their idle-timeline baseline (so nothing is left visually offset with no system driving it back).
-- If state is unchanged: no-op (idempotent — mirrors the existing `startLoop`/`stopLoop` guard pattern from the Living Surface composable).
+- If state is unchanged: no-op (idempotent — mirrors the existing `startLoop`/`stopLoop` guard pattern from the Living Surface composable, and guarantees the two triggers can never produce duplicate listeners/tickers even if they fire close together).
 
-This guarantees no duplicate listeners/tickers across repeated resizes and no stale pointer state surviving a tier crossing (e.g. rotating a tablet from landscape-with-mouse to a coarse-touch state, or a browser window being dragged across a breakpoint).
+**Cleanup** adds `pointerMql.removeEventListener('change', reconcilePointerState)` alongside the other listener teardown in the composable's returned cleanup function.
+
+This guarantees no duplicate listeners/tickers across repeated resizes or capability changes, and no stale pointer state surviving either a tier crossing (e.g. a browser window dragged across a breakpoint) or a capability change with no resize (e.g. a tablet gaining a mouse/trackpad).
 
 ## Reduced motion
 
@@ -101,7 +111,7 @@ Gated on the existing `introReady` ref, sequenced alongside (not blocking) the h
 **New:**
 - `app/components/home/HeroKineticBlueprint.vue` — mount wrapper, owns the SVG template markup + small CSS-pulse overlay
 - `app/composables/motion/useHeroKineticBlueprint.ts` — all GSAP/ScrollTrigger logic: idle A–D, entry, scroll timeline, pointer damping, reduced-motion static state, tier/lifecycle management
-- `app/composables/motion/kineticBlueprintPaths.ts` — static path/coordinate data per tier (desktop/tablet/mobile) and per-phase "resolved" scroll-target states
+- `app/composables/motion/kineticBlueprintPaths.ts` — static fixed-`d` path strings per tier (desktop/tablet/mobile) and per-phase target `transform`/`opacity`/`stroke-dashoffset` values (never target `d` values — see "SVG animation technique constraint")
 
 **Modified:**
 - `app/components/home/Hero.vue` — swap `<HomeHeroLivingSurface class="z-[3]" />` for `<HomeHeroKineticBlueprint class="z-[3]" />` at the existing mount line only
@@ -118,7 +128,7 @@ Same discipline as the audited Living Surface composable, adapted for DOM/SVG:
 - **Visibility pause**: `IntersectionObserver` (threshold 0) + `document.visibilitychange` → `.pause()`/`.resume()` all 4 idle timelines and the pointer `gsap.ticker` listener. ScrollTrigger's own scrub/pin naturally no-ops when not in viewport-relevant range.
 - **Reduced motion**: live listener, tears down/rebuilds idle timelines and the pin's ScrollTrigger on toggle.
 - **Resize**: `ResizeObserver` on the section; `viewBox`+`preserveAspectRatio` absorbs most resizes with zero JS. Only a tier crossing (mobile↔tablet↔desktop) rebuilds the coordinate set from `kineticBlueprintPaths.ts` and restarts idle timelines with the new element set.
-- **Cleanup**: one returned function that kills all GSAP timelines/tweens, the ScrollTrigger instance, the `gsap.ticker` listener, both observers, and both `matchMedia`/`visibilitychange` listeners. No WebGL context to force-lose, but every acquired observer/listener handle must be explicitly released.
+- **Cleanup**: one returned function that kills all GSAP timelines/tweens, the ScrollTrigger instance, the `gsap.ticker` listener, both observers, and all three `matchMedia`/`visibilitychange` listeners (reduced-motion query, pointer-capability query, tab visibility). No WebGL context to force-lose, but every acquired observer/listener handle must be explicitly released.
 - **No per-frame DOM measurement**: pointer bounds are cached in **document space**, not viewport space, because the Hero section moves relative to the viewport as the page scrolls through the pre-pin, pinned, and post-pin ranges. On mount and on resize, compute once: `cachedDocumentTop = rect.top + window.scrollY`, plus cached `width`/`height`/`left` from the same `getBoundingClientRect()` call. On every pointer update (inside the `gsap.ticker` callback, not per raw `mousemove`), derive the current viewport-space top on the fly as `currentViewportTop = cachedDocumentTop - window.scrollY` — this is a cheap arithmetic op, not a layout-triggering measurement, so it stays safe to run every tick. `getBoundingClientRect()` itself is never called inside the pointer or ticker hot path — only on mount and on `ResizeObserver` callbacks (which already exist for tier reconciliation). This keeps pointer-to-element proximity mapping correct before, during, and after the pinned scroll range.
 - **SSR/hydration**: same `ClientOnly` wrapper as today around the whole component, avoiding any mismatch between entry-choreography initial state and server output.
 
@@ -136,3 +146,5 @@ Manual verification against the brief's quality gates before calling this done:
 - Each tier (desktop/tablet/mobile) pins for its specified distance (160vh/100vh/65vh) and mobile does not feel scroll-jacked
 - Resizing the browser across a tier breakpoint mid-session re-attaches/detaches pointer interaction correctly with no duplicate listeners or stale ticker callbacks
 - Pointer proximity mapping stays accurate when tested before the pin activates, while pinned mid-scroll, and after the pin releases
+- No SVG path `d` attribute is animated anywhere in the implementation; all shape changes use `transform`/`clipPath`/`mask`/`stroke-dashoffset`/`opacity`, and no MorphSVGPlugin or other paid GSAP plugin is added to `package.json`
+- Simulating a pointer-capability change with no viewport resize (e.g. DevTools "connect a mouse" toggle on a touch emulation, or an actual tablet with a paired mouse/trackpad) correctly attaches/detaches pointer interaction via the `pointerMql` `change` listener, with no duplicate listeners on repeated toggling
