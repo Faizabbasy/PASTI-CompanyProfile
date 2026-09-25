@@ -97,15 +97,20 @@ useGsapContext(() => {
       aria-hidden="true"
       class="pointer-events-none absolute inset-x-0 top-0 h-px bg-navy-800"
     />
+    <!-- Signal — existing left accent bar (04-homepage-spec.md §8): the
+         section's ONLY Signal element, reused rather than a new dot/rail/
+         numeral. Closed = quiet/inactive, hover/focus = restrained Cobalt,
+         open = active Cobalt. Yellow removed per the frozen spec's "Yellow
+         locked — removed" rule for this section. -->
     <span
       aria-hidden="true"
-      class="absolute -left-px top-0 h-full w-0.5 origin-top scale-y-0 bg-yellow-400 transition-transform duration-500 ease-editorial group-hover/row:scale-y-100"
+      class="absolute -left-px top-0 h-full w-0.5 origin-top scale-y-0 bg-cobalt transition-transform duration-200 ease-editorial group-hover/row:scale-y-100 group-focus-within/row:scale-y-100"
       :class="{ 'scale-y-100': open }"
     />
 
     <details class="group" :open="open || closing" @toggle="handleNativeToggle">
       <summary
-        class="flex cursor-pointer list-none items-center justify-between gap-6 py-8 font-display text-body-lg font-medium text-paper marker:content-none transition-colors duration-400 ease-editorial hover:text-yellow-400 md:py-10 md:text-display-sm"
+        class="flex cursor-pointer list-none items-center justify-between gap-6 py-8 font-display text-body-lg font-medium text-paper marker:content-none transition-colors duration-150 ease-editorial hover:text-cobalt focus-visible:text-cobalt md:py-10 md:text-display-sm"
         @click.capture="handleSummaryClick"
       >
         {{ item.question }}
@@ -115,7 +120,7 @@ useGsapContext(() => {
         >
           <span class="absolute left-1/2 top-1/2 h-px w-4 -translate-x-1/2 -translate-y-1/2 bg-current" />
           <span
-            class="absolute left-1/2 top-1/2 h-4 w-px -translate-x-1/2 -translate-y-1/2 bg-current transition-transform duration-600 ease-editorial"
+            class="absolute left-1/2 top-1/2 h-4 w-px -translate-x-1/2 -translate-y-1/2 bg-current transition-transform duration-200 ease-editorial"
             :class="open && !closing ? 'rotate-90' : ''"
           />
         </span>
@@ -123,12 +128,12 @@ useGsapContext(() => {
 
       <div
         ref="bodyWrapRef"
-        class="grid transition-[grid-template-rows] duration-400 ease-editorial"
+        class="grid transition-[grid-template-rows] duration-200 ease-editorial"
         :style="{ gridTemplateRows: open && !closing ? '1fr' : '0fr' }"
       >
         <div class="overflow-hidden">
           <p
-            class="max-w-3xl pb-8 text-body-md text-navy-200 transition-all duration-400 ease-editorial md:pb-10 md:text-body-lg"
+            class="max-w-3xl pb-8 text-body-md text-navy-200 transition-all duration-200 ease-editorial md:pb-10 md:text-body-lg"
             :class="open && !closing ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'"
           >
             {{ item.answer }}

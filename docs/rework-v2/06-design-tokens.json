@@ -1,0 +1,168 @@
+{
+  "meta": {
+    "name": "PASTI Design Tokens",
+    "version": "2.0.0",
+    "direction": "Engineering Precision × Premium Digital",
+    "scope": "Reusable numeric primitives only — colors, typography, spacing, radius, borders, opacity, motion duration/easing, breakpoints, layout/grid constants. Section-specific values (scroll distances, project/card/fragment counts, rhythm vocabularies) live in 04-homepage-spec.md, not here — see 03-design-system.md §14 for the full exclusion list."
+  },
+  "color": {
+    "brand": {
+      "slateNavy": {
+        "value": "#0F172A",
+        "role": "Primary dark environment"
+      },
+      "pureWhite": {
+        "value": "#FFFFFF",
+        "role": "Primary light and high-contrast surface"
+      },
+      "surfaceNeutral": {
+        "value": "#F8FAFC",
+        "role": "Editorial light surface"
+      },
+      "cobalt": {
+        "value": "#2563EB",
+        "role": "Core digital interaction accent"
+      },
+      "cyan": {
+        "value": "#06B6D4",
+        "role": "Secondary technical highlight"
+      },
+      "yellow": {
+        "value": "PENDING_MASTER_LOGO_SAMPLE",
+        "role": "Rare signature PASTI signal. Brand-level recommended presence: 1-3% (see 00-brand-guide.md §05). Homepage-execution default posture: off unless a section explicitly justifies use (see 03-design-system.md §9)."
+      }
+    },
+    "text": {
+      "onDark": "#FFFFFF",
+      "onLight": "#0F172A",
+      "mutedOnDark": "rgba(255,255,255,0.64)",
+      "mutedOnLight": "rgba(15,23,42,0.64)"
+    },
+    "border": {
+      "darkSubtle": "rgba(255,255,255,0.12)",
+      "lightSubtle": "rgba(15,23,42,0.10)"
+    }
+  },
+  "typography": {
+    "families": {
+      "display": "var(--font-display)",
+      "body": "var(--font-body)",
+      "mono": "var(--font-mono)"
+    },
+    "note": "Exact production font family is not yet decided. Do not choose a final font file without explicit approval — see 02-design-direction.md §6.",
+    "weight": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    },
+    "size": {
+      "displayXL": "clamp(72px, 9vw, 160px)",
+      "sectionMonumental": "clamp(56px, 7vw, 96px)",
+      "h2": "clamp(36px, 4vw, 56px)",
+      "bodyLarge": "clamp(18px, 1.5vw, 24px)",
+      "body": "clamp(16px, 1.2vw, 18px)",
+      "metadata": "clamp(11px, 0.9vw, 14px)"
+    },
+    "lineHeight": {
+      "displayXL": 0.92,
+      "sectionMonumental": 1.0,
+      "h2": 1.05,
+      "bodyLarge": 1.5,
+      "body": 1.6,
+      "metadata": 1.3
+    },
+    "tracking": {
+      "displayXL": "-0.04em",
+      "sectionMonumental": "-0.03em",
+      "h2": "-0.02em",
+      "body": "0em",
+      "metadata": "0.06em"
+    }
+  },
+  "spacing": {
+    "note": "8px base grid. 4px permitted only for micro-spacing — see 03-design-system.md §2.",
+    "micro": "4px",
+    "1": "8px",
+    "2": "16px",
+    "3": "24px",
+    "4": "32px",
+    "5": "40px",
+    "6": "48px",
+    "8": "64px",
+    "10": "80px",
+    "12": "96px",
+    "16": "128px",
+    "20": "160px"
+  },
+  "sectionRhythm": {
+    "note": "Vertical spacing between sections — reusable system default, not a section-specific choreography value.",
+    "desktopMin": "120px",
+    "desktopMax": "200px",
+    "tabletMin": "96px",
+    "tabletMax": "144px",
+    "mobileMin": "72px",
+    "mobileMax": "112px"
+  },
+  "radius": {
+    "note": "Reconciled against Brand Guide §10 (buttons 6-8px, cards 8-12px) per the consolidation conflict-resolution principle: the token is corrected to conform to the Brand Guide, not the other way around. Previous v1.0.0 values (sm:6px / md:10px / lg:20px) partially diverged from this guidance and are superseded here — see 05-changelog.md. `button` and `card` are the primary semantic radius tokens; `sm` and `md` are compatibility/general-purpose aliases for radius needs outside buttons/cards (e.g. small Signal markers) and do NOT establish a broad arbitrary radius scale. Do not introduce `lg`, `xl`, or similar tiers unless a future Design System decision explicitly requires them — the old `lg: 20px` token is intentionally not restored.",
+    "button": "clamp(6px, 0.5vw, 8px)",
+    "card": "clamp(8px, 0.6vw, 12px)",
+    "sm": "6px",
+    "md": "10px"
+  },
+  "layout": {
+    "container": {
+      "max": "1440px",
+      "content": "1280px"
+    },
+    "gutter": {
+      "desktopMin": "48px",
+      "desktopMax": "80px",
+      "tabletMin": "32px",
+      "tabletMax": "48px",
+      "mobileMin": "20px",
+      "mobileMax": "24px"
+    },
+    "grid": {
+      "columns": 12,
+      "note": "12-column conceptual macro grid — see 03-design-system.md §1. Column spans and key-line usage per section are a Homepage Spec decision, not a token."
+    }
+  },
+  "motion": {
+    "duration": {
+      "microMin": 0.12,
+      "microMax": 0.25,
+      "standardMin": 0.3,
+      "standardMax": 0.6,
+      "cinematicMin": 0.8,
+      "cinematicMax": 1.6
+    },
+    "interactionTiming": {
+      "hoverFocus": { "min": 0.12, "max": 0.15 },
+      "openClose": { "min": 0.2, "max": 0.3 }
+    },
+    "ease": {
+      "cssPrimary": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "gsapPrimary": "power4.out",
+      "gsapStandard": "power3.out",
+      "gsapCinematic": "expo.out"
+    },
+    "language": "Controlled Momentum",
+    "forbidden": ["bounce", "elastic", "spring", "cartoon-overshoot"]
+  },
+  "breakpoint": {
+    "mobile": "0px",
+    "tablet": "640px",
+    "desktop": "1024px",
+    "wide": "1440px"
+  },
+  "rules": {
+    "copyPlaceholder": "Lorem ipsum dolor sit amet",
+    "cyanOnWhite": "Cyan Spark #06B6D4 must not be used as readable text directly on #FFFFFF without sufficient dark containment or verified contrast treatment.",
+    "yellow": "Exact production HEX must be sampled from the official PASTI master logo. Do not guess the official brand value.",
+    "spacingGrid": "Use an 8px base grid. 4px is permitted only for micro-spacing.",
+    "motion": "Every movement must serve Reveal, Focus, Progress, Transition, or Response.",
+    "antiTemplate": "Do not default to generic SaaS grids, AI gradient blobs, giant glass cards, browser mockup stacks, or fade-up-everywhere animation."
+  }
+}

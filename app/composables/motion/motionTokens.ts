@@ -73,3 +73,64 @@ export const spatialDuration = {
   /** Large depth transitions: Hero exit, Selected Work pin handoff. */
   cinematic: 1.6
 } as const
+
+/**
+ * Approved Controlled-Momentum tokens (docs/rework-v2/06-design-tokens.json
+ * `motion`), added for Milestone 1 (Global Foundation) per
+ * 08-implementation-plan.md §3.7. These are the FROZEN, spec-authoritative
+ * duration tiers and easing family — new section work should reference
+ * these directly rather than reinventing timing. The groups above
+ * (motionDuration/motionEase/motionStagger/spatialEase/spatialDuration)
+ * are UNCHANGED and still valid for their existing call sites; this is a
+ * pure addition, not a replacement, per the plan's "no motion redesign,
+ * pure rename/addition" discipline for this composable.
+ */
+export const motionTier = {
+  /** 06-design-tokens.json motion.duration — seconds. */
+  microMin: 0.12,
+  microMax: 0.25,
+  standardMin: 0.3,
+  standardMax: 0.6,
+  cinematicMin: 0.8,
+  cinematicMax: 1.6
+} as const
+
+export const interactionTiming = {
+  /** 06-design-tokens.json motion.interactionTiming — seconds. */
+  hoverFocusMin: 0.12,
+  hoverFocusMax: 0.15,
+  openCloseMin: 0.2,
+  openCloseMax: 0.3
+} as const
+
+/**
+ * Approved easing family (06-design-tokens.json motion.ease). Use
+ * `approvedEase.gsapStandard`/`gsapPrimary`/`gsapCinematic` as GSAP ease
+ * strings, `approvedEase.cssPrimary` for raw CSS transitions (same value
+ * as main.css's `--ease-css-primary`). Forbidden per the same token:
+ * bounce, elastic, spring, cartoon-overshoot — never use gsap's
+ * `back.out`/`elastic.out`/`bounce.out` families.
+ */
+export const approvedEase = {
+  cssPrimary: 'cubic-bezier(0.16, 1, 0.3, 1)',
+  gsapPrimary: 'power4.out',
+  gsapStandard: 'power3.out',
+  gsapCinematic: 'expo.out'
+} as const
+
+/**
+ * Shared reduced-motion matchMedia query strings — the established pattern
+ * across this folder's composables (see useScrollReveal.ts /
+ * useMaskedReveal.ts) is `gsap.matchMedia().add(reducedMotionQuery.reduce,
+ * ...)`, repeated inline per file. Centralized here so new composables
+ * reference the same two strings instead of retyping the media-query text,
+ * without changing how any existing composable already calls
+ * `gsap.matchMedia()` (pure addition, no behavior change to existing
+ * call sites — those keep their own inline strings unless separately
+ * migrated). See also app.vue's `data-reduced-motion` attribute for the
+ * plain-CSS equivalent of the same check.
+ */
+export const reducedMotionQuery = {
+  reduce: '(prefers-reduced-motion: reduce)',
+  noPreference: '(prefers-reduced-motion: no-preference)'
+} as const

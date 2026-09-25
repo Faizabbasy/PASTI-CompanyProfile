@@ -2,7 +2,10 @@
 //
 // Static SVG path/coordinate/gradient data for the Hero "Signal
 // Architecture" system — see
-// docs/superpowers/specs/2026-09-11-hero-signal-architecture-design.md.
+// docs/legacy/superpowers/specs/2026-09-11-hero-signal-architecture-design.md
+// (legacy pre-rework-v2 spec; superseded by docs/rework-v2/04-homepage-spec.md
+// Hero section for current art direction, kept here as the origin reference
+// for this specific data module).
 // Pure data: no GSAP/DOM code. All `d` strings are fixed for the lifetime
 // of the composable instance — nothing here is ever path-morphed; only
 // transform/opacity/gradient-stop-offset/stroke-dashoffset/filter (applied

@@ -5,6 +5,32 @@
 @layer base {
   :root {
     color-scheme: light;
+
+    /* Typography role abstraction (docs/rework-v2/06-design-tokens.json
+       typography.families) — display/body/metadata roles resolve through
+       these variables, not hardcoded family names, so the final brand font
+       (still pending owner decision — see 08-implementation-plan.md §12
+       Font Decision Gate) can be swapped in by editing only this block.
+       Manrope/Inter are INTERIM PLACEHOLDERS ONLY, not the final brand
+       fonts — do not present them as final anywhere in the codebase. */
+    --font-display: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-metadata: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, 'SFMono-Regular', monospace;
+
+    /* Approved Controlled-Momentum easing family (06-design-tokens.json
+       motion.ease) as CSS custom properties, for the rare case a component
+       needs a raw CSS transition/animation easing value instead of a
+       Tailwind `ease-*` utility or a GSAP ease string. Forbidden per the
+       same token: bounce, elastic, spring, cartoon-overshoot. */
+    --ease-css-primary: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* 1px structural border tokens (06-design-tokens.json color.border) —
+       dark/light variants for the frozen border system described in
+       03-design-system.md. Use via `border-[color:var(--border-dark-subtle)]`
+       etc., or the `.border-structural-*` utilities below. */
+    --border-dark-subtle: rgba(255, 255, 255, 0.12);
+    --border-light-subtle: rgba(15, 23, 42, 0.1);
   }
 
   * {
@@ -43,6 +69,12 @@
     @apply mx-auto w-full max-w-container px-gutter;
   }
 
+  /* Narrower reading-measure container (06-design-tokens.json layout.container.content
+     = 1280px) — same gutter discipline, tighter cap. See base/Container.vue's `content` prop. */
+  .container-page-content {
+    @apply mx-auto w-full max-w-container-content px-gutter;
+  }
+
   /* Vertical rhythm wrapper for full-bleed homepage sections. */
   .section {
     @apply py-section;
@@ -52,16 +84,23 @@
     @apply font-display text-eyebrow font-semibold uppercase tracking-widest text-navy-500;
   }
 
+  /* Compact radius per Brand Guide §10 (buttons 6-8px) — NOT `rounded-full`.
+     The previous pill (rounded-full) shape directly violated the frozen
+     Brand Guide's compact-radius mandate and the Anti-Template guardrail
+     against pill-UI-everywhere; corrected here to `rounded-button`
+     (06-design-tokens.json radius.button). Colors kept on the existing
+     `navy-*`/`yellow-*`/`ink`/`paper` aliases, whose VALUES were corrected
+     earlier in tailwind.config.ts to the real frozen brand palette. */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-navy-700 px-7 py-3.5 font-display text-sm font-semibold text-paper transition-all duration-400 ease-editorial hover:bg-yellow-500 hover:text-ink;
+    @apply inline-flex items-center justify-center gap-2 rounded-button bg-navy-700 px-7 py-3.5 font-display text-sm font-semibold text-paper transition-all duration-400 ease-editorial hover:bg-yellow-500 hover:text-ink;
   }
 
   .btn-accent {
-    @apply inline-flex items-center justify-center gap-2 rounded-full bg-yellow-500 px-7 py-3.5 font-display text-sm font-semibold text-ink transition-all duration-400 ease-editorial hover:bg-yellow-400;
+    @apply inline-flex items-center justify-center gap-2 rounded-button bg-yellow-500 px-7 py-3.5 font-display text-sm font-semibold text-ink transition-all duration-400 ease-editorial hover:bg-yellow-400;
   }
 
   .btn-outline {
-    @apply inline-flex items-center justify-center gap-2 rounded-full border border-navy-200 px-7 py-3.5 font-display text-sm font-semibold text-ink transition-all duration-400 ease-editorial hover:border-yellow-500 hover:text-yellow-600;
+    @apply inline-flex items-center justify-center gap-2 rounded-button border border-navy-200 px-7 py-3.5 font-display text-sm font-semibold text-ink transition-all duration-400 ease-editorial hover:border-yellow-500 hover:text-yellow-600;
   }
 
   /* Header nav "dim siblings on hover": hovering one primary nav link
@@ -222,5 +261,47 @@
   }
   [data-blueprint-id='plate-c'] .signal-architecture__facet {
     filter: drop-shadow(0 6px 14px rgba(5, 27, 40, 0.12));
+  }
+
+  /* 1px structural border system (06-design-tokens.json color.border).
+     Section-local components use these rather than an arbitrary opacity
+     value, so every "thin structural line" across the homepage (Signal
+     primitives, card edges, dividers) reads as one consistent system. */
+  .border-structural-dark {
+    border-color: var(--border-dark-subtle);
+  }
+
+  .border-structural-light {
+    border-color: var(--border-light-subtle);
+  }
+
+  /* Dark/light surface-rhythm pair (03-design-system.md's dark/light
+     alternation principle; 06-design-tokens.json color.brand). Sections
+     apply one of these two classes at their root rather than reaching for
+     arbitrary bg-* utilities, keeping the homepage's locked rhythm table
+     (04-homepage-spec.md line 21-33) expressed through a single shared
+     surface vocabulary instead of ad hoc per-section colors. */
+  .surface-dark {
+    background-color: theme('colors.slateNavy');
+    color: theme('colors.pureWhite');
+  }
+
+  .surface-light {
+    background-color: theme('colors.surfaceNeutral');
+    color: theme('colors.slateNavy');
+  }
+
+  /* Reduced-motion foundation: a single markup-level signal
+     (`data-reduced-motion="true"` on <html>, set once in app.vue) that any
+     component-level CSS can key off, alongside the existing
+     `prefers-reduced-motion` media query and each GSAP composable's own
+     `gsap.matchMedia()` branch (see useScrollReveal.ts / useMaskedReveal.ts
+     for the established pattern — this milestone does not change that
+     pattern, only makes the same signal available as a plain CSS selector
+     for cases that don't go through GSAP at all, e.g. `.hero-shine` above).
+     This does NOT implement any section-specific reduced-motion behavior —
+     that remains section-local work for later milestones. */
+  [data-reduced-motion='true'] .motion-decorative {
+    display: none;
   }
 }

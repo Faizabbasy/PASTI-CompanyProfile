@@ -20,10 +20,12 @@ const { setState } = useCustomCursor()
 
 const cornerRefs = ref<HTMLElement[]>([])
 
-// Brand Afterglow / Closing Field: four thin lines converge from the
-// footer's corners toward the center (roughly the logo), then stop and
-// remain as a subtle static frame — a resolved end-state, triggered once,
-// not a repeating ambient loop (LARGE_SCALE_MOTION_PLAN.md section 12).
+// Signal — Final Resolved State (04-homepage-spec.md §9): "The Signal
+// finishes active. It resolves structural." Four thin corner lines
+// converge once toward the footer's 12-column composition, then remain
+// completely static — neutral/slate color (not Cobalt, not an "active"
+// interaction color), one-shot, no loop, no pulse after completion. This
+// reads as Frame → Resolve → Lock the Composition, not "point to center."
 useGsapContext(() => {
   const footer = footerRef.value
   const corners = cornerRefs.value
@@ -53,15 +55,17 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <footer ref="footerRef" class="relative overflow-hidden border-t border-navy-900 bg-navy-950 py-16 md:py-20">
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute -left-1/4 -top-1/2 h-[32rem] w-[32rem] rounded-full bg-yellow-500/[0.06] blur-3xl"
-    />
+  <footer ref="footerRef" class="surface-dark relative overflow-hidden border-t border-navy-900 py-16 md:py-20">
+    <!-- No ambient glow (04-homepage-spec.md §9, locked, no exception): the
+         previous low-opacity Yellow glow blob is removed entirely, not
+         recolored or reduced further. Footer quality comes from grid,
+         spacing, typography, contrast, separator, microinteraction, and
+         Signal resolution instead. -->
 
-    <!-- Structural line collapse: 4 corner lines converging toward the
-         center logo, secondary blueprint language matching WhatWeDo/
-         Services/corner-brackets. -->
+    <!-- Corner-line convergence: 4 lines converging toward the footer's
+         12-column composition, then locking static — Frame → Resolve →
+         Lock the Composition, matching WhatWeDo/Services corner-brackets'
+         structural-blueprint language. -->
     <span
       v-for="corner in ['tl', 'tr', 'bl', 'br']"
       :key="corner"
@@ -100,29 +104,32 @@ useGsapContext(() => {
             v-for="link in navLinks"
             :key="link.to"
             :to="link.to"
-            class="group inline-flex w-fit items-center gap-2 font-display text-body-lg font-medium text-navy-200 transition-all duration-400 ease-editorial hover:translate-x-1 hover:text-yellow-400"
+            class="group inline-flex w-fit items-center gap-2 font-display text-body-lg font-medium text-navy-200 transition-all duration-150 ease-editorial hover:translate-x-1 hover:text-cobalt focus-visible:translate-x-1 focus-visible:text-cobalt"
             @mouseenter="setState('link')"
             @mouseleave="setState('default')"
           >
             {{ link.label }}
             <span
               aria-hidden="true"
-              class="inline-block -translate-x-1 opacity-0 transition-all duration-400 ease-editorial group-hover:translate-x-0 group-hover:opacity-100"
+              class="inline-block -translate-x-1 opacity-0 transition-all duration-150 ease-editorial group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100"
             >→</span>
           </NuxtLink>
         </nav>
 
+        <!-- Platform link dots: Yellow → Cobalt (04-homepage-spec.md §9,
+             locked, no exception) — platform ownership alone doesn't
+             justify a Yellow signature moment here. -->
         <nav class="footer-reveal flex flex-col gap-4 border-navy-800 md:col-span-3 md:col-start-10 md:border-l md:pl-8">
           <p class="eyebrow text-navy-500">Platforms</p>
           <NuxtLink
             v-for="link in platformLinks"
             :key="link.to"
             :to="link.to"
-            class="group inline-flex w-fit items-center gap-1.5 font-display text-body-lg font-medium text-paper transition-all duration-400 ease-editorial hover:translate-x-1 hover:text-yellow-400"
+            class="group inline-flex w-fit items-center gap-1.5 font-display text-body-lg font-medium text-paper transition-all duration-150 ease-editorial hover:translate-x-1 hover:text-cobalt focus-visible:translate-x-1 focus-visible:text-cobalt"
             @mouseenter="setState('link')"
             @mouseleave="setState('default')"
           >
-            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-yellow-500 transition-transform duration-400 ease-editorial group-hover:scale-125" aria-hidden="true" />
+            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-cobalt transition-transform duration-150 ease-editorial group-hover:scale-125 group-focus-visible:scale-125" aria-hidden="true" />
             {{ link.label }}
           </NuxtLink>
         </nav>

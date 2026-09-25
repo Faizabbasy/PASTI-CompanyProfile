@@ -10,6 +10,7 @@ const marqueeClients = [...clients, ...clients]
 
 const headingRef = ref<HTMLElement | null>(null)
 const trackRef = ref<HTMLElement | null>(null)
+const markerRef = ref<HTMLElement | null>(null)
 const hoveredClient = ref<string | null>(null)
 const paused = ref(false)
 // Reduced-motion still needs the plain Tailwind hover dim/scale (GSAP's
@@ -20,6 +21,34 @@ const motionSafe = import.meta.client ? window.matchMedia('(prefers-reduced-moti
 const { setState } = useCustomCursor()
 
 useMaskedReveal(headingRef, { by: 'word' })
+
+// Signal — Quiet Proof Marker (04-homepage-spec.md §4 "The Signal"): Selected
+// Work's editorial spine visually resolves into this restrained Cobalt
+// marker near the Trusted heading. One subtle activation on entry, then
+// fully static — no progress percentage, no numeral, no repeated pulse, no
+// logo tracking, no persistent animated rail. This is the section's only
+// Signal element; it does not track hovered/focal logos.
+useGsapContext(() => {
+  const marker = markerRef.value
+  if (!marker) return
+  const mm = gsap.matchMedia()
+
+  mm.add('(prefers-reduced-motion: no-preference)', () => {
+    gsap.set(marker, { scale: 0, opacity: 0 })
+    const anim = gsap.to(marker, {
+      scale: 1,
+      opacity: 1,
+      duration: motionDuration.editorial,
+      ease: approvedEase.gsapStandard,
+      scrollTrigger: { trigger: marker, start: 'top 85%', once: true }
+    })
+    return () => anim.kill()
+  })
+
+  mm.add('(prefers-reduced-motion: reduce)', () => {
+    gsap.set(marker, { scale: 1, opacity: 1 })
+  })
+})
 
 useGsapContext(() => {
   const track = trackRef.value
@@ -138,11 +167,20 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <BaseSection as="section" class="overflow-hidden">
+  <BaseSection as="section" class="surface-light overflow-hidden">
     <BaseContainer>
-      <h2 ref="headingRef" class="text-center text-display-sm">
-        {{ heading }}
-      </h2>
+      <div class="flex flex-col items-center">
+        <!-- Signal — Quiet Proof Marker: a single restrained Cobalt dot,
+             settling near the heading, one-shot activation then static. -->
+        <span
+          ref="markerRef"
+          aria-hidden="true"
+          class="mb-4 h-1.5 w-1.5 rounded-full bg-cobalt"
+        />
+        <h2 ref="headingRef" class="text-center text-display-sm">
+          {{ heading }}
+        </h2>
+      </div>
     </BaseContainer>
 
     <div v-if="clients.length" class="relative mt-16 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">

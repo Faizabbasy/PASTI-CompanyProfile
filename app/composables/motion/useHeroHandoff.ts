@@ -1,8 +1,12 @@
 // app/composables/motion/useHeroHandoff.ts
 //
 // Module-level singleton bridging Hero's disassembly exit to WhatWeDo's
-// entrance reveal (see docs/superpowers/specs/2026-09-11-hero-disassembly-handoff-design.md,
-// "Word ↔ facet mapping" and "Reconstruction on WhatWeDo"). Hero computes
+// entrance reveal (see
+// docs/legacy/superpowers/specs/2026-09-11-hero-disassembly-handoff-design.md,
+// "Word ↔ facet mapping" and "Reconstruction on WhatWeDo" — legacy
+// pre-rework-v2 spec; superseded by docs/rework-v2/04-homepage-spec.md
+// Hero/What We Build sections for current art direction, kept here as the
+// origin reference for this specific handoff mechanism). Hero computes
 // where each headline word visually lands during its scroll-driven
 // disassembly and publishes it here; WhatWeDo's EditorialIntro reads it
 // once at mount to start its three accent words from those positions

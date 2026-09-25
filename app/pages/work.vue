@@ -151,7 +151,7 @@ watch(showMore, async (isOpen) => {
       <div class="mt-16 flex justify-center md:mt-20">
         <button
           type="button"
-          class="inline-flex items-center justify-center gap-2 rounded-full border border-navy-200 px-7 py-3.5 font-display text-sm font-semibold text-ink transition-colors duration-300 ease-editorial hover:border-yellow-500"
+          class="inline-flex items-center justify-center gap-2 rounded-button border border-navy-200 px-7 py-3.5 font-display text-sm font-semibold text-ink transition-colors duration-300 ease-editorial hover:border-yellow-500"
           @click="showMore = !showMore"
         >
           {{ showMore ? viewLessLabel : viewMoreLabel }}

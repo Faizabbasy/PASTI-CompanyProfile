@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import type { InsightArticle } from '~/composables/useInsights'
+import type { InsightArticle, InsightRole } from '~/composables/useInsights'
 
 if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-const props = defineProps<{ article: InsightArticle; index?: number }>()
+const props = defineProps<{ article: InsightArticle; role: InsightRole }>()
 
 const cardRef = ref<HTMLElement | null>(null)
 const mediaRef = ref<HTMLElement | null>(null)
@@ -15,17 +15,13 @@ const mediaRef = ref<HTMLElement | null>(null)
 const { setState } = useCustomCursor()
 
 // Editorial directional flow: a magazine-page-opening wipe, not a generic
-// inset fade — reveal direction alternates per card (index modulo 3) for
-// rhythmic variation within the section (LARGE_SCALE_MOTION_PLAN.md
-// section 9). Each direction's clip-path starts fully hidden from that
-// edge and opens to the full rect.
+// inset fade — kept from the prior implementation as a valid editorial
+// entrance technique (not a product-style reveal). Reduced to a single
+// consistent direction (was previously index-cycled through 4 directions)
+// since the section itself no longer decides per-index — role decides
+// scale/dominance, not the editorial reveal grammar.
 const FULL_RECT = 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)'
-const DIRECTIONS = [
-  { from: 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)', to: FULL_RECT }, // left->right
-  { from: 'polygon(100% 0%, 100% 0%, 100% 100%, 100% 100%)', to: FULL_RECT }, // right->left
-  { from: 'polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%)', to: FULL_RECT }, // top->bottom
-  { from: 'polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%)', to: FULL_RECT } // bottom->top (mobile)
-]
+const FROM_RECT = 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)'
 
 useGsapContext(() => {
   const media = mediaRef.value
@@ -38,31 +34,32 @@ useGsapContext(() => {
   })
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
-    const isMobile = window.matchMedia('(max-width: 767px)').matches
-    // Mobile simplifies to one consistent bottom->top direction for clarity.
-    const dirIndex = isMobile ? 3 : (props.index ?? 0) % 3
-    const { from, to } = DIRECTIONS[dirIndex]!
-
-    gsap.set(media, { opacity: 1, scale: 1.08, clipPath: from })
+    gsap.set(media, { opacity: 1, scale: 1.08, clipPath: FROM_RECT })
 
     const entrance = gsap.to(media, {
       scale: 1,
-      clipPath: to,
+      clipPath: FULL_RECT,
       duration: 1.1,
-      ease: motionEase.standard,
+      ease: approvedEase.gsapStandard,
       scrollTrigger: { trigger: media, start: 'top 88%', toggleActions: 'restart none restart reverse' }
     })
 
     return () => entrance.kill()
   })
-
-  onBeforeUnmount(() => mm.revert())
 })
 </script>
 
 <template>
+  <!-- Digital Editorial Feature (Featured) / close-in-weight Supporting
+       (04-homepage-spec.md §7) — editorial composition: image, headline,
+       controlled crop. Not a literal magazine cover, not a browser window,
+       not a product mockup/SaaS card. -->
   <div ref="cardRef" class="group" @mouseenter="setState('view', 'Read')" @mouseleave="setState('default')">
-    <div ref="mediaRef" class="aspect-[4/3] w-full overflow-hidden rounded-2xl">
+    <div
+      ref="mediaRef"
+      class="w-full overflow-hidden rounded-card"
+      :class="role === 'featured' ? 'aspect-[16/10]' : 'aspect-[4/3]'"
+    >
       <img
         :src="article.image"
         :alt="article.title"
@@ -71,13 +68,16 @@ useGsapContext(() => {
       >
     </div>
 
-    <p class="mt-6 inline-flex items-center gap-2 text-body-lg font-display font-medium text-paper">
-      <span class="inline-block transition-all duration-400 ease-editorial group-hover:translate-x-1 group-hover:text-yellow-400">
+    <p
+      class="mt-6 inline-flex items-start gap-2 font-display font-medium text-ink"
+      :class="role === 'featured' ? 'text-display-sm' : 'text-body-lg'"
+    >
+      <span class="inline-block transition-all duration-400 ease-editorial group-hover:translate-x-1 group-hover:text-cobalt">
         {{ article.title }}
       </span>
       <span
         aria-hidden="true"
-        class="transition-transform duration-400 ease-editorial group-hover:translate-x-2"
+        class="mt-1 shrink-0 transition-transform duration-400 ease-editorial group-hover:translate-x-2"
       >→</span>
     </p>
   </div>

@@ -12,6 +12,21 @@ if (import.meta.client && 'scrollRestoration' in window.history) {
 
 useLenis()
 
+// Reduced-motion foundation (08-implementation-plan.md §3.8 / §14 Milestone
+// 1): a single `data-reduced-motion` attribute on <html>, set once here,
+// that any component's plain CSS can key off (see main.css's
+// `[data-reduced-motion='true']` rule) in addition to each GSAP composable's
+// own `gsap.matchMedia()` branch and useLenis's existing Lenis-disable
+// check. This does not replace those — it's the plain-CSS equivalent for
+// styling that isn't driven through GSAP at all. Read once on load rather
+// than kept live: a user changing the OS-level setting mid-session is
+// expected to reload, matching how useLenis() already behaves (Lenis is
+// also decided once, at start, not re-evaluated live).
+if (import.meta.client) {
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  document.documentElement.dataset.reducedMotion = String(prefersReducedMotion)
+}
+
 // Every ScrollTrigger created during initial mount (Hero, WhatWeDo, Service
 // rows, etc.) computes its start/end pixel positions against whatever the
 // page's layout is at that instant. That layout keeps growing for a beat
