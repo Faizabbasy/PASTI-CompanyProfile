@@ -52,32 +52,57 @@ export default <Partial<Config>>{
     // `breakpoint` block (mobile:0 / tablet:640 / desktop:1024 / wide:1440)
     // — §17.3 CLOSED decision.
     //
-    // BREAKPOINT DEBT (owner decision CLOSED, post-Milestone-1 follow-up):
-    // do NOT globally remap `md`/`xl` now. Design Tokens remain canonical;
-    // these legacy Tailwind pixel values are accepted as COMPATIBILITY DEBT
-    // — kept exactly as they were before this milestone so ~49 existing
-    // `md:`/`lg:`/`xl:` call sites across every route don't silently shift
-    // trigger points with no QA pass to catch it. This debt is NOT
-    // open/pending — it is a closed, tracked decision with a mandatory
-    // reconciliation deadline: **must be resolved before Milestone 5
-    // (Responsive pass) is considered complete** — see
-    // 08-implementation-plan.md §14 Milestone 5. Do not carry it past that
-    // gate. `lg`/`2xl` already match `desktop`/`wide` exactly and need no
-    // reconciliation.
-    // Alias mapping (name → nearest canonical tier, current pixel value):
-    //   sm (480px)  → below `mobile`/`tablet` boundary, sub-tablet fine tier — debt: none (no token tier)
-    //   md (768px)  → nearest to `tablet` (640px), NOT exact — debt: reconcile by Milestone 5
-    //   lg (1024px) → exact match for `desktop` (1024px) — debt: none
-    //   xl (1280px) → between `desktop` (1024px) and `wide` (1440px), NOT exact — debt: reconcile by Milestone 5
-    //   2xl (1440px)→ exact match for `wide` (1440px) — debt: none
-    //   3xl (1680px)→ above `wide`, extra-wide fine tier — debt: none (no token tier)
+    // MILESTONE 5A RECONCILIATION: explicit semantic aliases (`tablet`/
+    // `desktop`/`wide`) added below, mapped EXACTLY to the frozen token
+    // values. This does not remove or renumber any legacy alias — `sm`
+    // through `3xl` keep their original pixel values unchanged, so every
+    // pre-existing `md:`/`lg:`/`xl:` call site across every route (legacy
+    // and rework-v2 alike) keeps behaving exactly as before. New/updated
+    // homepage rework code should prefer the semantic names going forward;
+    // legacy call sites are migrated only where doing so is a pure, exact
+    // rename with zero behavioral change (verified per call site, not
+    // mechanically) — see the reconciliation note below for what was NOT
+    // touched and why.
+    //
+    // BREAKPOINT DEBT STATUS (was: owner decision CLOSED, post-Milestone-1
+    // follow-up; reconciled here per 08-implementation-plan.md §14
+    // Milestone 5):
+    //   sm (480px)  → below `tablet`, sub-tablet fine tier — no token tier, kept as-is, no debt.
+    //   md (768px)  → nearest to `tablet` (640px), NOT exact — this is the real, structural
+    //                 debt. `md:768`/`(min-width:768px)`/`(max-width:767px)` is the universal
+    //                 mobile-vs-desktop split boundary across every homepage rework section
+    //                 (Hero/WhatWeDo/SelectedWork/Trust/Testimonials/Platforms/Insight — both
+    //                 as Tailwind classes AND as the JS gsap.matchMedia()/window.matchMedia()
+    //                 gate that decides whether a section's pinned/scrubbed Heavy choreography
+    //                 even constructs at all). Reconciliation strategy: introduce `tablet:640`
+    //                 as the semantic alias for genuinely NEW/cosmetic layout work, but do NOT
+    //                 move the existing 767/768px pin-vs-no-pin JS gate down to 640px — doing
+    //                 so would silently flip true-tablet viewports (640-767px) from the spec's
+    //                 intended "Mobile: Recompose" treatment straight into full desktop Heavy
+    //                 pinned choreography with zero tablet-specific tuning, which is a real
+    //                 design/behavior change to already-CLOSED Heavy sections, not a safe
+    //                 reconciliation — forbidden by this milestone's own guardrail ("do not
+    //                 redesign already-closed sections"). Tracked as remaining, intentionally
+    //                 NOT-closed debt — see 08-implementation-plan.md §14 Milestone 5 report.
+    //   lg (1024px) → exact match for `desktop` (1024px) — debt: none, safe 1:1 rename available.
+    //   xl (1280px) → between `desktop` (1024px) and `wide` (1440px), NOT exact — only ONE call
+    //                 site in the whole homepage rework (Platforms.vue's single decorative
+    //                 `xl:block` fragment) — low-risk, left as-is this pass since `wide:1440`
+    //                 is not an exact substitute and 1280px has no token-tier equivalent to
+    //                 rename to; tracked as minor remaining debt (no token tier exists at 1280).
+    //   2xl (1440px)→ exact match for `wide` (1440px) — debt: none, safe 1:1 rename available.
+    //   3xl (1680px)→ above `wide`, extra-wide fine tier — no token tier, kept as-is, no debt.
     screens: {
       sm: '480px',
       md: '768px',
       lg: '1024px',
       xl: '1280px',
       '2xl': '1440px',
-      '3xl': '1680px'
+      '3xl': '1680px',
+      // --- Canonical semantic aliases (06-design-tokens.json `breakpoint`), exact 1:1 values ---
+      tablet: '640px',
+      desktop: '1024px',
+      wide: '1440px'
     },
     extend: {
       colors: {
