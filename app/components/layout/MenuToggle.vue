@@ -1,5 +1,5 @@
 <script setup lang="ts">
-defineProps<{ open: boolean }>()
+withDefaults(defineProps<{ open: boolean; dark?: boolean }>(), { dark: false })
 defineEmits<{ toggle: [] }>()
 </script>
 
@@ -13,16 +13,16 @@ defineEmits<{ toggle: [] }>()
   >
     <span class="relative flex h-4 w-6 flex-col justify-between">
       <span
-        class="h-0.5 w-full origin-center bg-ink transition-all duration-400 ease-editorial"
-        :class="open ? 'translate-y-[7px] rotate-45' : ''"
+        class="h-0.5 w-full origin-center transition-all duration-400 ease-editorial"
+        :class="[dark && !open ? 'bg-pureWhite' : 'bg-ink', open ? 'translate-y-[7px] rotate-45' : '']"
       />
       <span
-        class="h-0.5 w-full bg-ink transition-all duration-400 ease-editorial"
-        :class="open ? 'opacity-0' : 'opacity-100'"
+        class="h-0.5 w-full transition-all duration-400 ease-editorial"
+        :class="[dark && !open ? 'bg-pureWhite' : 'bg-ink', open ? 'opacity-0' : 'opacity-100']"
       />
       <span
-        class="h-0.5 w-full origin-center bg-ink transition-all duration-400 ease-editorial"
-        :class="open ? '-translate-y-[7px] -rotate-45' : ''"
+        class="h-0.5 w-full origin-center transition-all duration-400 ease-editorial"
+        :class="[dark && !open ? 'bg-pureWhite' : 'bg-ink', open ? '-translate-y-[7px] -rotate-45' : '']"
       />
     </span>
   </button>

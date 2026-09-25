@@ -30,6 +30,17 @@ const prefersReducedMotion = import.meta.client && window.matchMedia('(prefers-r
 // scroll.
 const activated = ref(false)
 
+// Nav (04-homepage-spec.md / 02-design-direction.md §12): "no background
+// box in initial Hero state" applies specifically to the homepage, whose
+// Hero is now a dark Slate Navy section (Milestone 4A) — every other
+// page's hero is still the light `bg-paper` treatment (out of scope for
+// this milestone; see pasti-working-process memory's per-task scope
+// rule). `heroIsDark` is true only pre-activation on `/`, where the header
+// sits directly over Hero's dark environment and must render as a
+// transparent, white-on-dark bar rather than the light bordered bar used
+// everywhere else.
+const heroIsDark = computed(() => route.path === '/' && !activated.value)
+
 useMagnetic(ctaLinkRef, { strength: 0.3 })
 
 useGsapContext(() => {
@@ -147,33 +158,44 @@ useGsapContext(() => {
 <template>
   <header
     ref="headerRef"
-    class="fixed inset-x-0 top-0 z-50 border-b border-navy-900/10 bg-paper shadow-[0_8px_30px_-12px_rgba(11,22,32,0.18)] transition-[height] duration-500 ease-editorial"
-    :class="activated ? 'h-14 md:h-16' : 'h-16 md:h-20'"
+    class="fixed inset-x-0 top-0 z-50 transition-[height,background-color,border-color,box-shadow] duration-500 ease-editorial"
+    :class="[
+      activated ? 'h-14 md:h-16' : 'h-16 md:h-20',
+      heroIsDark
+        ? 'border-b border-transparent bg-transparent'
+        : 'border-b border-navy-900/10 bg-paper shadow-[0_8px_30px_-12px_rgba(11,22,32,0.18)]'
+    ]"
   >
     <div class="container-page h-full">
       <div class="flex h-full items-center px-5 md:px-7">
         <div ref="logoRef" class="transition-transform duration-300 ease-editorial hover:scale-[1.03]">
-          <LayoutLogo />
+          <LayoutLogo :inverted="heroIsDark" />
         </div>
 
         <nav ref="navRef" class="header-nav ml-auto hidden items-center gap-10 lg:flex">
-          <LayoutNavLink v-for="item in navItems" :key="item.to" :item="item" />
+          <LayoutNavLink v-for="item in navItems" :key="item.to" :item="item" :dark="heroIsDark" />
         </nav>
 
         <div ref="ctaRef" class="ml-10 hidden lg:block">
           <div ref="ctaLinkRef" class="inline-block">
-            <a :href="whatsappLink" target="_blank" rel="noopener noreferrer" class="btn-primary">
+            <a
+              :href="whatsappLink"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-primary"
+              :class="{ '!bg-cobalt !text-pureWhite hover:!bg-cyan hover:!text-slateNavy': heroIsDark }"
+            >
               {{ primaryCta.label }}
             </a>
           </div>
         </div>
 
         <div ref="toggleRef" class="ml-auto lg:hidden">
-          <LayoutMenuToggle :open="mobileOpen" @toggle="toggleMobile" />
+          <LayoutMenuToggle :open="mobileOpen" :dark="heroIsDark" @toggle="toggleMobile" />
         </div>
       </div>
 
-      <div ref="progressRef" class="h-px w-full origin-left bg-yellow-500" aria-hidden="true" />
+      <div ref="progressRef" class="h-px w-full origin-left bg-yellow-500" :class="{ '!bg-cobalt': heroIsDark }" aria-hidden="true" />
     </div>
   </header>
 </template>
