@@ -37,12 +37,27 @@ const mobileSectionComponentRef = ref<{ $el: HTMLElement } | null>(null)
 useGsapContext(() => {
   const mm = gsap.matchMedia()
 
-  // --- Reduced motion: static premium compositions, no pin, no parallax, simplified state indicator ---
+  // --- Reduced motion (Milestone 5B final closure): the pinned desktop
+  // stage's OPEN/e-CORPORATE worlds are both `absolute inset-0` (they
+  // exist to be horizontally transferred, not stacked in flow) — the
+  // pre-5B code here set e-CORPORATE to `autoAlpha:0` believing it
+  // "remains reachable via normal document flow below it," but that was
+  // wrong: both worlds occupy the exact same absolutely-positioned box
+  // inside this stage, so hiding e-CORPORATE made it genuinely
+  // unreachable at desktop widths under reduced motion, not just visually
+  // deferred. Fixed at the CSS layer instead (main.css's
+  // `[data-reduced-motion] [data-motion-stage]` rules): the entire pinned
+  // stage (`data-motion-stage="pinned"`) is force-hidden and the existing
+  // Tablet+Mobile subtree (`data-motion-stage="simple"`, OPEN -> e-
+  // CORPORATE in normal vertical document flow) is force-shown at EVERY
+  // viewport width when reduced motion is active — both worlds are
+  // reachable there with zero pin/parallax dependency, so nothing needs
+  // to be set on this stage's own elements at all. ---
   mm.add(reducedMotionQuery.reduce, () => {
-    gsap.set([openWorldRef.value, corporateWorldRef.value].filter(Boolean), { opacity: 1, xPercent: 0 })
-    if (corporateWorldRef.value) gsap.set(corporateWorldRef.value, { autoAlpha: 0, position: 'absolute' })
-    // Static composition shows OPEN at rest; e-CORPORATE remains reachable
-    // via normal document flow below it rather than a horizontal transfer.
+    // Intentionally empty: the CSS-level stage swap above is sufficient.
+    // Kept as an explicit branch (not omitted) so this remains the
+    // documented, discoverable place a future reduced-motion adjustment to
+    // this section would go, matching every other section's pattern.
   })
 
   // --- Desktop only: pinned horizontal Spatial World Transfer (Milestone
@@ -186,10 +201,11 @@ useGsapContext(() => {
        light editorial reset (spec §6/§7). No wrapper id needed here (unlike
        Selected Work) — nothing currently jumps to Platforms directly. -->
 
-  <!-- Desktop/tablet stage (md and up). -->
+  <!-- Desktop-only stage (>= 1024px). -->
   <BaseSection
     ref="sectionComponentRef"
     as="section"
+    data-motion-stage="pinned"
     class="relative hidden overflow-hidden bg-navy-950 py-0 desktop:block"
   >
     <div ref="stageRef" class="relative h-[100svh] overflow-hidden">
@@ -295,11 +311,13 @@ useGsapContext(() => {
     </div>
   </BaseSection>
 
-  <!-- Mobile (below md): OPEN -> e-CORPORATE via natural vertical scroll,
-       no pin, no swipe carousel, Signal simplified/static (spec locked). -->
+  <!-- Tablet + Mobile (below desktop): OPEN -> e-CORPORATE via natural
+       vertical scroll, no pin, no swipe carousel, Signal simplified/static
+       (spec locked). -->
   <BaseSection
     ref="mobileSectionComponentRef"
     as="section"
+    data-motion-stage="simple"
     class="relative overflow-hidden bg-navy-950 desktop:hidden"
   >
     <BaseContainer>

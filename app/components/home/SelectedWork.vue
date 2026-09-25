@@ -63,23 +63,24 @@ function buildProjectRanges(totalDistance: number) {
 useGsapContext(() => {
   const mm = gsap.matchMedia()
 
-  // --- Reduced motion: static, simplified, first project visible, hierarchy preserved ---
+  // --- Reduced motion (Milestone 5B final closure): the pinned desktop
+  // stage only ever shows ONE project's content at rest (it has no
+  // scroll/pin mechanism to reach the other 9 once the pin/scrub itself is
+  // correctly disabled under reduced motion) — populating it with Project
+  // 01 here, as the pre-5B code did, left 9 of 10 projects genuinely
+  // unreachable at desktop widths under `prefers-reduced-motion: reduce`.
+  // Fixed at the CSS layer instead (main.css's `[data-reduced-motion]
+  // [data-motion-stage]` rules): the pinned stage (`data-motion-stage=
+  // "pinned"`) is force-hidden and the existing Tablet+Mobile simplified
+  // subtree (`data-motion-stage="simple"`) is force-shown at EVERY
+  // viewport width when reduced motion is active — that subtree already
+  // renders all 10 projects in normal, reachable document flow with no
+  // motion dependency, so no per-project population is needed here at all.
   mm.add(reducedMotionQuery.reduce, () => {
-    const first = projects[0]
-    if (!first) return
-    if (typeZoneRef.value) {
-      const title = typeZoneRef.value.querySelector<HTMLElement>('[data-project-title]')
-      const desc = typeZoneRef.value.querySelector<HTMLElement>('[data-project-desc]')
-      const category = typeZoneRef.value.querySelector<HTMLElement>('[data-project-category]')
-      if (title) title.textContent = first.title
-      if (desc) desc.textContent = first.description
-      if (category) category.textContent = first.category
-    }
-    if (mediaZoneRef.value) {
-      const img = mediaZoneRef.value.querySelector<HTMLImageElement>('img')
-      if (img) img.src = first.image
-    }
-    if (spineNumeralRef.value) spineNumeralRef.value.textContent = `01 / ${String(projects.length).padStart(2, '0')}`
+    // Intentionally empty: the CSS-level stage swap above is sufficient.
+    // Kept as an explicit branch (not omitted) so this remains the
+    // documented, discoverable place a future reduced-motion adjustment to
+    // this section would go, matching every other section's pattern.
   })
 
   // --- Desktop only: full Pinned Project Exchange (Milestone 5A final
@@ -325,6 +326,7 @@ useGsapContext(() => {
   <BaseSection
     ref="sectionComponentRef"
     as="section"
+    data-motion-stage="pinned"
     class="relative hidden overflow-hidden bg-navy-950 py-0 desktop:block"
   >
     <div ref="stageRef" class="relative h-[100svh] overflow-hidden">
@@ -404,6 +406,7 @@ useGsapContext(() => {
   <BaseSection
     ref="mobileSectionComponentRef"
     as="section"
+    data-motion-stage="simple"
     class="relative overflow-hidden bg-navy-950 desktop:hidden"
   >
     <BaseContainer>

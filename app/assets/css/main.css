@@ -304,4 +304,69 @@
   [data-reduced-motion='true'] .motion-decorative {
     display: none;
   }
+
+  /* MILESTONE 5B: forces any section's Desktop-only pinned/Heavy-
+     choreography stage to stay hidden, and its existing Tablet+Mobile
+     reduced-complexity subtree to stay shown, at EVERY viewport width when
+     reduced motion is active — overriding the width-only `desktop:block`/
+     `desktop:hidden` gate those two subtrees otherwise use (Milestone 5A).
+     Real bug this fixes: at desktop widths under `prefers-reduced-motion:
+     reduce`, the pinned stage's own JS reduced-motion branch resolves its
+     content to a static final state, but that stage still only ever shows
+     ONE item (Selected Work's Project 01, Platforms' OPEN world) or clips
+     the rest via `overflow-hidden` (Insight) — the mechanism that would
+     normally let a user reach the other items is the very pin/scrub this
+     milestone forbids relying on. Rather than build a third, alternate
+     "desktop reduced-motion" composition per section (forbidden — "do not
+     invent... section-specific alternate architecture unless genuinely
+     required"), reduced motion reuses each section's OWN existing
+     Tablet+Mobile subtree at every width — the simplest faithful reduced-
+     complexity composition already built and already showing every item in
+     normal, scrollable document flow. `data-motion-stage="pinned"`/
+     `"simple"` are applied only on SelectedWork.vue/Platforms.vue — see
+     each component's template for where (WhatWeDo.vue needed no such
+     swap: its reduced-motion JS branch already sets the desktop stage's
+     own cards to their final in-place positions directly, and that stage
+     has no reachability problem — unlike Selected Work/Platforms, it
+     never relied on a pin to reveal additional content). Same
+     specificity-order reasoning as `.motion-decorative` above: this
+     hand-written rule is injected at `@tailwind utilities`, after
+     Tailwind's own generated `desktop:` utilities, so it wins at equal
+     selector specificity without needing `!important`. */
+  [data-reduced-motion='true'] [data-motion-stage='pinned'] {
+    display: none;
+  }
+
+  [data-reduced-motion='true'] [data-motion-stage='simple'] {
+    display: block;
+  }
+
+  /* MILESTONE 5B — Insight-specific case: unlike Selected Work/Platforms,
+     Insight has no separate mobile/desktop subtree to swap between — the
+     SAME `canvasRef`/`trackRef` elements become the Sticky Editorial
+     Canvas's horizontal pin surface at desktop widths via `desktop:block
+     desktop:overflow-hidden` / `desktop:flex-row desktop:w-max` (width-
+     only CSS, Milestone 5A). With the pin+scrub correctly disabled under
+     reduced motion (Insights.vue's own JS gate), that horizontal layout
+     had no mechanism left to move `trackRef`'s x-position, so Supporting
+     articles 2 and 3 sat clipped by `overflow-hidden` and were genuinely
+     unreachable at desktop widths under `prefers-reduced-motion: reduce`.
+     Fixed by forcing the same vertical `flex-col` layout Tablet+Mobile
+     already use, at every width, when reduced motion is active — all 4
+     articles read in normal, reachable document flow. */
+  [data-reduced-motion='true'] [data-motion-canvas] {
+    display: flex !important;
+    overflow: visible !important;
+  }
+
+  [data-reduced-motion='true'] [data-motion-track] {
+    display: flex !important;
+    flex-direction: column !important;
+    width: auto !important;
+  }
+
+  [data-reduced-motion='true'] [data-motion-card] {
+    width: 100% !important;
+    flex-shrink: 1 !important;
+  }
 }

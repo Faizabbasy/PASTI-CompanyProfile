@@ -152,14 +152,15 @@ useGsapContext(() => {
              progression surface once pinned (script gates the pin+scrub
              behind the same desktop-only matchMedia branch, see
              breakpointQuery.desktopUp/belowDesktop above). -->
-        <div ref="canvasRef" class="flex flex-col gap-8 desktop:block desktop:overflow-hidden">
-          <div ref="trackRef" class="flex flex-col gap-8 desktop:w-max desktop:flex-row desktop:gap-8">
-            <HomeInsightsCard :article="featured" role="featured" class="insight-card desktop:w-[46rem] desktop:shrink-0" />
+        <div ref="canvasRef" data-motion-canvas class="flex flex-col gap-8 desktop:block desktop:overflow-hidden">
+          <div ref="trackRef" data-motion-track class="flex flex-col gap-8 desktop:w-max desktop:flex-row desktop:gap-8">
+            <HomeInsightsCard :article="featured" role="featured" data-motion-card class="insight-card desktop:w-[46rem] desktop:shrink-0" />
             <HomeInsightsCard
               v-for="article in supporting"
               :key="article.index"
               :article="article"
               role="supporting"
+              data-motion-card
               class="insight-card desktop:w-[26rem] desktop:shrink-0"
             />
           </div>
