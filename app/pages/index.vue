@@ -12,6 +12,14 @@
 // handoff the frozen spec requires (zig-zag -> shared baseline -> ordered
 // field -> restrained upward move -> Platforms spatial takeover), with no
 // legacy section between them.
+//
+// MILESTONE 6 FOLLOW-UP CORRECTION: `<HomeFinalCta />` removed too — same
+// reasoning as WhyPasti above. The locked 9-section sequence ends at
+// PAQ-FAQ, then Footer (mounted globally in app.vue, outside <NuxtPage>,
+// so it was never this file's concern); FinalCta has no slot in that
+// sequence at all. `FinalCta.vue` itself is NOT deleted — it's still
+// actively used by creative.vue/insights.vue/technology.vue/work.vue —
+// only this homepage usage is removed.
 </script>
 
 <template>
@@ -23,5 +31,4 @@
   <HomePlatforms />
   <HomeInsights />
   <HomeFaq />
-  <HomeFinalCta />
 </template>

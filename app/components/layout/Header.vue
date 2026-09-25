@@ -9,7 +9,7 @@ const { isOpen: mobileOpen, toggle: toggleMobile, close: closeMobile } = useMobi
 const route = useRoute()
 watch(() => route.path, closeMobile)
 
-const { introReady } = useIntroReady()
+const { pageReady } = usePageReady()
 const { coverTrigger, revealTrigger } = useRouteCurtain()
 
 const headerRef = ref<HTMLElement | null>(null)
@@ -67,7 +67,7 @@ useGsapContext(() => {
   }
 
   watch(
-    introReady,
+    pageReady,
     (ready) => {
       if (ready) playEntrance()
     },

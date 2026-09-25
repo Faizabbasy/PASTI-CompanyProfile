@@ -13,9 +13,9 @@ if (import.meta.client) {
 // Particles"). This replaces the previous light-themed, non-pinned
 // EditorialIntro + prose block entirely — that composition had no curtain,
 // no decode, no card system, and ran on the light Yellow-accented shared
-// editorial treatment (EditorialIntro.vue — still on disk, no longer used
-// on the homepage since WhyPasti.vue, its only remaining consumer, was
-// removed in Milestone 6 legacy decommission).
+// editorial treatment. EditorialIntro.vue itself has since been removed
+// (Milestone 6 legacy decommission — its only remaining consumer,
+// WhyPasti.vue, was removed first, leaving it orphaned).
 // Discarded per the milestone's guardrail: frozen docs win over existing
 // component structure.
 //

@@ -25,7 +25,7 @@ const ctaPrimary = { label: 'Explore our work', to: '#selected-work' }
 const ctaSecondary = { label: 'Tell us about it' }
 
 const { link: whatsappLink } = useWhatsapp()
-const { introReady } = useIntroReady()
+const { pageReady } = usePageReady()
 const { playTo } = useSectionCurtain()
 const { publishSignalX } = useHeroSignalHandoff()
 
@@ -87,7 +87,7 @@ const microStateLabel = computed(() => microStates[microStateIndex.value])
 
 useGsapContext(() => {
   watch(
-    introReady,
+    pageReady,
     (ready, _oldValue, onCleanup) => {
       if (!ready) return
 

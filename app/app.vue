@@ -12,6 +12,18 @@ if (import.meta.client && 'scrollRestoration' in window.history) {
 
 useLenis()
 
+// Page-ready signal for Hero/Header's entrance animations (see
+// usePageReady.ts) — replaces the former Intro-overlay-driven
+// `markIntroReady()` (Milestone 6 legacy decommission removed that whole
+// cluster). Flipped once, synchronously, right after client mount: no
+// decorative delay, matching what the removed Intro overlay actually did
+// in every case that didn't render a decorative sequence (reduced motion,
+// or "no intro" selected) — Hero/Header never depended on anything
+// intro-specific, only on "it's now safe to animate."
+if (import.meta.client) {
+  markPageReady()
+}
+
 // Reduced-motion foundation (08-implementation-plan.md §3.8 / §14 Milestone
 // 1): a single `data-reduced-motion` attribute on <html>, set once here,
 // that any component's plain CSS can key off (see main.css's
@@ -106,7 +118,6 @@ async function onPageAfterEnter() {
     <NuxtRouteAnnouncer />
     <LayoutAmbientLight />
     <LayoutGrainOverlay />
-    <LayoutIntroOverlay />
     <LayoutCustomCursor />
     <LayoutSectionCurtain />
     <LayoutRouteCurtain />
