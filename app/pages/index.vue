@@ -5,8 +5,8 @@
 <template>
   <HomeHero />
   <HomeWhatWeDo />
-  <HomeTrust />
   <HomeSelectedWork />
+  <HomeTrust />
   <HomeTestimonials />
   <HomeWhyPasti />
   <HomePlatforms />
