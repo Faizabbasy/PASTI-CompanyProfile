@@ -27,6 +27,7 @@ const ctaSecondary = { label: 'Tell us about it' }
 const { link: whatsappLink } = useWhatsapp()
 const { introReady } = useIntroReady()
 const { playTo } = useSectionCurtain()
+const { publishSignalX } = useHeroSignalHandoff()
 
 function goToSelectedWork() {
   playTo(ctaPrimary.to)
@@ -38,6 +39,9 @@ function goToSelectedWork() {
 // node). `$el` is Vue's fallthrough accessor to that single root element.
 const sectionComponentRef = ref<{ $el: HTMLElement } | null>(null)
 const sectionEl = computed<HTMLElement | null>(() => sectionComponentRef.value?.$el ?? null)
+// Same BaseContainer-is-a-component caveat as sectionComponentRef above.
+const heroContentComponentRef = ref<{ $el: HTMLElement } | null>(null)
+const heroContentEl = computed<HTMLElement | null>(() => heroContentComponentRef.value?.$el ?? null)
 const headingRef = ref<HTMLElement | null>(null)
 const subtextRef = ref<HTMLElement | null>(null)
 const ctaRowRef = ref<HTMLElement | null>(null)
@@ -207,21 +211,27 @@ useGsapContext(() => {
   )
 
   // --- Scroll-driven Signal exit + Primary crop/reframe ---
-  // Baseline additional scroll depth ~1.3-1.6 viewport (spec). Hero is not
-  // one of the pinned Heavy-Signature stages (Selected Work/Platforms own
-  // that mechanic) — but without pinning, a scrub tied to `end: '+=140%'`
-  // has no real scroll runway to play across: the very next section
-  // (What We Build) starts immediately below Hero's own 100svh box, so the
-  // whole "exit" would resolve within whatever sliver of ordinary scrolling
-  // happens to overlap it, not the ~1.3-1.6 viewport of dwell the spec
-  // calls for (verified via Playwright: without a pin, scrolling 60% of
-  // the intended distance already landed deep inside What We Build's
-  // content). A short pin on Hero's own content for exactly this trigger's
-  // duration is what actually reserves that scroll distance — content
-  // pins, the route/crop-shift/parallax plays out across genuine scroll
-  // input, then releases into What We Build at the trigger's end, same as
-  // this codebase's other scroll-linked (if non-pinned) reveals but scoped
-  // to Hero's own boundary only.
+  // Baseline additional scroll depth ~1.3-1.6 viewport lengths (spec).
+  //
+  // A pin was tried first and rejected after visual QA: pinning Hero's
+  // content for that whole distance made the composition sit completely
+  // frozen for most of the scroll (the crop-shift/parallax amplitudes
+  // that read as "restrained" over a normal scroll distance are far too
+  // subtle to register across ~1260px of held-still scrubbing), so the
+  // real experience was "enter Hero → obvious static hold → mechanical
+  // release into What We Build" — exactly the pinned-stage design drift
+  // the Hero spec explicitly does NOT call for (Hero is not Heavy-pinned
+  // like Selected Work/Platforms). Confirmed by a dense Playwright frame
+  // sweep across the full scroll range.
+  //
+  // Fixed by dropping the pin entirely: `heroExitSpacer` below adds real
+  // extra height (not a pin-spacer) so Hero's own natural, un-pinned
+  // scroll distance is genuinely ~1.3-1.6 viewport lengths before What We
+  // Build begins. The Living Proof column now scrolls WITH the page
+  // (ordinary document flow) while this ScrollTrigger scrubs its
+  // internal resolve (Signal shrink, Primary/Secondary B crop-shift) on
+  // top of that natural movement — the composition visibly travels and
+  // resolves together, rather than holding still and then cutting.
   const mmScroll = gsap.matchMedia()
   mmScroll.add(reducedMotionQuery.noPreference, () => {
     if (!sectionEl.value) return
@@ -229,29 +239,55 @@ useGsapContext(() => {
     const trigger = ScrollTrigger.create({
       trigger: sectionEl.value,
       start: 'top top',
-      end: '+=140%',
+      end: 'bottom top',
       scrub: 0.6,
-      pin: true,
-      pinSpacing: true,
       onUpdate: (self) => {
         // Primary: allowed crop shift / reframe, restrained. Secondary B:
         // its own, different parallax rate (never idle-looped).
-        if (primaryRef.value) gsap.set(primaryRef.value, { yPercent: self.progress * -6 })
-        if (secondaryBRef.value) gsap.set(secondaryBRef.value, { yPercent: self.progress * -14 })
-        if (signalRouteRef.value) gsap.set(signalRouteRef.value, { scaleY: 1 - self.progress * 0.4, transformOrigin: 'top' })
+        if (primaryRef.value) gsap.set(primaryRef.value, { yPercent: self.progress * -10 })
+        if (secondaryBRef.value) gsap.set(secondaryBRef.value, { yPercent: self.progress * -22 })
+        if (signalRouteRef.value) gsap.set(signalRouteRef.value, { scaleY: 1 - self.progress * 0.6, transformOrigin: 'top' })
+        // The Living Proof column and headline column fade out together
+        // as Hero approaches its own natural end, so the boundary into
+        // What We Build reads as a resolve rather than an abrupt content
+        // swap — restrained (never below 0 until the very last stretch).
+        const fadeStart = 0.75
+        const fadeProgress = Math.max(0, (self.progress - fadeStart) / (1 - fadeStart))
+        if (heroContentEl.value) gsap.set(heroContentEl.value, { opacity: 1 - fadeProgress })
       }
     })
 
     return () => trigger.kill()
   })
+
+  // Publish the Signal route's horizontal position for What We Build's
+  // handoff (see useHeroSignalHandoff — "Designed Continuity, Not
+  // Arbitrary Proximity": Signal's exit and WWB's entry share one 12-column
+  // key line). Measured once client-side after layout settles, as a
+  // fraction of viewport width so it stays meaningful regardless of scroll
+  // offset or either section's own height.
+  if (signalRouteRef.value) {
+    const rect = signalRouteRef.value.getBoundingClientRect()
+    publishSignalX(rect.left / window.innerWidth)
+  }
 })
 </script>
 
 <template>
+  <!-- Section height: ~1.4 viewport lengths tall (100svh floor + a ~40svh
+       exit runway), NOT pinned. Content is vertically centered within this
+       taller box via flex, so it scrolls WITH the page across that extra
+       height instead of holding still — the ScrollTrigger below scrubs the
+       Signal/crop-shift/fade against genuine scroll progress through this
+       same span, giving the ~1.3-1.6 viewport-length baseline real scroll
+       runway without a pinned hold. A pin was tried first and rejected
+       after Playwright QA showed it reading as an obvious frozen stage
+       (see the ScrollTrigger comment below) — Hero is not one of the
+       Heavy-pinned sections (Selected Work/Platforms own that mechanic). -->
   <BaseSection
     ref="sectionComponentRef"
     as="section"
-    class="relative flex min-h-[100svh] items-center overflow-hidden bg-slateNavy pb-20 pt-32 md:pt-36"
+    class="relative flex min-h-[140svh] items-center overflow-hidden bg-slateNavy pb-20 pt-32 md:pt-36"
   >
     <!-- Environment: Slate Navy with tonal depth via a very restrained
          radial lift behind the headline column — not a gradient blob, not
@@ -262,7 +298,7 @@ useGsapContext(() => {
       class="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_70%_60%_at_20%_35%,rgba(37,99,235,0.08),transparent_65%)]"
     />
 
-    <BaseContainer class="relative z-10">
+    <BaseContainer ref="heroContentComponentRef" class="relative z-10">
       <!-- 12-column macro grid, ~55/45 asymmetric split: headline column
            spans 7, Living Proof System spans 5 and is allowed to bleed
            slightly left of its column start (see proof-system's own
