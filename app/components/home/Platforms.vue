@@ -12,9 +12,9 @@ if (import.meta.client) {
 // PlatformRow.vue vertical two-row layout (giant rounded-image cards,
 // per-row parallax, no pin, no Signal, no world/spatial-transfer mechanic)
 // entirely — none of that structure is the frozen design, discarded per the
-// milestone guardrail. PlatformRow.vue is left on disk, now orphaned —
-// flagged as a cleanup candidate, not deleted unilaterally (same discipline
-// as Milestone 4B's ServiceCards retirement).
+// milestone guardrail. PlatformRow.vue was flagged as a cleanup candidate at
+// the time and has since been removed (Milestone 6 legacy decommission),
+// same discipline as Milestone 4B's ServiceCards retirement.
 
 const label = 'Platforms'
 const { platforms } = usePlatforms()

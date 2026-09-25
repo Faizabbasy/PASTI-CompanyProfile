@@ -13,7 +13,9 @@ if (import.meta.client) {
 // Particles"). This replaces the previous light-themed, non-pinned
 // EditorialIntro + prose block entirely — that composition had no curtain,
 // no decode, no card system, and ran on the light Yellow-accented shared
-// editorial treatment (still correctly used by WhyPasti, untouched here).
+// editorial treatment (EditorialIntro.vue — still on disk, no longer used
+// on the homepage since WhyPasti.vue, its only remaining consumer, was
+// removed in Milestone 6 legacy decommission).
 // Discarded per the milestone's guardrail: frozen docs win over existing
 // component structure.
 //
@@ -25,8 +27,10 @@ if (import.meta.client) {
 // now. 4 of the 5 real services become the card copy (Primary/Medium A/
 // Medium B/Accent); "Cybersecurity & Compliance" is dropped per user
 // decision as the least representative of PASTI's core capabilities
-// relative to the other four. `index.vue` no longer renders
-// `HomeServiceCards` as its own section.
+// relative to the other four. `ServiceCards.vue`/`ServiceRow.vue`/
+// `ServicesReactiveField.vue` have since been removed (Milestone 6 legacy
+// decommission) — `useServices()` below is the only surviving piece of
+// that cluster, still actively consumed for this section's card content.
 
 const { services } = useServices()
 // [0]=Technology Development -> Primary, [1]=Enterprise Platforms -> Medium A,
