@@ -134,3 +134,51 @@ export const reducedMotionQuery = {
   reduce: '(prefers-reduced-motion: reduce)',
   noPreference: '(prefers-reduced-motion: no-preference)'
 } as const
+
+/**
+ * MILESTONE 5A FINAL CLOSURE — single semantic source for the JS-side
+ * width queries every Heavy/Medium homepage section's `gsap.matchMedia()`/
+ * `window.matchMedia()` split uses, so `768px`/`767px` stop being a
+ * repeated magic number scattered per file. Values are the exact pixel
+ * boundaries from `06-design-tokens.json`'s `breakpoint` block (also
+ * mirrored as `tailwind.config.ts`'s `tablet`/`desktop`/`wide` aliases —
+ * one canonical breakpoint system, not two):
+ *
+ *   < 640        → Mobile   → Recomposed Experience
+ *   640–1023     → Tablet   → Reduced Complexity
+ *   >= 1024      → Desktop  → Full Experience
+ *   >= 1440      → Wide     → Desktop composition + wide-only refinements
+ *
+ * Owner-locked responsive model (Milestone 5A final closure): full
+ * pinned/sticky/Heavy desktop choreography activates at `desktop` (1024px),
+ * NOT at the legacy `768px` Tailwind `md` boundary — 768px sits inside the
+ * frozen Tablet tier, so keeping it as the "full experience" threshold
+ * would silently give Tablet viewports the Desktop-Heavy treatment. Below
+ * `desktop`, sections use their Tablet-labeled reduced-complexity branch;
+ * below `tablet`, their Mobile-labeled recomposed branch — see each
+ * section's own matchMedia usage for what "reduced complexity" means for
+ * that specific section (05-homepage rework Milestone 5A commit history).
+ */
+export const breakpointQuery = {
+  /** Reduced Complexity floor — matches Tablet and up (>= 640px). */
+  tabletUp: '(min-width: 640px)',
+  /** Recomposed Experience ceiling — matches below Tablet (< 640px). */
+  belowTablet: '(max-width: 639px)',
+  /** Full Experience floor — matches Desktop and up (>= 1024px). Use this,
+   * not `768px`, to gate any section's full pinned/sticky/Heavy
+   * choreography. */
+  desktopUp: '(min-width: 1024px)',
+  /** Reduced Complexity ceiling — matches below Desktop (< 1024px), i.e.
+   * Tablet and Mobile combined. Use this to gate a section's simplified/
+   * non-pinned branch when it intentionally serves both Tablet and Mobile
+   * with the same composition. */
+  belowDesktop: '(max-width: 1023px)',
+  /** Tablet tier only, both bounds (640px–1023px inclusive). Use this when
+   * a section needs to distinguish Tablet from Mobile within its
+   * "reduced complexity" branch (e.g. spacing/sizing tuning), rather than
+   * treating the whole sub-desktop range identically. */
+  tabletOnly: '(min-width: 640px) and (max-width: 1023px)',
+  /** Wide tier floor — matches Wide and up (>= 1440px), for desktop-
+   * composition-plus-refinement tuning only, never a new layout branch. */
+  wideUp: '(min-width: 1440px)'
+} as const

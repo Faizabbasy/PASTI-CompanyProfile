@@ -64,10 +64,18 @@ useGsapContext(() => {
     // World Transfer will be. Heading prominence reduces (scales down,
     // settles as a quieter anchor) as the canvas holds; it does not stay at
     // full scale through the whole progression.
-    const isMobile = window.matchMedia('(max-width: 767px)').matches
-    if (isMobile) {
-      // Mobile: no pin, no horizontal progression — natural vertical feed
-      // (handled entirely by normal document flow + the entrance above).
+    //
+    // Milestone 5A final closure: gated at Desktop (1024px), not the
+    // legacy 768px `md` boundary — see breakpointQuery.desktopUp/
+    // belowDesktop. Tablet gets the same lighter, non-sticky vertical feed
+    // as Mobile ("do not use full sticky progression if it reads as
+    // desktop-heavy behavior" — a short pin+scrub IS that, so Tablet skips
+    // it entirely, same as Mobile).
+    const isBelowDesktop = window.matchMedia(breakpointQuery.belowDesktop).matches
+    if (isBelowDesktop) {
+      // Tablet + Mobile: no pin, no horizontal progression — natural
+      // vertical feed (handled entirely by normal document flow + the
+      // entrance above).
       return
     }
 
@@ -135,28 +143,30 @@ useGsapContext(() => {
            Featured) — not 4 equal cards, not a giant-card-plus-tiny-cards
            layout. Composition settles in normal vertical flow before the
            Sticky Editorial Canvas (below) begins any horizontal motion. -->
-      <div ref="compositionRef" class="mt-16 md:mt-20">
-        <!-- Mobile (locked): natural vertical editorial feed — Featured →
-             Supporting → Supporting → Supporting, plain block flow, no
-             horizontal scroll container at all. Desktop: the flex/overflow
+      <div ref="compositionRef" class="mt-16 desktop:mt-20">
+        <!-- Tablet + Mobile (locked, Milestone 5A final closure): natural
+             vertical editorial feed — Featured → Supporting → Supporting →
+             Supporting, plain block flow, no horizontal scroll container at
+             all, below `desktop` (1024px). Desktop only: the flex/overflow
              track becomes the Sticky Editorial Canvas's horizontal
              progression surface once pinned (script gates the pin+scrub
-             behind a desktop-only matchMedia branch). -->
-        <div ref="canvasRef" class="flex flex-col gap-8 md:block md:overflow-hidden">
-          <div ref="trackRef" class="flex flex-col gap-8 md:w-max md:flex-row md:gap-8">
-            <HomeInsightsCard :article="featured" role="featured" class="insight-card md:w-[46rem] md:shrink-0" />
+             behind the same desktop-only matchMedia branch, see
+             breakpointQuery.desktopUp/belowDesktop above). -->
+        <div ref="canvasRef" class="flex flex-col gap-8 desktop:block desktop:overflow-hidden">
+          <div ref="trackRef" class="flex flex-col gap-8 desktop:w-max desktop:flex-row desktop:gap-8">
+            <HomeInsightsCard :article="featured" role="featured" class="insight-card desktop:w-[46rem] desktop:shrink-0" />
             <HomeInsightsCard
               v-for="article in supporting"
               :key="article.index"
               :article="article"
               role="supporting"
-              class="insight-card md:w-[26rem] md:shrink-0"
+              class="insight-card desktop:w-[26rem] desktop:shrink-0"
             />
           </div>
         </div>
       </div>
 
-      <div class="mt-16 flex justify-center md:mt-20">
+      <div class="mt-16 flex justify-center desktop:mt-20">
         <NuxtLink
           to="/insights"
           class="inline-flex items-center justify-center gap-2 rounded-button border border-navy-200 px-7 py-3.5 font-display text-sm font-semibold text-ink transition-colors duration-400 ease-editorial hover:border-cobalt hover:text-cobalt"

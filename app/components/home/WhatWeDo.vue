@@ -136,12 +136,16 @@ useGsapContext(() => {
     if (signalRouteRef.value) gsap.set(signalRouteRef.value, { scaleY: 1 })
   })
 
-  // --- Desktop/tablet, full choreography (md and up, no-preference motion) ---
-  // Mobile gets its own separate simplified DOM subtree (see template) —
+  // --- Desktop only, full choreography (Milestone 5A final closure:
+  // Desktop = 1024px, NOT the legacy 768px `md` boundary — 768px sits
+  // inside the frozen Tablet tier, so gating "full experience" there would
+  // silently give Tablet viewports the Desktop-Heavy pin/decode/break
+  // sequence with zero tablet-specific tuning). Tablet AND Mobile both get
+  // the separate reduced-complexity DOM subtree below (see template) —
   // gating the pinned mechanism itself behind this width query, not just
-  // hiding the result with CSS, so no ScrollTrigger/pin is ever created on
-  // narrow viewports at all (spec: "no long pin" on mobile).
-  mm.add({ isDesktop: `${reducedMotionQuery.noPreference} and (min-width: 768px)` }, (context) => {
+  // hiding the result with CSS, so no ScrollTrigger/pin is ever created
+  // below `desktop` at all (spec: "no long pin" on Tablet or Mobile). ---
+  mm.add({ isDesktop: `${reducedMotionQuery.noPreference} and ${breakpointQuery.desktopUp}` }, (context) => {
     const { isDesktop } = context.conditions as { isDesktop: boolean }
     if (!isDesktop) return
 
@@ -283,15 +287,18 @@ useGsapContext(() => {
     if (signalDotRef.value) tl.to(signalDotRef.value, { y: 40, duration: 0.4 }, 'exit')
   })
 
-  // --- Mobile: short Signal/mask, resolved typography directly, no
-  // decode, no typographic break, cards shown in final hierarchy, no long
-  // pin (04-homepage-spec.md §2 "Mobile"). A plain scroll-triggered reveal
-  // on the separate mobile DOM subtree — not a scaled-down copy of the
-  // desktop pinned mechanism. -->
-  mm.add({ isMobile: `${reducedMotionQuery.noPreference} and (max-width: 767px)` }, (context) => {
-    const { isMobile } = context.conditions as { isMobile: boolean }
+  // --- Tablet (Reduced Complexity) + Mobile (Recomposed): short
+  // Signal/mask, resolved typography directly, no decode, no typographic
+  // break, cards shown in final hierarchy, no long pin (04-homepage-spec.md
+  // §2 "Mobile"; Milestone 5A extends this same simplified composition to
+  // Tablet — the simplest faithful reduced-complexity adaptation, not a
+  // third invented design language). A plain scroll-triggered reveal on
+  // the shared Tablet+Mobile DOM subtree — not a scaled-down copy of the
+  // desktop pinned mechanism, for either tier. -->
+  mm.add({ isBelowDesktop: `${reducedMotionQuery.noPreference} and ${breakpointQuery.belowDesktop}` }, (context) => {
+    const { isBelowDesktop } = context.conditions as { isBelowDesktop: boolean }
     const section = mobileSectionComponentRef.value?.$el ?? null
-    if (!isMobile || !section) return
+    if (!isBelowDesktop || !section) return
 
     const heading = section.querySelector<HTMLElement>('[data-mobile-heading]')
     const cardEls = Array.from(section.querySelectorAll<HTMLElement>('[data-mobile-card]'))
@@ -332,18 +339,19 @@ function scrambleText(target: HTMLElement, final: string, progress: number) {
 </script>
 
 <template>
-  <!-- Desktop/tablet stage (md and up). Hidden entirely below md — mobile
-       renders its own separate, simpler subtree further down, not a CSS-
-       hidden copy of this one (04-homepage-spec.md's "no long pin" /
-       "do not reproduce desktop choreography" applies to the MECHANISM,
-       not just the visual result, so no pinned ScrollTrigger is created
-       for mobile viewports at all — see the isMobile/isDesktop matchMedia
-       split above). -->
+  <!-- Desktop-only stage (>= 1024px, Milestone 5A final closure — see
+       breakpointQuery.desktopUp above). Hidden entirely below `desktop` —
+       Tablet and Mobile both render the shared reduced-complexity subtree
+       further down, not a CSS-hidden copy of this one (04-homepage-spec.md's
+       "no long pin" / "do not reproduce desktop choreography" applies to
+       the MECHANISM, not just the visual result, so no pinned ScrollTrigger
+       is created below `desktop` at all — see the isBelowDesktop/isDesktop
+       matchMedia split above). -->
   <BaseSection
     v-if="primaryService"
     ref="sectionComponentRef"
     as="section"
-    class="relative hidden overflow-hidden bg-slateNavy py-0 md:block"
+    class="relative hidden overflow-hidden bg-slateNavy py-0 desktop:block"
   >
     <!-- py-0 above cancels BaseSection's default `.section` vertical
          rhythm padding (py-section, ~144-200px each side at desktop
@@ -484,7 +492,7 @@ function scrambleText(target: HTMLElement, final: string, progress: number) {
     v-if="primaryService"
     ref="mobileSectionComponentRef"
     as="section"
-    class="relative overflow-hidden bg-slateNavy md:hidden"
+    class="relative overflow-hidden bg-slateNavy desktop:hidden"
   >
     <BaseContainer>
       <div class="flex items-center gap-2">

@@ -82,8 +82,11 @@ useGsapContext(() => {
     if (spineNumeralRef.value) spineNumeralRef.value.textContent = `01 / ${String(projects.length).padStart(2, '0')}`
   })
 
-  // --- Desktop/tablet: full Pinned Project Exchange (md and up, no-preference motion) ---
-  mm.add({ isDesktop: `${reducedMotionQuery.noPreference} and (min-width: 768px)` }, (context) => {
+  // --- Desktop only: full Pinned Project Exchange (Milestone 5A final
+  // closure: Desktop = 1024px, not the legacy 768px `md` boundary — see
+  // breakpointQuery.desktopUp. Tablet gets the reduced-complexity, non-pin
+  // branch below, same as Mobile.) ---
+  mm.add({ isDesktop: `${reducedMotionQuery.noPreference} and ${breakpointQuery.desktopUp}` }, (context) => {
     const { isDesktop } = context.conditions as { isDesktop: boolean }
     if (!isDesktop) return
 
@@ -193,7 +196,7 @@ useGsapContext(() => {
 
       // --- Side alternation: odd (1-indexed) = media left/type right, even = type left/media right ---
       const mediaLeft = index % 2 === 0 // index is 0-based; project 01 (index 0) = media left
-      mediaZone.parentElement?.classList.toggle('lg:flex-row-reverse', !mediaLeft)
+      mediaZone.parentElement?.classList.toggle('desktop:flex-row-reverse', !mediaLeft)
 
       // --- Editorial spine: active point + numeral, 10 discrete segments ---
       spineSegments.forEach((seg, i) => seg.classList.toggle('bg-cobalt', i <= index))
@@ -272,11 +275,18 @@ useGsapContext(() => {
     return () => trigger.kill()
   })
 
-  // --- Mobile: media above / typography below, natural vertical sequence, no pin ---
-  mm.add({ isMobile: `${reducedMotionQuery.noPreference} and (max-width: 767px)` }, (context) => {
-    const { isMobile } = context.conditions as { isMobile: boolean }
+  // --- Tablet (Reduced Complexity) + Mobile (Recomposed): media above /
+  // typography below, natural vertical sequence, no pin. Milestone 5A
+  // final closure extends this same structural reading order to Tablet —
+  // per spec, "Tablet may use the same structural reading order if that is
+  // the cleanest faithful reduced-complexity solution," which it is here:
+  // it already preserves project hierarchy, media/type relationship, and
+  // editorial identity without any horizontal pin or awkward side-by-side
+  // squeeze at Tablet widths. ---
+  mm.add({ isBelowDesktop: `${reducedMotionQuery.noPreference} and ${breakpointQuery.belowDesktop}` }, (context) => {
+    const { isBelowDesktop } = context.conditions as { isBelowDesktop: boolean }
     const section = mobileSectionComponentRef.value?.$el ?? null
-    if (!isMobile || !section) return
+    if (!isBelowDesktop || !section) return
 
     const cards = Array.from(section.querySelectorAll<HTMLElement>('[data-mobile-project]'))
     gsap.set(cards, { opacity: 0, y: 20 })
@@ -299,30 +309,30 @@ useGsapContext(() => {
   <!-- Wrapping div carries the #selected-work anchor id (Hero's "Explore
        our work" CTA jumps here via useSectionCurtain) instead of either
        inner BaseSection: only one of the two is ever visible at a given
-       viewport width (the other is `display:none` via `hidden md:block` /
-       `md:hidden`), and a `display:none` element's `offsetTop` is always 0
-       — putting the id on the desktop section alone left the anchor
-       resolving to y=0 at mobile widths (caught via Playwright: the CTA
-       jump landed on Hero itself on a narrow viewport, not Selected Work).
-       Two elements sharing one id would also be invalid HTML if the id sat
-       on both sections directly. -->
+       viewport width (the other is `display:none` via `hidden desktop:block` /
+       `desktop:hidden`), and a `display:none` element's `offsetTop` is
+       always 0 — putting the id on the desktop section alone left the
+       anchor resolving to y=0 below desktop width (caught via Playwright:
+       the CTA jump landed on Hero itself on a narrow viewport, not
+       Selected Work). Two elements sharing one id would also be invalid
+       HTML if the id sat on both sections directly. -->
   <div id="selected-work">
-  <!-- Desktop/tablet stage (md and up). Mobile renders a fully separate,
-       simpler subtree below (see the isMobile/isDesktop matchMedia split
-       above and Milestone 4B's WWB precedent for why: no pinned
-       ScrollTrigger is even constructed below md, not just hidden via
-       CSS). -->
+  <!-- Desktop-only stage (>= 1024px, Milestone 5A final closure). Tablet
+       and Mobile both render a fully separate, simpler subtree below (see
+       the isBelowDesktop/isDesktop matchMedia split above and Milestone
+       4B's WWB precedent for why: no pinned ScrollTrigger is even
+       constructed below `desktop`, not just hidden via CSS). -->
   <BaseSection
     ref="sectionComponentRef"
     as="section"
-    class="relative hidden overflow-hidden bg-navy-950 py-0 md:block"
+    class="relative hidden overflow-hidden bg-navy-950 py-0 desktop:block"
   >
     <div ref="stageRef" class="relative h-[100svh] overflow-hidden">
       <!-- Editorial spine: persistent, non-alternating edge position. Thin
            structural rail + active point + project numeral + 10 discrete
            segments — never a percentage fill bar, browser scrollbar, or
            giant stepper. -->
-      <div class="pointer-events-none absolute inset-y-0 right-8 z-30 flex flex-col items-center justify-center gap-2 lg:right-12">
+      <div class="pointer-events-none absolute inset-y-0 right-8 z-30 flex flex-col items-center justify-center gap-2 desktop:right-12">
         <div ref="spineRef" class="flex flex-col gap-2">
           <span
             v-for="(project, i) in projects"
@@ -341,11 +351,11 @@ useGsapContext(() => {
 
       <BaseContainer class="relative z-10 h-full">
         <!-- Alternating split-screen: media / typography zones. Side
-             alternation is toggled via JS (lg:flex-row-reverse) per the
+             alternation is toggled via JS (desktop:flex-row-reverse) per the
              active project's parity — typography stays left-aligned
              within its own zone regardless of which side it's on. -->
-        <div class="flex h-full flex-col items-center gap-10 lg:flex-row lg:gap-16">
-          <div ref="mediaZoneRef" class="relative aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.1)] lg:aspect-auto lg:h-[68%] lg:w-1/2">
+        <div class="flex h-full flex-col items-center gap-10 desktop:flex-row desktop:gap-16">
+          <div ref="mediaZoneRef" class="relative aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.1)] desktop:aspect-auto desktop:h-[68%] desktop:w-1/2">
             <img
               data-media-a
               alt=""
@@ -360,7 +370,7 @@ useGsapContext(() => {
             >
           </div>
 
-          <div ref="typeZoneRef" class="w-full max-w-xl text-left lg:w-1/2">
+          <div ref="typeZoneRef" class="w-full max-w-xl text-left desktop:w-1/2">
             <span data-project-category class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-cobalt" />
             <div class="mt-3 overflow-hidden">
               <h3 data-project-title class="font-display text-token-h2 font-bold text-pureWhite" />
@@ -394,7 +404,7 @@ useGsapContext(() => {
   <BaseSection
     ref="mobileSectionComponentRef"
     as="section"
-    class="relative overflow-hidden bg-navy-950 md:hidden"
+    class="relative overflow-hidden bg-navy-950 desktop:hidden"
   >
     <BaseContainer>
       <div class="flex items-center gap-2">

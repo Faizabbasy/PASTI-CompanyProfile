@@ -80,14 +80,25 @@ useGsapContext(() => {
     // inside the per-frame loop. Per frame, only the track's own live
     // xPercent (already being driven by the tween above) combines with
     // that cached offset to derive where each logo currently sits.
+    // Milestone 5A final closure: this `isMobile` flag is a presentation
+    // optimization only (gentler focal-depth range + lower per-frame
+    // throttle for weaker devices), NOT a Heavy-vs-reduced pin gate — the
+    // marquee itself runs identically at every viewport width, per the
+    // spec's "Trusted is Quiet, the marquee may remain at Tablet only if
+    // it remains readable/performant/visually quiet" (it does). Per the
+    // frozen tier model, the same gentler tuning that was previously only
+    // "below 768px" is extended to cover the whole sub-desktop range
+    // (Tablet + Mobile, i.e. below 1024px) rather than just true-Mobile —
+    // Tablet is "Reduced Complexity" too, and this optimization already
+    // reads as reduced complexity, not a Heavy desktop-only device.
     const logos = Array.from(track.querySelectorAll<HTMLElement>('.trust-logo'))
-    const isMobile = window.matchMedia('(max-width: 767px)').matches
-    const scaleRange = isMobile ? [1, 1.15] : [1, 1.3] as const
+    const isBelowDesktop = window.matchMedia(breakpointQuery.belowDesktop).matches
+    const scaleRange = isBelowDesktop ? [1, 1.15] : [1, 1.3] as const
     // Raised the far-from-focus floor from 0.4/0.55 to 0.75/0.85 — logos
     // outside the focal zone still recede, but read as clearly visible
     // brand marks rather than washed out, per feedback that the marquee
     // overall needed to feel brighter.
-    const opacityRange = isMobile ? [0.85, 1] : [0.75, 1] as const
+    const opacityRange = isBelowDesktop ? [0.85, 1] : [0.75, 1] as const
     const focalHalfWidth = () => window.innerWidth * 0.1 // ~20% width zone, centered
 
     interface LogoMetrics { name: string; offset: number; scaleTo: (v: number) => void; opacityTo: (v: number) => void; yTo: (v: number) => void }
@@ -118,7 +129,7 @@ useGsapContext(() => {
     // Mobile throttles the per-frame update to every 3rd tick to save
     // compute on weaker devices, per the mobile adaptation note.
     let frameCount = 0
-    const throttle = isMobile ? 3 : 1
+    const throttle = isBelowDesktop ? 3 : 1
 
     function onTick() {
       frameCount++

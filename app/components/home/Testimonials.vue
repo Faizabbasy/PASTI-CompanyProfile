@@ -33,12 +33,12 @@ const compact = testimonials.filter((t) => t.tier === 'compact')
 // column classes, so it participates in the same transform GSAP owns for
 // the exit tween.
 const fieldItems = [
-  { testimonial: featured[0]!, columnClass: 'md:col-span-7', offsetPx: 0 },
-  { testimonial: medium[0]!, columnClass: 'md:col-span-5', offsetPx: 24 },
-  { testimonial: medium[1]!, columnClass: 'md:col-span-4', offsetPx: 32 },
-  { testimonial: medium[2]!, columnClass: 'md:col-span-4 md:col-start-5', offsetPx: 8 },
-  { testimonial: compact[0]!, columnClass: 'md:col-span-4 md:col-start-9', offsetPx: 32 },
-  { testimonial: compact[1]!, columnClass: 'md:col-span-8', offsetPx: 8 }
+  { testimonial: featured[0]!, columnClass: 'desktop:col-span-7', offsetPx: 0 },
+  { testimonial: medium[0]!, columnClass: 'desktop:col-span-5', offsetPx: 24 },
+  { testimonial: medium[1]!, columnClass: 'desktop:col-span-4', offsetPx: 32 },
+  { testimonial: medium[2]!, columnClass: 'desktop:col-span-4 desktop:col-start-5', offsetPx: 8 },
+  { testimonial: compact[0]!, columnClass: 'desktop:col-span-4 desktop:col-start-9', offsetPx: 32 },
+  { testimonial: compact[1]!, columnClass: 'desktop:col-span-8', offsetPx: 8 }
 ]
 
 const labelRef = ref<HTMLElement | null>(null)
@@ -98,7 +98,14 @@ useGsapContext(() => {
   const mm = gsap.matchMedia()
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
-    const isDesktop = window.matchMedia('(min-width: 768px)').matches
+    // Milestone 5A final closure: the zig-zag vertical-offset composition
+    // device is Desktop-only (>= 1024px), not the legacy 768px `md`
+    // boundary — Testimoni is Medium/not pinned, so "reduced offsets" for
+    // Tablet is satisfied by reusing the same simplified single-column
+    // stack Mobile already uses (spec: "do not invent a new third design
+    // language" / simplest faithful reduced-complexity adaptation), rather
+    // than inventing a separate partial-offset scheme for Tablet alone.
+    const isDesktop = window.matchMedia(breakpointQuery.desktopUp).matches
     // The zig-zag's vertical offset is only a desktop composition device
     // (mobile is a plain vertical stack, per spec) — apply it as a GSAP-
     // owned `y` at rest so the exit tween below can resolve it to 0.
@@ -216,8 +223,8 @@ useGsapContext(() => {
       <!-- Structured 2-band zig-zag field on a 12-column grid — precise
            misalignment, not masonry. See `fieldItems` above for the
            per-card grid placement/offset rationale. -->
-      <div ref="fieldRef" class="mt-16 md:mt-20">
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-12 md:gap-8">
+      <div ref="fieldRef" class="mt-16 desktop:mt-20">
+        <div class="grid grid-cols-1 gap-6 desktop:grid-cols-12 desktop:gap-8">
           <HomeTestimonialCard
             v-for="(item, i) in fieldItems"
             ref="cardComponents"

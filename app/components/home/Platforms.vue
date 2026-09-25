@@ -45,8 +45,15 @@ useGsapContext(() => {
     // via normal document flow below it rather than a horizontal transfer.
   })
 
-  // --- Desktop/tablet: pinned horizontal Spatial World Transfer (md and up, no-preference motion) ---
-  mm.add({ isDesktop: `${reducedMotionQuery.noPreference} and (min-width: 768px)` }, (context) => {
+  // --- Desktop only: pinned horizontal Spatial World Transfer (Milestone
+  // 5A final closure: Desktop = 1024px, not the legacy 768px `md`
+  // boundary — see breakpointQuery.desktopUp. Tablet gets the same
+  // reduced-complexity vertical stack as Mobile below, per spec: "Tablet
+  // may also resolve vertically if this best satisfies Reduced
+  // Complexity" — it does here, since building a scaled-down horizontal
+  // pin for Tablet would still be a full pin mechanism, not reduced
+  // complexity.) ---
+  mm.add({ isDesktop: `${reducedMotionQuery.noPreference} and ${breakpointQuery.desktopUp}` }, (context) => {
     const { isDesktop } = context.conditions as { isDesktop: boolean }
     if (!isDesktop) return
 
@@ -147,11 +154,15 @@ useGsapContext(() => {
     return () => trigger.kill()
   })
 
-  // --- Mobile: OPEN -> e-CORPORATE vertical stack, no pin, no horizontal transfer ---
-  mm.add({ isMobile: `${reducedMotionQuery.noPreference} and (max-width: 767px)` }, (context) => {
-    const { isMobile } = context.conditions as { isMobile: boolean }
+  // --- Tablet (Reduced Complexity) + Mobile (Recomposed): OPEN ->
+  // e-CORPORATE vertical stack, no pin, no horizontal transfer. Milestone
+  // 5A final closure extends this to Tablet — resolves vertically per
+  // spec, preserving OPEN -> e-CORPORATE hierarchy without inventing a
+  // scaled-down horizontal pin as a "tablet-only spectacle." ---
+  mm.add({ isBelowDesktop: `${reducedMotionQuery.noPreference} and ${breakpointQuery.belowDesktop}` }, (context) => {
+    const { isBelowDesktop } = context.conditions as { isBelowDesktop: boolean }
     const section = mobileSectionComponentRef.value?.$el ?? null
-    if (!isMobile || !section) return
+    if (!isBelowDesktop || !section) return
 
     const worlds = Array.from(section.querySelectorAll<HTMLElement>('[data-mobile-world]'))
     gsap.set(worlds, { opacity: 0, y: 24 })
@@ -179,7 +190,7 @@ useGsapContext(() => {
   <BaseSection
     ref="sectionComponentRef"
     as="section"
-    class="relative hidden overflow-hidden bg-navy-950 py-0 md:block"
+    class="relative hidden overflow-hidden bg-navy-950 py-0 desktop:block"
   >
     <div ref="stageRef" class="relative h-[100svh] overflow-hidden">
       <!-- Persistent "Platforms" label: understated, metadata-scale, static
@@ -258,16 +269,23 @@ useGsapContext(() => {
             </div>
 
             <div class="relative col-span-12 grid grid-cols-6 gap-3 lg:col-span-8">
-              <!-- Primary fragment: medium scale, grid-tight, structural border. -->
-              <div data-fragment class="relative col-span-6 aspect-[16/9] overflow-hidden rounded-lg border border-cobalt/20 md:col-span-4">
+              <!-- Primary fragment: medium scale, grid-tight, structural border.
+                   Milestone 5A: this stage only ever renders at >= desktop
+                   (1024px), so its old `md:col-span-4` (768px) threshold
+                   always won and is collapsed to its unconditional value
+                   here — no rendered change, just removing a now-unreachable
+                   breakpoint. -->
+              <div data-fragment class="relative col-span-4 aspect-[16/9] overflow-hidden rounded-lg border border-cobalt/20">
                 <img :src="corporate.image" :alt="corporate.name" loading="lazy" class="h-full w-full scale-[1.1] object-cover object-left-top">
               </div>
               <!-- Secondary fragment A: tighter crop, edge-aligned. -->
-              <div data-fragment class="relative col-span-3 aspect-square overflow-hidden rounded-lg border border-[color:rgba(255,255,255,0.1)] md:col-span-2">
+              <div data-fragment class="relative col-span-2 aspect-square overflow-hidden rounded-lg border border-[color:rgba(255,255,255,0.1)]">
                 <img :src="corporate.image" :alt="`${corporate.name} detail`" loading="lazy" class="h-full w-full scale-[1.6] object-cover object-right-top opacity-90">
               </div>
-              <!-- Secondary fragment B: max 2 total, structural crop, precise alignment. -->
-              <div data-fragment class="relative col-span-3 hidden aspect-[3/2] overflow-hidden rounded-lg border border-[color:rgba(255,255,255,0.1)] md:col-span-2 lg:block">
+              <!-- Secondary fragment B: max 2 total, structural crop, precise
+                   alignment. `lg:block` kept (both `lg` and `desktop` are
+                   the same 1024px, exact match, zero risk either name). -->
+              <div data-fragment class="relative col-span-2 hidden aspect-[3/2] overflow-hidden rounded-lg border border-[color:rgba(255,255,255,0.1)] lg:block">
                 <img :src="corporate.image" :alt="`${corporate.name} structure`" loading="lazy" class="h-full w-full scale-[1.3] object-cover object-center opacity-85">
               </div>
             </div>
@@ -282,7 +300,7 @@ useGsapContext(() => {
   <BaseSection
     ref="mobileSectionComponentRef"
     as="section"
-    class="relative overflow-hidden bg-navy-950 md:hidden"
+    class="relative overflow-hidden bg-navy-950 desktop:hidden"
   >
     <BaseContainer>
       <p class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.4)]">
