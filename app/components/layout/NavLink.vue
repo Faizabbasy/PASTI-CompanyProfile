@@ -9,15 +9,19 @@ const { setState } = useCustomCursor()
 </script>
 
 <template>
-  <NuxtLink
-    :to="item.to"
+  <component
+    :is="item.comingSoon ? 'span' : 'NuxtLink'"
+    :to="item.comingSoon ? undefined : item.to"
+    :aria-disabled="item.comingSoon ? 'true' : undefined"
+    :title="item.comingSoon ? `${item.label} — coming soon` : undefined"
     class="group relative flex items-center gap-1.5 py-2 font-display text-sm font-bold tracking-tight transition-opacity duration-400 ease-editorial"
-    :class="
+    :class="[
       dark
         ? ['text-pureWhite/80', { 'text-pureWhite': route.path === item.to }]
-        : ['text-navy-950', { 'text-navy-700': route.path === item.to }]
-    "
-    @mouseenter="setState('link')"
+        : ['text-navy-950', { 'text-navy-700': route.path === item.to }],
+      { 'cursor-default opacity-50': item.comingSoon }
+    ]"
+    @mouseenter="setState(item.comingSoon ? 'default' : 'link')"
     @mouseleave="setState('default')"
   >
     <!-- Platform-link dot / hover accent: unchanged Yellow on the existing
@@ -47,5 +51,5 @@ const { setState } = useCustomCursor()
       :class="[dark ? 'bg-cyan' : 'bg-yellow-500', { 'scale-x-100': route.path === item.to }]"
       aria-hidden="true"
     />
-  </NuxtLink>
+  </component>
 </template>

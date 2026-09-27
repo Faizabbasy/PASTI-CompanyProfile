@@ -115,6 +115,7 @@ useGsapContext(() => {
     gsap.set(mediaImgA, { clipPath: 'inset(0% 0% 0% 0%)', scale: 1.06 })
     gsap.set(mediaImgB, { clipPath: 'inset(100% 0% 0% 0%)', scale: 1.06, opacity: 0 })
     mediaImgA.src = firstProject.image
+    mediaImgA.alt = firstProject.title
 
     let currentIndex = -1
     let descWords: HTMLElement[] = []
@@ -190,6 +191,7 @@ useGsapContext(() => {
       const outgoing = activeMediaIsA ? mediaImgA : mediaImgB
       activeMediaIsA = !activeMediaIsA
       incoming.src = project.image
+      incoming.alt = project.title
       gsap.set(incoming, { clipPath: direction > 0 ? 'inset(100% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)', opacity: 1, scale: 1.08 })
       tl.to(incoming, { clipPath: 'inset(0% 0% 0% 0%)', scale: 1, duration: 0.55, ease: approvedEase.gsapCinematic }, 0.05)
       tl.to(outgoing, { opacity: 0, duration: 0.3 }, 0.05)
@@ -330,6 +332,14 @@ useGsapContext(() => {
     class="relative hidden overflow-hidden bg-navy-950 py-0 desktop:block"
   >
     <div ref="stageRef" class="relative h-[100svh] overflow-hidden">
+      <!-- Milestone 7 accessibility fix: page has exactly one h1 (Hero) and
+           no section-level h2 before this section's h3 project titles —
+           an h1 -> h3 skip. A visually-hidden h2 restores a standards-
+           compliant heading path without altering the frozen visual
+           composition (spec calls for no visible section label here beyond
+           the persistent metadata-scale "Selected Work" the mobile subtree
+           already shows, which itself is a <span>, not a heading). -->
+      <h2 class="sr-only">Selected Work</h2>
       <!-- Editorial spine: persistent, non-alternating edge position. Thin
            structural rail + active point + project numeral + 10 discrete
            segments — never a percentage fill bar, browser scrollbar, or
@@ -412,7 +422,7 @@ useGsapContext(() => {
     <BaseContainer>
       <div class="flex items-center gap-2">
         <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-cobalt" />
-        <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">Selected Work</span>
+        <h2 class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">Selected Work</h2>
       </div>
 
       <div class="mt-8 flex flex-col gap-14">

@@ -213,9 +213,9 @@ useGsapContext(() => {
            on a stable grid line, does not travel with the horizontal world
            motion (spec: "orientation, not visual emphasis"). -->
       <BaseContainer class="pointer-events-none absolute inset-x-0 top-10 z-30">
-        <p class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.4)]">
+        <h2 class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.4)]">
           {{ label }}
-        </p>
+        </h2>
       </BaseContainer>
 
       <!-- Signal: horizontal state-transfer system. Short structural route,
@@ -246,9 +246,16 @@ useGsapContext(() => {
               <p class="mt-6 max-w-sm text-token-body text-[color:rgba(255,255,255,0.64)]">
                 {{ open.positioning }}
               </p>
-              <NuxtLink :to="open.to" class="mt-8 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt">
+              <component
+                :is="open.comingSoon ? 'span' : 'NuxtLink'"
+                :to="open.comingSoon ? undefined : open.to"
+                :aria-disabled="open.comingSoon ? 'true' : undefined"
+                :title="open.comingSoon ? 'OPEN — coming soon' : undefined"
+                class="mt-8 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt"
+                :class="{ 'cursor-default opacity-60': open.comingSoon }"
+              >
                 Explore OPEN <span aria-hidden="true">→</span>
-              </NuxtLink>
+              </component>
             </div>
 
             <div class="relative col-span-12 lg:col-span-7">
@@ -279,9 +286,16 @@ useGsapContext(() => {
               <p class="mt-6 max-w-xs text-token-body text-[color:rgba(255,255,255,0.64)]">
                 {{ corporate.positioning }}
               </p>
-              <NuxtLink :to="corporate.to" class="mt-8 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt">
+              <component
+                :is="corporate.comingSoon ? 'span' : 'NuxtLink'"
+                :to="corporate.comingSoon ? undefined : corporate.to"
+                :aria-disabled="corporate.comingSoon ? 'true' : undefined"
+                :title="corporate.comingSoon ? 'e-CORPORATE — coming soon' : undefined"
+                class="mt-8 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt"
+                :class="{ 'cursor-default opacity-60': corporate.comingSoon }"
+              >
                 Explore e-CORPORATE <span aria-hidden="true">→</span>
-              </NuxtLink>
+              </component>
             </div>
 
             <div class="relative col-span-12 grid grid-cols-6 gap-3 lg:col-span-8">
@@ -321,9 +335,9 @@ useGsapContext(() => {
     class="relative overflow-hidden bg-navy-950 desktop:hidden"
   >
     <BaseContainer>
-      <p class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.4)]">
+      <h2 class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.4)]">
         {{ label }}
-      </p>
+      </h2>
 
       <div class="mt-8 flex flex-col gap-16">
         <article v-for="(platform, i) in platforms" :key="platform.index" data-mobile-world>
@@ -340,9 +354,16 @@ useGsapContext(() => {
           <p class="mt-4 max-w-md text-token-body text-[color:rgba(255,255,255,0.64)]">
             {{ platform.positioning }}
           </p>
-          <NuxtLink :to="platform.to" class="mt-5 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt">
+          <component
+            :is="platform.comingSoon ? 'span' : 'NuxtLink'"
+            :to="platform.comingSoon ? undefined : platform.to"
+            :aria-disabled="platform.comingSoon ? 'true' : undefined"
+            :title="platform.comingSoon ? `${platform.name} — coming soon` : undefined"
+            class="mt-5 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt"
+            :class="{ 'cursor-default opacity-60': platform.comingSoon }"
+          >
             Explore {{ platform.name }} <span aria-hidden="true">→</span>
-          </NuxtLink>
+          </component>
           <span class="mt-4 block font-display text-token-metadata font-semibold tracking-[0.08em] text-[color:rgba(255,255,255,0.4)]">
             {{ platform.index }} / {{ String(platforms.length).padStart(2, '0') }}
           </span>

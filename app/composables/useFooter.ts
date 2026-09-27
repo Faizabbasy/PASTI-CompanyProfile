@@ -1,6 +1,9 @@
 export interface FooterLink {
   label: string
   to: string
+  /** Milestone 7: see NavItem.comingSoon in useNavigation.ts — same 404
+   * finding, same fix, applied to the footer's platform links. */
+  comingSoon?: boolean
 }
 
 /**
@@ -25,8 +28,8 @@ export function useFooter() {
   ]
 
   const platformLinks: FooterLink[] = [
-    { label: 'OPEN', to: '/open' },
-    { label: 'e-CORPORATE', to: '/e-corporate' }
+    { label: 'OPEN', to: '/open', comingSoon: true },
+    { label: 'e-CORPORATE', to: '/e-corporate', comingSoon: true }
   ]
 
   return { navLinks, platformLinks }

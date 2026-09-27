@@ -121,17 +121,21 @@ useGsapContext(() => {
              justify a Yellow signature moment here. -->
         <nav class="footer-reveal flex flex-col gap-4 border-navy-800 md:col-span-3 md:col-start-10 md:border-l md:pl-8">
           <p class="eyebrow text-navy-500">Platforms</p>
-          <NuxtLink
+          <component
+            :is="link.comingSoon ? 'span' : 'NuxtLink'"
             v-for="link in platformLinks"
             :key="link.to"
-            :to="link.to"
-            class="group inline-flex w-fit items-center gap-1.5 font-display text-body-lg font-medium text-paper transition-all duration-150 ease-editorial hover:translate-x-1 hover:text-cobalt focus-visible:translate-x-1 focus-visible:text-cobalt"
-            @mouseenter="setState('link')"
+            :to="link.comingSoon ? undefined : link.to"
+            :aria-disabled="link.comingSoon ? 'true' : undefined"
+            :title="link.comingSoon ? `${link.label} — coming soon` : undefined"
+            class="group inline-flex w-fit items-center gap-1.5 font-display text-body-lg font-medium text-paper transition-all duration-150 ease-editorial"
+            :class="link.comingSoon ? 'cursor-default opacity-50' : 'hover:translate-x-1 hover:text-cobalt focus-visible:translate-x-1 focus-visible:text-cobalt'"
+            @mouseenter="link.comingSoon ? undefined : setState('link')"
             @mouseleave="setState('default')"
           >
             <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-cobalt transition-transform duration-150 ease-editorial group-hover:scale-125 group-focus-visible:scale-125" aria-hidden="true" />
             {{ link.label }}
-          </NuxtLink>
+          </component>
         </nav>
       </div>
 

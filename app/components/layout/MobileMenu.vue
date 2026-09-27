@@ -70,11 +70,14 @@ onBeforeUnmount(() => {
               :key="item.to"
               class="border-b border-navy-100"
             >
-              <NuxtLink
-                :to="item.to"
+              <component
+                :is="item.comingSoon ? 'span' : 'NuxtLink'"
+                :to="item.comingSoon ? undefined : item.to"
+                :aria-disabled="item.comingSoon ? 'true' : undefined"
+                :title="item.comingSoon ? `${item.label} — coming soon` : undefined"
                 class="flex items-center gap-2 py-4 font-display text-display-sm font-semibold text-ink transition-colors duration-400 ease-editorial hover:text-navy-500"
-                :class="{ 'text-navy-700': route.path === item.to }"
-                @click="close()"
+                :class="[{ 'text-navy-700': route.path === item.to }, { 'cursor-default opacity-50': item.comingSoon }]"
+                @click="item.comingSoon ? undefined : close()"
               >
                 <span
                   v-if="item.isPlatform"
@@ -82,7 +85,7 @@ onBeforeUnmount(() => {
                   aria-hidden="true"
                 />
                 {{ item.label }}
-              </NuxtLink>
+              </component>
             </li>
           </ul>
 
