@@ -32,5 +32,26 @@ export function useFooter() {
     { label: 'e-CORPORATE', to: '/e-corporate', comingSoon: true }
   ]
 
-  return { navLinks, platformLinks }
+  // Service links: labels are the real service titles (useServices); each
+  // routes to its pillar page, same mapping the homepage rows use.
+  const { services } = useServices()
+  const serviceLinks: FooterLink[] = services.map((s) => ({
+    label: s.title,
+    to: s.category === 'creative' ? '/creative' : '/technology'
+  }))
+
+  // Contact facts. The WhatsApp number is the real one already used by every
+  // CTA (useWhatsapp). The office address is NOT known — no address exists in
+  // the brief or repo and none may be invented — so it stays a Lorem ipsum
+  // placeholder (global copy rule). Set `address` to the real string and the
+  // placeholder disappears.
+  const contact = {
+    whatsappDisplay: '+62 821-2549-2299',
+    address: null as string | null,
+    addressPlaceholder: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+    entity: 'PT Hidup Pasti Bahagia',
+    positioning: 'Technology × Creative Execution Partner'
+  }
+
+  return { navLinks, serviceLinks, platformLinks, contact }
 }

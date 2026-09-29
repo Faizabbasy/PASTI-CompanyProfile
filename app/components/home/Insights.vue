@@ -6,9 +6,17 @@ if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-// Editorial Intelligence in Motion, Not a Horizontal Blog Carousel
-// (04-homepage-spec.md §7). Copy sourced from .docs/PASTI_Cuberto_Template_
-// Content_Mapping.docx, section 08 — INSIGHTS.
+// Editorial Intelligence in Motion (04-homepage-spec.md §7), redirected by the
+// owner: instead of a flat horizontal track, the 4 articles sit on a curved
+// ring (perspective, receding to the right) around a thin orbit line. Scrolling
+// (a short pin) slides the ring sideways one article at a time — the active
+// article leads on the left, the next ones recede behind it. Mirrors the
+// Hero gallery's mechanic, so Insight reads as the same universe on a light
+// surface. Copy sourced from the content mapping doc, section 08 — INSIGHTS.
+//
+// Below `desktop` (1024px) and under reduced motion there is no pin and no
+// ring: the section is a plain vertical editorial feed (Featured -> Supporting
+// x3), shown via the `data-motion-stage="simple"` swap in main.css.
 const heading = 'Insights'
 const cta = 'View all'
 
@@ -16,164 +24,301 @@ const { articles } = useInsights()
 const featured = articles.find((a) => a.role === 'featured')!
 const supporting = articles.filter((a) => a.role === 'supporting').slice(0, 3)
 const homepageArticles = [featured, ...supporting]
+const N = homepageArticles.length
 
-const sectionRef = ref<HTMLElement | null>(null)
+const stageRef = ref<HTMLElement | null>(null)
 const headingRef = ref<HTMLElement | null>(null)
-const compositionRef = ref<HTMLElement | null>(null)
-const canvasRef = ref<HTMLElement | null>(null)
-const trackRef = ref<HTMLElement | null>(null)
-const signalRef = ref<HTMLElement | null>(null)
+const mobileHeadingRef = ref<HTMLElement | null>(null)
+const cardRefs = ref<HTMLElement[]>([])
+const captionRef = ref<HTMLElement | null>(null)
+const orbitDotRef = ref<SVGCircleElement | null>(null)
 
 useMaskedReveal(headingRef, { by: 'word' })
+useMaskedReveal(mobileHeadingRef, { by: 'word' })
 
-// Reading State Marker Signal (04-homepage-spec.md §7, locked narrow scope):
-// a restrained marker + short structural cue, optional small numeral. Not a
-// category selector, not a progress bar. `activeIndex` reflects which
-// article state is currently active during the sticky progression.
+const { setState } = useCustomCursor()
+
+// Reading State Marker Signal (spec §7, narrow scope): which article state is
+// active. Not a category selector, not a progress bar.
 const activeIndex = ref(0)
+const activeArticle = computed(() => homepageArticles[activeIndex.value]!)
+
+// Orbit: an ellipse the Signal dot rides as the ring turns (viewBox units).
+const ORBIT = { cx: 720, cy: 470, rx: 560, ry: 250, rot: -8 }
+const clamp = gsap.utils.clamp
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 useGsapContext(() => {
-  const section = sectionRef.value
-  const composition = compositionRef.value
-  const canvas = canvasRef.value
-  const track = trackRef.value
-  const heading = headingRef.value
-  if (!section || !composition || !canvas || !track || !heading) return
-
   const mm = gsap.matchMedia()
 
-  mm.add('(prefers-reduced-motion: no-preference)', () => {
-    // Entrance: normal vertical flow only — heading mask reveal (via
-    // useMaskedReveal above) → Featured appears → Supporting stagger in →
-    // composition settles → THEN the Sticky Editorial Canvas begins.
-    // Horizontal motion must not start immediately on section entry.
-    const cards = Array.from(composition.querySelectorAll<HTMLElement>('.insight-card'))
-    gsap.set(cards, { opacity: 0, y: 28 })
+  mm.add({ isDesktop: `${reducedMotionQuery.noPreference} and ${breakpointQuery.desktopUp}` }, (context) => {
+    const { isDesktop } = context.conditions as { isDesktop: boolean }
+    const stage = stageRef.value
+    const cards = cardRefs.value
+    if (!isDesktop || !stage || cards.length === 0) return
 
-    const entrance = gsap.to(cards, {
-      opacity: 1,
-      y: 0,
-      duration: motionDuration.editorial,
-      ease: approvedEase.gsapStandard,
-      stagger: motionStagger.base,
-      scrollTrigger: { trigger: composition, start: 'top 80%', toggleActions: 'restart none restart reverse' }
-    })
-
-    // Sticky Editorial Canvas — deliberately LIGHT, not another Heavy pinned
-    // section: short pin distance, flatter/quieter than Platforms' Spatial
-    // World Transfer will be. Heading prominence reduces (scales down,
-    // settles as a quieter anchor) as the canvas holds; it does not stay at
-    // full scale through the whole progression.
-    //
-    // Milestone 5A final closure: gated at Desktop (1024px), not the
-    // legacy 768px `md` boundary — see breakpointQuery.desktopUp/
-    // belowDesktop. Tablet gets the same lighter, non-sticky vertical feed
-    // as Mobile ("do not use full sticky progression if it reads as
-    // desktop-heavy behavior" — a short pin+scrub IS that, so Tablet skips
-    // it entirely, same as Mobile).
-    const isBelowDesktop = window.matchMedia(breakpointQuery.belowDesktop).matches
-    if (isBelowDesktop) {
-      // Tablet + Mobile: no pin, no horizontal progression — natural
-      // vertical feed (handled entirely by normal document flow + the
-      // entrance above).
-      return
+    let vw = window.innerWidth
+    let vh = window.innerHeight
+    let W = 0
+    let H = 0
+    let anchorX = 0 // front card's centre, relative to the stage centre
+    const measure = () => {
+      vw = window.innerWidth
+      vh = window.innerHeight
+      W = Math.min(vw * 0.46, vh * 0.5 * 1.6)
+      H = W * 0.625
+      const gutter = clamp(20, 80, vw * 0.04)
+      const left = Math.max(0, (vw - 1440) / 2) + gutter
+      anchorX = -vw / 2 + left + vw * 0.05 + W / 2
+      cards.forEach((c) => {
+        c.style.width = `${W}px`
+        c.style.height = `${H}px`
+        c.style.marginLeft = `${-W / 2}px`
+        c.style.marginTop = `${-H / 2}px`
+      })
     }
+    measure()
 
-    const trackDistance = () => track.scrollWidth - canvas.clientWidth
+    const state = { pos: 0, enter: 0 }
+    const centerY = () => vh * 0.03 // offset from stage middle
 
-    const cardEls = Array.from(track.querySelectorAll<HTMLElement>('.insight-card'))
+    const render = () => {
+      for (let i = 0; i < N; i++) {
+        const el = cards[i]!
+        const d = i - state.pos
+        const ahead = d >= 0
 
-    const st = ScrollTrigger.create({
-      trigger: canvas,
-      start: 'top top+=80',
-      end: () => `+=${Math.max(trackDistance(), 1) * 1.1}`,
-      pin: true,
-      scrub: 0.6,
-      anticipatePin: 1,
-      onUpdate: (self) => {
-        gsap.set(track, { x: -trackDistance() * self.progress })
-        gsap.set(heading, {
-          scale: 1 - self.progress * 0.28,
-          opacity: 1 - self.progress * 0.35,
-          transformOrigin: '0% 50%'
-        })
-        const count = homepageArticles.length
-        const active = Math.min(count - 1, Math.floor(self.progress * count))
-        activeIndex.value = active
+        // Ring geometry: ahead cards recede right/up and shrink; passed cards
+        // slide off to the left and dissolve.
+        const x = ahead ? anchorX + W * (0.9 * d - 0.1 * d * d) : anchorX + W * 0.9 * d
+        const s = ahead ? Math.max(0.5, 1 - 0.15 * d) : Math.max(0.7, 1 + 0.1 * d)
+        const y = centerY() + (ahead ? -d * 14 : 0) + (1 - state.enter) * vh * 0.1
+        const rotY = ahead ? -6 + 20 * Math.min(d, 1.6) : -6 - 10 * Math.abs(d)
+        const rotZ = ahead ? -d * 1.4 : 0
+        const far = ahead ? clamp(0, 1, 1 - (d - 2.4)) : clamp(0, 1, 1 + d * 1.25)
+        // Active emphasis (locked ~75-85% inactive, spec §7): visible articles stay scannable.
+        const opacity = far * lerp(1, 0.82, clamp(0, 1, Math.abs(d))) * state.enter
 
-        // Active/inactive emphasis (locked values, deliberately lighter
-        // than Testimoni's 35-50%): active 100%, inactive ~75-85% — content
-        // here must stay scannable, not merely decorative.
-        cardEls.forEach((el, i) => {
-          gsap.set(el, { opacity: i === active ? 1 : 0.8 })
+        gsap.set(el, {
+          x,
+          y,
+          scale: s,
+          rotationY: rotY,
+          rotationZ: rotZ,
+          opacity,
+          zIndex: 100 - Math.round(Math.abs(d) * 10),
+          pointerEvents: opacity > 0.6 && Math.abs(d) < 0.6 ? 'auto' : 'none'
         })
       }
+
+      const nearest = clamp(0, N - 1, Math.round(state.pos))
+      if (nearest !== activeIndex.value) activeIndex.value = nearest
+
+      // Signal dot rides the orbit as the ring turns.
+      const dot = orbitDotRef.value
+      if (dot) {
+        const t = N > 1 ? state.pos / (N - 1) : 0
+        const angle = lerp(200, -20, t) * (Math.PI / 180)
+        dot.setAttribute('cx', String(ORBIT.cx + ORBIT.rx * Math.cos(angle)))
+        dot.setAttribute('cy', String(ORBIT.cy - ORBIT.ry * Math.sin(angle)))
+      }
+    }
+    render()
+
+    // Short, light pin (spec: ~2.2-2.8 viewports total, hard max 3.2).
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: stage,
+        start: 'top top',
+        end: '+=170%',
+        scrub: 0.6,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onRefreshInit: measure
+      },
+      onUpdate: render,
+      defaults: { ease: 'none' }
+    })
+    tl.to({}, { duration: 0.08 })
+    tl.to(state, { pos: N - 1, duration: 0.84, ease: 'power1.inOut' }, 0.08)
+    tl.to({}, { duration: 0.08 }, 0.92)
+
+    // Entrance: composition settles in normal flow before the ring turns.
+    const enter = gsap.to(state, {
+      enter: 1,
+      duration: motionTier.cinematicMin + 0.4,
+      ease: approvedEase.gsapCinematic,
+      onUpdate: render,
+      scrollTrigger: { trigger: stage, start: 'top 75%', once: true }
     })
 
-    return () => st.kill()
-  })
+    const cleanups: Array<() => void> = []
+    const onResize = () => {
+      measure()
+      render()
+    }
+    window.addEventListener('resize', onResize)
+    cleanups.push(() => window.removeEventListener('resize', onResize))
 
-  mm.add('(prefers-reduced-motion: reduce)', () => {
-    const cards = Array.from(composition.querySelectorAll<HTMLElement>('.insight-card'))
-    gsap.set(cards, { opacity: 1, y: 0 })
-    gsap.set(heading, { scale: 1, opacity: 1 })
+    // Pointer response: the ring drifts a few px at different depths.
+    if (window.matchMedia('(pointer: fine)').matches) {
+      const inners = cards.map((c) => c.querySelector<HTMLElement>('[data-card-inner]')!)
+      const qx = inners.map((el) => gsap.quickTo(el, 'x', { duration: 0.9, ease: approvedEase.gsapStandard }))
+      const qy = inners.map((el) => gsap.quickTo(el, 'y', { duration: 0.9, ease: approvedEase.gsapStandard }))
+      const onMove = (event: PointerEvent) => {
+        const r = stage.getBoundingClientRect()
+        if (r.bottom < 0 || r.top > window.innerHeight) return
+        const nx = (event.clientX / window.innerWidth) * 2 - 1
+        const ny = (event.clientY / window.innerHeight) * 2 - 1
+        inners.forEach((_, i) => {
+          const depth = 5 + (i % 3) * 3
+          qx[i]!(nx * depth)
+          qy[i]!(ny * depth * 0.6)
+        })
+      }
+      window.addEventListener('pointermove', onMove, { passive: true })
+      cleanups.push(() => window.removeEventListener('pointermove', onMove))
+    }
+
+    return () => {
+      enter.kill()
+      tl.scrollTrigger?.kill()
+      tl.kill()
+      cleanups.forEach((fn) => fn())
+    }
   })
+})
+
+// Caption swap: the new article title slides in as the active state changes.
+watch(activeIndex, () => {
+  const el = captionRef.value
+  if (!el) return
+  gsap.fromTo(el, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
 })
 </script>
 
 <template>
-  <BaseSection ref="sectionRef" as="section" class="surface-light">
-    <BaseContainer>
-      <div class="flex items-center justify-center gap-3">
-        <!-- Signal — Reading State Marker: restrained, narrow-scope. Not a
-             category selector (category stays in article metadata), not a
-             progress bar, not a carousel indicator. -->
-        <span ref="signalRef" aria-hidden="true" class="h-1.5 w-1.5 shrink-0 rounded-full bg-cobalt" />
-        <p class="eyebrow text-navy-500">
-          {{ String(activeIndex + 1).padStart(2, '0') }}/{{ String(homepageArticles.length).padStart(2, '0') }}
-        </p>
-      </div>
+  <!-- Desktop-only stage (>= 1024px): curved ring of the 4 articles. -->
+  <BaseSection as="section" data-motion-stage="pinned" class="surface-light relative hidden overflow-hidden py-0 desktop:block">
+    <div ref="stageRef" class="relative h-[100svh] overflow-hidden">
+      <BaseGridLines tone="light" />
 
-      <h2 ref="headingRef" class="mt-4 text-center text-display-lg">
-        {{ heading }}
-      </h2>
+      <!-- Orbit line + Signal dot (structural, one dot: the reading state). -->
+      <svg
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-0 z-0 h-full w-full"
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMid slice"
+        fill="none"
+      >
+        <g :transform="`rotate(${ORBIT.rot} ${ORBIT.cx} ${ORBIT.cy})`">
+          <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx" :ry="ORBIT.ry" stroke="rgba(15,23,42,0.14)" stroke-width="1" />
+        </g>
+        <circle ref="orbitDotRef" r="5" fill="#2563EB" cx="160" cy="590" />
+      </svg>
 
-      <!-- Digital Editorial Feature + 3 Supporting, close in visual weight
-           (one may be slightly more dominant, none becomes a second
-           Featured) — not 4 equal cards, not a giant-card-plus-tiny-cards
-           layout. Composition settles in normal vertical flow before the
-           Sticky Editorial Canvas (below) begins any horizontal motion. -->
-      <div ref="compositionRef" class="mt-16 desktop:mt-20">
-        <!-- Tablet + Mobile (locked, Milestone 5A final closure): natural
-             vertical editorial feed — Featured → Supporting → Supporting →
-             Supporting, plain block flow, no horizontal scroll container at
-             all, below `desktop` (1024px). Desktop only: the flex/overflow
-             track becomes the Sticky Editorial Canvas's horizontal
-             progression surface once pinned (script gates the pin+scrub
-             behind the same desktop-only matchMedia branch, see
-             breakpointQuery.desktopUp/belowDesktop above). -->
-        <div ref="canvasRef" data-motion-canvas class="flex flex-col gap-8 desktop:block desktop:overflow-hidden">
-          <div ref="trackRef" data-motion-track class="flex flex-col gap-8 desktop:w-max desktop:flex-row desktop:gap-8">
-            <HomeInsightsCard :article="featured" role="featured" data-motion-card class="insight-card desktop:w-[46rem] desktop:shrink-0" />
-            <HomeInsightsCard
-              v-for="article in supporting"
-              :key="article.index"
-              :article="article"
-              role="supporting"
-              data-motion-card
-              class="insight-card desktop:w-[26rem] desktop:shrink-0"
-            />
+      <BaseContainer class="pointer-events-none absolute inset-x-0 top-10 z-30">
+        <BaseSectionMark surface="light" label="Insight" meta="07 / 09" />
+      </BaseContainer>
+
+      <!-- Title + reading-state marker + CTA. -->
+      <BaseContainer class="absolute inset-x-0 top-[11svh] z-30">
+        <div class="flex items-start justify-between gap-8">
+          <h2 ref="headingRef" class="pointer-events-none font-display text-[length:clamp(64px,8vw,132px)] font-bold leading-[0.92] tracking-[-0.04em] text-slateNavy">
+            {{ heading }}
+          </h2>
+          <div class="flex flex-col items-end gap-5 pt-4">
+            <div class="flex items-center gap-3">
+              <span aria-hidden="true" class="h-1.5 w-1.5 shrink-0 rounded-full bg-cobalt" />
+              <p class="font-display text-token-body-large font-semibold tabular-nums tracking-[-0.01em] text-slateNavy">
+                {{ String(activeIndex + 1).padStart(2, '0') }}<span class="text-[color:rgba(15,23,42,0.35)]"> / {{ String(N).padStart(2, '0') }}</span>
+              </p>
+            </div>
+            <NuxtLink
+              to="/insights"
+              class="group/cta relative inline-flex items-center gap-2 pb-1.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-slateNavy hover:text-cobalt"
+            >
+              {{ cta }}
+              <span aria-hidden="true" class="inline-block transition-transform duration-200 ease-editorial group-hover/cta:translate-x-1">→</span>
+              <span aria-hidden="true" class="absolute inset-x-0 bottom-0 h-px origin-left scale-x-[0.2] bg-current transition-transform duration-200 ease-editorial group-hover/cta:scale-x-100" />
+            </NuxtLink>
           </div>
         </div>
+      </BaseContainer>
+
+      <!-- The ring. Cards are absolutely centred on the stage and placed by
+           render(); perspective lives here. -->
+      <div class="pointer-events-none absolute inset-0 z-20" style="perspective: 1800px">
+        <article
+          v-for="(article, i) in homepageArticles"
+          :key="article.index"
+          :ref="(el) => { if (el) cardRefs[i] = el as HTMLElement }"
+          class="absolute left-1/2 top-1/2 opacity-0"
+          style="transform-style: preserve-3d"
+          @mouseenter="setState('view', 'Read')"
+          @mouseleave="setState('default')"
+        >
+          <NuxtLink to="/insights" :aria-label="article.title" tabindex="-1" class="block h-full w-full">
+            <div
+              data-card-inner
+              class="relative h-full w-full overflow-hidden rounded-card border border-structural-light bg-pureWhite shadow-[0_36px_70px_-38px_rgba(15,23,42,0.4)]"
+            >
+              <img :src="article.image" :alt="article.title" :loading="i < 2 ? 'eager' : 'lazy'" class="h-full w-full object-cover">
+              <span class="pointer-events-none absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-token-sm bg-[color:rgba(255,255,255,0.92)] px-2.5 py-1.5">
+                <LayoutBrandMark surface="light" :height="10" />
+                <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(15,23,42,0.2)]" />
+                <span class="font-display text-[10px] font-semibold tabular-nums tracking-[0.08em] text-slateNavy">{{ article.index }}</span>
+              </span>
+            </div>
+          </NuxtLink>
+        </article>
       </div>
 
-      <div class="mt-16 flex justify-center desktop:mt-20">
+      <!-- Caption for the active article. -->
+      <BaseContainer class="absolute inset-x-0 bottom-[5svh] z-30">
         <NuxtLink
           to="/insights"
-          class="inline-flex items-center justify-center gap-2 rounded-button border border-navy-200 px-7 py-3.5 font-display text-sm font-semibold text-ink transition-colors duration-400 ease-editorial hover:border-cobalt hover:text-cobalt"
+          class="group inline-flex max-w-[46rem] items-start gap-4 font-display text-[length:clamp(24px,2.4vw,40px)] font-medium leading-[1.12] tracking-[-0.015em] text-slateNavy"
+          @mouseenter="setState('link')"
+          @mouseleave="setState('default')"
+        >
+          <span ref="captionRef" class="inline-flex items-start gap-4">
+            <span class="transition-colors duration-200 ease-editorial group-hover:text-cobalt">{{ activeArticle.title }}</span>
+            <span aria-hidden="true" class="mt-1 shrink-0 transition-transform duration-200 ease-editorial group-hover:translate-x-2">→</span>
+          </span>
+        </NuxtLink>
+      </BaseContainer>
+    </div>
+  </BaseSection>
+
+  <!-- Tablet + Mobile + reduced motion: plain vertical editorial feed. -->
+  <BaseSection as="section" data-motion-stage="simple" class="surface-light relative desktop:hidden">
+    <BaseGridLines tone="light" />
+    <BaseContainer class="relative z-10">
+      <BaseSectionMark surface="light" label="Insight" meta="07 / 09" />
+
+      <div class="mt-14 flex items-end justify-between gap-6 md:mt-16">
+        <h2 ref="mobileHeadingRef" class="font-display text-token-display-xl font-bold text-slateNavy">
+          {{ heading }}
+        </h2>
+        <NuxtLink
+          to="/insights"
+          class="group/cta relative mb-2 inline-flex shrink-0 items-center gap-2 pb-1.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-slateNavy hover:text-cobalt"
         >
           {{ cta }}
+          <span aria-hidden="true" class="inline-block transition-transform duration-200 ease-editorial group-hover/cta:translate-x-1">→</span>
+          <span aria-hidden="true" class="absolute inset-x-0 bottom-0 h-px origin-left scale-x-[0.2] bg-current transition-transform duration-200 ease-editorial group-hover/cta:scale-x-100" />
         </NuxtLink>
+      </div>
+
+      <div class="mt-12 flex flex-col gap-10 md:mt-14">
+        <HomeInsightsCard
+          v-for="(article, i) in homepageArticles"
+          :key="article.index"
+          :article="article"
+          :role="i === 0 ? 'featured' : 'supporting'"
+        />
       </div>
     </BaseContainer>
   </BaseSection>

@@ -24,8 +24,8 @@
 
 <template>
   <HomeHero />
-  <HomeWhatWeDo />
   <HomeSelectedWork />
+  <HomeWhatWeDo />
   <HomeTrust />
   <HomeTestimonials />
   <HomePlatforms />

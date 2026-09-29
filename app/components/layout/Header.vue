@@ -19,6 +19,7 @@ const ctaRef = ref<HTMLElement | null>(null)
 const ctaLinkRef = ref<HTMLElement | null>(null)
 const toggleRef = ref<HTMLElement | null>(null)
 const progressRef = ref<HTMLElement | null>(null)
+const progressDotRef = ref<HTMLElement | null>(null)
 
 const prefersReducedMotion = import.meta.client && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -39,7 +40,12 @@ const activated = ref(false)
 // sits directly over Hero's dark environment and must render as a
 // transparent, white-on-dark bar rather than the light bordered bar used
 // everywhere else.
-const heroIsDark = computed(() => route.path === '/' && !activated.value)
+// The homepage is dark end to end at the top of every section boundary the
+// header crosses, so on `/` the bar stays in the dark, transparent-with-scrim
+// treatment even after activation (never the light bordered bar) — a
+// transparent header re-appearing over light sections (Trusted, Insight) is
+// kept legible by the scrim below, not by a filled background.
+const heroIsDark = computed(() => route.path === '/')
 
 useMagnetic(ctaLinkRef, { strength: 0.3 })
 
@@ -119,14 +125,19 @@ useGsapContext(() => {
       if (current < 120) {
         if (hidden) {
           hidden = false
-          gsap.to(header, { yPercent: 0, duration: 0.5, ease: 'power3.out' })
+          gsap.to(header, { yPercent: 0, autoAlpha: 1, duration: 0.5, ease: 'power3.out' })
         }
       } else if (delta > deadZone && !hidden) {
+        // Never hide while the mobile menu is open.
+        if (mobileOpen.value) {
+          lastScroll = current
+          return
+        }
         hidden = true
-        gsap.to(header, { yPercent: -100, duration: 0.45, ease: 'power3.inOut' })
+        gsap.to(header, { yPercent: -100, autoAlpha: 0, duration: 0.45, ease: 'power3.inOut' })
       } else if (delta < -deadZone && hidden) {
         hidden = false
-        gsap.to(header, { yPercent: 0, duration: 0.45, ease: 'power3.out' })
+        gsap.to(header, { yPercent: 0, autoAlpha: 1, duration: 0.45, ease: 'power3.out' })
       }
 
       lastScroll = current
@@ -143,6 +154,10 @@ useGsapContext(() => {
       end: 'max',
       onUpdate: (self) => {
         gsap.set(progressRef.value, { scaleX: self.progress })
+        if (progressDotRef.value) {
+          progressDotRef.value.style.left = `${self.progress * 100}%`
+          progressDotRef.value.style.opacity = self.progress > 0.002 ? '1' : '0'
+        }
       }
     })
   }
@@ -166,7 +181,17 @@ useGsapContext(() => {
         : 'border-b border-navy-900/10 bg-paper shadow-[0_8px_30px_-12px_rgba(11,22,32,0.18)]'
     ]"
   >
-    <div class="container-page h-full">
+    <!-- Scrim (homepage): the bar itself has no fill — this dark-to-clear
+         gradient sits behind it once the page has scrolled, so white nav
+         text stays legible over any section without a filled background,
+         a border box or blur. Fades in with `activated`. -->
+    <div
+      v-if="heroIsDark"
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-x-0 top-0 h-[170%] bg-gradient-to-b from-[rgba(15,23,42,0.92)] via-[rgba(15,23,42,0.55)] to-transparent transition-opacity duration-500 ease-editorial"
+      :class="activated ? 'opacity-100' : 'opacity-0'"
+    />
+    <div class="container-page relative h-full">
       <div class="flex h-full items-center px-5 md:px-7">
         <div ref="logoRef" class="transition-transform duration-300 ease-editorial hover:scale-[1.03]">
           <LayoutLogo :inverted="heroIsDark" />
@@ -195,7 +220,13 @@ useGsapContext(() => {
         </div>
       </div>
 
-      <div ref="progressRef" class="h-px w-full origin-left bg-yellow-500" :class="{ '!bg-cobalt': heroIsDark }" aria-hidden="true" />
+      <!-- Scroll progress: a Cobalt line whose leading point is the logo's
+           own yellow dot — the brand's one signature colour, riding the
+           Signal. ~6px, so Yellow stays scarce (00-brand-guide.md §05). -->
+      <div class="relative" aria-hidden="true">
+        <div ref="progressRef" class="h-px w-full origin-left bg-yellow-500" :class="{ '!bg-cobalt': heroIsDark }" />
+        <span ref="progressDotRef" class="absolute -top-[2.5px] left-0 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-yellow-500 opacity-0" />
+      </div>
     </div>
   </header>
 </template>

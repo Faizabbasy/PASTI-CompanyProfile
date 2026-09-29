@@ -2,63 +2,74 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-// MILESTONE 4A — Hero, total rework per docs/rework-v2/04-homepage-spec.md §1
-// ("Operational Evidence in Motion" / "Precise Misalignment, Not Playful
-// Irregularity"). This replaces the previous centered-SaaS-hero markup
-// entirely — that composition (centered column, WebGL wire-grid backdrop,
-// yellow cursor-spotlight duplicate text, diagonal shine sweep) directly
-// contradicted the frozen asymmetric 55/45 Living Proof System direction
-// and is discarded per the milestone's non-negotiable guardrail (frozen
-// docs win over existing component structure/legacy implementation).
-//
-// Kept from the previous implementation: the masked word-reveal mechanic
-// (`wrapWord`) and `useMagnetic` on the primary CTA — both are visually
-// neutral techniques compatible with the new direction, not decorative
-// legacy behavior tied to the old composition.
+if (import.meta.client) {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
-// Copy: no approved production headline exists yet for this reworked
-// composition (04-homepage-spec.md's global copy rule) — using the
-// required literal placeholder rather than inventing a new brand claim.
-const headline = 'Lorem ipsum dolor sit amet'
-const subtext = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
-const ctaPrimary = { label: 'Explore our work', to: '#selected-work' }
+// HERO + SELECTED WORK GALLERY (post-Milestone 7 redirection, owner-directed).
+// The hero is now one pinned stage: a glass-ring centerpiece behind the
+// headline, and the 10 Selected Work projects as cards sitting on a curved
+// arc at the bottom edge. Scrolling straightens the arc, grows the cards
+// (not to full screen) and then slides them sideways one project at a time.
+// This supersedes 04-homepage-spec.md §1 (Living Proof System) and §3
+// (alternating split-screen Pinned Project Exchange) by owner decision —
+// those sections of the spec need a follow-up edit.
+//
+// Below `desktop` (1024px) and under reduced motion there is no pin and no
+// gallery: the hero is a static composition and the existing vertical
+// Selected Work list (SelectedWork.vue) carries all 10 projects.
+//
+// Copy: headline/subtext are owner-supplied; project copy comes straight from
+// useSelectedWork() (existing data, incl. the 4 explicit placeholders).
+
+const headlineWords = ['Technology.', 'Creativity.', 'Impact.']
+const subtext = 'We build technology and creative solutions for businesses ready to move forward.'
+const ctaPrimary = { label: 'Explore our work' }
 const ctaSecondary = { label: 'Tell us about it' }
 
+const { projects } = useSelectedWork()
 const { link: whatsappLink } = useWhatsapp()
 const { pageReady } = usePageReady()
 const { playTo } = useSectionCurtain()
-const { publishSignalX } = useHeroSignalHandoff()
 
-function goToSelectedWork() {
-  playTo(ctaPrimary.to)
-}
-
-// BaseSection renders via <component :is="as">, so a template `ref` here
-// resolves to the component instance, not its DOM element (see
-// pasti-gotchas memory #4 — a ref on a Vue component is never the DOM
-// node). `$el` is Vue's fallthrough accessor to that single root element.
 const sectionComponentRef = ref<{ $el: HTMLElement } | null>(null)
-const sectionEl = computed<HTMLElement | null>(() => sectionComponentRef.value?.$el ?? null)
-// Same BaseContainer-is-a-component caveat as sectionComponentRef above.
-const heroContentComponentRef = ref<{ $el: HTMLElement } | null>(null)
-const heroContentEl = computed<HTMLElement | null>(() => heroContentComponentRef.value?.$el ?? null)
+const stageRef = ref<HTMLElement | null>(null)
 const headingRef = ref<HTMLElement | null>(null)
+const copyRef = ref<HTMLElement | null>(null)
 const subtextRef = ref<HTMLElement | null>(null)
 const ctaRowRef = ref<HTMLElement | null>(null)
 const ctaPrimaryRef = ref<HTMLElement | null>(null)
-
-const primaryRef = ref<HTMLElement | null>(null)
-const secondaryARef = ref<HTMLElement | null>(null)
-const secondaryBRef = ref<HTMLElement | null>(null)
-const microUtilityRef = ref<HTMLElement | null>(null)
-const signalDotRef = ref<HTMLElement | null>(null)
-const signalRouteRef = ref<HTMLElement | null>(null)
+const ringRef = ref<HTMLElement | null>(null)
+const chipsRef = ref<HTMLElement | null>(null)
+const galleryRef = ref<HTMLElement | null>(null)
+const cardRefs = ref<HTMLElement[]>([])
+const captionRef = ref<HTMLElement | null>(null)
+const categoryRef = ref<HTMLElement | null>(null)
+const titleRef = ref<HTMLElement | null>(null)
+const descRef = ref<HTMLElement | null>(null)
+const railRef = ref<HTMLElement | null>(null)
+const railWrapRef = ref<HTMLElement | null>(null)
+const numeralRef = ref<HTMLElement | null>(null)
+const successRef = ref<HTMLElement | null>(null)
 
 useMagnetic(ctaPrimaryRef, { strength: 0.2 })
 
-/** Wraps a word in the outer-clip / inner-translate mask structure — see
- * git history for provenance. Kept verbatim as a technique; only the
- * composition around it changed. */
+// The gallery's ScrollTrigger, kept so the primary CTA can jump straight to
+// the point where the first project becomes active.
+let galleryTrigger: ScrollTrigger | undefined
+const GALLERY_START = 0.36 // fraction of the pin where the horizontal phase begins
+
+function goToWork() {
+  if (galleryTrigger) {
+    const y = galleryTrigger.start + (galleryTrigger.end - galleryTrigger.start) * GALLERY_START
+    playTo(`y:${Math.round(y)}`)
+  } else {
+    playTo('#selected-work')
+  }
+}
+
+/** Wraps a word in the outer-clip / inner-translate mask structure. The
+ * closing full stop is the headline's Signal point, kept Cobalt. */
 function wrapWord(word: string): { outer: HTMLSpanElement; inner: HTMLSpanElement } {
   const outer = document.createElement('span')
   outer.style.overflow = 'clip'
@@ -69,383 +80,456 @@ function wrapWord(word: string): { outer: HTMLSpanElement; inner: HTMLSpanElemen
   const inner = document.createElement('span')
   inner.style.display = 'inline-block'
   inner.style.padding = '0.2em'
-  inner.textContent = word
-  inner.dataset.revealEl = ''
-  inner.dataset.revealKind = 'mask'
-
+  if (word.endsWith('.')) {
+    inner.textContent = word.slice(0, -1)
+    const dot = document.createElement('span')
+    dot.className = 'text-cobalt'
+    dot.textContent = '.'
+    inner.appendChild(dot)
+  } else {
+    inner.textContent = word
+  }
   outer.appendChild(inner)
   return { outer, inner }
 }
 
-// Micro Utility state cycle — whitelisted placeholder states only
-// (04-homepage-spec.md "Micro Utility — Whitelist"). This is the element
-// that "most visibly works": a restrained, non-looping index/state
-// transition, not a fake KPI.
-const microStates = ['SYSTEM ACTIVE', 'PROCESS READY', '01 / 04'] as const
-const microStateIndex = ref(0)
-const microStateLabel = computed(() => microStates[microStateIndex.value])
+const clamp = gsap.utils.clamp
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 useGsapContext(() => {
+  // --- Entrance (all widths; skipped under reduced motion) ---
   watch(
     pageReady,
-    (ready, _oldValue, onCleanup) => {
+    (ready, _old, onCleanup) => {
       if (!ready) return
-
       const mm = gsap.matchMedia()
       onCleanup(() => mm.revert())
-
-      mm.add(reducedMotionQuery.reduce, () => {
-        // Reduced motion: premium static composition, short mask/Signal
-        // state acceptable, no long motion dependency (spec "Reduced
-        // Motion"). Everything settles to its resting state immediately.
-        gsap.set(
-          [subtextRef.value, ctaRowRef.value, primaryRef.value, secondaryARef.value, secondaryBRef.value, microUtilityRef.value].filter(
-            Boolean
-          ),
-          { opacity: 1, x: 0, y: 0, scale: 1, clearProps: 'filter' }
-        )
-        if (signalDotRef.value) gsap.set(signalDotRef.value, { opacity: 1 })
-        if (signalRouteRef.value) gsap.set(signalRouteRef.value, { scaleY: 1 })
-      })
 
       mm.add(reducedMotionQuery.noPreference, () => {
         const heading = headingRef.value
         if (!heading) return
-
-        // --- Headline mask reveal setup ---
-        const allHeadingWords: HTMLElement[] = []
-        const headingText = heading.textContent ?? ''
+        const words: HTMLElement[] = []
         heading.textContent = ''
-        for (const part of headingText.split(/(\s+)/).filter(Boolean)) {
-          if (/^\s+$/.test(part)) {
-            heading.appendChild(document.createTextNode(part))
-            continue
-          }
+        for (const part of headlineWords) {
           const { outer, inner } = wrapWord(part)
           heading.appendChild(outer)
-          allHeadingWords.push(inner)
+          words.push(inner)
         }
+        gsap.set(words, { yPercent: 120 })
+        gsap.set([subtextRef.value, ctaRowRef.value].filter(Boolean), { opacity: 0, y: 14 })
+        gsap.set(chipsRef.value, { opacity: 0 })
+        gsap.set(ringRef.value, { opacity: 0, scale: 0.9 })
 
-        if (subtextRef.value) {
-          subtextRef.value.dataset.revealEl = ''
-          subtextRef.value.dataset.revealKind = 'scroll'
-        }
-        if (ctaRowRef.value) {
-          ctaRowRef.value.dataset.revealEl = ''
-          ctaRowRef.value.dataset.revealKind = 'scroll'
-        }
-
-        gsap.set(allHeadingWords, { yPercent: 120 })
-        gsap.set([subtextRef.value, ctaRowRef.value].filter(Boolean), { opacity: 0, y: 12 })
-
-        // --- Living Proof System initial states ---
-        // Primary: mostly stable — enters via a restrained scale/opacity
-        // settle only (crop/reframe is its idle language, not entrance).
-        if (primaryRef.value) gsap.set(primaryRef.value, { opacity: 0, y: 24, scale: 0.98 })
-        // Secondary A: aligned to Primary's top edge — enters slightly
-        // behind Primary, partial-occlusion depth already in the DOM
-        // layering (z-index), not faked with blur.
-        if (secondaryARef.value) gsap.set(secondaryARef.value, { opacity: 0, y: 18 })
-        // Secondary B: farther crop, different parallax rate later.
-        if (secondaryBRef.value) gsap.set(secondaryBRef.value, { opacity: 0, y: 14 })
-        // Micro Utility: last to arrive — it's the payoff of the route.
-        if (microUtilityRef.value) gsap.set(microUtilityRef.value, { opacity: 0, y: 10 })
-        if (signalRouteRef.value) gsap.set(signalRouteRef.value, { scaleY: 0 })
-        if (signalDotRef.value) gsap.set(signalDotRef.value, { opacity: 0, scale: 0.6 })
-
-        // --- Load sequence: mask reveal → hierarchy settles → proof system activates ---
         const tl = gsap.timeline({ defaults: { ease: approvedEase.gsapStandard } })
-
-        tl.to(allHeadingWords, { yPercent: 0, duration: motionTier.cinematicMin, stagger: motionStagger.loose })
-        tl.to(
-          subtextRef.value,
-          { opacity: 1, y: 0, duration: motionTier.standardMax },
-          `-=${motionTier.cinematicMin * 0.55}`
-        )
-        tl.to(
-          ctaRowRef.value,
-          { opacity: 1, y: 0, duration: motionTier.standardMax },
-          `-=${motionTier.standardMax * 0.7}`
-        )
-        tl.addLabel('proofSystem', `-=${motionTier.standardMax * 0.4}`)
-
-        // The Signal begins its route as the headline settles, reaching
-        // Primary just as it arrives — "headline → primary proof" per the
-        // spec's execution route.
-        tl.to(signalRouteRef.value, { scaleY: 1, duration: motionTier.standardMax, ease: approvedEase.gsapCinematic }, 'proofSystem')
-        tl.to(primaryRef.value, { opacity: 1, y: 0, scale: 1, duration: motionTier.cinematicMin * 0.8, ease: approvedEase.gsapCinematic }, 'proofSystem')
-        tl.to(secondaryARef.value, { opacity: 1, y: 0, duration: motionTier.standardMax }, 'proofSystem+=0.12')
-        tl.to(secondaryBRef.value, { opacity: 1, y: 0, duration: motionTier.standardMax }, 'proofSystem+=0.2')
-
-        // "→ micro state" — Signal reaches its destination and the Micro
-        // Utility activates: this is the single purposeful activation
-        // moment, not a looping pulse.
-        tl.to(signalDotRef.value, { opacity: 1, scale: 1, duration: motionTier.microMax }, 'proofSystem+=0.5')
-        tl.to(microUtilityRef.value, { opacity: 1, y: 0, duration: motionTier.standardMin }, 'proofSystem+=0.55')
-
-        // --- Idle motion: system-based, not "everything floating" ---
-        // Secondary A: positional breathing, ±3-4px max, restrained.
-        if (secondaryARef.value) {
-          gsap.to(secondaryARef.value, {
-            y: '+=4',
-            duration: 3.4,
-            ease: spatialEase.drift,
-            repeat: -1,
-            yoyo: true,
-            delay: motionTier.cinematicMax
-          })
-        }
-
-        // Micro Utility state cycle: a sparse, non-looping-feeling index
-        // transition (index advances slowly; this is the element that
-        // "most visibly works").
-        const stateInterval = window.setInterval(() => {
-          microStateIndex.value = (microStateIndex.value + 1) % microStates.length
-        }, 4200)
-        onCleanup(() => window.clearInterval(stateInterval))
-
+        tl.to(ringRef.value, { opacity: 1, scale: 1, duration: motionTier.cinematicMax, ease: approvedEase.gsapCinematic }, 0)
+        tl.to(words, { yPercent: 0, duration: motionTier.cinematicMin, stagger: motionStagger.loose }, 0.1)
+        tl.to(subtextRef.value, { opacity: 1, y: 0, duration: motionTier.standardMax }, '-=0.5')
+        tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: motionTier.standardMax }, '-=0.4')
+        tl.to(chipsRef.value, { opacity: 1, duration: motionTier.standardMax }, '-=0.3')
         return () => tl.kill()
       })
     },
     { immediate: true }
   )
 
-  // --- Scroll-driven Signal exit + Primary crop/reframe ---
-  // Baseline additional scroll depth ~1.3-1.6 viewport lengths (spec).
-  //
-  // A pin was tried first and rejected after visual QA: pinning Hero's
-  // content for that whole distance made the composition sit completely
-  // frozen for most of the scroll (the crop-shift/parallax amplitudes
-  // that read as "restrained" over a normal scroll distance are far too
-  // subtle to register across ~1260px of held-still scrubbing), so the
-  // real experience was "enter Hero → obvious static hold → mechanical
-  // release into What We Build" — exactly the pinned-stage design drift
-  // the Hero spec explicitly does NOT call for (Hero is not Heavy-pinned
-  // like Selected Work/Platforms). Confirmed by a dense Playwright frame
-  // sweep across the full scroll range.
-  //
-  // Fixed by dropping the pin entirely: `heroExitSpacer` below adds real
-  // extra height (not a pin-spacer) so Hero's own natural, un-pinned
-  // scroll distance is genuinely ~1.3-1.6 viewport lengths before What We
-  // Build begins. The Living Proof column now scrolls WITH the page
-  // (ordinary document flow) while this ScrollTrigger scrubs its
-  // internal resolve (Signal shrink, Primary/Secondary B crop-shift) on
-  // top of that natural movement — the composition visibly travels and
-  // resolves together, rather than holding still and then cutting.
-  const mmScroll = gsap.matchMedia()
-  mmScroll.add(reducedMotionQuery.noPreference, () => {
-    if (!sectionEl.value) return
+  // --- Desktop only: pinned gallery. Below desktop / reduced motion the
+  // gallery layer is display:none (see <style>) and nothing here runs. ---
+  const mm = gsap.matchMedia()
+  mm.add({ isDesktop: `${reducedMotionQuery.noPreference} and ${breakpointQuery.desktopUp}` }, (context) => {
+    const { isDesktop } = context.conditions as { isDesktop: boolean }
+    const stage = stageRef.value
+    const gallery = galleryRef.value
+    const cards = cardRefs.value
+    if (!isDesktop || !stage || !gallery || cards.length === 0) return
 
-    const trigger = ScrollTrigger.create({
-      trigger: sectionEl.value,
-      start: 'top top',
-      end: 'bottom top',
-      scrub: 0.6,
-      onUpdate: (self) => {
-        // Primary: allowed crop shift / reframe, restrained. Secondary B:
-        // its own, different parallax rate (never idle-looped).
-        if (primaryRef.value) gsap.set(primaryRef.value, { yPercent: self.progress * -10 })
-        if (secondaryBRef.value) gsap.set(secondaryBRef.value, { yPercent: self.progress * -22 })
-        if (signalRouteRef.value) gsap.set(signalRouteRef.value, { scaleY: 1 - self.progress * 0.6, transformOrigin: 'top' })
-        // The Living Proof column and headline column fade out together
-        // as Hero approaches its own natural end, so the boundary into
-        // What We Build reads as a resolve rather than an abrupt content
-        // swap — restrained (never below 0 until the very last stretch).
-        const fadeStart = 0.75
-        const fadeProgress = Math.max(0, (self.progress - fadeStart) / (1 - fadeStart))
-        if (heroContentEl.value) gsap.set(heroContentEl.value, { opacity: 1 - fadeProgress })
+    const N = cards.length
+    let vw = window.innerWidth
+    let vh = window.innerHeight
+    // Final (active) card size: wide but never full-screen — capped by both
+    // viewport width and height so caption + rail always fit below it.
+    let W = Math.min(vw * 0.56, vh * 0.54 * 1.6)
+    let H = W * 0.625
+    const measure = () => {
+      vw = window.innerWidth
+      vh = window.innerHeight
+      W = Math.min(vw * 0.56, vh * 0.54 * 1.6)
+      H = W * 0.625
+      cards.forEach((c) => {
+        c.style.width = `${W}px`
+        c.style.height = `${H}px`
+        c.style.marginLeft = `${-W / 2}px`
+        c.style.marginTop = `${-H / 2}px`
+      })
+      if (captionRef.value) captionRef.value.style.width = `${W}px`
+    }
+    measure()
+
+    // Animated state, driven by one scrubbed timeline.
+    const state = { enter: 0, b: 0, pos: 1, fade: 1 }
+    const centerYFinal = 0.47 // stage-height fraction where the active card sits
+    const easeB = gsap.parseEase('power2.inOut')
+
+    let activeIndex = -1
+    const setCaption = (index: number, direction: 1 | -1) => {
+      const project = projects[index]
+      if (!project) return
+      activeIndex = index
+      const title = titleRef.value
+      const category = categoryRef.value
+      const desc = descRef.value
+      if (!title || !category || !desc) return
+      const tl = gsap.timeline({ defaults: { ease: approvedEase.gsapStandard } })
+      tl.to(title, { yPercent: direction > 0 ? -110 : 110, duration: 0.25 }, 0)
+      tl.call(() => {
+        title.textContent = project.title
+        category.textContent = project.category
+        desc.textContent = project.description
+      }, undefined, 0.15)
+      tl.fromTo(title, { yPercent: direction > 0 ? 110 : -110 }, { yPercent: 0, duration: 0.35 }, 0.15)
+      tl.fromTo([category, desc], { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.05 }, 0.18)
+      if (numeralRef.value) numeralRef.value.textContent = `${project.index} / ${String(N).padStart(2, '0')}`
+      const segs = railRef.value?.children
+      if (segs) {
+        for (let i = 0; i < segs.length; i++) {
+          const el = segs[i] as HTMLElement
+          el.dataset.on = i < index ? 'past' : i === index ? 'active' : 'off'
+        }
       }
+    }
+
+    const render = () => {
+      const eB = easeB(state.b)
+      const arc = 1 - eB
+      const spacing = lerp(W * 0.68, W * 0.97, eB)
+      const centerY = vh * centerYFinal
+      const baseY = vh * 0.5 // cards are absolutely centered on the stage middle
+
+      for (let i = 0; i < N; i++) {
+        const el = cards[i]!
+        const d = i - state.pos
+        const ad = Math.abs(d)
+
+        // Scale: at rest the center card is largest and the arc's sides
+        // fall away; once grown, only the active card is full size.
+        const scaleA = clamp(0.3, 0.66, 0.66 - ad * 0.11)
+        const scaleC = clamp(0.6, 1, 1 - ad * 0.17)
+        const s = lerp(scaleA, scaleC, eB)
+
+        const x = d * spacing
+        // Arc: at rest the row sits at the bottom edge, the center card
+        // highest and the sides falling away and tilting; it straightens
+        // to a flat row at the final height.
+        const restY = vh * 0.8 + (H * scaleA) / 2 - baseY + arc * ad * ad * vh * 0.045
+        const y = lerp(restY, centerY - baseY, eB) + (1 - state.enter) * vh * 0.12
+        const rotZ = arc * d * 5
+        const rotY = arc * -d * 16
+
+        // Cards far from the active one fade out so at most ~3 are seen.
+        const far = clamp(0, 1, 1 - (ad - 2.2))
+        const opacity = far * lerp(1, ad < 0.5 ? 1 : 0.55, eB) * state.enter * state.fade
+
+        gsap.set(el, {
+          x,
+          y,
+          scale: s,
+          rotationZ: rotZ,
+          rotationY: rotY,
+          opacity,
+          zIndex: 100 - Math.round(ad * 10),
+          pointerEvents: opacity > 0.5 ? 'auto' : 'none'
+        })
+      }
+
+      // Caption follows the nearest card once the cards have grown.
+      const nearest = clamp(0, N - 1, Math.round(state.pos))
+      if (eB > 0.55 && nearest !== activeIndex) {
+        setCaption(nearest, nearest >= activeIndex ? 1 : -1)
+      }
+      // Ring has faded out by the end of B — stop rendering it (HeroRing skips
+      // frames while this flag is set) so the GPU isn't drawing invisible glass.
+      if (ringRef.value) ringRef.value.dataset.paused = String(state.b > 0.85)
+      const captionOpacity = String(clamp(0, 1, (eB - 0.6) / 0.3) * state.fade)
+      if (captionRef.value) captionRef.value.style.opacity = captionOpacity
+      // "Success Project" title: arrives with the grown cards, holds through
+      // the horizontal travel, leaves with the gallery's release.
+      if (successRef.value) {
+        const t = clamp(0, 1, (eB - 0.5) / 0.4)
+        successRef.value.style.opacity = String(t * state.fade)
+        successRef.value.style.transform = `translateY(${(1 - t) * 28}px)`
+      }
+    }
+
+    // Initial state
+    setCaption(0, 1)
+    render()
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: stage,
+        start: 'top top',
+        // ~7.5 viewport lengths total, inside the Selected Work guardrail
+        // (baseline 6.5-8, hard maximum ~9).
+        end: '+=650%',
+        scrub: 0.8,
+        pin: true,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onRefreshInit: measure
+      },
+      onUpdate: render,
+      defaults: { ease: 'none' }
     })
 
-    return () => trigger.kill()
-  })
+    // 0-12: intro rest.
+    // 12-36 (B): hero copy recedes, ring drifts back, cards straighten + grow,
+    // and the centered card shifts from project 02 to project 01.
+    tl.to(state, { b: 1, duration: 24, ease: 'none' }, 12)
+    tl.to(state, { pos: 0, duration: 24, ease: 'power2.inOut' }, 12)
+    tl.to(copyRef.value, { opacity: 0, y: -70, duration: 14, ease: 'power2.in' }, 12)
+    tl.to(chipsRef.value, { opacity: 0, duration: 10, ease: 'power2.in' }, 12)
+    tl.to(ringRef.value, { scale: 0.6, yPercent: -22, opacity: 0, duration: 20, ease: 'power2.inOut' }, 12)
+    // 36-94 (C): horizontal travel across all projects.
+    tl.to(state, { pos: N - 1, duration: 58, ease: 'none' }, 36)
+    // 94-100 (D): release — gallery dissolves into the next section.
+    tl.to(state, { fade: 0, duration: 6, ease: 'power1.in' }, 94)
 
-  // Publish the Signal route's horizontal position for What We Build's
-  // handoff (see useHeroSignalHandoff — "Designed Continuity, Not
-  // Arbitrary Proximity": Signal's exit and WWB's entry share one 12-column
-  // key line). Measured once client-side after layout settles, as a
-  // fraction of viewport width so it stays meaningful regardless of scroll
-  // offset or either section's own height.
-  if (signalRouteRef.value) {
-    const rect = signalRouteRef.value.getBoundingClientRect()
-    publishSignalX(rect.left / window.innerWidth)
-  }
+    galleryTrigger = tl.scrollTrigger ?? undefined
+
+    // Entrance of the arc after the hero copy has landed.
+    const enterTween = gsap.to(state, {
+      enter: 1,
+      duration: 1.4,
+      delay: 0.9,
+      ease: approvedEase.gsapCinematic,
+      onUpdate: render
+    })
+
+    // --- Pointer response: cards drift a few px at different depths ---
+    const cleanups: Array<() => void> = []
+    if (window.matchMedia('(pointer: fine)').matches) {
+      const inners = cards.map((c) => c.querySelector<HTMLElement>('[data-card-inner]')!)
+      const qx = inners.map((el) => gsap.quickTo(el, 'x', { duration: 0.9, ease: approvedEase.gsapStandard }))
+      const qy = inners.map((el) => gsap.quickTo(el, 'y', { duration: 0.9, ease: approvedEase.gsapStandard }))
+      const onMove = (event: PointerEvent) => {
+        const nx = (event.clientX / window.innerWidth) * 2 - 1
+        const ny = (event.clientY / window.innerHeight) * 2 - 1
+        inners.forEach((_, i) => {
+          const depth = 6 + (i % 3) * 4
+          qx[i]!(nx * depth)
+          qy[i]!(ny * depth * 0.6)
+        })
+      }
+      window.addEventListener('pointermove', onMove, { passive: true })
+      cleanups.push(() => window.removeEventListener('pointermove', onMove))
+
+      // Hover: gentle lift on the grown card.
+      cards.forEach((card, i) => {
+        const inner = inners[i]!
+        const enter = () => {
+          if (state.b < 0.95) return
+          gsap.to(inner, { scale: 1.02, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
+        }
+        const leave = () => {
+          gsap.to(inner, { scale: 1, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
+        }
+        card.addEventListener('pointerenter', enter)
+        card.addEventListener('pointerleave', leave)
+        cleanups.push(() => {
+          card.removeEventListener('pointerenter', enter)
+          card.removeEventListener('pointerleave', leave)
+        })
+      })
+    }
+
+    const onResize = () => {
+      measure()
+      render()
+    }
+    window.addEventListener('resize', onResize)
+    cleanups.push(() => window.removeEventListener('resize', onResize))
+
+    return () => {
+      enterTween.kill()
+      tl.scrollTrigger?.kill()
+      tl.kill()
+      galleryTrigger = undefined
+      cleanups.forEach((fn) => fn())
+    }
+  })
 })
 </script>
 
 <template>
-  <!-- Section height: ~1.4 viewport lengths tall (100svh floor + a ~40svh
-       exit runway), NOT pinned. Content is vertically centered within this
-       taller box via flex, so it scrolls WITH the page across that extra
-       height instead of holding still — the ScrollTrigger below scrubs the
-       Signal/crop-shift/fade against genuine scroll progress through this
-       same span, giving the ~1.3-1.6 viewport-length baseline real scroll
-       runway without a pinned hold. A pin was tried first and rejected
-       after Playwright QA showed it reading as an obvious frozen stage
-       (see the ScrollTrigger comment below) — Hero is not one of the
-       Heavy-pinned sections (Selected Work/Platforms own that mechanic). -->
-  <BaseSection
-    ref="sectionComponentRef"
-    as="section"
-    class="relative flex min-h-[140svh] items-center overflow-hidden bg-slateNavy pb-20 pt-32 md:pt-36"
-  >
-    <!-- Environment: Slate Navy with tonal depth via a very restrained
-         radial lift behind the headline column — not a gradient blob, not
-         a glow effect; a single low-opacity tonal shift so the surface
-         doesn't read as flat. -->
-    <div
-      aria-hidden="true"
-      class="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_70%_60%_at_20%_35%,rgba(37,99,235,0.08),transparent_65%)]"
-    />
+  <BaseSection ref="sectionComponentRef" as="section" class="relative overflow-hidden bg-slateNavy py-0">
+    <div ref="stageRef" class="relative flex min-h-[100svh] items-center justify-center overflow-hidden desktop:h-[100svh]">
+      <!-- Background: deep blue gradation, restrained — a single soft lift
+           behind the ring, a cool highlight at the top-right, plus one thin
+           orbit line and two small marks. No grid, no particles, no blobs. -->
+      <div
+        aria-hidden="true"
+        class="absolute inset-0"
+        style="background: radial-gradient(ellipse 58% 52% at 50% 44%, rgba(37, 99, 235, 0.42), rgba(29, 78, 216, 0.16) 46%, transparent 74%), radial-gradient(ellipse 40% 38% at 92% 6%, rgba(96, 165, 250, 0.16), transparent 70%), radial-gradient(ellipse 45% 40% at 4% 92%, rgba(37, 99, 235, 0.14), transparent 70%), linear-gradient(180deg, #050b1c 0%, #0a1330 46%, #0d1836 100%)"
+      />
+      <svg
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-0 h-full w-full"
+        viewBox="0 0 1440 900"
+        preserveAspectRatio="xMidYMid slice"
+        fill="none"
+      >
+        <ellipse cx="720" cy="400" rx="470" ry="300" stroke="rgba(147,197,253,0.22)" stroke-width="1" transform="rotate(-14 720 400)" />
+        <circle cx="1094" cy="212" r="6" fill="#3b82f6" />
+        <path d="M22 500h16M30 492v16" stroke="rgba(147,197,253,0.45)" stroke-width="1" />
+        <path d="M1402 500h16M1410 492v16" stroke="rgba(147,197,253,0.3)" stroke-width="1" />
+      </svg>
 
-    <BaseContainer ref="heroContentComponentRef" class="relative z-10">
-      <!-- 12-column macro grid, ~55/45 asymmetric split: headline column
-           spans 7, Living Proof System spans 5 and is allowed to bleed
-           slightly left of its column start (see proof-system's own
-           negative margin) toward the center per spec. -->
-      <div class="grid grid-cols-1 gap-y-16 md:grid-cols-12 md:items-center md:gap-x-8">
-        <!-- LEFT: headline / composition anchor -->
-        <div class="md:col-span-7">
+      <!-- Glass ring (Three.js, client-only) -->
+      <div
+        ref="ringRef"
+        aria-hidden="true"
+        class="pointer-events-none absolute left-1/2 top-[46%] z-0 h-[min(78vw,680px)] w-[min(78vw,680px)] -translate-x-1/2 -translate-y-1/2 desktop:top-[47%] desktop:h-[min(50vw,78svh,700px)] desktop:w-[min(50vw,78svh,700px)]"
+      >
+        <ClientOnly>
+          <HomeHeroRing />
+        </ClientOnly>
+      </div>
+
+      <!-- Copy: headline / supporting text / CTAs, centered. -->
+      <BaseContainer class="z-10 w-full">
+        <div
+          ref="copyRef"
+          class="mx-auto flex flex-col items-center px-2 pb-16 pt-28 text-center desktop:absolute desktop:inset-x-0 desktop:top-[22svh] desktop:mx-0 desktop:px-0 desktop:pb-0 desktop:pt-0"
+        >
           <h1
             ref="headingRef"
-            class="max-w-[14ch] text-left font-display text-token-display-xl font-bold text-pureWhite"
+            class="flex flex-col items-center text-center font-display text-[length:clamp(40px,14vw,72px)] font-bold leading-[0.92] tracking-[-0.04em] text-pureWhite [text-shadow:0_4px_44px_rgba(5,11,28,0.65)] md:text-token-display-xl desktop:flex-row desktop:justify-center desktop:gap-x-[0.1em] desktop:text-[length:clamp(64px,6.4vw,132px)]"
           >
-            {{ headline }}
+            <span v-for="word in headlineWords" :key="word" class="block">{{ word.slice(0, -1) }}<span class="text-cobalt">.</span></span>
           </h1>
 
-          <!-- text-[color:...] arbitrary value, not `text-pureWhite/64`: the
-               opacity-modifier utility for this exact fraction did not
-               reliably compile via the JIT scanner in dev (verified via
-               Playwright: /45 and /80 elsewhere in this file compiled fine,
-               /64 silently did not) — using the literal
-               06-design-tokens.json color.text.mutedOnDark value directly
-               sidesteps that scanning gap entirely. -->
-          <p ref="subtextRef" class="mt-6 max-w-md text-left text-token-body text-[color:rgba(255,255,255,0.64)]">
+          <p ref="subtextRef" class="mx-auto mt-8 max-w-lg text-center text-token-body-large font-medium text-pureWhite [text-shadow:0_2px_18px_rgba(5,11,28,0.9),0_0_34px_rgba(5,11,28,0.6)]">
             {{ subtext }}
           </p>
 
-          <div ref="ctaRowRef" class="mt-8 flex flex-wrap items-center gap-6">
+          <div ref="ctaRowRef" class="mt-9 flex flex-wrap items-center justify-center gap-6">
             <div ref="ctaPrimaryRef" class="inline-block">
-              <!-- Cobalt CTA, not the shared `.btn-accent`/`.btn-primary`
-                   classes — both bake in a Yellow fill/hover that conflicts
-                   with this section's Cobalt-led Signal language and the
-                   Yellow-off-by-default posture (03-design-system.md §9).
-                   Those shared classes remain correct for their existing
-                   light-page call sites; not touched here. -->
               <a
-                :href="ctaPrimary.to"
+                href="#selected-work"
                 class="inline-flex items-center justify-center gap-2 rounded-button bg-cobalt px-7 py-3.5 font-display text-sm font-semibold text-pureWhite transition-colors duration-150 hover:bg-cyan hover:text-slateNavy"
-                @click.prevent="goToSelectedWork"
+                @click.prevent="goToWork"
               >
                 {{ ctaPrimary.label }}
+                <span aria-hidden="true">→</span>
               </a>
             </div>
             <a
               :href="whatsappLink"
               target="_blank"
               rel="noopener noreferrer"
-              class="group inline-flex items-center gap-2 text-token-metadata font-semibold uppercase tracking-[0.06em] text-[color:rgba(255,255,255,0.64)] transition-colors duration-150 hover:text-pureWhite"
+              class="group inline-flex items-center gap-2 text-token-metadata font-semibold uppercase tracking-[0.06em] text-pureWhite [text-shadow:0_2px_14px_rgba(5,11,28,0.9)] transition-colors duration-150 hover:text-cyan"
             >
               {{ ctaSecondary.label }}
               <span aria-hidden="true" class="transition-transform duration-150 group-hover:translate-x-1">→</span>
             </a>
           </div>
         </div>
+      </BaseContainer>
 
-        <!-- RIGHT: Living Proof System — not container-bound, fragments
-             align to grid key lines while overlapping/occluding each
-             other. Exactly 4 fragments: Primary, Secondary A, Secondary B,
-             Micro Utility — must not read as 4 equal cards.
+      <!-- Status chips (whitelisted neutral states). -->
+      <div ref="chipsRef" aria-hidden="true" class="hidden desktop:block">
+        <div class="absolute left-[4vw] top-[34svh] z-10 flex items-center gap-3 font-display text-token-metadata font-semibold tracking-[0.08em] text-[color:rgba(255,255,255,0.72)]">
+          <span>01 / 04</span>
+          <span class="h-px w-16 bg-cobalt" />
+        </div>
+        <div class="absolute right-[4vw] top-[66svh] z-30 flex items-center gap-3 rounded-button border border-[color:rgba(147,197,253,0.3)] bg-[color:rgba(10,19,48,0.6)] px-4 py-2.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-pureWhite">
+          <span class="h-1.5 w-1.5 rounded-full bg-cobalt" />
+          Process Ready
+        </div>
+      </div>
 
-             Mobile recomposition (spec: "Recompose, not scale"): Secondary
-             B is hidden below `md` rather than shrunk into an unreadable
-             sliver — a squeezed 58%-width fragment inside a narrow mobile
-             column would just be the desktop layout scaled down. Primary +
-             Secondary A + Micro Utility + Signal are preserved, which is
-             the essential-fragment subset the spec calls for ("preserve
-             Primary proof, essential Secondary proof, Micro Utility,
-             Signal logic"). Height drops from a fixed 520px to a shorter,
-             content-driven mobile block. -->
-        <div class="relative h-[320px] sm:h-[380px] md:col-span-5 md:col-start-8 md:-ml-6 md:h-[520px]">
-          <!-- The Signal — execution route: descends from the headline
-               anchor, through Primary, to the Micro Utility, toward the
-               section boundary. A short bounded line + point, not a
-               network connecting all fragments. -->
+      <!-- Gallery: the 10 Selected Work projects on a curved arc that
+           straightens, grows and travels sideways with scroll. Desktop
+           only (hidden below 1024px and under reduced motion — the
+           vertical Selected Work list covers those). -->
+      <div
+        ref="galleryRef"
+        class="hero-gallery pointer-events-none absolute inset-0 z-20 hidden desktop:block"
+        style="perspective: 1500px"
+      >
+        <article
+          v-for="(project, i) in projects"
+          :key="project.index"
+          :ref="(el) => { if (el) cardRefs[i] = el as HTMLElement }"
+          class="absolute left-1/2 top-1/2 opacity-0"
+          style="transform-style: preserve-3d"
+        >
           <div
-            ref="signalRouteRef"
-            aria-hidden="true"
-            class="absolute -left-3 top-0 h-full w-px origin-top bg-[color:rgba(37,99,235,0.4)] md:-left-5"
-          />
-          <span
-            ref="signalDotRef"
-            aria-hidden="true"
-            class="absolute -left-[15px] top-[58%] h-2 w-2 rounded-full bg-cobalt shadow-[0_0_0_4px_rgba(37,99,235,0.18)] md:-left-[23px]"
-          />
-
-          <!-- Secondary B: farther crop, aligned to a different grid line
-               (bottom-right), lowest z, most aggressive crop. Depth from
-               crop + tonal contrast, never blur. Hidden on mobile — see
-               recomposition note above. -->
-          <div
-            ref="secondaryBRef"
-            class="absolute bottom-0 right-0 z-10 hidden h-[46%] w-[58%] overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.1)] bg-slateNavy md:block"
-            style="background: linear-gradient(155deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))"
+            data-card-inner
+            class="relative h-full w-full overflow-hidden rounded-card border border-[color:rgba(147,197,253,0.28)] bg-[#0a1330] shadow-[0_50px_100px_-40px_rgba(2,6,23,0.9)]"
           >
-            <div class="flex h-full flex-col justify-between p-4">
-              <div class="h-1.5 w-10 rounded-full bg-[color:rgba(255,255,255,0.15)]" />
-              <div class="space-y-2">
-                <div class="h-1.5 w-full rounded-full bg-[color:rgba(255,255,255,0.1)]" />
-                <div class="h-1.5 w-2/3 rounded-full bg-[color:rgba(255,255,255,0.1)]" />
-              </div>
+            <img :src="project.image" :alt="project.title" :loading="i < 3 ? 'eager' : 'lazy'" class="h-full w-full object-cover">
+            <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(5,11,28,0.55)] via-transparent to-transparent" />
+            <span class="absolute left-4 top-3 font-display text-token-metadata font-semibold tracking-[0.08em] text-pureWhite">{{ project.index }}</span>
+            <LayoutBrandMark :height="11" class="absolute right-4 top-3.5 opacity-80" />
+          </div>
+        </article>
+
+        <!-- Section title above the grown cards. Driven by render(), so it
+             follows the same scrubbed timeline as the cards. -->
+        <div
+          ref="successRef"
+          class="absolute inset-x-0 top-[11svh] z-0 opacity-0"
+        >
+          <div class="container-page">
+            <p class="flex items-center gap-4 font-display text-[length:clamp(36px,4.2vw,68px)] font-bold leading-[0.95] tracking-[-0.035em] text-pureWhite">
+              <span>Success Project<span class="text-cobalt">.</span></span>
+              <span aria-hidden="true" class="mt-[0.35em] hidden h-px flex-1 bg-[color:rgba(255,255,255,0.16)] md:block" />
+              <LayoutBrandMark :height="14" class="mt-[0.3em] hidden md:inline-block" />
+            </p>
+          </div>
+        </div>
+
+        <!-- Caption under the active card. -->
+        <div
+          ref="captionRef"
+          class="absolute inset-x-0 bottom-[4.5svh] mx-auto flex items-end justify-between gap-10 opacity-0"
+        >
+          <div class="max-w-lg text-left">
+            <span ref="categoryRef" class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-[color:#93c5fd]" />
+            <div class="mt-2 overflow-hidden">
+              <h2 ref="titleRef" class="font-display text-[length:clamp(26px,2.6vw,44px)] font-bold leading-[1.05] tracking-[-0.02em] text-pureWhite" />
             </div>
+            <p ref="descRef" class="mt-2 line-clamp-2 text-token-body text-[color:rgba(255,255,255,0.68)]" />
           </div>
 
-          <!-- Primary: largest, most stable, frontmost. Aligned to the
-               top-left key line of this column. -->
-          <div
-            ref="primaryRef"
-            class="absolute left-0 top-0 z-20 h-[68%] w-[86%] overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.12)] bg-slateNavy shadow-[0_40px_80px_-40px_rgba(0,0,0,0.6)] md:h-[62%] md:w-[78%]"
-            style="background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015))"
-          >
-            <div class="flex h-full flex-col justify-between p-6">
-              <div class="flex items-center justify-between">
-                <span class="text-token-metadata font-semibold uppercase tracking-[0.08em] text-[color:rgba(255,255,255,0.45)]">Execution</span>
-                <span class="h-1.5 w-1.5 rounded-full bg-cobalt" aria-hidden="true" />
-              </div>
-              <div class="space-y-3">
-                <div class="h-2 w-full rounded-full bg-[color:rgba(255,255,255,0.12)]" />
-                <div class="h-2 w-4/5 rounded-full bg-[color:rgba(255,255,255,0.12)]" />
-                <div class="h-2 w-1/2 rounded-full bg-[color:rgba(37,99,235,0.4)]" />
-              </div>
+          <!-- Segmented rail: 10 discrete segments + numeral. -->
+          <div ref="railWrapRef" class="flex shrink-0 flex-col items-end gap-3 pb-1">
+            <div ref="railRef" class="hero-rail flex items-center gap-1.5">
+              <span v-for="p in projects" :key="p.index" data-on="off" class="h-[3px] w-6" />
             </div>
-          </div>
-
-          <!-- Secondary A: shares Primary's top edge, ~65% of its scale,
-               partially occluded by Primary. Kept on mobile (essential
-               Secondary proof) but narrower so it still reads as a
-               distinct, occluded fragment rather than crowding Primary. -->
-          <div
-            ref="secondaryARef"
-            class="absolute right-0 top-0 z-30 h-[30%] w-[36%] overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.1)] bg-slateNavy md:h-[34%] md:w-[42%]"
-            style="background: linear-gradient(160deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02))"
-          >
-            <div class="flex h-full flex-col justify-center gap-2 p-3 md:p-4">
-              <div class="h-1.5 w-full rounded-full bg-[color:rgba(255,255,255,0.14)]" />
-              <div class="h-1.5 w-3/5 rounded-full bg-[color:rgba(255,255,255,0.14)]" />
-            </div>
-          </div>
-
-          <!-- Micro Utility: smallest, attached to Primary's edge like a
-               metadata chip — a state indicator, not an image. -->
-          <div
-            ref="microUtilityRef"
-            class="absolute -bottom-4 left-4 z-40 flex items-center gap-2 rounded-button border border-[color:rgba(37,99,235,0.3)] bg-slateNavy px-3 py-2 shadow-[0_16px_32px_-16px_rgba(0,0,0,0.7)] md:left-10"
-          >
-            <span class="h-1.5 w-1.5 rounded-full bg-cobalt" aria-hidden="true" />
-            <span class="text-token-metadata font-semibold uppercase tracking-[0.08em] text-[color:rgba(255,255,255,0.8)]">{{ microStateLabel }}</span>
+            <span ref="numeralRef" class="font-display text-token-metadata font-semibold tracking-[0.08em] text-[color:rgba(255,255,255,0.7)]">01 / 10</span>
           </div>
         </div>
       </div>
-    </BaseContainer>
+    </div>
   </BaseSection>
 </template>
+
+<style>
+/* Gallery is desktop-only and motion-only: with reduced motion the vertical
+   Selected Work list carries every project. */
+[data-reduced-motion='true'] .hero-gallery {
+  display: none;
+}
+
+.hero-rail > span {
+  background: rgba(255, 255, 255, 0.18);
+  transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hero-rail > span[data-on='past'] {
+  background: #2563eb;
+}
+.hero-rail > span[data-on='active'] {
+  background: #fdc81f;
+}
+</style>

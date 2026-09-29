@@ -60,7 +60,7 @@ useGsapContext(() => {
     // this section would go, matching every other section's pattern.
   })
 
-  // --- Desktop only: pinned horizontal Spatial World Transfer (Milestone
+  // --- Desktop only: pinned vertical Spatial World Transfer (owner-directed: e-CORPORATE slides up over OPEN, no longer sideways) (Milestone
   // 5A final closure: Desktop = 1024px, not the legacy 768px `md`
   // boundary — see breakpointQuery.desktopUp. Tablet gets the same
   // reduced-complexity vertical stack as Mobile below, per spec: "Tablet
@@ -86,16 +86,16 @@ useGsapContext(() => {
     const signalNumeral = signal?.querySelector<HTMLElement>('[data-signal-numeral]') ?? null
 
     // --- Initial state: OPEN active at x:0, e-CORPORATE staged fully off-right ---
-    gsap.set(corpWorld, { xPercent: 100 })
-    gsap.set(openWorld, { xPercent: 0 })
-    gsap.set(openTitle, { xPercent: 0 })
-    gsap.set(corpTitle, { xPercent: 8 })
+    gsap.set(corpWorld, { yPercent: 100 })
+    gsap.set(openWorld, { yPercent: 0 })
+    gsap.set(openTitle, { yPercent: 0 })
+    gsap.set(corpTitle, { yPercent: 14 })
     // Restrained parallax layers (4-8px range per spec) tied to horizontal
     // transfer progress, not idle — set up as a fixed depth offset here,
     // driven from onUpdate below.
     gsap.set(openFragments, { x: 0 })
     gsap.set(corpFragments, { x: 0 })
-    if (signalPoint) gsap.set(signalPoint, { xPercent: 0 })
+    if (signalPoint) gsap.set(signalPoint, { y: 0 })
 
     // Dwell distribution across the pin's total scroll distance (spec
     // "conceptual, not rigid": OPEN ~35% / transfer ~25-30% / e-CORPORATE
@@ -132,8 +132,8 @@ useGsapContext(() => {
           1,
           (p - OPEN_DWELL_END) / (TRANSFER_END - OPEN_DWELL_END)
         )
-        gsap.set(openWorld, { xPercent: -30 * transferProgress })
-        gsap.set(corpWorld, { xPercent: 100 - 100 * transferProgress })
+        gsap.set(openWorld, { yPercent: -30 * transferProgress })
+        gsap.set(corpWorld, { yPercent: 100 - 100 * transferProgress })
 
         // --- Crop/reframe (strong secondary, priority 2): outgoing world
         // tightens its crop as it exits, incoming world resolves toward
@@ -145,28 +145,52 @@ useGsapContext(() => {
         // range across fragment layers, tied to transfer progress. ---
         openFragments.forEach((el, i) => {
           const depth = i === 0 ? 4 : 8
-          gsap.set(el, { x: -depth * transferProgress })
+          gsap.set(el, { y: -depth * transferProgress })
         })
         corpFragments.forEach((el, i) => {
           const depth = i === 0 ? 4 : 6
-          gsap.set(el, { x: depth * (1 - transferProgress) })
+          gsap.set(el, { y: depth * (1 - transferProgress) })
         })
 
         // --- Mask-based title exit/entry (not opacity-only) ---
-        gsap.set(openTitle, { xPercent: -12 * transferProgress, autoAlpha: 1 - transferProgress })
-        gsap.set(corpTitle, { xPercent: 8 * (1 - transferProgress), autoAlpha: transferProgress })
+        gsap.set(openTitle, { yPercent: -18 * transferProgress, autoAlpha: 1 - transferProgress })
+        gsap.set(corpTitle, { yPercent: 14 * (1 - transferProgress), autoAlpha: transferProgress })
 
         // --- Signal: horizontal state-transfer system (functional marker,
         // priority 3). Static at each state anchor, moves only during the
         // active transfer window. ---
-        if (signalPoint) gsap.set(signalPoint, { xPercent: 100 * transferProgress })
+        if (signalPoint) gsap.set(signalPoint, { y: 57 * transferProgress })
         if (signalNumeral) signalNumeral.textContent = transferProgress < 0.5 ? '01 / 02' : '02 / 02'
         signal?.classList.toggle('text-cyan', transferProgress > 0.05 && transferProgress < 0.95)
         signal?.classList.toggle('text-cobalt', transferProgress <= 0.05 || transferProgress >= 0.95)
       }
     })
 
-    return () => trigger.kill()
+    // --- Post-settle Response layer (fine pointers only): the primary
+    // fragment's inner layer drifts a few px against the pointer while the
+    // pointer is over the stage, so the crop reads as a window onto the
+    // product. It lives on [data-pan], an inner wrapper — the pinned
+    // transfer above owns the fragment's own transform, so the two never
+    // fight. Amplitude stays inside the 4-8px depth budget's spirit (a
+    // bit more, since it is user-driven, not idle).
+    const cleanups: Array<() => void> = [() => trigger.kill()]
+    if (window.matchMedia('(pointer: fine)').matches) {
+      const pans = Array.from(stage.querySelectorAll<HTMLElement>('[data-pan]'))
+      const panX = pans.map((el) => gsap.quickTo(el, 'x', { duration: 0.8, ease: approvedEase.gsapStandard }))
+      const panY = pans.map((el) => gsap.quickTo(el, 'y', { duration: 0.8, ease: approvedEase.gsapStandard }))
+      const onMove = (event: PointerEvent) => {
+        const nx = (event.clientX / window.innerWidth) * 2 - 1
+        const ny = (event.clientY / window.innerHeight) * 2 - 1
+        pans.forEach((_, i) => {
+          panX[i]!(-nx * 14)
+          panY[i]!(-ny * 9)
+        })
+      }
+      stage.addEventListener('pointermove', onMove, { passive: true })
+      cleanups.push(() => stage.removeEventListener('pointermove', onMove))
+    }
+
+    return () => cleanups.forEach((fn) => fn())
   })
 
   // --- Tablet (Reduced Complexity) + Mobile (Recomposed): OPEN ->
@@ -213,9 +237,7 @@ useGsapContext(() => {
            on a stable grid line, does not travel with the horizontal world
            motion (spec: "orientation, not visual emphasis"). -->
       <BaseContainer class="pointer-events-none absolute inset-x-0 top-10 z-30">
-        <h2 class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.4)]">
-          {{ label }}
-        </h2>
+        <BaseSectionMark as="h2" surface="dark" :label="label" meta="06 / 09" />
       </BaseContainer>
 
       <!-- Signal: horizontal state-transfer system. Short structural route,
@@ -224,10 +246,10 @@ useGsapContext(() => {
       <div
         ref="signalRef"
         aria-hidden="true"
-        class="pointer-events-none absolute inset-x-0 bottom-10 z-30 flex flex-col items-center gap-2 text-cobalt"
+        class="pointer-events-none absolute right-[max(24px,3vw)] top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-3 text-cobalt"
       >
-        <div class="relative h-px w-16 bg-[color:rgba(255,255,255,0.15)]">
-          <span data-signal-point class="absolute -top-[3px] left-0 h-[7px] w-[7px] rounded-full bg-current" />
+        <div class="relative h-16 w-px bg-[color:rgba(255,255,255,0.15)]">
+          <span data-signal-point class="absolute -left-[3px] top-0 h-[7px] w-[7px] rounded-full bg-current" />
         </div>
         <span data-signal-numeral class="font-display text-token-metadata font-semibold tracking-[0.1em] text-current">01 / 02</span>
       </div>
@@ -235,7 +257,18 @@ useGsapContext(() => {
       <!-- OPEN world: Expansive Precision. 1 Primary fragment + optional 1
            Secondary. Expansive, breathable, one dominant fragment, generous
            negative space, restrained-but-roomy Cobalt/Cyan usage. -->
-      <div ref="openWorldRef" class="absolute inset-0 z-10">
+      <!-- OPEN sits on the lighter navy of the family (roomier), e-CORPORATE
+           on the deeper one (denser) — same family, different spatial
+           character (spec §6 Color). The pointer-following measuring layer
+           lives only here: OPEN is the expansive world, so the field is the
+           thing that "opens". -->
+      <div ref="openWorldRef" class="absolute inset-0 z-10 bg-slateNavy">
+        <HomePrecisionField variant="stage" :show-routes="false" :focus="[0.72, 0.5]" />
+        <span
+          aria-hidden="true"
+          class="pointer-events-none absolute -right-[2vw] top-[10vh] select-none font-display text-[clamp(200px,26vw,440px)] font-bold leading-none tracking-[-0.06em] text-[color:rgba(255,255,255,0.03)]"
+          >01</span
+        >
         <BaseContainer class="relative flex h-full items-center">
           <div class="grid w-full grid-cols-12 items-center gap-8">
             <div class="col-span-12 lg:col-span-5">
@@ -246,22 +279,20 @@ useGsapContext(() => {
               <p class="mt-6 max-w-sm text-token-body text-[color:rgba(255,255,255,0.64)]">
                 {{ open.positioning }}
               </p>
-              <component
-                :is="open.comingSoon ? 'span' : 'NuxtLink'"
-                :to="open.comingSoon ? undefined : open.to"
-                :aria-disabled="open.comingSoon ? 'true' : undefined"
-                :title="open.comingSoon ? 'OPEN — coming soon' : undefined"
-                class="mt-8 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt"
-                :class="{ 'cursor-default opacity-60': open.comingSoon }"
-              >
-                Explore OPEN <span aria-hidden="true">→</span>
-              </component>
+              <div class="mt-8">
+                <HomePlatformCta :platform="open" />
+              </div>
             </div>
 
             <div class="relative col-span-12 lg:col-span-7">
-              <!-- Primary fragment: large, aggressively cropped, edge-bled — never a complete framed screenshot. -->
-              <div data-fragment class="relative ml-auto aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.08)]">
-                <img :src="open.image" :alt="open.name" loading="lazy" class="h-full w-full scale-[1.15] object-cover object-left-top">
+              <!-- Primary fragment: large, aggressively cropped, edge-bled — never a complete framed screenshot.
+                   The inner [data-pan] layer follows the pointer a few px so the crop
+                   feels like a window onto the product (Response, not idle motion). -->
+              <div data-fragment data-pan-host class="relative ml-auto aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.08)]">
+                <div data-pan class="h-full w-full">
+                  <img :src="open.image" :alt="open.name" loading="lazy" class="h-full w-full scale-[1.15] object-cover object-left-top">
+                </div>
+                <HomePlatformChip :name="open.name" class="absolute bottom-3 right-3" />
               </div>
               <!-- Optional Secondary fragment: small, offset, partial. -->
               <div data-fragment class="absolute -bottom-6 -left-6 hidden aspect-[4/3] w-40 overflow-hidden rounded-lg border border-[color:rgba(255,255,255,0.1)] bg-navy-900 shadow-2xl xl:block">
@@ -276,37 +307,42 @@ useGsapContext(() => {
            Secondary fragments. Tighter, grid-structured, higher density
            from spacing/alignment/layering, not screenshot count. -->
       <div ref="corporateWorldRef" class="absolute inset-0 z-20 bg-navy-950">
+        <!-- Structured Precision: the grid is the composition here — static,
+             denser, with Cobalt edge ticks (structural, not interactive). -->
+        <BaseGridLines tone="dark" edge="top" />
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-1/2 h-px bg-[color:rgba(37,99,235,0.18)]" />
+        <span
+          aria-hidden="true"
+          class="pointer-events-none absolute -right-[2vw] top-[10vh] select-none font-display text-[clamp(200px,26vw,440px)] font-bold leading-none tracking-[-0.06em] text-[color:rgba(255,255,255,0.03)]"
+          >02</span
+        >
         <BaseContainer class="relative flex h-full items-center">
           <div class="grid w-full grid-cols-12 items-center gap-6">
-            <div class="col-span-12 lg:col-span-4">
+            <div class="col-span-12 lg:col-span-5">
               <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-cyan">{{ corporate.character }}</span>
-              <h3 data-world-title class="mt-4 font-display text-[clamp(2.75rem,7vw,6rem)] font-bold leading-[0.94] tracking-[-0.02em] text-pureWhite">
+              <h3 data-world-title class="mt-4 font-display text-[clamp(2.25rem,4.9vw,4.75rem)] whitespace-nowrap font-bold leading-[0.94] tracking-[-0.02em] text-pureWhite">
                 {{ corporate.name }}
               </h3>
               <p class="mt-6 max-w-xs text-token-body text-[color:rgba(255,255,255,0.64)]">
                 {{ corporate.positioning }}
               </p>
-              <component
-                :is="corporate.comingSoon ? 'span' : 'NuxtLink'"
-                :to="corporate.comingSoon ? undefined : corporate.to"
-                :aria-disabled="corporate.comingSoon ? 'true' : undefined"
-                :title="corporate.comingSoon ? 'e-CORPORATE — coming soon' : undefined"
-                class="mt-8 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt"
-                :class="{ 'cursor-default opacity-60': corporate.comingSoon }"
-              >
-                Explore e-CORPORATE <span aria-hidden="true">→</span>
-              </component>
+              <div class="mt-8">
+                <HomePlatformCta :platform="corporate" />
+              </div>
             </div>
 
-            <div class="relative col-span-12 grid grid-cols-6 gap-3 lg:col-span-8">
+            <div class="relative col-span-12 grid grid-cols-6 gap-3 lg:col-span-7">
               <!-- Primary fragment: medium scale, grid-tight, structural border.
                    Milestone 5A: this stage only ever renders at >= desktop
                    (1024px), so its old `md:col-span-4` (768px) threshold
                    always won and is collapsed to its unconditional value
                    here — no rendered change, just removing a now-unreachable
                    breakpoint. -->
-              <div data-fragment class="relative col-span-4 aspect-[16/9] overflow-hidden rounded-lg border border-cobalt/20">
-                <img :src="corporate.image" :alt="corporate.name" loading="lazy" class="h-full w-full scale-[1.1] object-cover object-left-top">
+              <div data-fragment data-pan-host class="relative col-span-4 aspect-[16/9] overflow-hidden rounded-lg border border-cobalt/20">
+                <div data-pan class="h-full w-full">
+                  <img :src="corporate.image" :alt="corporate.name" loading="lazy" class="h-full w-full scale-[1.1] object-cover object-left-top">
+                </div>
+                <HomePlatformChip :name="corporate.name" class="absolute bottom-3 left-3" />
               </div>
               <!-- Secondary fragment A: tighter crop, edge-aligned. -->
               <div data-fragment class="relative col-span-2 aspect-square overflow-hidden rounded-lg border border-[color:rgba(255,255,255,0.1)]">
@@ -334,39 +370,34 @@ useGsapContext(() => {
     data-motion-stage="simple"
     class="relative overflow-hidden bg-navy-950 desktop:hidden"
   >
-    <BaseContainer>
-      <h2 class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.4)]">
-        {{ label }}
-      </h2>
+    <BaseGridLines tone="dark" />
+    <BaseContainer class="relative z-10">
+      <BaseSectionMark as="h2" surface="dark" :label="label" meta="06 / 09" />
 
-      <div class="mt-8 flex flex-col gap-16">
-        <article v-for="(platform, i) in platforms" :key="platform.index" data-mobile-world>
-          <div class="flex items-center gap-2">
+      <div class="mt-12 flex flex-col gap-20">
+        <article v-for="platform in platforms" :key="platform.index" data-mobile-world class="relative">
+          <span
+            aria-hidden="true"
+            class="pointer-events-none absolute -right-2 -top-6 select-none font-display text-[128px] font-bold leading-none tracking-[-0.06em] text-[color:rgba(255,255,255,0.05)]"
+            >{{ platform.index }}</span
+          >
+          <div class="relative flex items-center gap-2">
             <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-cobalt" />
             <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-cyan">{{ platform.character }}</span>
           </div>
-          <h3 class="mt-3 font-display text-[clamp(2.5rem,13vw,4rem)] font-bold leading-[0.94] tracking-[-0.02em] text-pureWhite">
+          <h3 class="relative mt-3 font-display text-[clamp(2.5rem,13vw,4rem)] font-bold leading-[0.94] tracking-[-0.02em] text-pureWhite">
             {{ platform.name }}
           </h3>
           <div class="relative mt-6 aspect-[4/3] w-full overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.08)]">
             <img :src="platform.image" :alt="platform.name" loading="lazy" class="h-full w-full object-cover">
+            <HomePlatformChip :name="platform.name" class="absolute bottom-3 left-3" />
           </div>
-          <p class="mt-4 max-w-md text-token-body text-[color:rgba(255,255,255,0.64)]">
+          <p class="relative mt-4 max-w-md text-token-body text-[color:rgba(255,255,255,0.64)]">
             {{ platform.positioning }}
           </p>
-          <component
-            :is="platform.comingSoon ? 'span' : 'NuxtLink'"
-            :to="platform.comingSoon ? undefined : platform.to"
-            :aria-disabled="platform.comingSoon ? 'true' : undefined"
-            :title="platform.comingSoon ? `${platform.name} — coming soon` : undefined"
-            class="mt-5 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt"
-            :class="{ 'cursor-default opacity-60': platform.comingSoon }"
-          >
-            Explore {{ platform.name }} <span aria-hidden="true">→</span>
-          </component>
-          <span class="mt-4 block font-display text-token-metadata font-semibold tracking-[0.08em] text-[color:rgba(255,255,255,0.4)]">
-            {{ platform.index }} / {{ String(platforms.length).padStart(2, '0') }}
-          </span>
+          <div class="relative mt-5">
+            <HomePlatformCta :platform="platform" />
+          </div>
         </article>
       </div>
     </BaseContainer>

@@ -20,7 +20,10 @@ const motionSafe = import.meta.client ? window.matchMedia('(prefers-reduced-moti
 
 const { setState } = useCustomCursor()
 
+const countRef = ref<HTMLElement | null>(null)
+
 useMaskedReveal(headingRef, { by: 'word' })
+useCountUp(countRef, { value: clients.length, duration: 1.4, format: (n) => String(Math.round(n)).padStart(2, '0') })
 
 // Signal — Quiet Proof Marker (04-homepage-spec.md §4 "The Signal"): Selected
 // Work's editorial spine visually resolves into this restrained Cobalt
@@ -178,9 +181,25 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <BaseSection as="section" class="surface-light overflow-hidden">
-    <BaseContainer>
-      <div class="flex flex-col items-center">
+  <BaseSection as="section" class="surface-light relative overflow-hidden">
+    <!-- Brand environment (light reset): the 12-column grid made visible with
+         top-edge ticks, and a single ghost PASTI wordmark cropped by the
+         section corner (Large Type as Graphic / Editorial Crop). Static,
+         ~4% — it is texture you notice only when you look for it. -->
+    <BaseGridLines tone="light" edge="top" />
+    <img
+      src="/images/pasti-logo.png"
+      alt=""
+      aria-hidden="true"
+      draggable="false"
+      class="pointer-events-none absolute -bottom-[14%] -right-[6%] z-0 w-auto max-w-none select-none opacity-[0.03]"
+      style="height: clamp(200px, 38vw, 560px)"
+    />
+
+    <BaseContainer class="relative z-10">
+      <BaseSectionMark surface="light" label="Trusted" meta="04 / 09" />
+
+      <div class="mt-16 flex flex-col items-center md:mt-20">
         <!-- Signal — Quiet Proof Marker: a single restrained Cobalt dot,
              settling near the heading, one-shot activation then static. -->
         <span
@@ -194,7 +213,7 @@ useGsapContext(() => {
       </div>
     </BaseContainer>
 
-    <div v-if="clients.length" class="relative mt-16 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+    <div v-if="clients.length" class="relative z-10 mt-16 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
       <div
         ref="trackRef"
         class="flex w-max flex-wrap items-center justify-center gap-x-16 gap-y-14 motion-safe:flex-nowrap motion-safe:justify-start md:gap-x-24"
@@ -205,7 +224,7 @@ useGsapContext(() => {
           v-for="(client, i) in marqueeClients"
           :key="`${client.name}-${i}`"
           :data-client-name="client.name"
-          class="trust-logo flex h-24 w-56 shrink-0 items-center justify-center transition-all duration-400 ease-editorial motion-reduce:transition-none"
+          class="trust-logo group relative flex h-24 w-56 shrink-0 items-center justify-center transition-all duration-400 ease-editorial motion-reduce:transition-none"
           :class="[
             i >= clients.length ? 'motion-reduce:hidden' : '',
             hoveredClient === client.name ? 'motion-reduce:scale-110' : 'motion-reduce:scale-100'
@@ -224,9 +243,25 @@ useGsapContext(() => {
             }"
             loading="lazy"
           />
+          <!-- Precision tick: PASTI's line language sits around the partner
+               logo, never on it (04-homepage-spec.md §4 Partner Logo Respect). -->
+          <span
+            aria-hidden="true"
+            class="absolute bottom-1 left-1/2 h-px w-10 -translate-x-1/2 origin-center scale-x-0 bg-cobalt transition-transform duration-200 ease-editorial group-hover:scale-x-100"
+          />
         </div>
       </div>
     </div>
+
+    <!-- Proof line: the count is the real length of the approved logo list —
+         no invented metric. -->
+    <BaseContainer class="relative z-10 mt-14 md:mt-20">
+      <div class="flex items-center gap-4 border-t border-structural-light pt-6">
+        <span ref="countRef" class="font-display text-token-h2 font-bold leading-none tracking-[-0.03em] text-slateNavy">{{ String(clients.length).padStart(2, '0') }}</span>
+        <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-[color:rgba(15,23,42,0.55)]">Approved partner logos</span>
+        <LayoutBrandMark surface="light" :height="13" class="ml-auto" />
+      </div>
+    </BaseContainer>
   </BaseSection>
 </template>
 

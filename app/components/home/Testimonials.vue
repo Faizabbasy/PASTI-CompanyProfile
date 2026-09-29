@@ -204,8 +204,15 @@ useGsapContext(() => {
       class="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-surfaceNeutral to-transparent md:h-56"
     />
 
-    <BaseContainer class="relative">
-      <div class="flex items-center justify-center gap-3">
+    <!-- Same structural grid the Hero/What We Build environment uses, static
+         here (Medium intensity): Testimoni belongs to the same visual
+         universe, not a separate template. -->
+    <BaseGridLines tone="dark" />
+
+    <BaseContainer class="relative z-10">
+      <BaseSectionMark surface="dark" label="Testimoni" meta="05 / 09" />
+
+      <div class="mt-16 flex items-start gap-4 md:mt-20 desktop:gap-6">
         <!-- Signal — Structural Focus Indicator: a restrained anchor near
              the field's edge, not a follower/cursor. Its STATE (opacity/
              micro-shift) changes with the active card; its position never
@@ -213,17 +220,17 @@ useGsapContext(() => {
         <span
           ref="signalRef"
           aria-hidden="true"
-          class="h-1.5 w-1.5 shrink-0 rounded-full bg-cobalt opacity-40"
+          class="mt-[0.55em] h-2 w-2 shrink-0 rounded-full bg-cobalt opacity-40 desktop:mt-[0.9em]"
         />
-        <p ref="labelRef" class="eyebrow">
+        <h2 ref="labelRef" class="max-w-4xl font-display text-token-section-monumental font-bold text-pureWhite">
           {{ label }}
-        </p>
+        </h2>
       </div>
 
       <!-- Structured 2-band zig-zag field on a 12-column grid — precise
            misalignment, not masonry. See `fieldItems` above for the
            per-card grid placement/offset rationale. -->
-      <div ref="fieldRef" class="mt-16 desktop:mt-20">
+      <div ref="fieldRef" class="mt-14 desktop:mt-20">
         <div class="grid grid-cols-1 gap-6 desktop:grid-cols-12 desktop:gap-8">
           <HomeTestimonialCard
             v-for="(item, i) in fieldItems"

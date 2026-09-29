@@ -61,6 +61,16 @@ export function getLenisInstance() {
 export function scrollToImmediate(target: string) {
   if (!import.meta.client) return
 
+  // `y:<px>` targets an absolute scroll position — used when the
+  // destination lives inside a pinned stage (Hero's project gallery), where
+  // no element has a meaningful document offset of its own.
+  if (target.startsWith('y:')) {
+    const y = Number(target.slice(2))
+    if (lenis) lenis.scrollTo(y, { immediate: true })
+    else window.scrollTo({ top: y, behavior: 'auto' })
+    return
+  }
+
   if (lenis) {
     lenis.scrollTo(target, { immediate: true })
     return

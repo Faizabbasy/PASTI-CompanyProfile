@@ -114,13 +114,17 @@ useGsapContext(() => {
         @click.capture="handleSummaryClick"
       >
         {{ item.question }}
+        <!-- Indicator: a framed 32px cell (Precision Framing) — plus resolves
+             to minus, and the frame fills Cobalt in the same 200ms window as
+             the accent bar, height reveal and answer (one state change). -->
         <span
           aria-hidden="true"
-          class="relative h-6 w-6 shrink-0"
+          class="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-token-sm border transition-colors duration-200 ease-editorial group-hover/row:border-cobalt group-focus-within/row:border-cobalt"
+          :class="open && !closing ? 'border-cobalt bg-cobalt text-pureWhite' : 'border-[color:rgba(255,255,255,0.2)]'"
         >
-          <span class="absolute left-1/2 top-1/2 h-px w-4 -translate-x-1/2 -translate-y-1/2 bg-current" />
+          <span class="absolute left-1/2 top-1/2 h-px w-3.5 -translate-x-1/2 -translate-y-1/2 bg-current" />
           <span
-            class="absolute left-1/2 top-1/2 h-4 w-px -translate-x-1/2 -translate-y-1/2 bg-current transition-transform duration-200 ease-editorial"
+            class="absolute left-1/2 top-1/2 h-3.5 w-px -translate-x-1/2 -translate-y-1/2 bg-current transition-transform duration-200 ease-editorial"
             :class="open && !closing ? 'rotate-90' : ''"
           />
         </span>
@@ -132,12 +136,15 @@ useGsapContext(() => {
         :style="{ gridTemplateRows: open && !closing ? '1fr' : '0fr' }"
       >
         <div class="overflow-hidden">
-          <p
-            class="max-w-3xl pb-8 text-body-md text-navy-200 transition-all duration-200 ease-editorial md:pb-10 md:text-body-lg"
+          <div
+            class="flex items-start justify-between gap-8 pb-8 transition-all duration-200 ease-editorial md:pb-10"
             :class="open && !closing ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'"
           >
-            {{ item.answer }}
-          </p>
+            <p class="max-w-3xl text-body-md text-navy-200 md:text-body-lg">
+              {{ item.answer }}
+            </p>
+            <LayoutBrandMark :height="12" class="mt-2 hidden opacity-60 md:inline-block" />
+          </div>
         </div>
       </div>
     </details>
