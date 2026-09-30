@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import type { NavItem } from '~/composables/useNavigation'
 
+// A string `:is="'NuxtLink'"` is not resolved at runtime (components are
+// auto-imported, not globally registered) — it rendered a dead <NuxtLink>
+// element instead of an <a>. Resolve the component itself.
+const RouterLink = resolveComponent('NuxtLink')
+
 withDefaults(defineProps<{ item: NavItem; dark?: boolean }>(), { dark: false })
 
 const route = useRoute()
@@ -10,7 +15,7 @@ const { setState } = useCustomCursor()
 
 <template>
   <component
-    :is="item.comingSoon ? 'span' : 'NuxtLink'"
+    :is="item.comingSoon ? 'span' : RouterLink"
     :to="item.comingSoon ? undefined : item.to"
     :aria-disabled="item.comingSoon ? 'true' : undefined"
     :title="item.comingSoon ? `${item.label} — coming soon` : undefined"

@@ -1,3 +1,13 @@
+export type SocialKey = 'linkedin' | 'instagram' | 'whatsapp' | 'tiktok' | 'youtube'
+
+export interface FooterSocial {
+  key: SocialKey
+  label: string
+  /** null = not supplied yet: the icon renders dimmed and non-interactive
+   * (same "coming soon" pattern as the platform links) — never a fake URL. */
+  url: string | null
+}
+
 export interface FooterLink {
   label: string
   to: string
@@ -41,17 +51,31 @@ export function useFooter() {
   }))
 
   // Contact facts. The WhatsApp number is the real one already used by every
-  // CTA (useWhatsapp). The office address is NOT known — no address exists in
-  // the brief or repo and none may be invented — so it stays a Lorem ipsum
-  // placeholder (global copy rule). Set `address` to the real string and the
-  // placeholder disappears.
+  // CTA (useWhatsapp). Office address, email, maps link and hours are NOT known
+  // yet — no such data exists in the brief or repo and none may be invented —
+  // so they are null and the Footer simply omits those rows (no placeholder
+  // copy). Fill them in here when the owner supplies them.
+  const { email } = useFinalCta()
   const contact = {
     whatsappDisplay: '+62 821-2549-2299',
+    email,
     address: null as string | null,
-    addressPlaceholder: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit',
+    mapsUrl: null as string | null,
+    hours: null as string | null,
     entity: 'PT Hidup Pasti Bahagia',
     positioning: 'Technology × Creative Execution Partner'
   }
 
-  return { navLinks, serviceLinks, platformLinks, contact }
+  // Social profiles. Only WhatsApp has a real destination so far; the others
+  // stay null until the owner provides the official URLs.
+  const { link: whatsappLink } = useWhatsapp()
+  const socials: FooterSocial[] = [
+    { key: 'linkedin', label: 'LinkedIn', url: null },
+    { key: 'instagram', label: 'Instagram', url: null },
+    { key: 'whatsapp', label: 'WhatsApp', url: whatsappLink },
+    { key: 'tiktok', label: 'TikTok', url: null },
+    { key: 'youtube', label: 'YouTube', url: null }
+  ]
+
+  return { navLinks, serviceLinks, platformLinks, contact, socials }
 }

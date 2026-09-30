@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 
+// A string `:is="'NuxtLink'"` is not resolved at runtime (components are
+// auto-imported, not globally registered) — it rendered a dead <NuxtLink>
+// element instead of an <a>. Resolve the component itself.
+const RouterLink = resolveComponent('NuxtLink')
+
 const { navItems, primaryCta } = useNavigation()
 const { link: whatsappLink } = useWhatsapp()
 const { isOpen: open, close } = useMobileMenu()
@@ -71,7 +76,7 @@ onBeforeUnmount(() => {
               class="border-b border-navy-100"
             >
               <component
-                :is="item.comingSoon ? 'span' : 'NuxtLink'"
+                :is="item.comingSoon ? 'span' : RouterLink"
                 :to="item.comingSoon ? undefined : item.to"
                 :aria-disabled="item.comingSoon ? 'true' : undefined"
                 :title="item.comingSoon ? `${item.label} — coming soon` : undefined"

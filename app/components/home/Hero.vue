@@ -423,11 +423,11 @@ useGsapContext(() => {
                Desktop: pinned to the left key line (4vw — header logo / 01·04
                marker) at the same height as the right "Process Ready" chip
                (22svh + 44svh = 66svh), so the ring sits centred between them. -->
-          <div ref="ctaRowRef" class="mt-9 flex flex-wrap items-center justify-center gap-4 desktop:absolute desktop:left-[4vw] desktop:top-[44svh] desktop:mt-0 desktop:flex-col desktop:items-stretch desktop:gap-3 wide:flex-row wide:items-center wide:gap-4">
-            <div ref="ctaPrimaryRef" class="inline-block desktop:w-full wide:w-auto">
+          <div ref="ctaRowRef" class="mt-9 flex w-full max-w-[21rem] flex-col items-stretch gap-3 tablet:w-auto tablet:max-w-none tablet:flex-row tablet:flex-wrap tablet:items-center tablet:justify-center tablet:gap-4 desktop:absolute desktop:left-[4vw] desktop:top-[44svh] desktop:mt-0 desktop:flex-col desktop:items-stretch desktop:gap-3 wide:flex-row wide:items-center wide:gap-4">
+            <div ref="ctaPrimaryRef" class="inline-block w-full tablet:w-auto desktop:w-full wide:w-auto">
               <a
                 href="#selected-work"
-                class="group relative flex items-center justify-between gap-4 overflow-hidden rounded-[14px] bg-slateNavy py-2.5 pl-6 pr-2.5 font-display text-[15px] font-bold text-pureWhite shadow-[0_18px_40px_-16px_rgba(3,60,89,0.7)]"
+                class="group relative flex items-center justify-between gap-4 overflow-hidden rounded-[14px] bg-slateNavy transition-transform duration-200 active:scale-[0.97] py-2.5 pl-6 pr-2.5 font-display text-[15px] font-bold text-pureWhite shadow-[0_18px_40px_-16px_rgba(3,60,89,0.7)]"
                 @click.prevent="goToWork"
               >
                 <span aria-hidden="true" class="absolute inset-0 origin-left scale-x-0 bg-cobalt transition-transform duration-500 ease-editorial group-hover:scale-x-100" />
@@ -437,12 +437,12 @@ useGsapContext(() => {
                 </span>
               </a>
             </div>
-            <div ref="ctaSecondaryRef" class="inline-block desktop:w-full wide:w-auto">
+            <div ref="ctaSecondaryRef" class="inline-block w-full tablet:w-auto desktop:w-full wide:w-auto">
               <a
                 :href="whatsappLink"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group flex items-center justify-between gap-4 rounded-[14px] border border-[color:rgba(3,60,89,0.14)] bg-pureWhite py-2.5 pl-6 pr-2.5 font-display text-[15px] font-bold text-slateNavy shadow-[0_18px_40px_-18px_rgba(3,60,89,0.45)] transition-colors duration-300 ease-editorial hover:border-slateNavy"
+                class="group flex items-center justify-between gap-4 rounded-[14px] border active:scale-[0.97] border-[color:rgba(3,60,89,0.14)] bg-pureWhite py-2.5 pl-6 pr-2.5 font-display text-[15px] font-bold text-slateNavy shadow-[0_18px_40px_-18px_rgba(3,60,89,0.45)] transition-colors duration-300 ease-editorial hover:border-slateNavy"
               >
                 {{ ctaSecondary.label }}
                 <span class="grid h-10 w-10 place-items-center rounded-[10px] bg-[color:rgba(3,60,89,0.07)] text-slateNavy transition-colors duration-300 ease-editorial group-hover:bg-slateNavy group-hover:text-pureWhite">

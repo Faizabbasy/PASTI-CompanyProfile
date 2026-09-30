@@ -19,12 +19,35 @@ export type InsightRole = 'featured' | 'supporting'
  */
 export type InsightContentStatus = 'existing-unverified' | 'verified' | 'placeholder'
 
+/** A headline split into a plain part and an accent part (rendered in PASTI
+ * Yellow on the dark Insight pages, mirroring the accent on the poster). */
+export interface InsightAccentLine {
+  text: string
+  accent: string
+}
+
+/**
+ * Homepage "topic page" content (owner redesign 2026-09-30). Every string is
+ * transcribed from the text already printed on the article's poster image —
+ * nothing new is claimed. `focus` is the centre (x% y% of the poster) of the
+ * visual focal point the zoomed detail tile frames.
+ */
+export interface InsightPage {
+  category: string
+  headline: InsightAccentLine
+  tagline?: InsightAccentLine
+  description: string
+  points: string[]
+  focus: string
+}
+
 export interface InsightArticle {
   index: string
   title: string
   image: string
   role: InsightRole
   status: InsightContentStatus
+  page?: InsightPage
 }
 
 /**
@@ -47,10 +70,64 @@ export interface InsightArticle {
  */
 export function useInsights() {
   const articles: InsightArticle[] = [
-    { index: '01', title: 'Cybersecurity: Protect What Matters. Build With Confidence.', image: '/images/insights/cybersecurity-compliance.png', role: 'featured', status: 'existing-unverified' },
-    { index: '02', title: 'Enterprise Technology', image: '/images/insights/enterprise-technology.png', role: 'supporting', status: 'existing-unverified' },
-    { index: '03', title: 'AI & Digital Transformation', image: '/images/insights/ai-digital-transformation.png', role: 'supporting', status: 'existing-unverified' },
-    { index: '04', title: 'The Future of Business: Innovate Today. Lead Tomorrow.', image: '/images/insights/future-of-business.png', role: 'supporting', status: 'existing-unverified' },
+    {
+      index: '01',
+      title: 'Cybersecurity: Protect What Matters. Build With Confidence.',
+      image: '/images/insights/cybersecurity-compliance.png',
+      role: 'featured',
+      status: 'existing-unverified',
+      page: {
+        category: 'Security',
+        headline: { text: 'Cybersecurity', accent: '' },
+        tagline: { text: 'Protect What Matters.', accent: 'Build With Confidence.' },
+        description: 'Advanced security solutions to safeguard your data, systems, and digital future.',
+        points: ['Network Security', 'Data Encryption', 'Endpoint Protection', 'Threat Detection'],
+        focus: '74.5% 48%'
+      }
+    },
+    {
+      index: '02',
+      title: 'Enterprise Technology',
+      image: '/images/insights/enterprise-technology.png',
+      role: 'supporting',
+      status: 'existing-unverified',
+      page: {
+        category: 'Enterprise',
+        headline: { text: 'Enterprise', accent: 'Technology' },
+        description: 'Scalable solutions and robust systems that power enterprises, streamline operations, and drive long-term value.',
+        points: ['Cloud', 'Applications', 'Data', 'Security'],
+        focus: '77% 29%'
+      }
+    },
+    {
+      index: '03',
+      title: 'AI & Digital Transformation',
+      image: '/images/insights/ai-digital-transformation.png',
+      role: 'supporting',
+      status: 'existing-unverified',
+      page: {
+        category: 'AI',
+        headline: { text: 'AI & Digital', accent: 'Transformation' },
+        description: 'Leveraging AI and emerging technologies to transform operations, elevate customer experiences, and drive sustainable growth.',
+        points: ['AI Overview', 'Data Insights', 'Automation', 'Analytics'],
+        focus: '79% 27%'
+      }
+    },
+    {
+      index: '04',
+      title: 'The Future of Business: Innovate Today. Lead Tomorrow.',
+      image: '/images/insights/future-of-business.png',
+      role: 'supporting',
+      status: 'existing-unverified',
+      page: {
+        category: 'Business',
+        headline: { text: 'The Future of Business', accent: '' },
+        tagline: { text: 'Innovate Today.', accent: 'Lead Tomorrow.' },
+        description: 'Embracing change, technology, and human potential to create a better tomorrow.',
+        points: ['Change', 'Technology', 'Human Potential', 'A Better Tomorrow'],
+        focus: '68% 27%'
+      }
+    },
     { index: '05', title: 'Creative & Brand', image: '/images/insights/creative-and-brand.png', role: 'supporting', status: 'existing-unverified' },
     { index: '06', title: 'Ideas That Move Business Forward.', image: '/images/insights/ideas-that-move-business.png', role: 'supporting', status: 'existing-unverified' },
     { index: '07', title: 'Digital Product & UX', image: '/images/insights/digital-product-ux.png', role: 'supporting', status: 'existing-unverified' }

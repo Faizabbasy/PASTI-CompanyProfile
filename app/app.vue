@@ -132,5 +132,6 @@ async function onPageAfterEnter() {
       </Transition>
     </NuxtPage>
     <LayoutFooter />
+    <LayoutWhatsappFab />
   </div>
 </template>

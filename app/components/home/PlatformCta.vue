@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import type { Platform } from '~/composables/usePlatforms'
 
+// A string `:is="'NuxtLink'"` is not resolved at runtime (components are
+// auto-imported, not globally registered) — it rendered a dead <NuxtLink>
+// element instead of an <a>. Resolve the component itself.
+const RouterLink = resolveComponent('NuxtLink')
+
 // Text-led CTA (00-brand-guide.md §10: hover uses line travel / arrow shift,
 // never scaling). The underline draws left-to-right and the arrow steps
 // forward inside the same ~200ms window. While a platform has no destination
@@ -12,7 +17,7 @@ const { setState } = useCustomCursor()
 
 <template>
   <component
-    :is="platform.comingSoon ? 'span' : 'NuxtLink'"
+    :is="platform.comingSoon ? 'span' : RouterLink"
     :to="platform.comingSoon ? undefined : platform.to"
     :aria-disabled="platform.comingSoon ? 'true' : undefined"
     :title="platform.comingSoon ? `${platform.name} — coming soon` : undefined"

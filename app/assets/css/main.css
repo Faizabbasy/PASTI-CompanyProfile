@@ -378,3 +378,21 @@
     flex-shrink: 1 !important;
   }
 }
+
+/* Mobile experience (owner pass 2026-09-30). */
+html {
+  /* No grey/blue flash on tap — every interactive element has its own
+     pressed state (active:scale / fills) instead. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Native swipe rails (useSnapRail): keep the browser's momentum + snap,
+   hide the scrollbar, let vertical page scroll pass through. */
+.snap-rail {
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+.snap-rail::-webkit-scrollbar {
+  display: none;
+}

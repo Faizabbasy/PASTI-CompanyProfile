@@ -2,6 +2,10 @@ export interface TechnologyService {
   index: string
   title: string
   body: string
+  /** Visual shown with the row (cursor preview on desktop, inline on mobile).
+   * Reuses existing approved project/insight artwork whose subject matches
+   * the service — illustrative, not a claim that this project is that service. */
+  image: string
 }
 
 /**
@@ -28,32 +32,38 @@ export function useTechnology() {
     {
       index: '01',
       title: 'Technology Development',
-      body: 'Modern web and mobile products built on solid architecture, from first line of code to production-ready release.'
+      body: 'Modern web and mobile products built on solid architecture, from first line of code to production-ready release.',
+      image: '/images/selected-work/ikea-indonesia.png'
     },
     {
       index: '02',
       title: 'Custom Built AI Solutions',
-      body: 'Bespoke AI systems designed around your workflow, from internal automation to customer-facing intelligent features.'
+      body: 'Bespoke AI systems designed around your workflow, from internal automation to customer-facing intelligent features.',
+      image: '/images/insights/ai-digital-transformation.png'
     },
     {
       index: '03',
       title: 'Enterprise Platforms',
-      body: 'Scalable systems built to handle real operational load, integrated with the tools your business already runs on.'
+      body: 'Scalable systems built to handle real operational load, integrated with the tools your business already runs on.',
+      image: '/images/selected-work/jm-click.png'
     },
     {
       index: '04',
       title: 'Mobile App Development & MVP',
-      body: 'From validated idea to shipped product, built lean and fast without cutting corners on quality.'
+      body: 'From validated idea to shipped product, built lean and fast without cutting corners on quality.',
+      image: '/images/selected-work/powerhours.png'
     },
     {
       index: '05',
       title: 'Cybersecurity & Compliance Architecture',
-      body: 'Security built into the foundation, not bolted on after — protecting your systems and meeting compliance from day one.'
+      body: 'Security built into the foundation, not bolted on after — protecting your systems and meeting compliance from day one.',
+      image: '/images/insights/cybersecurity-compliance.png'
     },
     {
       index: '06',
       title: 'System Maintenance & SLA Support',
-      body: 'Ongoing care and guaranteed response times, so what we build keeps running long after launch.'
+      body: 'Ongoing care and guaranteed response times, so what we build keeps running long after launch.',
+      image: '/images/insights/enterprise-technology.png'
     }
   ]
 

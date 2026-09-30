@@ -99,13 +99,22 @@ useGsapContext(() => {
           <circle cx="330" cy="120" r="118" fill="none" stroke="rgba(255,255,255,0.08)" stroke-dasharray="2 6" />
         </svg>
 
-        <div ref="portraitRef" class="absolute -bottom-2 right-3 w-[46%] max-w-[210px]">
-          <div class="overflow-hidden rounded-t-full border-[5px] border-b-0 border-pureWhite shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]">
-            <img :src="partner.portrait.src" :alt="partner.portrait.alt" class="aspect-[3/4] w-full object-cover" loading="lazy" draggable="false" />
-          </div>
+        <!-- Sticker-style cutout (white outline baked into the PNG), flush to
+             the panel's bottom-right like the owner's reference; the panel's
+             rounded overflow crops the flat right/bottom edges. -->
+        <div ref="portraitRef" class="absolute bottom-0 right-0 h-[92%]">
+          <img
+            :src="partner.portrait.src"
+            :alt="partner.portrait.alt"
+            class="h-full w-auto max-w-none select-none [filter:drop-shadow(0_18px_28px_rgba(0,20,35,0.45))]"
+            width="368"
+            height="596"
+            loading="lazy"
+            draggable="false"
+          />
         </div>
 
-        <div class="relative z-10 flex h-full min-h-[inherit] max-w-[58%] flex-col justify-between p-6">
+        <div class="relative z-10 flex h-full min-h-[inherit] max-w-[55%] flex-col justify-between p-6">
           <div>
             <p data-tp-item class="font-display text-[13px] text-[color:rgba(255,255,255,0.72)]">{{ partner.kicker }}</p>
             <h3 data-tp-item class="mt-3 font-display text-[clamp(30px,3vw,44px)] font-extrabold leading-[0.98] tracking-[-0.03em] text-pureWhite">
