@@ -182,7 +182,7 @@ function onLeave() {
 .cap-card__grid--hot {
   background-image:
     linear-gradient(to right, rgba(37, 99, 235, 0.35) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(6, 182, 212, 0.22) 1px, transparent 1px);
+    linear-gradient(to bottom, rgba(251, 186, 0, 0.22) 1px, transparent 1px);
   -webkit-mask-image: radial-gradient(circle 110px at var(--wx, 50%) var(--wy, 50%), #000 0%, transparent 100%);
   mask-image: radial-gradient(circle 110px at var(--wx, 50%) var(--wy, 50%), #000 0%, transparent 100%);
 }

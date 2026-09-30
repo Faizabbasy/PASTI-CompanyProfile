@@ -45,18 +45,18 @@ onMounted(async () => {
     const pmrem = new THREE.PMREMGenerator(renderer)
     const envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
     scene.environment = envTexture
-    scene.environmentIntensity = 0.7
+    scene.environmentIntensity = 0.5
 
     const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50)
     camera.position.set(0, 0, 9.4)
 
-    // Blue-family lighting for the gradation the brief allows (Cobalt key,
-    // Cyan rim, a soft cool fill) — no yellow in the object itself.
-    scene.add(new THREE.AmbientLight(0x6f9bff, 0.35))
-    const key = new THREE.PointLight(0x2563eb, 28, 24, 1.6)
+    // Owner revision (2026-09-30): the knot is PASTI Yellow glass. Warm amber
+    // key + a cool white rim keep the gradation readable on the light hero.
+    scene.add(new THREE.AmbientLight(0xffd98a, 0.35))
+    const key = new THREE.PointLight(0xffc233, 22, 24, 1.6)
     key.position.set(-3.2, 2.4, 3.5)
     scene.add(key)
-    const rim = new THREE.PointLight(0x22d3ee, 18, 24, 1.6)
+    const rim = new THREE.PointLight(0xfff4d6, 16, 24, 1.6)
     rim.position.set(3.4, -1.8, 2.4)
     scene.add(rim)
     const top = new THREE.PointLight(0xffffff, 6, 24, 1.6)
@@ -65,19 +65,19 @@ onMounted(async () => {
 
     const geometry = new THREE.TorusKnotGeometry(1.15, 0.27, 360, 64, 2, 3)
     const material = new THREE.MeshPhysicalMaterial({
-      color: 0x4f7dff,
+      color: 0xf5a800,
       metalness: 0,
       roughness: 0.1,
-      transmission: 1,
-      thickness: 2.2,
+      transmission: 0.35,
+      thickness: 1.2,
       ior: 1.45,
-      attenuationColor: new THREE.Color(0x2f63f0),
-      attenuationDistance: 1.1,
+      attenuationColor: new THREE.Color(0xfbba00),
+      attenuationDistance: 2.6,
       clearcoat: 1,
       clearcoatRoughness: 0.05,
-      iridescence: 0.35,
+      iridescence: 0.15,
       iridescenceIOR: 1.3,
-      envMapIntensity: 1.1,
+      envMapIntensity: 0.8,
       specularIntensity: 1
     })
     const ring = new THREE.Mesh(geometry, material)
@@ -183,7 +183,7 @@ onBeforeUnmount(() => {
     <div
       v-if="failed"
       class="absolute inset-[14%] rounded-full"
-      style=" border: 22px solid transparent; background: linear-gradient(#f6f9fb, #f6f9fb) padding-box, linear-gradient(140deg, #60a5fa, #2563eb 45%, #22d3ee) border-box; opacity: 0.85; "
+      style=" border: 22px solid transparent; background: linear-gradient(#f6f9fb, #f6f9fb) padding-box, linear-gradient(140deg, #ffd45a, #fbba00 45%, #f29d00) border-box; opacity: 0.85; "
     />
   </div>
 </template>

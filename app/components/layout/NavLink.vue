@@ -46,14 +46,14 @@ const { setState } = useCustomCursor()
       <span class="block transition-transform duration-400 ease-editorial group-hover:-translate-y-full">{{ item.label }}</span>
       <span
         class="absolute inset-0 block translate-y-full transition-transform duration-400 ease-editorial group-hover:translate-y-0"
-        :class="dark ? 'text-cyan' : 'text-yellow-500'"
+        :class="dark ? 'text-pastiYellow-500' : 'text-yellow-500'"
         aria-hidden="true"
         >{{ item.label }}</span
       >
     </span>
     <span
       class="pointer-events-none absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 transition-transform duration-400 ease-editorial group-hover:scale-x-100"
-      :class="[dark ? 'bg-cyan' : 'bg-yellow-500', { 'scale-x-100': route.path === item.to }]"
+      :class="[dark ? 'bg-pastiYellow-500' : 'bg-yellow-500', { 'scale-x-100': route.path === item.to }]"
       aria-hidden="true"
     />
   </component>

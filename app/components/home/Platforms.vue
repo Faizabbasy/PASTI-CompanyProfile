@@ -496,7 +496,7 @@ useGsapContext(() => {
           data-corp-light
           aria-hidden="true"
           class="pointer-events-none absolute inset-0"
-          style="background: radial-gradient(ellipse 30% 36% at 0% 0%, rgba(6, 182, 212, 0.16), transparent 72%), radial-gradient(ellipse 44% 50% at 72% 60%, rgba(37, 99, 235, 0.22), transparent 74%), linear-gradient(200deg, #022F47 0%, #022436 55%, #011826 100%)"
+          style="background: radial-gradient(ellipse 30% 36% at 0% 0%, rgba(251, 186, 0, 0.16), transparent 72%), radial-gradient(ellipse 44% 50% at 72% 60%, rgba(37, 99, 235, 0.22), transparent 74%), linear-gradient(200deg, #022F47 0%, #022436 55%, #011826 100%)"
         />
         <!-- Vertical light rails behind the stack (a skyline of light). -->
         <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-[48%] right-[4%]">
@@ -512,7 +512,7 @@ useGsapContext(() => {
         <BaseContainer class="relative flex h-full items-center">
           <div class="grid w-full grid-cols-12 items-center gap-8">
             <div class="col-span-5">
-              <span class="block font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-cyan">{{ corporate.character }}</span>
+              <span class="block font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-pastiYellow-500">{{ corporate.character }}</span>
               <h3 data-world-title :aria-label="corporate.name" class="mt-4 whitespace-nowrap font-display text-[clamp(2.5rem,5.2vw,5.25rem)] font-bold leading-[0.92] tracking-[-0.03em] text-pureWhite">
                 <span v-for="(ch, i) in corporate.name.split('')" :key="i" aria-hidden="true" class="inline-block overflow-hidden align-top"><span data-corp-char class="inline-block">{{ ch }}</span></span>
               </h3>
@@ -529,8 +529,8 @@ useGsapContext(() => {
                   data-corp-outcome
                   class="corp-outcome relative flex items-center gap-4 border-b border-[color:rgba(255,255,255,0.08)] py-3"
                 >
-                  <span class="corp-outcome__bar absolute bottom-[-1px] left-0 h-px w-full origin-left bg-cyan" />
-                  <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-cyan">0{{ i + 1 }}</span>
+                  <span class="corp-outcome__bar absolute bottom-[-1px] left-0 h-px w-full origin-left bg-pastiYellow-500" />
+                  <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-pastiYellow-500">0{{ i + 1 }}</span>
                   <span class="font-display text-token-body font-semibold">{{ o }}</span>
                 </li>
               </ol>
@@ -553,13 +553,13 @@ useGsapContext(() => {
                 </div>
 
                 <!-- 02 Processes: lanes and hand-offs. -->
-                <div data-corp-plate class="corp-plate absolute inset-0 rounded-card border border-[color:rgba(6,182,212,0.4)] bg-[color:rgba(10,22,48,0.78)]">
+                <div data-corp-plate class="corp-plate absolute inset-0 rounded-card border border-[color:rgba(251, 186, 0,0.4)] bg-[color:rgba(10,22,48,0.78)]">
                   <svg aria-hidden="true" viewBox="0 0 400 250" class="absolute inset-0 h-full w-full" fill="none">
                     <g v-for="(y, l) in [62, 125, 188]" :key="l">
                       <path :d="`M40 ${y}H360`" stroke="rgba(255,255,255,0.14)" />
-                      <rect v-for="(x, k) in [[70, 170, 280], [110, 230], [60, 150, 250, 330]][l]" :key="k" :x="x - 22" :y="y - 12" width="44" height="24" rx="4" stroke="rgba(6,182,212,0.75)" fill="rgba(6,182,212,0.08)" />
+                      <rect v-for="(x, k) in [[70, 170, 280], [110, 230], [60, 150, 250, 330]][l]" :key="k" :x="x - 22" :y="y - 12" width="44" height="24" rx="4" stroke="rgba(251, 186, 0,0.75)" fill="rgba(251, 186, 0,0.08)" />
                     </g>
-                    <path d="M92 74V113M232 137V176" stroke="rgba(6,182,212,0.75)" stroke-dasharray="3 4" />
+                    <path d="M92 74V113M232 137V176" stroke="rgba(251, 186, 0,0.75)" stroke-dasharray="3 4" />
                   </svg>
                   <span class="corp-plate__label">02 Processes</span>
                 </div>
@@ -611,7 +611,7 @@ useGsapContext(() => {
           >
           <div class="relative flex items-center gap-2">
             <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-cobalt" />
-            <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-cyan">{{ platform.character }}</span>
+            <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-pastiYellow-500">{{ platform.character }}</span>
           </div>
           <h3 class="relative mt-3 font-display text-[clamp(2.5rem,13vw,4rem)] font-bold leading-[0.94] tracking-[-0.02em] text-pureWhite">
             {{ platform.name }}
@@ -638,8 +638,8 @@ useGsapContext(() => {
 .corp-floor {
   transform: translateZ(-60px);
   background-image:
-    linear-gradient(to right, rgba(6, 182, 212, 0.14) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(6, 182, 212, 0.14) 1px, transparent 1px);
+    linear-gradient(to right, rgba(251, 186, 0, 0.14) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(251, 186, 0, 0.14) 1px, transparent 1px);
   background-size: 40px 40px;
   -webkit-mask-image: radial-gradient(closest-side, #000 35%, transparent 100%);
   mask-image: radial-gradient(closest-side, #000 35%, transparent 100%);
@@ -649,8 +649,8 @@ useGsapContext(() => {
   transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .corp-plate[data-active='true'] {
-  border-color: rgba(6, 182, 212, 0.9);
-  box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.35);
+  border-color: rgba(251, 186, 0, 0.9);
+  box-shadow: 0 0 0 1px rgba(251, 186, 0, 0.35);
 }
 .corp-plate__label {
   position: absolute;

@@ -175,7 +175,7 @@ useGsapContext(() => {
   background: radial-gradient(
     circle var(--spotlight-radius, 400px) at var(--spotlight-x, -9999px) var(--spotlight-y, -9999px),
     rgba(37, 99, 235, 0.32),
-    rgba(6, 182, 212, 0.06) 45%,
+    rgba(251, 186, 0, 0.06) 45%,
     transparent 70%
   );
 }

@@ -149,28 +149,39 @@ useGsapContext(() => {
     const N = cards.length
     let vw = window.innerWidth
     let vh = window.innerHeight
-    // Final (active) card size: wide but never full-screen — capped by both
-    // viewport width and height so caption + rail always fit below it.
-    let W = Math.min(vw * 0.56, vh * 0.54 * 1.6)
-    let H = W * 0.625
+    // Final (active) card size + height: fitted into the free band between
+    // the "Success Project" title and the caption row (measured, plus a
+    // breathing gap), so the grown card never touches either on short
+    // viewports. Capped by width so it never goes full-screen.
+    let W = 0
+    let H = 0
+    let centerFinal = 0 // px from stage top where the active card sits
     const measure = () => {
       vw = window.innerWidth
       vh = window.innerHeight
-      W = Math.min(vw * 0.56, vh * 0.54 * 1.6)
-      H = W * 0.625
+      const title = successRef.value
+      const caption = captionRef.value
+      const titleBottom = title ? title.offsetTop + title.offsetHeight : vh * 0.2
+      const captionTop = caption ? caption.offsetTop : vh * 0.8
+      const gap = clamp(28, 56, vh * 0.05)
+      const band = Math.max(160, captionTop - titleBottom - gap * 2)
+      H = Math.min(band, vw * 0.56 * 0.625)
+      W = H / 0.625
+      centerFinal = titleBottom + gap + band / 2
       cards.forEach((c) => {
         c.style.width = `${W}px`
         c.style.height = `${H}px`
         c.style.marginLeft = `${-W / 2}px`
         c.style.marginTop = `${-H / 2}px`
       })
-      if (captionRef.value) captionRef.value.style.width = `${W}px`
+      // Caption spans a bit wider than the card so titles stay on one line.
+      if (caption) caption.style.width = `${Math.min(vw * 0.9, Math.max(W, 820))}px`
     }
     measure()
+    measure() // caption width changed → its wrapped height; settle once more
 
     // Animated state, driven by one scrubbed timeline.
     const state = { enter: 0, b: 0, pos: 1, fade: 1 }
-    const centerYFinal = 0.47 // stage-height fraction where the active card sits
     const easeB = gsap.parseEase('power2.inOut')
 
     let activeIndex = -1
@@ -205,7 +216,7 @@ useGsapContext(() => {
       const eB = easeB(state.b)
       const arc = 1 - eB
       const spacing = lerp(W * 0.68, W * 0.97, eB)
-      const centerY = vh * centerYFinal
+      const centerY = centerFinal
       const baseY = vh * 0.5 // cards are absolutely centered on the stage middle
 
       for (let i = 0; i < N; i++) {
@@ -223,7 +234,7 @@ useGsapContext(() => {
         // Arc: at rest the row sits at the bottom edge, the center card
         // highest and the sides falling away and tilting; it straightens
         // to a flat row at the final height.
-        const restY = vh * 0.8 + (H * scaleA) / 2 - baseY + arc * ad * ad * vh * 0.045
+        const restY = vh * 0.87 + (H * scaleA) / 2 - baseY + arc * ad * ad * vh * 0.045
         const y = lerp(restY, centerY - baseY, eB) + (1 - state.enter) * vh * 0.12
         const rotZ = arc * d * 5
         const rotY = arc * -d * 16
@@ -373,7 +384,7 @@ useGsapContext(() => {
       <div
         aria-hidden="true"
         class="absolute inset-0"
-        style="background: radial-gradient(ellipse 52% 48% at 50% 46%, rgba(37, 99, 235, 0.16), rgba(37, 99, 235, 0.05) 50%, transparent 74%), radial-gradient(ellipse 40% 38% at 94% 4%, rgba(96, 165, 250, 0.14), transparent 70%), radial-gradient(ellipse 45% 42% at 4% 96%, rgba(3, 60, 89, 0.08), transparent 70%), linear-gradient(180deg, #ffffff 0%, #f5f8fb 55%, #eef3f7 100%)"
+        style="background: radial-gradient(ellipse 52% 48% at 50% 44%, rgba(251, 186, 0, 0.16), rgba(251, 186, 0, 0.05) 50%, transparent 74%), radial-gradient(ellipse 40% 38% at 94% 4%, rgba(251, 186, 0, 0.14), transparent 70%), radial-gradient(ellipse 45% 42% at 4% 96%, rgba(3, 60, 89, 0.08), transparent 70%), linear-gradient(180deg, #ffffff 0%, #f5f8fb 55%, #eef3f7 100%)"
       />
       <svg
         aria-hidden="true"
@@ -383,7 +394,7 @@ useGsapContext(() => {
         fill="none"
       >
         <ellipse cx="720" cy="400" rx="470" ry="300" stroke="rgba(3,60,89,0.16)" stroke-width="1" transform="rotate(-14 720 400)" />
-        <circle cx="1094" cy="212" r="6" fill="#3b82f6" />
+        <circle cx="1094" cy="212" r="6" fill="#FBBA00" />
         <path d="M22 500h16M30 492v16" stroke="rgba(3,60,89,0.35)" stroke-width="1" />
         <path d="M1402 500h16M1410 492v16" stroke="rgba(3,60,89,0.25)" stroke-width="1" />
       </svg>
@@ -392,7 +403,7 @@ useGsapContext(() => {
       <div
         ref="ringRef"
         aria-hidden="true"
-        class="pointer-events-none absolute left-1/2 top-[46%] z-0 h-[min(78vw,680px)] w-[min(78vw,680px)] -translate-x-1/2 -translate-y-1/2 desktop:top-[47%] desktop:h-[min(50vw,78svh,700px)] desktop:w-[min(50vw,78svh,700px)]"
+        class="pointer-events-none absolute left-1/2 top-[46%] z-0 h-[min(78vw,680px)] w-[min(78vw,680px)] -translate-x-1/2 -translate-y-1/2 desktop:top-[45%] desktop:h-[min(48vw,74svh,680px)] desktop:w-[min(48vw,74svh,680px)]"
       >
         <ClientOnly>
           <HomeHeroRing />
@@ -484,12 +495,18 @@ useGsapContext(() => {
         >
           <div
             data-card-inner
-            class="relative h-full w-full overflow-hidden rounded-card border border-[color:rgba(3,60,89,0.14)] bg-pureWhite shadow-[0_50px_100px_-45px_rgba(3,60,89,0.55)]"
+            class="relative h-full w-full overflow-hidden rounded-card border border-[color:rgba(3,60,89,0.14)] bg-slateNavy shadow-[0_50px_100px_-45px_rgba(3,60,89,0.55)]"
           >
-            <img :src="project.image" :alt="project.title" :loading="i < 3 ? 'eager' : 'lazy'" class="h-full w-full object-cover">
-            <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(1,24,38,0.55)] via-transparent to-transparent" />
+            <!-- Posters are portrait (4:5) in a landscape card: show the WHOLE
+                 poster with breathing room (its baked-in headline stays
+                 readable), over a blurred, dimmed copy of itself as backdrop. -->
+            <img :src="project.image" alt="" aria-hidden="true" loading="lazy" class="absolute inset-0 h-full w-full scale-125 object-cover opacity-60 blur-2xl">
+            <span aria-hidden="true" class="absolute inset-0 bg-[color:rgba(3,60,89,0.35)]" />
+            <div class="absolute inset-0 flex items-center justify-center px-[6%] py-[4.5%]">
+              <img :src="project.image" :alt="project.title" :loading="i < 3 ? 'eager' : 'lazy'" class="h-full w-auto max-w-full rounded-[clamp(8px,0.8vw,14px)] object-contain shadow-[0_30px_60px_-20px_rgba(0,12,22,0.7)] ring-1 ring-[color:rgba(255,255,255,0.14)]">
+            </div>
             <span class="absolute left-4 top-3 font-display text-token-metadata font-semibold tracking-[0.08em] text-pureWhite">{{ project.index }}</span>
-            <LayoutBrandMark :height="11" class="absolute right-4 top-3.5 opacity-80" />
+            <span class="absolute right-4 top-3.5 opacity-80"><LayoutBrandMark :height="11" /></span>
           </div>
         </article>
 
@@ -497,7 +514,7 @@ useGsapContext(() => {
              follows the same scrubbed timeline as the cards. -->
         <div
           ref="successRef"
-          class="absolute inset-x-0 top-[11svh] z-0 opacity-0"
+          class="absolute inset-x-0 top-[9svh] z-0 opacity-0"
         >
           <div class="container-page">
             <p class="flex items-center gap-4 font-display text-[length:clamp(36px,4.2vw,68px)] font-bold leading-[0.95] tracking-[-0.035em] text-slateNavy">
@@ -513,12 +530,12 @@ useGsapContext(() => {
           ref="captionRef"
           class="absolute inset-x-0 bottom-[4.5svh] mx-auto flex items-end justify-between gap-10 opacity-0"
         >
-          <div class="max-w-lg text-left">
-            <span ref="categoryRef" class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-cobalt" />
+          <div class="min-w-0 max-w-xl flex-1 text-left">
+            <span ref="categoryRef" class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-cobalt">{{ projects[0]?.category }}</span>
             <div class="mt-2 overflow-hidden">
-              <h2 ref="titleRef" class="font-display text-[length:clamp(26px,2.6vw,44px)] font-bold leading-[1.05] tracking-[-0.02em] text-slateNavy" />
+              <h2 ref="titleRef" class="truncate font-display text-[length:clamp(24px,min(2.6vw,5svh),44px)] font-bold leading-[1.05] tracking-[-0.02em] text-slateNavy">{{ projects[0]?.title }}</h2>
             </div>
-            <p ref="descRef" class="mt-2 line-clamp-2 text-token-body text-[color:rgba(3,60,89,0.72)]" />
+            <p ref="descRef" class="mt-2 line-clamp-2 min-h-[3.2em] text-token-body text-[color:rgba(3,60,89,0.72)]">{{ projects[0]?.description }}</p>
           </div>
 
           <!-- Segmented rail: one segment per project + numeral. -->

@@ -72,7 +72,7 @@ onMounted(() => {
       const push = k * k * 10
       const x = p.x + (dx / d) * push
       const y = p.y + (dy / d) * push
-      ctx.fillStyle = k > 0 ? `rgba(${Math.round(160 + 95 * k)}, ${Math.round(190 + 65 * k)}, 255, ${(0.14 + 0.8 * k).toFixed(3)})` : 'rgba(160, 190, 255, 0.14)'
+      ctx.fillStyle = k > 0 ? `rgba(255, ${Math.round(222 - 36 * k)}, ${Math.round(140 - 140 * k)}, ${(0.14 + 0.8 * k).toFixed(3)})` : 'rgba(255, 222, 140, 0.14)'
       ctx.beginPath()
       ctx.arc(x, y, 1 + 1.4 * k, 0, Math.PI * 2)
       ctx.fill()

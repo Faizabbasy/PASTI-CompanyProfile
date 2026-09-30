@@ -42,6 +42,8 @@ const headingRef = ref<HTMLElement | null>(null)
 const mobileHeadingRef = ref<HTMLElement | null>(null)
 const cardRefs = ref<HTMLElement[]>([])
 const captionRef = ref<HTMLElement | null>(null)
+const headerRowRef = ref<HTMLElement | null>(null)
+const captionRowRef = ref<HTMLElement | null>(null)
 const ghostRef = ref<HTMLElement | null>(null)
 const progressRef = ref<HTMLElement | null>(null)
 const readRef = ref<HTMLElement | null>(null)
@@ -108,11 +110,21 @@ useGsapContext(() => {
     let W = 0
     let H = 0
     let anchorX = 0 // front card's centre, relative to the stage centre
+    let centerOffset = 0 // lead card's centre, relative to the stage middle
     const measure = () => {
       vw = window.innerWidth
       vh = window.innerHeight
-      W = Math.min(vw * 0.46, vh * 0.5 * 1.6)
-      H = W * 0.625
+      // Fit the lead card into the free band between the header row (title,
+      // tabs, View all) and the caption row, with a breathing gap (+ room for
+      // the precision brackets), so it never touches either on short screens.
+      const sr = stage.getBoundingClientRect()
+      const headBottom = headerRowRef.value ? headerRowRef.value.getBoundingClientRect().bottom - sr.top : vh * 0.3
+      const capTop = captionRowRef.value ? captionRowRef.value.getBoundingClientRect().top - sr.top : vh * 0.8
+      const gap = clamp(28, 56, vh * 0.05) + 12
+      const band = Math.max(160, capTop - headBottom - gap * 2)
+      H = Math.min(band, vw * 0.46 * 0.625)
+      W = H / 0.625
+      centerOffset = headBottom + gap + band / 2 - vh / 2
       const gutter = clamp(20, 80, vw * 0.04)
       const left = Math.max(0, (vw - 1440) / 2) + gutter
       anchorX = -vw / 2 + left + vw * 0.05 + W / 2
@@ -126,7 +138,7 @@ useGsapContext(() => {
     measure()
 
     const state = { pos: 0, enter: 0 }
-    const centerY = () => vh * 0.02 // offset from stage middle
+    const centerY = () => centerOffset
 
     const render = () => {
       for (let i = 0; i < N; i++) {
@@ -321,19 +333,28 @@ watch(activeIndex, (next, prev) => {
       </BaseContainer>
 
       <!-- Title + topic tabs + progress + CTA. -->
-      <BaseContainer class="absolute inset-x-0 top-[11svh] z-30">
-        <div class="flex items-start justify-between gap-8">
-          <h2 ref="headingRef" class="pointer-events-none font-display text-[length:clamp(64px,8vw,132px)] font-bold leading-[0.92] tracking-[-0.04em] text-slateNavy">
+      <BaseContainer class="absolute inset-x-0 top-[10svh] z-30">
+        <div ref="headerRowRef" class="flex items-start justify-between gap-8">
+          <h2 ref="headingRef" class="pointer-events-none font-display text-[length:clamp(56px,min(8vw,13svh),132px)] font-bold leading-[0.92] tracking-[-0.04em] text-slateNavy">
             {{ heading }}
           </h2>
-          <div class="flex flex-col items-end gap-5 pt-3">
-            <div data-ins-chrome class="flex items-center gap-3">
-              <span aria-hidden="true" class="h-1.5 w-1.5 shrink-0 rounded-full bg-pastiYellow-500" />
-              <p class="font-display text-token-body-large font-semibold tabular-nums tracking-[-0.01em] text-slateNavy">
-                {{ pad(activeIndex + 1) }}<span class="text-[color:rgba(3,60,89,0.35)]"> / {{ pad(N) }}</span>
-              </p>
+          <div class="flex flex-col items-end gap-4 pt-3">
+            <div data-ins-chrome class="flex items-center gap-8">
+              <div class="flex items-center gap-3">
+                <span aria-hidden="true" class="h-1.5 w-1.5 shrink-0 rounded-full bg-pastiYellow-500" />
+                <p class="font-display text-token-body-large font-semibold tabular-nums tracking-[-0.01em] text-slateNavy">
+                  {{ pad(activeIndex + 1) }}<span class="text-[color:rgba(3,60,89,0.35)]"> / {{ pad(N) }}</span>
+                </p>
+              </div>
+              <NuxtLink
+                to="/insights"
+                class="group/cta relative inline-flex items-center gap-2 pb-1.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-slateNavy hover:text-cobalt"
+              >
+                {{ cta }}
+                <span aria-hidden="true" class="inline-block transition-transform duration-200 ease-editorial group-hover/cta:translate-x-1">→</span>
+                <span aria-hidden="true" class="absolute inset-x-0 bottom-0 h-px origin-left scale-x-[0.2] bg-current transition-transform duration-200 ease-editorial group-hover/cta:scale-x-100" />
+              </NuxtLink>
             </div>
-
             <div data-ins-chrome class="flex flex-col items-end gap-2.5">
               <div class="flex items-center gap-1" role="tablist" aria-label="Insight topics">
                 <button
@@ -358,15 +379,6 @@ watch(activeIndex, (next, prev) => {
               </span>
             </div>
 
-            <NuxtLink
-              data-ins-chrome
-              to="/insights"
-              class="group/cta relative inline-flex items-center gap-2 pb-1.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-slateNavy hover:text-cobalt"
-            >
-              {{ cta }}
-              <span aria-hidden="true" class="inline-block transition-transform duration-200 ease-editorial group-hover/cta:translate-x-1">→</span>
-              <span aria-hidden="true" class="absolute inset-x-0 bottom-0 h-px origin-left scale-x-[0.2] bg-current transition-transform duration-200 ease-editorial group-hover/cta:scale-x-100" />
-            </NuxtLink>
           </div>
         </div>
       </BaseContainer>
@@ -417,7 +429,7 @@ watch(activeIndex, (next, prev) => {
 
       <!-- Caption for the active article + circular Read CTA. -->
       <BaseContainer class="absolute inset-x-0 bottom-[4.5svh] z-30">
-        <div class="flex items-end justify-between gap-10">
+        <div ref="captionRowRef" class="flex items-end justify-between gap-10">
           <NuxtLink
             to="/insights"
             data-ins-chrome

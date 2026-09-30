@@ -128,7 +128,7 @@ useGsapContext(() => {
     <div
       v-if="variant === 'hero'"
       class="absolute inset-0"
-      style=" background: radial-gradient(ellipse 60% 45% at 50% 34%, rgba(37, 99, 235, 0.1), transparent 70%), radial-gradient(ellipse 45% 40% at 100% 0%, rgba(6, 182, 212, 0.05), transparent 70%), linear-gradient(180deg, #0a1020 0%, #033C59 42%, #033C59 100%); "
+      style=" background: radial-gradient(ellipse 60% 45% at 50% 34%, rgba(37, 99, 235, 0.1), transparent 70%), radial-gradient(ellipse 45% 40% at 100% 0%, rgba(251, 186, 0, 0.05), transparent 70%), linear-gradient(180deg, #0a1020 0%, #033C59 42%, #033C59 100%); "
     />
     <div
       v-else
@@ -163,7 +163,7 @@ useGsapContext(() => {
       </div>
       <div
         class="absolute inset-0"
-        style=" background-image: repeating-linear-gradient( to bottom, rgba(6, 182, 212, 0.32) 0, rgba(6, 182, 212, 0.32) 1px, transparent 1px, transparent 48px ); "
+        style=" background-image: repeating-linear-gradient( to bottom, rgba(251, 186, 0, 0.32) 0, rgba(251, 186, 0, 0.32) 1px, transparent 1px, transparent 48px ); "
       />
     </div>
 
