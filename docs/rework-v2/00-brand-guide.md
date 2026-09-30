@@ -129,7 +129,7 @@ A navy-led precision brand with digital blue accents and a distinctive yellow si
 
 | Color | Value | Primary Role |
 |---|---|---|
-| Slate Navy | `#0F172A` | Primary dark environment |
+| Slate Navy | `#033C59` | Primary dark environment (owner revision 2026-09-30; was `#0F172A`) |
 | Pure White | `#FFFFFF` | Primary light / contrast surface |
 | Surface Neutral | `#F8FAFC` | Editorial light surface |
 | Cobalt Blue | `#2563EB` | Core digital accent / interaction |

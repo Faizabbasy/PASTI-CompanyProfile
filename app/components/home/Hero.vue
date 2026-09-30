@@ -8,7 +8,7 @@ if (import.meta.client) {
 
 // HERO + SELECTED WORK GALLERY (post-Milestone 7 redirection, owner-directed).
 // The hero is now one pinned stage: a glass-ring centerpiece behind the
-// headline, and the 10 Selected Work projects as cards sitting on a curved
+// headline, and the Selected Work projects as cards sitting on a curved
 // arc at the bottom edge. Scrolling straightens the arc, grows the cards
 // (not to full screen) and then slides them sideways one project at a time.
 // This supersedes 04-homepage-spec.md §1 (Living Proof System) and §3
@@ -17,10 +17,10 @@ if (import.meta.client) {
 //
 // Below `desktop` (1024px) and under reduced motion there is no pin and no
 // gallery: the hero is a static composition and the existing vertical
-// Selected Work list (SelectedWork.vue) carries all 10 projects.
+// Selected Work list (SelectedWork.vue) carries every project.
 //
 // Copy: headline/subtext are owner-supplied; project copy comes straight from
-// useSelectedWork() (existing data, incl. the 4 explicit placeholders).
+// useSelectedWork() (the 6 real projects; placeholders removed 2026-09-30).
 
 const headlineWords = ['Technology.', 'Creativity.', 'Impact.']
 const subtext = 'We build technology and creative solutions for businesses ready to move forward.'
@@ -39,6 +39,7 @@ const copyRef = ref<HTMLElement | null>(null)
 const subtextRef = ref<HTMLElement | null>(null)
 const ctaRowRef = ref<HTMLElement | null>(null)
 const ctaPrimaryRef = ref<HTMLElement | null>(null)
+const ctaSecondaryRef = ref<HTMLElement | null>(null)
 const ringRef = ref<HTMLElement | null>(null)
 const chipsRef = ref<HTMLElement | null>(null)
 const galleryRef = ref<HTMLElement | null>(null)
@@ -53,6 +54,7 @@ const numeralRef = ref<HTMLElement | null>(null)
 const successRef = ref<HTMLElement | null>(null)
 
 useMagnetic(ctaPrimaryRef, { strength: 0.2 })
+useMagnetic(ctaSecondaryRef, { strength: 0.2 })
 
 // The gallery's ScrollTrigger, kept so the primary CTA can jump straight to
 // the point where the first project becomes active.
@@ -362,15 +364,16 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <BaseSection ref="sectionComponentRef" as="section" class="relative overflow-hidden bg-slateNavy py-0">
+  <BaseSection ref="sectionComponentRef" as="section" class="relative overflow-hidden bg-[#f6f9fb] py-0">
     <div ref="stageRef" class="relative flex min-h-[100svh] items-center justify-center overflow-hidden desktop:h-[100svh]">
-      <!-- Background: deep blue gradation, restrained — a single soft lift
-           behind the ring, a cool highlight at the top-right, plus one thin
-           orbit line and two small marks. No grid, no particles, no blobs. -->
+      <!-- Background (owner revision 2026-09-30: light): white-to-mist with a
+           soft Cobalt lift behind the ring, a cool highlight top-right and a
+           faint #033C59 lift bottom-left, plus one thin orbit line and two
+           small marks. No grid, no particles, no blobs. -->
       <div
         aria-hidden="true"
         class="absolute inset-0"
-        style="background: radial-gradient(ellipse 58% 52% at 50% 44%, rgba(37, 99, 235, 0.42), rgba(29, 78, 216, 0.16) 46%, transparent 74%), radial-gradient(ellipse 40% 38% at 92% 6%, rgba(96, 165, 250, 0.16), transparent 70%), radial-gradient(ellipse 45% 40% at 4% 92%, rgba(37, 99, 235, 0.14), transparent 70%), linear-gradient(180deg, #050b1c 0%, #0a1330 46%, #0d1836 100%)"
+        style="background: radial-gradient(ellipse 52% 48% at 50% 46%, rgba(37, 99, 235, 0.16), rgba(37, 99, 235, 0.05) 50%, transparent 74%), radial-gradient(ellipse 40% 38% at 94% 4%, rgba(96, 165, 250, 0.14), transparent 70%), radial-gradient(ellipse 45% 42% at 4% 96%, rgba(3, 60, 89, 0.08), transparent 70%), linear-gradient(180deg, #ffffff 0%, #f5f8fb 55%, #eef3f7 100%)"
       />
       <svg
         aria-hidden="true"
@@ -379,10 +382,10 @@ useGsapContext(() => {
         preserveAspectRatio="xMidYMid slice"
         fill="none"
       >
-        <ellipse cx="720" cy="400" rx="470" ry="300" stroke="rgba(147,197,253,0.22)" stroke-width="1" transform="rotate(-14 720 400)" />
+        <ellipse cx="720" cy="400" rx="470" ry="300" stroke="rgba(3,60,89,0.16)" stroke-width="1" transform="rotate(-14 720 400)" />
         <circle cx="1094" cy="212" r="6" fill="#3b82f6" />
-        <path d="M22 500h16M30 492v16" stroke="rgba(147,197,253,0.45)" stroke-width="1" />
-        <path d="M1402 500h16M1410 492v16" stroke="rgba(147,197,253,0.3)" stroke-width="1" />
+        <path d="M22 500h16M30 492v16" stroke="rgba(3,60,89,0.35)" stroke-width="1" />
+        <path d="M1402 500h16M1410 492v16" stroke="rgba(3,60,89,0.25)" stroke-width="1" />
       </svg>
 
       <!-- Glass ring (Three.js, client-only) -->
@@ -404,52 +407,66 @@ useGsapContext(() => {
         >
           <h1
             ref="headingRef"
-            class="flex flex-col items-center text-center font-display text-[length:clamp(40px,14vw,72px)] font-bold leading-[0.92] tracking-[-0.04em] text-pureWhite [text-shadow:0_4px_44px_rgba(5,11,28,0.65)] md:text-token-display-xl desktop:flex-row desktop:justify-center desktop:gap-x-[0.1em] desktop:text-[length:clamp(64px,6.4vw,132px)]"
+            class="flex flex-col items-center text-center font-display text-[length:clamp(40px,14vw,72px)] font-bold leading-[0.92] tracking-[-0.04em] text-slateNavy md:text-token-display-xl desktop:flex-row desktop:justify-center desktop:gap-x-[0.1em] desktop:text-[length:clamp(64px,6.4vw,132px)]"
           >
             <span v-for="word in headlineWords" :key="word" class="block">{{ word.slice(0, -1) }}<span class="text-cobalt">.</span></span>
           </h1>
 
-          <p ref="subtextRef" class="mx-auto mt-8 max-w-lg text-center text-token-body-large font-medium text-pureWhite [text-shadow:0_2px_18px_rgba(5,11,28,0.9),0_0_34px_rgba(5,11,28,0.6)]">
+          <p ref="subtextRef" class="mx-auto mt-8 max-w-lg text-center text-token-body-large font-semibold text-[color:rgba(3,60,89,0.9)] [text-shadow:0_0_12px_rgba(255,255,255,0.95),0_0_26px_rgba(255,255,255,0.85)]">
             {{ subtext }}
           </p>
 
-          <div ref="ctaRowRef" class="mt-9 flex flex-wrap items-center justify-center gap-6">
-            <div ref="ctaPrimaryRef" class="inline-block">
+          <!-- CTAs sit over the Cobalt 3D ring, so neither may be Cobalt at
+               rest: primary is solid Slate Navy (the header CTA's colour) with
+               a soft shadow lifting it off the render; secondary is a solid
+               white surface instead of bare text. Cobalt only as hover wipe.
+               Desktop: pinned to the left key line (4vw — header logo / 01·04
+               marker) at the same height as the right "Process Ready" chip
+               (22svh + 44svh = 66svh), so the ring sits centred between them. -->
+          <div ref="ctaRowRef" class="mt-9 flex flex-wrap items-center justify-center gap-4 desktop:absolute desktop:left-[4vw] desktop:top-[44svh] desktop:mt-0 desktop:flex-col desktop:items-stretch desktop:gap-3 wide:flex-row wide:items-center wide:gap-4">
+            <div ref="ctaPrimaryRef" class="inline-block desktop:w-full wide:w-auto">
               <a
                 href="#selected-work"
-                class="inline-flex items-center justify-center gap-2 rounded-button bg-cobalt px-7 py-3.5 font-display text-sm font-semibold text-pureWhite transition-colors duration-150 hover:bg-cyan hover:text-slateNavy"
+                class="group relative flex items-center justify-between gap-4 overflow-hidden rounded-[14px] bg-slateNavy py-2.5 pl-6 pr-2.5 font-display text-[15px] font-bold text-pureWhite shadow-[0_18px_40px_-16px_rgba(3,60,89,0.7)]"
                 @click.prevent="goToWork"
               >
-                {{ ctaPrimary.label }}
-                <span aria-hidden="true">→</span>
+                <span aria-hidden="true" class="absolute inset-0 origin-left scale-x-0 bg-cobalt transition-transform duration-500 ease-editorial group-hover:scale-x-100" />
+                <span class="relative z-10">{{ ctaPrimary.label }}</span>
+                <span class="relative z-10 grid h-10 w-10 place-items-center rounded-[10px] bg-pastiYellow-500 text-slateNavy transition-transform duration-300 ease-editorial group-hover:rotate-[-45deg]">
+                  <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+                </span>
               </a>
             </div>
-            <a
-              :href="whatsappLink"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="group inline-flex items-center gap-2 text-token-metadata font-semibold uppercase tracking-[0.06em] text-pureWhite [text-shadow:0_2px_14px_rgba(5,11,28,0.9)] transition-colors duration-150 hover:text-cyan"
-            >
-              {{ ctaSecondary.label }}
-              <span aria-hidden="true" class="transition-transform duration-150 group-hover:translate-x-1">→</span>
-            </a>
+            <div ref="ctaSecondaryRef" class="inline-block desktop:w-full wide:w-auto">
+              <a
+                :href="whatsappLink"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="group flex items-center justify-between gap-4 rounded-[14px] border border-[color:rgba(3,60,89,0.14)] bg-pureWhite py-2.5 pl-6 pr-2.5 font-display text-[15px] font-bold text-slateNavy shadow-[0_18px_40px_-18px_rgba(3,60,89,0.45)] transition-colors duration-300 ease-editorial hover:border-slateNavy"
+              >
+                {{ ctaSecondary.label }}
+                <span class="grid h-10 w-10 place-items-center rounded-[10px] bg-[color:rgba(3,60,89,0.07)] text-slateNavy transition-colors duration-300 ease-editorial group-hover:bg-slateNavy group-hover:text-pureWhite">
+                  <svg viewBox="0 0 16 16" class="h-4 w-4 transition-transform duration-300 ease-editorial group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+                </span>
+              </a>
+            </div>
           </div>
         </div>
       </BaseContainer>
 
       <!-- Status chips (whitelisted neutral states). -->
       <div ref="chipsRef" aria-hidden="true" class="hidden desktop:block">
-        <div class="absolute left-[4vw] top-[34svh] z-10 flex items-center gap-3 font-display text-token-metadata font-semibold tracking-[0.08em] text-[color:rgba(255,255,255,0.72)]">
+        <div class="absolute left-[4vw] top-[34svh] z-10 flex items-center gap-3 font-display text-token-metadata font-semibold tracking-[0.08em] text-[color:rgba(3,60,89,0.72)]">
           <span>01 / 04</span>
           <span class="h-px w-16 bg-cobalt" />
         </div>
-        <div class="absolute right-[4vw] top-[66svh] z-30 flex items-center gap-3 rounded-button border border-[color:rgba(147,197,253,0.3)] bg-[color:rgba(10,19,48,0.6)] px-4 py-2.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-pureWhite">
+        <div class="absolute right-[4vw] top-[66svh] z-30 flex items-center gap-3 rounded-button border border-[color:rgba(3,60,89,0.16)] bg-[color:rgba(255,255,255,0.75)] px-4 py-2.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-slateNavy shadow-[0_12px_30px_-20px_rgba(3,60,89,0.5)]">
           <span class="h-1.5 w-1.5 rounded-full bg-cobalt" />
           Process Ready
         </div>
       </div>
 
-      <!-- Gallery: the 10 Selected Work projects on a curved arc that
+      <!-- Gallery: the Selected Work projects on a curved arc that
            straightens, grows and travels sideways with scroll. Desktop
            only (hidden below 1024px and under reduced motion — the
            vertical Selected Work list covers those). -->
@@ -467,10 +484,10 @@ useGsapContext(() => {
         >
           <div
             data-card-inner
-            class="relative h-full w-full overflow-hidden rounded-card border border-[color:rgba(147,197,253,0.28)] bg-[#0a1330] shadow-[0_50px_100px_-40px_rgba(2,6,23,0.9)]"
+            class="relative h-full w-full overflow-hidden rounded-card border border-[color:rgba(3,60,89,0.14)] bg-pureWhite shadow-[0_50px_100px_-45px_rgba(3,60,89,0.55)]"
           >
             <img :src="project.image" :alt="project.title" :loading="i < 3 ? 'eager' : 'lazy'" class="h-full w-full object-cover">
-            <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(5,11,28,0.55)] via-transparent to-transparent" />
+            <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(1,24,38,0.55)] via-transparent to-transparent" />
             <span class="absolute left-4 top-3 font-display text-token-metadata font-semibold tracking-[0.08em] text-pureWhite">{{ project.index }}</span>
             <LayoutBrandMark :height="11" class="absolute right-4 top-3.5 opacity-80" />
           </div>
@@ -483,10 +500,10 @@ useGsapContext(() => {
           class="absolute inset-x-0 top-[11svh] z-0 opacity-0"
         >
           <div class="container-page">
-            <p class="flex items-center gap-4 font-display text-[length:clamp(36px,4.2vw,68px)] font-bold leading-[0.95] tracking-[-0.035em] text-pureWhite">
+            <p class="flex items-center gap-4 font-display text-[length:clamp(36px,4.2vw,68px)] font-bold leading-[0.95] tracking-[-0.035em] text-slateNavy">
               <span>Success Project<span class="text-cobalt">.</span></span>
-              <span aria-hidden="true" class="mt-[0.35em] hidden h-px flex-1 bg-[color:rgba(255,255,255,0.16)] md:block" />
-              <LayoutBrandMark :height="14" class="mt-[0.3em] hidden md:inline-block" />
+              <span aria-hidden="true" class="mt-[0.35em] hidden h-px flex-1 bg-[color:rgba(3,60,89,0.16)] md:block" />
+              <LayoutBrandMark surface="light" :height="14" class="mt-[0.3em] hidden md:inline-block" />
             </p>
           </div>
         </div>
@@ -497,19 +514,19 @@ useGsapContext(() => {
           class="absolute inset-x-0 bottom-[4.5svh] mx-auto flex items-end justify-between gap-10 opacity-0"
         >
           <div class="max-w-lg text-left">
-            <span ref="categoryRef" class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-[color:#93c5fd]" />
+            <span ref="categoryRef" class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-cobalt" />
             <div class="mt-2 overflow-hidden">
-              <h2 ref="titleRef" class="font-display text-[length:clamp(26px,2.6vw,44px)] font-bold leading-[1.05] tracking-[-0.02em] text-pureWhite" />
+              <h2 ref="titleRef" class="font-display text-[length:clamp(26px,2.6vw,44px)] font-bold leading-[1.05] tracking-[-0.02em] text-slateNavy" />
             </div>
-            <p ref="descRef" class="mt-2 line-clamp-2 text-token-body text-[color:rgba(255,255,255,0.68)]" />
+            <p ref="descRef" class="mt-2 line-clamp-2 text-token-body text-[color:rgba(3,60,89,0.72)]" />
           </div>
 
-          <!-- Segmented rail: 10 discrete segments + numeral. -->
+          <!-- Segmented rail: one segment per project + numeral. -->
           <div ref="railWrapRef" class="flex shrink-0 flex-col items-end gap-3 pb-1">
             <div ref="railRef" class="hero-rail flex items-center gap-1.5">
               <span v-for="p in projects" :key="p.index" data-on="off" class="h-[3px] w-6" />
             </div>
-            <span ref="numeralRef" class="font-display text-token-metadata font-semibold tracking-[0.08em] text-[color:rgba(255,255,255,0.7)]">01 / 10</span>
+            <span ref="numeralRef" class="font-display text-token-metadata font-semibold tracking-[0.08em] text-[color:rgba(3,60,89,0.7)]">01 / {{ String(projects.length).padStart(2, '0') }}</span>
           </div>
         </div>
       </div>
@@ -525,7 +542,7 @@ useGsapContext(() => {
 }
 
 .hero-rail > span {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(3, 60, 89, 0.14);
   transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .hero-rail > span[data-on='past'] {

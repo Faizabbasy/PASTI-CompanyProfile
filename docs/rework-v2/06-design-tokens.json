@@ -8,7 +8,7 @@
   "color": {
     "brand": {
       "slateNavy": {
-        "value": "#0F172A",
+        "value": "#033C59",
         "role": "Primary dark environment"
       },
       "pureWhite": {
@@ -34,7 +34,7 @@
     },
     "text": {
       "onDark": "#FFFFFF",
-      "onLight": "#0F172A",
+      "onLight": "#033C59",
       "mutedOnDark": "rgba(255,255,255,0.64)",
       "mutedOnLight": "rgba(15,23,42,0.64)"
     },

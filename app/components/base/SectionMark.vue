@@ -55,7 +55,7 @@ useGsapContext(() => {
 const tone = computed(() =>
   props.surface === 'dark'
     ? { text: 'text-[color:rgba(255,255,255,0.55)]', line: 'bg-[color:rgba(255,255,255,0.14)]' }
-    : { text: 'text-[color:rgba(15,23,42,0.6)]', line: 'bg-[color:rgba(15,23,42,0.14)]' }
+    : { text: 'text-[color:rgba(3,60,89,0.6)]', line: 'bg-[color:rgba(3,60,89,0.14)]' }
 )
 </script>
 

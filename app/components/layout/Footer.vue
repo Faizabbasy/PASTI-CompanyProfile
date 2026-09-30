@@ -57,7 +57,7 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <footer ref="footerRef" class="surface-dark relative overflow-hidden border-t border-navy-900 pb-0 pt-16 md:pt-20">
+  <footer ref="footerRef" data-header-theme="dark" class="surface-dark relative overflow-hidden border-t border-navy-900 pb-0 pt-16 md:pt-20">
     <!-- No ambient glow (04-homepage-spec.md §9, locked, no exception): the
          previous low-opacity Yellow glow blob is removed entirely, not
          recolored or reduced further. Footer quality comes from grid,

@@ -72,8 +72,8 @@ useGsapContext(() => {
          article reads as a PASTI publication. The rule's Cobalt segment
          draws on hover (line travel, 00-brand-guide.md §10). -->
     <div class="mt-5 flex items-center gap-3">
-      <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(15,23,42,0.55)]">{{ article.index }}</span>
-      <span class="relative block h-px flex-1 bg-[color:rgba(15,23,42,0.14)]">
+      <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(3,60,89,0.55)]">{{ article.index }}</span>
+      <span class="relative block h-px flex-1 bg-[color:rgba(3,60,89,0.14)]">
         <span aria-hidden="true" class="absolute inset-y-0 left-0 w-full origin-left scale-x-0 bg-cobalt transition-transform duration-400 ease-editorial group-hover:scale-x-100" />
       </span>
       <LayoutBrandMark surface="light" :height="12" />

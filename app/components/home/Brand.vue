@@ -138,7 +138,7 @@ useGsapContext(() => {
       <div
         aria-hidden="true"
         class="pointer-events-none absolute inset-0"
-        style="background: linear-gradient(180deg, transparent 72%, #0f172a 100%), radial-gradient(ellipse 45% 55% at 78% 55%, rgba(37, 99, 235, 0.16), transparent 72%), linear-gradient(90deg, #0a1122 0%, #0f172a 55%, #101b36 100%)"
+        style="background: linear-gradient(180deg, transparent 72%, #033C59 100%), radial-gradient(ellipse 45% 55% at 78% 55%, rgba(37, 99, 235, 0.16), transparent 72%), linear-gradient(90deg, #022436 0%, #033C59 55%, #022F47 100%)"
       />
 
       <BaseContainer class="relative z-10 desktop:pt-10">

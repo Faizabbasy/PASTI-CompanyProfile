@@ -94,8 +94,8 @@ function onLeave() {
 <template>
   <div
     ref="rootRef"
-    class="cap-card group/cap relative overflow-hidden rounded-card border bg-[linear-gradient(180deg,#141d35_0%,#0F172A_62%)]"
-    :class="[sz.pad, size === 'accent' ? 'border-[color:rgba(37,99,235,0.45)]' : 'border-[color:rgba(255,255,255,0.1)]']"
+    class="cap-card group/cap relative overflow-hidden rounded-card border bg-[linear-gradient(180deg,#FFFFFF_0%,#F4F8FB_100%)] shadow-[0_24px_50px_-34px_rgba(3,60,89,0.45)]"
+    :class="[sz.pad, size === 'accent' ? 'border-[color:rgba(37,99,235,0.45)]' : 'border-[color:rgba(3,60,89,0.120)]']"
     @pointermove="onMove"
     @pointerenter="onEnter"
     @pointerleave="onLeave"
@@ -109,16 +109,16 @@ function onLeave() {
 
     <!-- Header: index, primary Signal point, a rule, the pillar. -->
     <div class="relative flex items-center gap-3">
-      <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-pureWhite">{{ service.index }}</span>
+      <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-slateNavy">{{ service.index }}</span>
       <span v-if="size === 'primary'" aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-cobalt" />
-      <span aria-hidden="true" class="h-px flex-1 bg-[color:rgba(255,255,255,0.12)]" />
-      <span class="font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">{{ pillar }}</span>
+      <span aria-hidden="true" class="h-px flex-1 bg-[color:rgba(3,60,89,0.144)]" />
+      <span class="font-display text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.68)]">{{ pillar }}</span>
     </div>
 
     <!-- Blueprint window. -->
     <div
       ref="windowRef"
-      class="cap-card__window relative mt-4 overflow-hidden rounded-token-sm border border-[color:rgba(255,255,255,0.07)] bg-[color:rgba(5,11,28,0.55)] px-3 py-2 text-[color:rgba(255,255,255,0.5)]"
+      class="cap-card__window relative mt-4 overflow-hidden rounded-token-sm border border-[color:rgba(3,60,89,0.084)] bg-[color:rgba(3,60,89,0.035)] px-3 py-2 text-[color:rgba(3,60,89,0.68)]"
       :class="sz.art"
     >
       <span aria-hidden="true" class="cap-card__grid pointer-events-none absolute inset-0" />
@@ -134,15 +134,15 @@ function onLeave() {
       <span ref="scanRef" aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-0 w-px bg-cobalt opacity-0" />
     </div>
 
-    <h3 class="relative mt-5 font-display font-semibold leading-tight text-pureWhite" :class="sz.title">
+    <h3 class="relative mt-5 font-display font-semibold leading-tight text-slateNavy" :class="sz.title">
       {{ service.title }}
     </h3>
-    <p v-if="size !== 'accent'" class="relative mt-2 text-[color:rgba(255,255,255,0.62)]" :class="sz.body">
+    <p v-if="size !== 'accent'" class="relative mt-2 text-[color:rgba(3,60,89,0.80)]" :class="sz.body">
       {{ service.body }}
     </p>
 
     <!-- Footer: CTA (primary) / pillar tick, signed with the brand mark. -->
-    <div class="relative flex items-center justify-between border-t border-[color:rgba(255,255,255,0.08)]" :class="size === 'accent' ? 'mt-4 pt-3' : 'mt-5 pt-4'">
+    <div class="relative flex items-center justify-between border-t border-[color:rgba(3,60,89,0.096)]" :class="size === 'accent' ? 'mt-4 pt-3' : 'mt-5 pt-4'">
       <span
         v-if="size === 'primary'"
         class="inline-flex items-center gap-1.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-cobalt"
@@ -150,8 +150,8 @@ function onLeave() {
         {{ service.cta }}
         <span aria-hidden="true" class="inline-block transition-transform duration-200 ease-editorial group-hover/cap:translate-x-1">→</span>
       </span>
-      <span v-else aria-hidden="true" class="h-px w-6 bg-[color:rgba(255,255,255,0.3)] transition-all duration-200 ease-editorial group-hover/cap:w-10 group-hover/cap:bg-cobalt" />
-      <LayoutBrandMark :height="size === 'accent' ? 9 : size === 'primary' ? 12 : 10" class="opacity-70 transition-opacity duration-200 ease-editorial group-hover/cap:opacity-100" />
+      <span v-else aria-hidden="true" class="h-px w-6 bg-[color:rgba(3,60,89,0.360)] transition-all duration-200 ease-editorial group-hover/cap:w-10 group-hover/cap:bg-cobalt" />
+      <LayoutBrandMark surface="light" :height="size === 'accent' ? 9 : size === 'primary' ? 12 : 10" class="opacity-70 transition-opacity duration-200 ease-editorial group-hover/cap:opacity-100" />
     </div>
 
     <!-- Cobalt edge: drawn left-to-right by the parent on hover. -->
@@ -174,8 +174,8 @@ function onLeave() {
 /* Fine 12px measuring grid inside the window (structure, not texture). */
 .cap-card__grid {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    linear-gradient(to right, rgba(3,60,89,0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(3,60,89,0.07) 1px, transparent 1px);
   background-size: 12px 12px;
 }
 

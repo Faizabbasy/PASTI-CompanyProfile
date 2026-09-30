@@ -30,7 +30,7 @@
        03-design-system.md. Use via `border-[color:var(--border-dark-subtle)]`
        etc., or the `.border-structural-*` utilities below. */
     --border-dark-subtle: rgba(255, 255, 255, 0.12);
-    --border-light-subtle: rgba(15, 23, 42, 0.1);
+    --border-light-subtle: rgba(3,60,89, 0.1);
   }
 
   * {
@@ -286,8 +286,16 @@
     color: theme('colors.pureWhite');
   }
 
+  /* Owner revision (2026-09-30): the site is now light-dominant. Light
+     sections are not flat white — a white-to-mist gradient with a faint
+     navy lift and a cool Cobalt corner. `--lift-x/--lift-y` move the navy
+     lift per section so consecutive light sections don't look identical. */
   .surface-light {
-    background-color: theme('colors.surfaceNeutral');
+    background-color: #f6f9fb;
+    background-image:
+      radial-gradient(ellipse 60% 55% at var(--lift-x, 88%) var(--lift-y, 0%), rgba(3, 60, 89, 0.07), transparent 70%),
+      radial-gradient(ellipse 50% 45% at 0% 100%, rgba(37, 99, 235, 0.05), transparent 70%),
+      linear-gradient(180deg, #ffffff 0%, #f3f7fa 100%);
     color: theme('colors.slateNavy');
   }
 

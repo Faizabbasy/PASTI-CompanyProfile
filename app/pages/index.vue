@@ -31,6 +31,10 @@
        Restore by uncommenting. -->
   <!-- <HomeBrand /> -->
   <HomeWhatWeDo />
+  <!-- Owner-directed addition (2026-09-30): Who We Are + Trusted Partner card.
+       Approved exception to the locked 9-section sequence — see the header
+       comment in WhoWeAre.vue. Trusted (below) is unchanged. -->
+  <HomeWhoWeAre />
   <HomeTrust />
   <HomeTestimonials />
   <HomePlatforms />

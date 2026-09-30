@@ -146,6 +146,30 @@ useGsapContext(() => {
     })
     let lastTp = 0
 
+    // --- e-CORPORATE exploded stack ---
+    const corpStack = corpWorld.querySelector<HTMLElement>('[data-corp-stack]')
+    const corpTilt = corpWorld.querySelector<HTMLElement>('[data-corp-tilt]')
+    const corpPlates = Array.from(corpWorld.querySelectorAll<HTMLElement>('[data-corp-plate]')) // bottom -> top
+    const corpFloor = corpWorld.querySelector<HTMLElement>('[data-corp-floor]')
+    const corpRails = Array.from(corpWorld.querySelectorAll<HTMLElement>('[data-corp-rail]'))
+    const corpChars = Array.from(corpWorld.querySelectorAll<HTMLElement>('[data-corp-char]'))
+    const corpOutcomes = Array.from(corpWorld.querySelectorAll<HTMLElement>('[data-corp-outcome]'))
+    const STACK_REST = { rotationX: 56, rotationZ: -38 }
+    const PLATE_GAP = 112 // px between plates once exploded
+    gsap.set(corpStack, STACK_REST)
+    gsap.set(corpPlates, { z: 0 })
+    gsap.set(corpRails, { scaleY: 0 })
+    const corpTitleIn = gsap.fromTo(corpChars, { yPercent: 110 }, { yPercent: 0, duration: 0.8, stagger: 0.04, ease: approvedEase.gsapPrimary, paused: true })
+    let corpTitleShown = false
+    let corpActive = -2
+    const setCorpActive = (i: number) => {
+      if (i === corpActive) return
+      corpActive = i
+      corpOutcomes.forEach((el, k) => { el.dataset.active = String(k === i) })
+      // outcome i lights plate i+? — People (2), Processes (1), Information (0)
+      corpPlates.forEach((el, k) => { el.dataset.active = String(i >= 0 && k === 2 - i) })
+    }
+
     // Dwell distribution across the pin's total scroll distance (spec
     // "conceptual, not rigid": OPEN ~35% / transfer ~25-30% / e-CORPORATE
     // ~35-40%). Transfer overlap begins before OPEN's own dwell ends
@@ -217,6 +241,26 @@ useGsapContext(() => {
           gsap.set(el, { y: 90 * (1 - e), rotationX: 18 * (1 - e), transformPerspective: 1200, opacity: 0.2 + 0.8 * e })
         })
 
+        // ENTRY of the e-CORPORATE stack: arrives flat, then the layers
+        // lift apart (bottom stays, each layer above rises further); floor
+        // and light rails come up with it. During the dwell after the
+        // transfer the stack turns a few degrees and the three outcomes
+        // light in turn, each with its layer.
+        {
+          const lift = 1 - Math.pow(1 - gsap.utils.clamp(0, 1, (transferProgress - 0.3) / 0.7), 3)
+          corpPlates.forEach((el, i) => {
+            const show = gsap.utils.clamp(0, 1, (transferProgress - 0.05 - i * 0.08) / 0.4)
+            gsap.set(el, { z: i * PLATE_GAP * lift, opacity: 0.15 + 0.85 * show })
+          })
+          gsap.set(corpFloor, { opacity: transferProgress })
+          corpRails.forEach((el, i) => gsap.set(el, { scaleY: gsap.utils.clamp(0, 1, (transferProgress - 0.2 - i * 0.05) / 0.6) }))
+          const dwell = gsap.utils.clamp(0, 1, (p - TRANSFER_END) / (1 - TRANSFER_END))
+          gsap.set(corpStack, { rotationZ: STACK_REST.rotationZ + 12 * dwell, rotationX: STACK_REST.rotationX - 4 * dwell })
+          setCorpActive(transferProgress < 1 ? -1 : Math.min(2, Math.floor(dwell * 3.3)))
+          if (transferProgress > 0.55 && !corpTitleShown) { corpTitleShown = true; corpTitleIn.play() }
+          if (transferProgress < 0.25 && corpTitleShown) { corpTitleShown = false; corpTitleIn.reverse() }
+        }
+
         // --- Mask-based title exit/entry (not opacity-only) ---
         gsap.set(openTitle, { yPercent: -18 * transferProgress, autoAlpha: 1 - transferProgress })
         gsap.set(corpTitle, { yPercent: 14 * (1 - transferProgress), autoAlpha: transferProgress })
@@ -237,7 +281,7 @@ useGsapContext(() => {
     // fight. Amplitude stays inside the 4-8px depth budget's spirit (a
     // bit more, since it is user-driven, not idle).
     pinTrigger = trigger
-    const cleanups: Array<() => void> = [() => trigger.kill(), () => openInTrigger.kill(), () => openIn.kill(), () => { pinTrigger = undefined }]
+    const cleanups: Array<() => void> = [() => trigger.kill(), () => openInTrigger.kill(), () => openIn.kill(), () => corpTitleIn.kill(), () => { pinTrigger = undefined }]
     if (window.matchMedia('(pointer: fine)').matches) {
       const pans = Array.from(stage.querySelectorAll<HTMLElement>('[data-pan]'))
       const panX = pans.map((el) => gsap.quickTo(el, 'x', { duration: 0.8, ease: approvedEase.gsapStandard }))
@@ -252,6 +296,17 @@ useGsapContext(() => {
       }
       stage.addEventListener('pointermove', onMove, { passive: true })
       cleanups.push(() => stage.removeEventListener('pointermove', onMove))
+
+      if (corpTilt) {
+        const tx = gsap.quickTo(corpTilt, 'rotationY', { duration: 1, ease: approvedEase.gsapStandard })
+        const ty = gsap.quickTo(corpTilt, 'rotationX', { duration: 1, ease: approvedEase.gsapStandard })
+        const onTilt = (event: PointerEvent) => {
+          tx(((event.clientX / window.innerWidth) * 2 - 1) * 5)
+          ty(-((event.clientY / window.innerHeight) * 2 - 1) * 4)
+        }
+        stage.addEventListener('pointermove', onTilt, { passive: true })
+        cleanups.push(() => stage.removeEventListener('pointermove', onTilt))
+      }
     }
 
     return () => cleanups.forEach((fn) => fn())
@@ -294,6 +349,7 @@ useGsapContext(() => {
     ref="sectionComponentRef"
     as="section"
     data-motion-stage="pinned"
+    data-header-theme="dark"
     class="relative hidden overflow-hidden bg-navy-950 py-0 desktop:block"
   >
     <div ref="stageRef" class="relative h-[100svh] overflow-hidden">
@@ -301,7 +357,7 @@ useGsapContext(() => {
            on a stable grid line, does not travel with the horizontal world
            motion (spec: "orientation, not visual emphasis"). -->
       <BaseContainer class="pointer-events-none absolute inset-x-0 top-10 z-30">
-        <BaseSectionMark as="h2" surface="dark" :label="label" meta="06 / 09" />
+        <BaseSectionMark as="h2" surface="dark" :label="label" meta="07 / 10" />
       </BaseContainer>
 
       <!-- Signal: horizontal state-transfer system. Short structural route,
@@ -336,7 +392,7 @@ useGsapContext(() => {
            character (spec §6 Color). The pointer-following measuring layer
            lives only here: OPEN is the expansive world, so the field is the
            thing that "opens". -->
-      <div ref="openWorldRef" class="absolute inset-0 z-10 overflow-hidden bg-[#0b1120]">
+      <div ref="openWorldRef" class="absolute inset-0 z-10 overflow-hidden bg-[#022436]">
         <!-- Owner-directed "stage light": two directional pools of PASTI
              Yellow falling in from opposite corners, like light on a product
              set. Static, low opacity, fades in with the world and out with
@@ -345,7 +401,7 @@ useGsapContext(() => {
           data-open-light
           aria-hidden="true"
           class="pointer-events-none absolute inset-0"
-          style="background: radial-gradient(ellipse 34% 30% at 100% 0%, rgba(251, 186, 0, 0.3), transparent 72%), radial-gradient(ellipse 26% 38% at 0% 100%, rgba(251, 186, 0, 0.2), transparent 72%), radial-gradient(ellipse 42% 48% at 70% 52%, rgba(37, 99, 235, 0.24), rgba(29, 78, 216, 0.08) 55%, transparent 78%), linear-gradient(155deg, #060b18 0%, #0b1224 45%, #111c38 100%)"
+          style="background: radial-gradient(ellipse 34% 30% at 100% 0%, rgba(251, 186, 0, 0.3), transparent 72%), radial-gradient(ellipse 26% 38% at 0% 100%, rgba(251, 186, 0, 0.2), transparent 72%), radial-gradient(ellipse 42% 48% at 70% 52%, rgba(37, 99, 235, 0.24), rgba(29, 78, 216, 0.08) 55%, transparent 78%), linear-gradient(155deg, #011826 0%, #022F47 45%, #022F47 100%)"
         />
         <!-- OPEN's own field (not the grid used elsewhere): concentric rings
              radiating from the product — "opening outward", Expansive
@@ -398,7 +454,7 @@ useGsapContext(() => {
 
               <div
                 data-open-panel="left"
-                class="absolute left-0 top-1/2 flex h-[50%] w-[30%] flex-col rounded-card border border-[color:rgba(255,255,255,0.1)] bg-[color:rgba(15,23,42,0.82)] p-5"
+                class="absolute left-0 top-1/2 flex h-[50%] w-[30%] flex-col rounded-card border border-[color:rgba(255,255,255,0.1)] bg-[color:rgba(3,60,89,0.82)] p-5"
               >
                 <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(255,255,255,0.55)]">01</span>
                 <p class="mt-auto max-w-[62%] font-display text-token-body font-medium leading-snug text-pureWhite">From planning to contract.</p>
@@ -406,7 +462,7 @@ useGsapContext(() => {
               </div>
               <div
                 data-open-panel="right"
-                class="absolute right-0 top-1/2 flex h-[50%] w-[30%] flex-col items-end rounded-card border border-[color:rgba(251,186,0,0.35)] bg-[color:rgba(15,23,42,0.82)] p-5"
+                class="absolute right-0 top-1/2 flex h-[50%] w-[30%] flex-col items-end rounded-card border border-[color:rgba(251,186,0,0.35)] bg-[color:rgba(3,60,89,0.82)] p-5"
               >
                 <span class="w-[62%] font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(255,255,255,0.55)]">02</span>
                 <p class="mt-auto w-[62%] font-display text-token-body font-medium leading-snug text-pureWhite">People, processes, vendors and approvals.</p>
@@ -428,56 +484,102 @@ useGsapContext(() => {
         </BaseContainer>
       </div>
 
-      <!-- e-CORPORATE world: Structured Precision. 1 Primary + max 2
-           Secondary fragments. Tighter, grid-structured, higher density
-           from spacing/alignment/layering, not screenshot count. -->
-      <div ref="corporateWorldRef" class="absolute inset-0 z-20 bg-navy-950">
-        <!-- Structured Precision: the grid is the composition here — static,
-             denser, with Cobalt edge ticks (structural, not interactive). -->
-        <BaseGridLines tone="dark" edge="top" />
-        <div aria-hidden="true" class="pointer-events-none absolute inset-x-0 top-1/2 h-px bg-[color:rgba(37,99,235,0.18)]" />
-        <span
+      <!-- e-CORPORATE world: Structured Precision, answered architecturally.
+           Where OPEN opens outward (rings, a screen swung into space),
+           e-CORPORATE is built upward: the product sits on top of an
+           exploded stack of the three things it connects — people,
+           processes, information (its own positioning copy) — drawn in
+           isometric on a measured floor. Cool light (Cyan/Cobalt) instead
+           of OPEN's Yellow, vertical light rails instead of rings. -->
+      <div ref="corporateWorldRef" class="absolute inset-0 z-20 overflow-hidden bg-[#011826]">
+        <div
+          data-corp-light
           aria-hidden="true"
-          class="pointer-events-none absolute -right-[2vw] top-[10vh] select-none font-display text-[clamp(200px,26vw,440px)] font-bold leading-none tracking-[-0.06em] text-[color:rgba(255,255,255,0.03)]"
-          >02</span
-        >
+          class="pointer-events-none absolute inset-0"
+          style="background: radial-gradient(ellipse 30% 36% at 0% 0%, rgba(6, 182, 212, 0.16), transparent 72%), radial-gradient(ellipse 44% 50% at 72% 60%, rgba(37, 99, 235, 0.22), transparent 74%), linear-gradient(200deg, #022F47 0%, #022436 55%, #011826 100%)"
+        />
+        <!-- Vertical light rails behind the stack (a skyline of light). -->
+        <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-[48%] right-[4%]">
+          <span
+            v-for="(r, i) in [8, 22, 41, 63, 79, 94]"
+            :key="i"
+            data-corp-rail
+            class="absolute bottom-0 w-px origin-bottom"
+            :style="{ left: `${r}%`, height: `${[62, 84, 70, 96, 58, 76][i]}%`, background: `linear-gradient(to top, rgba(${i % 2 ? '6,182,212' : '37,99,235'},0.55), transparent)` }"
+          />
+        </div>
+
         <BaseContainer class="relative flex h-full items-center">
-          <div class="grid w-full grid-cols-12 items-center gap-6">
-            <div class="col-span-12 lg:col-span-5">
-              <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-cyan">{{ corporate.character }}</span>
-              <h3 data-world-title class="mt-4 font-display text-[clamp(2.25rem,4.9vw,4.75rem)] whitespace-nowrap font-bold leading-[0.94] tracking-[-0.02em] text-pureWhite">
-                {{ corporate.name }}
+          <div class="grid w-full grid-cols-12 items-center gap-8">
+            <div class="col-span-5">
+              <span class="block font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-cyan">{{ corporate.character }}</span>
+              <h3 data-world-title :aria-label="corporate.name" class="mt-4 whitespace-nowrap font-display text-[clamp(2.5rem,5.2vw,5.25rem)] font-bold leading-[0.92] tracking-[-0.03em] text-pureWhite">
+                <span v-for="(ch, i) in corporate.name.split('')" :key="i" aria-hidden="true" class="inline-block overflow-hidden align-top"><span data-corp-char class="inline-block">{{ ch }}</span></span>
               </h3>
-              <p class="mt-6 max-w-xs text-token-body text-[color:rgba(255,255,255,0.64)]">
+              <p class="mt-6 max-w-md text-token-body text-[color:rgba(255,255,255,0.72)]">
                 {{ corporate.positioning }}
               </p>
+
+              <!-- Three outcomes, lifted from the positioning line; they
+                   light up in turn as the reader dwells on this world. -->
+              <ol class="mt-8 max-w-md border-t border-[color:rgba(255,255,255,0.12)]">
+                <li
+                  v-for="(o, i) in ['Work smarter', 'Collaborate better', 'Operate with greater control']"
+                  :key="o"
+                  data-corp-outcome
+                  class="corp-outcome relative flex items-center gap-4 border-b border-[color:rgba(255,255,255,0.08)] py-3"
+                >
+                  <span class="corp-outcome__bar absolute bottom-[-1px] left-0 h-px w-full origin-left bg-cyan" />
+                  <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-cyan">0{{ i + 1 }}</span>
+                  <span class="font-display text-token-body font-semibold">{{ o }}</span>
+                </li>
+              </ol>
+
               <div class="mt-8">
                 <HomePlatformCta :platform="corporate" />
               </div>
             </div>
 
-            <div class="relative col-span-12 grid grid-cols-6 gap-3 lg:col-span-7">
-              <!-- Primary fragment: medium scale, grid-tight, structural border.
-                   Milestone 5A: this stage only ever renders at >= desktop
-                   (1024px), so its old `md:col-span-4` (768px) threshold
-                   always won and is collapsed to its unconditional value
-                   here — no rendered change, just removing a now-unreachable
-                   breakpoint. -->
-              <div data-fragment data-pan-host class="relative col-span-4 aspect-[16/9] overflow-hidden rounded-lg border border-cobalt/20">
-                <div data-pan class="h-full w-full">
-                  <img :src="corporate.image" :alt="corporate.name" loading="lazy" class="h-full w-full scale-[1.1] object-cover object-left-top">
+            <!-- The exploded stack. -->
+            <div data-corp-tilt class="relative col-span-7 flex h-[72svh] items-center justify-center" style="perspective: 2000px">
+              <div data-corp-stack class="relative aspect-[16/10] w-[min(29vw,430px)] translate-y-[14%]" style="transform-style: preserve-3d">
+                <!-- Measured floor (square grid; reads as diamonds in isometric). -->
+                <div data-corp-floor aria-hidden="true" class="corp-floor pointer-events-none absolute -inset-[55%]" />
+
+                <!-- 03 Information: the data layer. -->
+                <div data-corp-plate class="corp-plate absolute inset-0 rounded-card border border-[color:rgba(37,99,235,0.45)] bg-[color:rgba(8,15,34,0.92)]">
+                  <div aria-hidden="true" class="corp-plate__blocks absolute inset-5" />
+                  <span class="corp-plate__label">03 Information</span>
                 </div>
-                <HomePlatformChip :name="corporate.name" class="absolute bottom-3 left-3" />
-              </div>
-              <!-- Secondary fragment A: tighter crop, edge-aligned. -->
-              <div data-fragment class="relative col-span-2 aspect-square overflow-hidden rounded-lg border border-[color:rgba(255,255,255,0.1)]">
-                <img :src="corporate.image" :alt="`${corporate.name} detail`" loading="lazy" class="h-full w-full scale-[1.6] object-cover object-right-top opacity-90">
-              </div>
-              <!-- Secondary fragment B: max 2 total, structural crop, precise
-                   alignment. `lg:block` kept (both `lg` and `desktop` are
-                   the same 1024px, exact match, zero risk either name). -->
-              <div data-fragment class="relative col-span-2 hidden aspect-[3/2] overflow-hidden rounded-lg border border-[color:rgba(255,255,255,0.1)] lg:block">
-                <img :src="corporate.image" :alt="`${corporate.name} structure`" loading="lazy" class="h-full w-full scale-[1.3] object-cover object-center opacity-85">
+
+                <!-- 02 Processes: lanes and hand-offs. -->
+                <div data-corp-plate class="corp-plate absolute inset-0 rounded-card border border-[color:rgba(6,182,212,0.4)] bg-[color:rgba(10,22,48,0.78)]">
+                  <svg aria-hidden="true" viewBox="0 0 400 250" class="absolute inset-0 h-full w-full" fill="none">
+                    <g v-for="(y, l) in [62, 125, 188]" :key="l">
+                      <path :d="`M40 ${y}H360`" stroke="rgba(255,255,255,0.14)" />
+                      <rect v-for="(x, k) in [[70, 170, 280], [110, 230], [60, 150, 250, 330]][l]" :key="k" :x="x - 22" :y="y - 12" width="44" height="24" rx="4" stroke="rgba(6,182,212,0.75)" fill="rgba(6,182,212,0.08)" />
+                    </g>
+                    <path d="M92 74V113M232 137V176" stroke="rgba(6,182,212,0.75)" stroke-dasharray="3 4" />
+                  </svg>
+                  <span class="corp-plate__label">02 Processes</span>
+                </div>
+
+                <!-- 01 People: the network. -->
+                <div data-corp-plate class="corp-plate absolute inset-0 rounded-card border border-[color:rgba(255,255,255,0.18)] bg-[color:rgba(15,27,58,0.72)]">
+                  <svg aria-hidden="true" viewBox="0 0 400 250" class="absolute inset-0 h-full w-full" fill="none">
+                    <path d="M80 70L190 120L310 64M190 120L130 196M190 120L280 190M310 64L340 150M80 70L60 160" stroke="rgba(255,255,255,0.25)" />
+                    <circle v-for="(c, k) in [[80, 70], [190, 120], [310, 64], [130, 196], [280, 190], [340, 150], [60, 160]]" :key="k" :cx="c[0]" :cy="c[1]" :r="k === 1 ? 12 : 8" :fill="k === 1 ? '#2563EB' : '#033C59'" stroke="rgba(255,255,255,0.7)" />
+                  </svg>
+                  <span class="corp-plate__label">01 People</span>
+                </div>
+
+                <!-- The product, on top. -->
+                <div data-corp-plate data-pan-host class="corp-plate absolute inset-0 overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.22)] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.8)]">
+                  <div data-pan class="h-full w-full">
+                    <img :src="corporate.image" :alt="corporate.name" loading="lazy" class="h-full w-full scale-[1.06] object-cover object-left-top">
+                  </div>
+                  <HomePlatformChip :name="corporate.name" class="absolute bottom-3 left-3" />
+                </div>
               </div>
             </div>
           </div>
@@ -493,11 +595,12 @@ useGsapContext(() => {
     ref="mobileSectionComponentRef"
     as="section"
     data-motion-stage="simple"
+    data-header-theme="dark"
     class="relative overflow-hidden bg-navy-950 desktop:hidden"
   >
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark as="h2" surface="dark" :label="label" meta="06 / 09" />
+      <BaseSectionMark as="h2" surface="dark" :label="label" meta="07 / 10" />
 
       <div class="mt-12 flex flex-col gap-20">
         <article v-for="platform in platforms" :key="platform.index" data-mobile-world class="relative">
@@ -530,6 +633,55 @@ useGsapContext(() => {
 </template>
 
 <style scoped>
+/* e-CORPORATE floor: a square measuring grid, faded at the edges. Seen
+   through the isometric stack it reads as a diamond plan. */
+.corp-floor {
+  transform: translateZ(-60px);
+  background-image:
+    linear-gradient(to right, rgba(6, 182, 212, 0.14) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(6, 182, 212, 0.14) 1px, transparent 1px);
+  background-size: 40px 40px;
+  -webkit-mask-image: radial-gradient(closest-side, #000 35%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 35%, transparent 100%);
+}
+.corp-plate {
+  transform-style: preserve-3d;
+  transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.corp-plate[data-active='true'] {
+  border-color: rgba(6, 182, 212, 0.9);
+  box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.35);
+}
+.corp-plate__label {
+  position: absolute;
+  left: 14px;
+  bottom: 10px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+.corp-plate__blocks {
+  background-image: radial-gradient(rgba(37, 99, 235, 0.55) 1.5px, transparent 1.6px);
+  background-size: 16px 16px;
+}
+.corp-outcome {
+  color: rgba(255, 255, 255, 0.45);
+  transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.corp-outcome__bar {
+  transform: scaleX(0);
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.corp-outcome[data-active='true'] {
+  color: #fff;
+}
+.corp-outcome[data-active='true'] .corp-outcome__bar {
+  transform: scaleX(1);
+}
+
 .open-rings {
   -webkit-mask-image: radial-gradient(ellipse 60% 70% at 70% 52%, #000 30%, transparent 85%);
   mask-image: radial-gradient(ellipse 60% 70% at 70% 52%, #000 30%, transparent 85%);

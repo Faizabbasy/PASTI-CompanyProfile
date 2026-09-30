@@ -7,7 +7,7 @@ defineProps<{ name: string }>()
 
 <template>
   <span
-    class="pointer-events-none inline-flex items-center gap-2.5 rounded-token-sm border border-[color:rgba(255,255,255,0.12)] bg-[color:rgba(15,23,42,0.92)] px-3 py-2"
+    class="pointer-events-none inline-flex items-center gap-2.5 rounded-token-sm border border-[color:rgba(255,255,255,0.12)] bg-[color:rgba(3,60,89,0.92)] px-3 py-2"
   >
     <LayoutBrandMark :height="11" />
     <span aria-hidden="true" class="h-3 w-px bg-[color:rgba(255,255,255,0.22)]" />

@@ -442,7 +442,7 @@ useGsapContext(() => {
         gsap.to(others, { opacity: 0.55, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
         hubReadout.value = `${cards[i]?.service?.index ?? ''} / ${String(cards.length).padStart(2, '0')}`
         routeRefs.value.forEach((r, j) => {
-          gsap.to(r, { stroke: j === i ? '#2563EB' : 'rgba(255,255,255,0.1)', duration: motionTier.microMax, overwrite: 'auto' })
+          gsap.to(r, { stroke: j === i ? '#2563EB' : 'rgba(3,60,89,0.130)', duration: motionTier.microMax, overwrite: 'auto' })
         })
         const route = routeRefs.value[i]
         const pulse = pulseRef.value
@@ -469,7 +469,7 @@ useGsapContext(() => {
         gsap.to(edges[i]!, { scaleX: 0, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
         gsap.to(others, { opacity: 1, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
         hubReadout.value = HUB_IDLE
-        gsap.to(routeRefs.value, { stroke: 'rgba(255,255,255,0.2)', duration: motionTier.microMax, overwrite: 'auto' })
+        gsap.to(routeRefs.value, { stroke: 'rgba(3,60,89,0.260)', duration: motionTier.microMax, overwrite: 'auto' })
       }
       lift.addEventListener('pointerenter', enter)
       lift.addEventListener('pointerleave', leave)
@@ -544,7 +544,7 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
     v-if="primaryService"
     ref="sectionComponentRef"
     as="section"
-    class="relative hidden overflow-hidden bg-slateNavy py-0 desktop:block"
+    class="surface-light relative hidden overflow-hidden py-0 desktop:block"
   >
     <!-- py-0 above cancels BaseSection's default `.section` vertical
          rhythm padding — that padding is meant for normal homepage section
@@ -559,13 +559,13 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
            pointer-following measuring layer), so Hero -> What We Build
            reads as one continuous world. This section owns its own Signal,
            so the field's routes are off. -->
-      <HomePrecisionField variant="stage" :show-routes="false" :focus="[0.5, 0.5]" />
+      <HomePrecisionField variant="stage" tone="light" :show-routes="false" :focus="[0.5, 0.5]" />
 
       <!-- Curtain: 2 layers (this panel + the stage environment behind it),
            tonal continuity — Slate Navy on Slate Navy, not a contrasting
            color snap. Slides up on a single vertical axis; its trailing
            edge is a Cobalt rule with 12-column ticks. -->
-      <div ref="curtainRef" aria-hidden="true" class="pointer-events-none absolute inset-0 z-30 bg-slateNavy">
+      <div ref="curtainRef" aria-hidden="true" class="pointer-events-none absolute inset-0 z-30 bg-[linear-gradient(180deg,#eef3f7_0%,#f6f9fb_100%)]">
         <div class="absolute inset-x-0 bottom-0 h-px bg-[color:rgba(37,99,235,0.7)]" />
         <div class="absolute inset-x-0 bottom-px">
           <div class="container-page">
@@ -598,13 +598,13 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
            break, cards. Fixed to the stage's left edge. -->
       <div aria-hidden="true" class="absolute left-[max(24px,3vw)] top-1/2 z-20 flex -translate-y-1/2 flex-col gap-2">
         <div v-for="n in 4" :key="n" class="flex items-center gap-3">
-          <span class="relative block h-10 w-[2px] bg-[color:rgba(255,255,255,0.12)]">
+          <span class="relative block h-10 w-[2px] bg-[color:rgba(3,60,89,0.144)]">
             <span
               :ref="(el) => { if (el) railFillRefs[n - 1] = el as HTMLElement }"
               class="absolute inset-0 origin-top bg-cobalt"
             />
           </span>
-          <span class="font-display text-[10px] font-semibold tracking-[0.12em] text-[color:rgba(255,255,255,0.35)]">0{{ n }}</span>
+          <span class="font-display text-[10px] font-semibold tracking-[0.12em] text-[color:rgba(3,60,89,0.55)]">0{{ n }}</span>
         </div>
       </div>
 
@@ -614,11 +614,11 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
              macro grid governs the overall section even though this
              moment is centered). -->
         <div class="relative mx-auto flex min-h-[40vh] max-w-6xl flex-col items-center justify-center text-center">
-          <span ref="eyebrowRef" class="mb-8 font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.45)]">{{ eyebrow }}</span>
+          <span ref="eyebrowRef" class="mb-8 font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.63)]">{{ eyebrow }}</span>
           <h2
             ref="headlineRef"
             :aria-label="`${headlineFinal}.`"
-            class="flex items-baseline justify-center gap-x-[0.26em] whitespace-nowrap font-display text-[length:clamp(56px,8vw,150px)] font-bold leading-[0.92] tracking-[-0.04em] text-pureWhite"
+            class="flex items-baseline justify-center gap-x-[0.26em] whitespace-nowrap font-display text-[length:clamp(56px,8vw,150px)] font-bold leading-[0.92] tracking-[-0.04em] text-slateNavy"
           >
             <span v-for="word in headlineWords" :key="word" data-word aria-hidden="true" class="relative inline-block text-left">
               <span data-word-main>{{ word }}</span>
@@ -639,7 +639,7 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
           </h2>
           <p
             ref="supportRef"
-            class="mt-8 max-w-md font-body text-token-body-large text-[color:rgba(255,255,255,0.64)]"
+            class="mt-8 max-w-md font-body text-token-body-large text-[color:rgba(3,60,89,0.82)]"
           >
             {{ supportLine }}
           </p>
@@ -654,7 +654,7 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
             <span
               v-for="n in 4"
               :key="n"
-              class="h-px bg-[color:rgba(255,255,255,0.4)]"
+              class="h-px bg-[color:rgba(3,60,89,0.480)]"
               :style="{ width: `${120 + (n % 3) * 90}px`, marginLeft: `${(n % 2 === 0 ? 1 : -1) * 220}px` }"
             />
           </div>
@@ -684,7 +684,7 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
                   :key="`r${n}`"
                   :ref="(el) => { if (el) routeRefs[n - 1] = el as unknown as SVGPathElement }"
                   fill="none"
-                  stroke="rgba(255,255,255,0.2)"
+                  stroke="rgba(3,60,89,0.260)"
                   stroke-width="1"
                 />
                 <rect
@@ -693,7 +693,7 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
                   :ref="(el) => { if (el) routeNodeRefs[n - 1] = el as unknown as SVGRectElement }"
                   width="5"
                   height="5"
-                  fill="#0F172A"
+                  fill="#FFFFFF"
                   stroke="rgba(37,99,235,0.8)"
                   stroke-width="1"
                 />
@@ -701,12 +701,12 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
               </svg>
               <div
                 ref="hubRef"
-                class="absolute left-0 top-0 flex flex-col items-center gap-2 rounded-token-sm border border-[color:rgba(37,99,235,0.5)] bg-slateNavy px-4 py-3 opacity-0"
+                class="absolute left-0 top-0 flex flex-col items-center gap-2 rounded-token-sm border border-[color:rgba(37,99,235,0.5)] bg-pureWhite px-4 py-3 opacity-0 shadow-[0_12px_30px_-18px_rgba(3,60,89,0.45)]"
               >
                 <span class="absolute -left-px -top-px h-2 w-2 border-l border-t border-cobalt" />
                 <span class="absolute -bottom-px -right-px h-2 w-2 border-b border-r border-cobalt" />
-                <LayoutBrandMark :height="15" />
-                <span class="whitespace-nowrap font-display text-[10px] font-semibold tabular-nums tracking-[0.14em] text-[color:rgba(255,255,255,0.55)]">{{ hubReadout }}</span>
+                <LayoutBrandMark surface="light" :height="15" />
+                <span class="whitespace-nowrap font-display text-[10px] font-semibold tabular-nums tracking-[0.14em] text-[color:rgba(3,60,89,0.73)]">{{ hubReadout }}</span>
               </div>
             </div>
 
@@ -745,17 +745,17 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
     v-if="primaryService"
     ref="mobileSectionComponentRef"
     as="section"
-    class="relative overflow-hidden bg-slateNavy desktop:hidden"
+    class="surface-light relative overflow-hidden desktop:hidden"
   >
     <BaseContainer>
       <div class="flex items-center gap-2">
         <span data-mobile-signal-dot aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-cobalt" />
-        <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.45)]">{{ eyebrow }}</span>
+        <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.63)]">{{ eyebrow }}</span>
       </div>
-      <h2 data-mobile-heading class="mt-4 font-display text-token-h2 font-bold text-pureWhite">
+      <h2 data-mobile-heading class="mt-4 font-display text-token-h2 font-bold text-slateNavy">
         {{ headlineFinal }}<span class="text-cobalt">.</span>
       </h2>
-      <p class="mt-3 max-w-md text-token-body text-[color:rgba(255,255,255,0.64)]">{{ supportLine }}</p>
+      <p class="mt-3 max-w-md text-token-body text-[color:rgba(3,60,89,0.82)]">{{ supportLine }}</p>
 
       <div class="mt-10 flex flex-col gap-4 sm:grid sm:grid-cols-2">
         <div

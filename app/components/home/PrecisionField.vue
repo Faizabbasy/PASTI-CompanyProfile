@@ -24,8 +24,10 @@ const props = withDefaults(
     variant?: 'hero' | 'stage'
     showRoutes?: boolean
     focus?: [number, number]
+    /** Surface the field sits on — `light` draws the grid in navy. */
+    tone?: 'dark' | 'light'
   }>(),
-  { variant: 'hero', showRoutes: true, focus: () => [0.64, 0.36] }
+  { variant: 'hero', showRoutes: true, focus: () => [0.64, 0.36], tone: 'dark' }
 )
 
 const rootRef = ref<HTMLElement | null>(null)
@@ -126,7 +128,7 @@ useGsapContext(() => {
     <div
       v-if="variant === 'hero'"
       class="absolute inset-0"
-      style=" background: radial-gradient(ellipse 60% 45% at 50% 34%, rgba(37, 99, 235, 0.1), transparent 70%), radial-gradient(ellipse 45% 40% at 100% 0%, rgba(6, 182, 212, 0.05), transparent 70%), linear-gradient(180deg, #0a1020 0%, #0f172a 42%, #0f172a 100%); "
+      style=" background: radial-gradient(ellipse 60% 45% at 50% 34%, rgba(37, 99, 235, 0.1), transparent 70%), radial-gradient(ellipse 45% 40% at 100% 0%, rgba(6, 182, 212, 0.05), transparent 70%), linear-gradient(180deg, #0a1020 0%, #033C59 42%, #033C59 100%); "
     />
     <div
       v-else
@@ -140,8 +142,8 @@ useGsapContext(() => {
         <div
           v-for="n in COLUMNS"
           :key="n"
-          class="h-full border-l border-[color:rgba(255,255,255,0.055)]"
-          :class="n === COLUMNS ? 'border-r' : ''"
+          class="h-full border-l"
+          :class="[n === COLUMNS ? 'border-r' : '', tone === 'light' ? 'border-[color:rgba(3,60,89,0.07)]' : 'border-[color:rgba(255,255,255,0.055)]']"
         />
       </div>
     </div>

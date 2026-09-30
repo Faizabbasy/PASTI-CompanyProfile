@@ -47,6 +47,42 @@ const activated = ref(false)
 // kept legible by the scrim below, not by a filled background.
 const heroIsDark = computed(() => route.path === '/')
 
+// Owner revision (2026-09-30): the homepage is now light-dominant, so the
+// transparent homepage bar can't stay white-on-dark. Dark sections carry
+// `data-header-theme="dark"`; whatever sits under the bar decides whether it
+// renders white-on-dark (dark scrim) or navy-on-light (light scrim).
+const onLight = ref(false)
+const darkMode = computed(() => heroIsDark.value && !onLight.value)
+function probeHeaderTheme() {
+  if (!heroIsDark.value) return
+  const y = 40
+  let dark = false
+  document.querySelectorAll<HTMLElement>('[data-header-theme="dark"]').forEach((el) => {
+    const r = el.getBoundingClientRect()
+    if (r.height > 0 && r.top <= y && r.bottom > y) dark = true
+  })
+  onLight.value = !dark
+}
+let probeQueued = false
+function queueProbe() {
+  if (probeQueued) return
+  probeQueued = true
+  requestAnimationFrame(() => {
+    probeQueued = false
+    probeHeaderTheme()
+  })
+}
+onMounted(() => {
+  window.addEventListener('scroll', queueProbe, { passive: true })
+  window.addEventListener('resize', queueProbe, { passive: true })
+  queueProbe()
+})
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', queueProbe)
+  window.removeEventListener('resize', queueProbe)
+})
+watch(() => route.path, () => nextTick(queueProbe))
+
 useMagnetic(ctaLinkRef, { strength: 0.3 })
 
 useGsapContext(() => {
@@ -188,17 +224,23 @@ useGsapContext(() => {
     <div
       v-if="heroIsDark"
       aria-hidden="true"
-      class="pointer-events-none absolute inset-x-0 top-0 h-[170%] bg-gradient-to-b from-[rgba(15,23,42,0.92)] via-[rgba(15,23,42,0.55)] to-transparent transition-opacity duration-500 ease-editorial"
-      :class="activated ? 'opacity-100' : 'opacity-0'"
+      class="pointer-events-none absolute inset-x-0 top-0 h-[170%] bg-gradient-to-b from-[rgba(3,60,89,0.92)] via-[rgba(3,60,89,0.55)] to-transparent transition-opacity duration-500 ease-editorial"
+      :class="activated && darkMode ? 'opacity-100' : 'opacity-0'"
+    />
+    <div
+      v-if="heroIsDark"
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-x-0 top-0 h-[170%] bg-gradient-to-b from-[rgba(255,255,255,0.94)] via-[rgba(255,255,255,0.6)] to-transparent transition-opacity duration-500 ease-editorial"
+      :class="activated && !darkMode ? 'opacity-100' : 'opacity-0'"
     />
     <div class="container-page relative h-full">
       <div class="flex h-full items-center px-5 md:px-7">
         <div ref="logoRef" class="transition-transform duration-300 ease-editorial hover:scale-[1.03]">
-          <LayoutLogo :inverted="heroIsDark" />
+          <LayoutLogo :inverted="darkMode" />
         </div>
 
         <nav ref="navRef" class="header-nav ml-auto hidden items-center gap-10 lg:flex">
-          <LayoutNavLink v-for="item in navItems" :key="item.to" :item="item" :dark="heroIsDark" />
+          <LayoutNavLink v-for="item in navItems" :key="item.to" :item="item" :dark="darkMode" />
         </nav>
 
         <div ref="ctaRef" class="ml-10 hidden lg:block">
@@ -207,8 +249,8 @@ useGsapContext(() => {
               :href="whatsappLink"
               target="_blank"
               rel="noopener noreferrer"
-              class="btn-primary"
-              :class="{ '!bg-cobalt !text-pureWhite hover:!bg-cyan hover:!text-slateNavy': heroIsDark }"
+              class="btn-primary !rounded-[14px] !bg-slateNavy !text-pureWhite hover:!bg-cobalt"
+              :class="{ 'ring-1 ring-[color:rgba(255,255,255,0.35)]': darkMode }"
             >
               {{ primaryCta.label }}
             </a>
@@ -216,7 +258,7 @@ useGsapContext(() => {
         </div>
 
         <div ref="toggleRef" class="ml-auto lg:hidden">
-          <LayoutMenuToggle :open="mobileOpen" :dark="heroIsDark" @toggle="toggleMobile" />
+          <LayoutMenuToggle :open="mobileOpen" :dark="darkMode" @toggle="toggleMobile" />
         </div>
       </div>
 

@@ -183,7 +183,7 @@ onBeforeUnmount(() => {
     <div
       v-if="failed"
       class="absolute inset-[14%] rounded-full"
-      style=" border: 22px solid transparent; background: linear-gradient(#0b1533, #0b1533) padding-box, linear-gradient(140deg, #60a5fa, #2563eb 45%, #22d3ee) border-box; opacity: 0.85; "
+      style=" border: 22px solid transparent; background: linear-gradient(#f6f9fb, #f6f9fb) padding-box, linear-gradient(140deg, #60a5fa, #2563eb 45%, #22d3ee) border-box; opacity: 0.85; "
     />
   </div>
 </template>

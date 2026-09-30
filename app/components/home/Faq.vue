@@ -1,52 +1,130 @@
 <script setup lang="ts">
-// Copy sourced from .docs/PASTI_Cuberto_Template_Content_Mapping.docx, sections 13
-// — FAQ: REPLACE TEMPLATE QUESTIONS and 14 — FAQ ANSWERS / PASTI COPY.
-//
-// Quiet Precision (04-homepage-spec.md §8): existing IA (heading,
-// single-column accordion, native details/summary, divider, left accent
-// bar) is preserved unchanged. Removed per the frozen spec: the two
-// ambient glow blobs, the corner-bracket Yellow accent, and the
-// continuous scroll-scrubbed heading scale/tracking — none of these are
-// "structure," they're decoration the spec explicitly requires removed.
-// Motion here is now: a single restrained heading mask reveal (unchanged,
-// already existed) and nothing else at the section level — interaction
-// motion lives entirely in FaqItem.vue's accordion/divider/accent-bar,
-// per the "existing left accent bar is the Signal, not a new element" rule.
-//
-// Brand layer (still Quiet, still one column): the section carries the same
-// SectionMark as the rest of the homepage, the 12-column grid is drawn as
-// static structure (no glow, no drift), the heading takes the monumental
-// editorial scale, and the list closes on a PASTI mark + brand essence line
-// that hands off to the Footer as one composed closing movement.
-const heading = 'FAQ'
+import gsap from 'gsap'
 
+// FAQ — "Question index + reading panel" (owner-directed redesign; copy is
+// unchanged from useFaq(), sourced from the content-mapping doc §13/§14).
+//
+//   [PASTI] ───────────────────────────────── PAQ   09 / 10
+//   FAQ.                      │ 01  What can PASTI help ...      [–]
+//                             │     answer, word by word
+//    ┌──────┐                 │ 02  What technology services ... [+]
+//    │  01  │ / 07            │ 03  ...
+//    └──────┘                 │ ...
+//   active question, echoed   │
+//   [ Tell us about it → ]    │ PASTI ─────── Certainty Through Execution
+//
+// The left column is sticky on desktop and *reads* the list: its oversized
+// outlined numeral rolls to whichever question is hovered/focused/open, and
+// echoes that question underneath — the Signal as a reading state, not
+// decoration. One answer open at a time (parent-controlled), native
+// <details> kept in every row. Below desktop the panel collapses to the
+// heading + CTA and the list reads top to bottom.
+const heading = 'FAQ'
 const { items } = useFaq()
+const { link: whatsappLink } = useWhatsapp()
+const { setState } = useCustomCursor()
+
+const openIndex = ref<number | null>(0)
+const hoverIndex = ref<number | null>(null)
+const activeIndex = computed(() => hoverIndex.value ?? openIndex.value ?? 0)
+const active = computed(() => items[activeIndex.value]!)
+
+function toggle(i: number) {
+  openIndex.value = openIndex.value === i ? null : i
+}
 
 const headingRef = ref<HTMLElement | null>(null)
+const numeralRef = ref<HTMLElement | null>(null)
+const echoRef = ref<HTMLElement | null>(null)
 useMaskedReveal(headingRef, { by: 'word' })
+
+watch(activeIndex, (next, prev) => {
+  if (window.matchMedia(reducedMotionQuery.reduce).matches) return
+  const dir = prev === undefined || next > prev ? 1 : -1
+  if (numeralRef.value) gsap.fromTo(numeralRef.value, { yPercent: 60 * dir, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.55, ease: approvedEase.gsapPrimary, overwrite: 'auto' })
+  if (echoRef.value) gsap.fromTo(echoRef.value, { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, ease: approvedEase.gsapStandard, overwrite: 'auto' })
+})
 </script>
 
 <template>
-  <BaseSection as="section" class="surface-dark relative overflow-hidden">
-    <BaseGridLines tone="dark" />
+  <BaseSection as="section" class="surface-light relative overflow-clip" style="--lift-x: 10%; --lift-y: 30%">
+    <BaseGridLines tone="light" />
 
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="PAQ" meta="08 / 09" />
+      <BaseSectionMark surface="light" label="PAQ" meta="09 / 10" />
 
-      <h2 ref="headingRef" class="mt-16 font-display text-token-display-xl font-bold text-paper md:mt-20">
-        {{ heading }}
-      </h2>
+      <div class="mt-14 grid grid-cols-1 gap-12 md:mt-20 desktop:grid-cols-12 desktop:gap-10">
+        <!-- Reading panel -->
+        <aside class="desktop:col-span-5">
+          <div class="desktop:sticky desktop:top-28">
+            <h2 ref="headingRef" class="font-display text-token-display-xl font-bold text-slateNavy">
+              {{ heading }}
+            </h2>
 
-      <div class="mt-14 md:mt-20">
-        <HomeFaqItem v-for="item in items" :key="item.index" :item="item" />
-        <!-- Closing rule: the last divider, then the brand signature. -->
-        <div class="border-t border-navy-800 pt-8">
-          <div class="flex items-center justify-between gap-6">
-            <LayoutBrandMark :height="14" class="opacity-80" />
-            <p class="font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-[color:rgba(255,255,255,0.45)]">Certainty Through Execution</p>
+            <div class="mt-10 hidden desktop:block" aria-hidden="true">
+              <div class="flex items-end gap-4">
+                <div class="relative overflow-hidden">
+                  <span
+                    ref="numeralRef"
+                    class="faq-numeral block font-display text-[clamp(120px,12vw,210px)] font-bold leading-[0.8] tracking-[-0.06em]"
+                    :class="openIndex === activeIndex ? 'is-open' : ''"
+                    >{{ active.index }}</span
+                  >
+                </div>
+                <span class="mb-3 font-display text-token-body-large font-semibold tabular-nums text-[color:rgba(3,60,89,0.4)]">/ {{ String(items.length).padStart(2, '0') }}</span>
+              </div>
+              <div class="mt-6 flex items-start gap-3 border-t border-[color:rgba(3,60,89,0.14)] pt-5">
+                <span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-pastiYellow-500" />
+                <p ref="echoRef" class="max-w-sm font-display text-token-body font-semibold leading-snug text-slateNavy">{{ active.question }}</p>
+              </div>
+            </div>
+
+            <a
+              :href="whatsappLink"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group mt-10 inline-flex items-center gap-4 rounded-[14px] bg-slateNavy py-3 pl-6 pr-3 font-display text-sm font-semibold text-pureWhite transition-colors duration-150 ease-editorial hover:bg-cobalt"
+              @mouseenter="setState('contact')"
+              @mouseleave="setState('default')"
+            >
+              Tell us about it
+              <span aria-hidden="true" class="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[color:rgba(255,255,255,0.12)] transition-transform duration-200 ease-editorial group-hover:translate-x-1">→</span>
+            </a>
+          </div>
+        </aside>
+
+        <!-- Question index -->
+        <div class="desktop:col-span-7" @mouseleave="hoverIndex = null">
+          <HomeFaqItem
+            v-for="(item, i) in items"
+            :key="item.index"
+            :item="item"
+            :open="openIndex === i"
+            @toggle="toggle(i)"
+            @hover="hoverIndex = i"
+          />
+          <div class="border-t border-[color:rgba(3,60,89,0.12)] pt-8">
+            <div class="flex items-center justify-between gap-6">
+              <LayoutBrandMark surface="light" :height="14" class="opacity-80" />
+              <p class="font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.63)]">Certainty Through Execution</p>
+            </div>
           </div>
         </div>
       </div>
     </BaseContainer>
   </BaseSection>
 </template>
+
+<style scoped>
+/* Outlined numeral: navy stroke at rest, filled Cobalt when that question
+   is the open one — the reading state made visible. */
+.faq-numeral {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(3, 60, 89, 0.55);
+  transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1), -webkit-text-stroke-color 0.3s;
+}
+.faq-numeral.is-open {
+  color: #2563eb;
+  -webkit-text-stroke-color: #2563eb;
+}
+</style>

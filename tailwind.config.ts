@@ -109,7 +109,15 @@ export default <Partial<Config>>{
         // --- Canonical brand vocabulary (docs/rework-v2/06-design-tokens.json) ---
         // Use these names for all NEW section work. `yellow` value is a
         // placeholder — see comment below; do not treat it as final.
-        slateNavy: '#0F172A',
+        // Owner revision (2026-09-30): the brand's dark blue is #033C59 (was
+        // #0F172A). `navyDeep` is its darker family for gradients/depth.
+        slateNavy: '#033C59',
+        navyDeep: {
+          700: '#033C59',
+          800: '#022F47',
+          900: '#022436',
+          950: '#011826'
+        },
         pureWhite: '#FFFFFF',
         surfaceNeutral: '#F8FAFC',
         cobalt: '#2563EB',
@@ -164,7 +172,7 @@ export default <Partial<Config>>{
           400: '#3F839F',
           500: '#1C5E7C', // reverted — see regression note above; this was never Cobalt's real role
           600: '#124A64',
-          700: '#0F172A', // = slateNavy — was #0B3954 (guessed), now the real primary dark
+          700: '#033C59', // = slateNavy (owner revision 2026-09-30) — was #0B3954 (guessed), now the real primary dark
           800: '#082A3E',
           900: '#051B28',
           950: '#030F17'
@@ -181,7 +189,7 @@ export default <Partial<Config>>{
           800: '#7C5900',
           900: '#523B00'
         },
-        ink: '#0F172A', // = slateNavy (was #0B3954, guessed)
+        ink: '#033C59', // = slateNavy (owner revision 2026-09-30) (was #0B3954, guessed)
         paper: '#FFFFFF', // = pureWhite (already correct)
         muted: '#5C7280'
       },

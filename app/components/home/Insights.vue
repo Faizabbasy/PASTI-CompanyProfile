@@ -215,13 +215,13 @@ watch(activeIndex, () => {
         fill="none"
       >
         <g :transform="`rotate(${ORBIT.rot} ${ORBIT.cx} ${ORBIT.cy})`">
-          <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx" :ry="ORBIT.ry" stroke="rgba(15,23,42,0.14)" stroke-width="1" />
+          <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx" :ry="ORBIT.ry" stroke="rgba(3,60,89,0.14)" stroke-width="1" />
         </g>
         <circle ref="orbitDotRef" r="5" fill="#FBBA00" cx="160" cy="590" />
       </svg>
 
       <BaseContainer class="pointer-events-none absolute inset-x-0 top-10 z-30">
-        <BaseSectionMark surface="light" label="Insight" meta="07 / 09" />
+        <BaseSectionMark surface="light" label="Insight" meta="08 / 10" />
       </BaseContainer>
 
       <!-- Title + reading-state marker + CTA. -->
@@ -234,7 +234,7 @@ watch(activeIndex, () => {
             <div class="flex items-center gap-3">
               <span aria-hidden="true" class="h-1.5 w-1.5 shrink-0 rounded-full bg-pastiYellow-500" />
               <p class="font-display text-token-body-large font-semibold tabular-nums tracking-[-0.01em] text-slateNavy">
-                {{ String(activeIndex + 1).padStart(2, '0') }}<span class="text-[color:rgba(15,23,42,0.35)]"> / {{ String(N).padStart(2, '0') }}</span>
+                {{ String(activeIndex + 1).padStart(2, '0') }}<span class="text-[color:rgba(3,60,89,0.35)]"> / {{ String(N).padStart(2, '0') }}</span>
               </p>
             </div>
             <NuxtLink
@@ -264,12 +264,12 @@ watch(activeIndex, () => {
           <NuxtLink to="/insights" :aria-label="article.title" tabindex="-1" class="block h-full w-full">
             <div
               data-card-inner
-              class="relative h-full w-full overflow-hidden rounded-card border border-structural-light bg-pureWhite shadow-[0_36px_70px_-38px_rgba(15,23,42,0.4)]"
+              class="relative h-full w-full overflow-hidden rounded-card border border-structural-light bg-pureWhite shadow-[0_36px_70px_-38px_rgba(3,60,89,0.4)]"
             >
               <img :src="article.image" :alt="article.title" :loading="i < 2 ? 'eager' : 'lazy'" class="h-full w-full object-cover">
               <span class="pointer-events-none absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-token-sm bg-[color:rgba(255,255,255,0.92)] px-2.5 py-1.5">
                 <LayoutBrandMark surface="light" :height="10" />
-                <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(15,23,42,0.2)]" />
+                <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(3,60,89,0.2)]" />
                 <span class="font-display text-[10px] font-semibold tabular-nums tracking-[0.08em] text-slateNavy">{{ article.index }}</span>
               </span>
             </div>
@@ -298,7 +298,7 @@ watch(activeIndex, () => {
   <BaseSection as="section" data-motion-stage="simple" class="surface-light relative desktop:hidden">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Insight" meta="07 / 09" />
+      <BaseSectionMark surface="light" label="Insight" meta="08 / 10" />
 
       <div class="mt-14 flex items-end justify-between gap-6 md:mt-16">
         <h2 ref="mobileHeadingRef" class="font-display text-token-display-xl font-bold text-slateNavy">

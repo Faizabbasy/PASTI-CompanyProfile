@@ -243,13 +243,13 @@ useGsapContext(() => {
 
 <template>
   <!-- Desktop stage (>= 1024px, motion allowed): pinned ring. -->
-  <BaseSection as="section" data-motion-stage="pinned" class="surface-dark relative hidden overflow-hidden py-0 desktop:block">
+  <BaseSection as="section" data-motion-stage="pinned" class="surface-light relative hidden overflow-hidden py-0 desktop:block">
     <div ref="stageRef" class="relative h-[100svh] overflow-hidden">
-      <BaseGridLines tone="dark" />
+      <BaseGridLines tone="light" />
 
       <!-- Orbit + the single Yellow Signal point riding it. -->
       <svg aria-hidden="true" class="pointer-events-none absolute inset-0 z-0 h-full w-full" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none">
-        <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx" :ry="ORBIT.ry" stroke="rgba(255,255,255,0.1)" stroke-width="1" />
+        <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx" :ry="ORBIT.ry" stroke="rgba(3,60,89,0.130)" stroke-width="1" />
         <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx - 60" :ry="ORBIT.ry - 60" stroke="rgba(37,99,235,0.14)" stroke-width="1" />
         <ellipse
           ref="orbitArcRef"
@@ -267,13 +267,13 @@ useGsapContext(() => {
       </svg>
 
       <BaseContainer class="pointer-events-none absolute inset-x-0 top-10 z-30">
-        <BaseSectionMark surface="dark" label="Testimoni" meta="05 / 09" />
+        <BaseSectionMark surface="light" label="Testimoni" meta="06 / 10" />
       </BaseContainer>
 
       <!-- Left column: heading, the active voice in full, controls. -->
       <BaseContainer class="absolute inset-x-0 bottom-[7svh] top-[13svh] z-30">
         <div class="flex h-full w-[min(36vw,500px)] flex-col">
-          <h2 ref="headingRef" class="pointer-events-none relative font-display text-[length:clamp(56px,5.6vw,96px)] font-bold leading-[0.92] tracking-[-0.04em] text-pureWhite">
+          <h2 ref="headingRef" class="pointer-events-none relative font-display text-[length:clamp(56px,5.6vw,96px)] font-bold leading-[0.92] tracking-[-0.04em] text-slateNavy">
             {{ label }}
           </h2>
           <!-- Yellow underline stroke under the heading — drawn once. -->
@@ -282,7 +282,7 @@ useGsapContext(() => {
           <figure class="relative mt-[5svh] flex gap-4">
             <span aria-hidden="true" class="-mt-3 shrink-0 select-none font-display text-[72px] font-bold leading-none text-pastiYellow-500">“</span>
             <div>
-              <blockquote :key="active" ref="quoteRef" aria-live="polite" class="text-[length:clamp(15px,1.15vw,18px)] leading-[1.6] text-[color:rgba(255,255,255,0.86)]">
+              <blockquote :key="active" ref="quoteRef" aria-live="polite" class="text-[length:clamp(15px,1.15vw,18px)] leading-[1.6] text-[color:rgba(3,60,89,0.95)]">
                 <p>
                   <template v-for="(w, i) in words" :key="i"
                     ><span class="inline-block overflow-hidden align-top"><span data-w class="inline-block">{{ w }}</span></span
@@ -293,8 +293,8 @@ useGsapContext(() => {
               <figcaption ref="attributionRef" class="mt-6 flex items-center gap-4">
                 <span aria-hidden="true" class="h-px w-8 bg-cobalt" />
                 <span>
-                  <span class="block font-display text-token-body font-semibold text-pureWhite">{{ current.name }}</span>
-                  <span class="block text-body-sm text-navy-300">{{ current.role }}</span>
+                  <span class="block font-display text-token-body font-semibold text-slateNavy">{{ current.name }}</span>
+                  <span class="block text-body-sm text-[color:rgba(3,60,89,0.65)]">{{ current.role }}</span>
                 </span>
               </figcaption>
             </div>
@@ -306,7 +306,7 @@ useGsapContext(() => {
                 type="button"
                 aria-label="Previous testimony"
                 :disabled="active === 0"
-                class="flex h-11 w-11 items-center justify-center rounded-button border border-[color:rgba(255,255,255,0.18)] text-pureWhite transition-colors duration-150 ease-editorial hover:border-cobalt hover:text-cobalt focus-visible:border-cobalt focus-visible:outline-none disabled:opacity-30"
+                class="flex h-11 w-11 items-center justify-center rounded-button border border-[color:rgba(3,60,89,0.216)] text-slateNavy transition-colors duration-150 ease-editorial hover:border-cobalt hover:text-cobalt focus-visible:border-cobalt focus-visible:outline-none disabled:opacity-30"
                 @click="goTo(active - 1)"
                 @mouseenter="setState('link')"
                 @mouseleave="setState('default')"
@@ -317,7 +317,7 @@ useGsapContext(() => {
                 type="button"
                 aria-label="Next testimony"
                 :disabled="active === N - 1"
-                class="flex h-11 w-11 items-center justify-center rounded-button border border-pastiYellow-500 text-pastiYellow-500 transition-colors duration-150 ease-editorial hover:bg-pastiYellow-500 hover:text-slateNavy focus-visible:bg-pastiYellow-500 focus-visible:text-slateNavy focus-visible:outline-none disabled:opacity-30"
+                class="flex h-11 w-11 items-center justify-center rounded-button border border-pastiYellow-500 bg-pastiYellow-500 text-slateNavy transition-colors duration-150 ease-editorial hover:bg-slateNavy hover:border-slateNavy hover:text-pureWhite focus-visible:bg-slateNavy focus-visible:text-pureWhite focus-visible:outline-none disabled:opacity-30"
                 @click="goTo(active + 1)"
                 @mouseenter="setState('link')"
                 @mouseleave="setState('default')"
@@ -326,8 +326,8 @@ useGsapContext(() => {
               </button>
             </div>
             <span aria-hidden="true" class="h-px w-10 bg-pastiYellow-500" />
-            <p class="font-display text-token-body-large font-semibold tabular-nums text-pureWhite">
-              {{ String(active + 1).padStart(2, '0') }}<span class="text-[color:rgba(255,255,255,0.35)]"> / {{ total }}</span>
+            <p class="font-display text-token-body-large font-semibold tabular-nums text-slateNavy">
+              {{ String(active + 1).padStart(2, '0') }}<span class="text-[color:rgba(3,60,89,0.55)]"> / {{ total }}</span>
             </p>
           </div>
         </div>
@@ -346,26 +346,26 @@ useGsapContext(() => {
           @mouseenter="setState('link')"
           @mouseleave="setState('default')"
         >
-          <div data-card-inner class="voice-card__inner relative flex h-full w-full flex-col overflow-hidden rounded-card border bg-[linear-gradient(180deg,#152040_0%,#0F172A_70%)] p-6">
+          <div data-card-inner class="voice-card__inner relative flex h-full w-full flex-col overflow-hidden rounded-card border bg-[linear-gradient(180deg,#FFFFFF_0%,#F4F8FB_100%)] shadow-[0_30px_60px_-40px_rgba(3,60,89,0.5)] p-6">
             <div class="flex items-center justify-between">
               <span class="voice-card__index font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em]">{{ String(i + 1).padStart(2, '0') }}</span>
-              <LayoutBrandMark :height="11" class="opacity-70" />
+              <LayoutBrandMark surface="light" :height="11" class="opacity-70" />
             </div>
 
             <!-- Monogram: typographic stand-in for a portrait (none exist). -->
             <div class="relative mx-auto mt-4 aspect-square w-[40%]">
               <span aria-hidden="true" class="voice-card__disc absolute inset-0 rounded-full" />
-              <span aria-hidden="true" class="absolute -inset-2 rounded-full border border-dashed border-[color:rgba(255,255,255,0.14)]" />
+              <span aria-hidden="true" class="absolute -inset-2 rounded-full border border-dashed border-[color:rgba(3,60,89,0.168)]" />
               <span aria-hidden="true" class="voice-card__halo absolute -inset-3.5 rounded-full border-2 border-transparent" />
-              <span class="relative flex h-full w-full items-center justify-center font-display text-[clamp(28px,2.6vw,44px)] font-bold tracking-[-0.03em] text-pureWhite voice-card__initials">{{ initials(v.name) }}</span>
+              <span class="relative flex h-full w-full items-center justify-center font-display text-[clamp(28px,2.6vw,44px)] font-bold tracking-[-0.03em] text-slateNavy voice-card__initials">{{ initials(v.name) }}</span>
             </div>
 
-            <p class="mt-6 line-clamp-3 font-display text-[length:clamp(14px,1.08vw,17px)] font-medium leading-[1.4] text-pureWhite">“{{ excerpt(v.quote) }}”</p>
+            <p class="mt-6 line-clamp-3 font-display text-[length:clamp(14px,1.08vw,17px)] font-medium leading-[1.4] text-slateNavy">“{{ excerpt(v.quote) }}”</p>
 
             <div class="mt-auto">
               <span aria-hidden="true" class="voice-card__rule block h-px w-8" />
-              <p class="mt-3 font-display text-token-body font-semibold text-pureWhite">{{ v.name }}</p>
-              <p class="truncate text-body-sm text-navy-300">{{ v.role }}</p>
+              <p class="mt-3 font-display text-token-body font-semibold text-slateNavy">{{ v.name }}</p>
+              <p class="truncate text-body-sm text-[color:rgba(3,60,89,0.65)]">{{ v.role }}</p>
             </div>
           </div>
         </article>
@@ -374,13 +374,13 @@ useGsapContext(() => {
       <!-- Bottom-right: segmented progress (one segment per voice). -->
       <BaseContainer class="pointer-events-none absolute inset-x-0 bottom-[7svh] z-30">
         <div class="ml-auto flex w-fit items-center gap-4">
-          <span class="font-display text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.45)]">Client voices</span>
+          <span class="font-display text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.63)]">Client voices</span>
           <span class="flex items-center gap-1.5">
             <span
               v-for="n in N"
               :key="n"
               class="h-[3px] w-6 transition-colors duration-200 ease-editorial"
-              :class="n - 1 === active ? 'bg-pastiYellow-500' : n - 1 < active ? 'bg-[color:rgba(37,99,235,0.45)]' : 'bg-[color:rgba(255,255,255,0.16)]'"
+              :class="n - 1 === active ? 'bg-pastiYellow-500' : n - 1 < active ? 'bg-[color:rgba(37,99,235,0.45)]' : 'bg-[color:rgba(3,60,89,0.192)]'"
             />
           </span>
         </div>
@@ -389,29 +389,29 @@ useGsapContext(() => {
   </BaseSection>
 
   <!-- Tablet + Mobile + reduced motion: every voice in a native swipe row. -->
-  <BaseSection as="section" data-motion-stage="simple" class="surface-dark relative overflow-hidden desktop:hidden">
-    <BaseGridLines tone="dark" />
+  <BaseSection as="section" data-motion-stage="simple" class="surface-light relative overflow-hidden desktop:hidden">
+    <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="Testimoni" meta="05 / 09" />
-      <h2 ref="mobileHeadingRef" class="mt-14 font-display text-token-section-monumental font-bold text-pureWhite">{{ label }}</h2>
-      <p class="mt-4 font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-[color:rgba(255,255,255,0.45)]">{{ total }} client voices</p>
+      <BaseSectionMark surface="light" label="Testimoni" meta="06 / 10" />
+      <h2 ref="mobileHeadingRef" class="mt-14 font-display text-token-section-monumental font-bold text-slateNavy">{{ label }}</h2>
+      <p class="mt-4 font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.63)]">{{ total }} client voices</p>
     </BaseContainer>
     <div class="relative z-10 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-gutter px-gutter pb-4 [scrollbar-width:none]">
       <article
         v-for="(v, i) in voices"
         :key="v.name"
-        class="flex w-[82vw] max-w-[380px] shrink-0 snap-start flex-col rounded-card border border-[color:rgba(255,255,255,0.12)] bg-[linear-gradient(180deg,#152040_0%,#0F172A_70%)] p-6"
+        class="flex w-[82vw] max-w-[380px] shrink-0 snap-start flex-col rounded-card border border-[color:rgba(3,60,89,0.144)] bg-[linear-gradient(180deg,#FFFFFF_0%,#F4F8FB_100%)] shadow-[0_30px_60px_-40px_rgba(3,60,89,0.5)] p-6"
       >
         <div class="flex items-center justify-between">
           <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-cobalt">{{ String(i + 1).padStart(2, '0') }}</span>
-          <LayoutBrandMark :height="11" class="opacity-70" />
+          <LayoutBrandMark surface="light" :height="11" class="opacity-70" />
         </div>
         <div class="mt-5 flex h-16 w-16 items-center justify-center rounded-full bg-pastiYellow-500 font-display text-xl font-bold text-slateNavy">{{ initials(v.name) }}</div>
-        <p class="mt-5 text-body-md leading-[1.6] text-[color:rgba(255,255,255,0.86)]">“{{ v.quote }}”</p>
+        <p class="mt-5 text-body-md leading-[1.6] text-[color:rgba(3,60,89,0.95)]">“{{ v.quote }}”</p>
         <div class="mt-auto pt-6">
           <span aria-hidden="true" class="block h-px w-8 bg-pastiYellow-500" />
-          <p class="mt-3 font-display text-token-body font-semibold text-pureWhite">{{ v.name }}</p>
-          <p class="text-body-sm text-navy-300">{{ v.role }}</p>
+          <p class="mt-3 font-display text-token-body font-semibold text-slateNavy">{{ v.name }}</p>
+          <p class="text-body-sm text-[color:rgba(3,60,89,0.65)]">{{ v.role }}</p>
         </div>
       </article>
     </div>
@@ -420,18 +420,18 @@ useGsapContext(() => {
 
 <style scoped>
 .voice-card__inner {
-  border-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(3,60,89,0.130);
   transition: border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .voice-card__index {
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(3,60,89,0.715);
 }
 .voice-card__disc {
-  background: #1e293b;
+  background: rgba(3, 60, 89, 0.08);
   transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .voice-card__rule {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(3,60,89,0.390);
 }
 .voice-card__halo {
   opacity: 0;
@@ -452,13 +452,13 @@ useGsapContext(() => {
   border-color: rgba(251, 186, 0, 0.45);
 }
 .voice-card[data-active='true'] .voice-card__index {
-  color: #fbba00;
+  color: #033C59;
 }
 .voice-card[data-active='true'] .voice-card__disc {
   background: #fbba00;
 }
 .voice-card[data-active='true'] .voice-card__initials {
-  color: #0f172a;
+  color: #033C59;
 }
 .voice-card[data-active='true'] .voice-card__rule {
   background: #fbba00;

@@ -197,7 +197,7 @@ useGsapContext(() => {
     />
 
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Trusted" meta="04 / 09" />
+      <BaseSectionMark surface="light" label="Trusted" meta="05 / 10" />
 
       <div class="mt-16 flex flex-col items-center md:mt-20">
         <!-- Signal — Quiet Proof Marker: a single restrained Cobalt dot,
@@ -258,7 +258,7 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10 mt-14 md:mt-20">
       <div class="flex items-center gap-4 border-t border-structural-light pt-6">
         <span ref="countRef" class="font-display text-token-h2 font-bold leading-none tracking-[-0.03em] text-slateNavy">{{ String(clients.length).padStart(2, '0') }}</span>
-        <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-[color:rgba(15,23,42,0.55)]">Approved partner logos</span>
+        <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.55)]">Approved partner logos</span>
         <LayoutBrandMark surface="light" :height="13" class="ml-auto" />
       </div>
     </BaseContainer>
