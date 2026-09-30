@@ -45,7 +45,9 @@ const activeArticle = computed(() => homepageArticles[activeIndex.value]!)
 
 // Orbit: an ellipse the Signal dot rides as the ring turns (viewBox units).
 const ORBIT = { cx: 720, cy: 470, rx: 560, ry: 250, rot: -8 }
-const clamp = gsap.utils.clamp
+// Plain helper, not gsap.utils.clamp: this line runs during SSR, where the
+// server bundle can resolve `gsap` to its CJS module object (no `.utils`).
+const clamp = (min: number, max: number, v: number) => Math.min(max, Math.max(min, v))
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 useGsapContext(() => {

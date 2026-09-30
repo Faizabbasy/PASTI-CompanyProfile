@@ -11,6 +11,13 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  // Bundle GSAP's ESM build into the server output instead of letting Node
+  // load its CommonJS `main` (dist/gsap.js) — keeps `import gsap from 'gsap'`
+  // resolving to the real gsap instance during SSR on Vercel.
+  build: {
+    transpile: ['gsap']
+  },
+
   app: {
     head: {
       htmlAttrs: { lang: 'en' },

@@ -71,7 +71,9 @@ useMaskedReveal(mobileHeadingRef, { by: 'word' })
 const { setState } = useCustomCursor()
 
 const ORBIT = { cx: 1000, cy: 450, rx: 440, ry: 330 }
-const clamp = gsap.utils.clamp
+// Plain helper, not gsap.utils.clamp: this line runs during SSR, where the
+// server bundle can resolve `gsap` to its CJS module object (no `.utils`).
+const clamp = (min: number, max: number, v: number) => Math.min(max, Math.max(min, v))
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
 let trigger: ScrollTrigger | undefined
