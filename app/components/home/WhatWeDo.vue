@@ -64,31 +64,11 @@ const cards: CardConfig[] = [
 // Primary leads the composition, Medium A/B ~65-75% of it, Accent smallest
 // but frontmost. Sizes differ in proportion, not just scale, so the four
 // cards never read as one repeated SaaS card.
-const CARD_STYLE: Record<CardKey, { shell: string; lift: string; art: string; numeral: string }> = {
-  primary: {
-    shell: 'z-20 w-[380px]',
-    lift: 'border-[color:rgba(255,255,255,0.14)] p-7',
-    art: 'h-[128px]',
-    numeral: 'text-[132px]'
-  },
-  mediumA: {
-    shell: 'z-10 w-[280px]',
-    lift: 'border-[color:rgba(255,255,255,0.1)] p-6',
-    art: 'h-[92px]',
-    numeral: 'text-[104px]'
-  },
-  mediumB: {
-    shell: 'z-10 w-[280px]',
-    lift: 'border-[color:rgba(255,255,255,0.1)] p-6',
-    art: 'h-[92px]',
-    numeral: 'text-[104px]'
-  },
-  accent: {
-    shell: 'z-30 w-[208px]',
-    lift: 'border-[color:rgba(37,99,235,0.4)] p-5',
-    art: 'h-[60px]',
-    numeral: 'text-[80px]'
-  }
+const CARD_STYLE: Record<CardKey, { shell: string }> = {
+  primary: { shell: 'z-20 w-[400px]' },
+  mediumA: { shell: 'z-10 w-[292px]' },
+  mediumB: { shell: 'z-10 w-[292px]' },
+  accent: { shell: 'z-30 w-[224px]' }
 }
 
 // Decode charset: clean alphanumeric + limited technical punctuation only
@@ -103,10 +83,10 @@ const DECODE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/.-:'
 // so both land cards in the same place. Each card sits on a different
 // horizontal key line — Precise Misalignment, not a symmetric fan.
 const CARD_LAYOUT = [
-  { key: 'primary', x: -250, y: -20, rotation: -1.5 },
-  { key: 'mediumA', x: 290, y: -110, rotation: 1.2 },
-  { key: 'mediumB', x: 250, y: 178, rotation: -1 },
-  { key: 'accent', x: -190, y: 232, rotation: 2 }
+  { key: 'primary', x: -285, y: -20, rotation: -1.5 },
+  { key: 'mediumA', x: 300, y: -120, rotation: 1.2 },
+  { key: 'mediumB', x: 270, y: 190, rotation: -1 },
+  { key: 'accent', x: -215, y: 250, rotation: 2 }
 ] as const
 
 // Parallax reach (px) per card once the fan has settled — foreground cards
@@ -129,6 +109,46 @@ const cardRefs = ref<HTMLElement[]>([])
 const railFillRefs = ref<HTMLElement[]>([])
 const signalDotRef = ref<HTMLElement | null>(null)
 const signalRouteRef = ref<HTMLElement | null>(null)
+const hubRef = ref<HTMLElement | null>(null)
+const routeRefs = ref<SVGPathElement[]>([])
+const routeNodeRefs = ref<SVGRectElement[]>([])
+const pulseRef = ref<SVGCircleElement | null>(null)
+const HUB_IDLE = `— / ${String(cards.length).padStart(2, '0')}`
+const hubReadout = ref(HUB_IDLE)
+
+// Hub sits in the gap between the Primary card and the right-hand pair.
+const HUB_X = 20
+
+/** Lays the system-map routes out from the hub to each card's facing edge,
+ * orthogonally (grid-aware, never diagonal). Card sizes are measured from
+ * the unscaled layout box and multiplied by the same layout scale `s` the
+ * cards are placed with. */
+function layoutRoutes(s: number) {
+  const hub = hubRef.value
+  if (!hub) return
+  const hx = HUB_X * s
+  gsap.set(hub, { xPercent: -50, yPercent: -50, x: hx, y: 0 })
+  const hubHalf = hub.offsetWidth / 2
+  cardRefs.value.forEach((el, i) => {
+    const path = routeRefs.value[i]
+    const node = routeNodeRefs.value[i]
+    const layout = CARD_LAYOUT[i]
+    if (!path || !node || !layout) return
+    const cx = layout.x * s
+    const cy = layout.y * s
+    const hw = (el.offsetWidth * s) / 2
+    const hh = (el.offsetHeight * s) / 2
+    const left = cx < hx
+    const sx = left ? hx - hubHalf : hx + hubHalf
+    const ex = left ? cx + hw : cx - hw
+    const ey = gsap.utils.clamp(cy - hh * 0.55, cy + hh * 0.55, 0)
+    const mx = sx + (ex - sx) * 0.5
+    path.setAttribute('d', `M${sx} 0 H${mx} V${ey} H${ex}`)
+    path.setAttribute('pathLength', '1')
+    node.setAttribute('x', String(ex - 2.5))
+    node.setAttribute('y', String(ey - 2.5))
+  })
+}
 
 // Mobile-simplified refs — a separate, normal-flow DOM subtree (see
 // template) rather than reusing the desktop absolute-positioned fan, since
@@ -176,6 +196,9 @@ useGsapContext(() => {
       gsap.set(el, { xPercent: -50, yPercent: -50, opacity: 1, x: layout.x * s, y: layout.y * s, rotation: layout.rotation, scale: s })
     })
     gsap.set(railFillRefs.value, { scaleY: 1 })
+    layoutRoutes(s)
+    gsap.set(hubRef.value, { opacity: 1 })
+    gsap.set(routeRefs.value, { strokeDasharray: 'none', strokeDashoffset: 0 })
     if (signalDotRef.value) gsap.set(signalDotRef.value, { opacity: 1 })
     if (signalRouteRef.value) gsap.set(signalRouteRef.value, { scaleY: 1 })
   })
@@ -224,6 +247,10 @@ useGsapContext(() => {
     gsap.set(cardEls, { xPercent: -50, yPercent: -50, opacity: 0, x: 0, y: 0, scale: 0.4, rotation: 0 })
     gsap.set(allStrokes, { strokeDasharray: 1, strokeDashoffset: 1 })
     gsap.set(railFillRefs.value, { scaleY: 0, transformOrigin: 'top' })
+    layoutRoutes(s)
+    gsap.set(hubRef.value, { opacity: 0, scale: 0.85 })
+    gsap.set(routeRefs.value, { strokeDasharray: 1, strokeDashoffset: 1 })
+    gsap.set(routeNodeRefs.value, { opacity: 0 })
     if (signalDotRef.value) gsap.set(signalDotRef.value, { opacity: 0.5, scale: 1 })
     if (signalRouteRef.value) gsap.set(signalRouteRef.value, { scaleY: 0 })
 
@@ -343,6 +370,10 @@ useGsapContext(() => {
       tl.to(strokesOf(el), { strokeDashoffset: 0, duration: 0.7, ease: 'power3.out', stagger: 0.05 }, `cards+=${0.35 + i * 0.1}`)
     }
     if (railFillRefs.value[3]) tl.to(railFillRefs.value[3], { scaleY: 1, duration: 0.6 }, 'cards')
+    // System map: hub resolves at the centroid, routes draw out to each card.
+    tl.to(hubRef.value, { opacity: 1, scale: 1, duration: 0.35, ease: approvedEase.gsapPrimary }, 'cards+=0.45')
+    tl.to(routeRefs.value, { strokeDashoffset: 0, duration: 0.5, ease: approvedEase.gsapStandard, stagger: 0.06 }, 'cards+=0.6')
+    tl.to(routeNodeRefs.value, { opacity: 1, duration: 0.2, stagger: 0.06 }, 'cards+=0.95')
     // Signal: single restrained highlight on Primary as it settles.
     if (signalDotRef.value) tl.to(signalDotRef.value, { opacity: 1, scale: 1.3, duration: 0.2 }, 'cards+=0.5')
     if (signalDotRef.value) tl.to(signalDotRef.value, { scale: 1, duration: 0.2 }, 'cards+=0.7')
@@ -400,6 +431,7 @@ useGsapContext(() => {
     window.addEventListener('pointermove', onMove, { passive: true })
 
     const cleanups: Array<() => void> = [() => window.removeEventListener('pointermove', onMove)]
+    const pulseTravel = { t: 0 }
     lifts.forEach((lift, i) => {
       const others = lifts.filter((_, j) => j !== i)
       const enter = () => {
@@ -408,11 +440,36 @@ useGsapContext(() => {
         gsap.to(edges[i]!, { scaleX: 1, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
         gsap.fromTo(accents[i]!, { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.7, ease: approvedEase.gsapCinematic, overwrite: 'auto' })
         gsap.to(others, { opacity: 0.55, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
+        hubReadout.value = `${cards[i]?.service?.index ?? ''} / ${String(cards.length).padStart(2, '0')}`
+        routeRefs.value.forEach((r, j) => {
+          gsap.to(r, { stroke: j === i ? '#2563EB' : 'rgba(255,255,255,0.1)', duration: motionTier.microMax, overwrite: 'auto' })
+        })
+        const route = routeRefs.value[i]
+        const pulse = pulseRef.value
+        if (route && pulse) {
+          const total = route.getTotalLength()
+          gsap.killTweensOf(pulseTravel)
+          pulseTravel.t = 0
+          gsap.set(pulse, { opacity: 1 })
+          gsap.to(pulseTravel, {
+            t: 1,
+            duration: 0.7,
+            ease: approvedEase.gsapStandard,
+            onUpdate: () => {
+              const pt = route.getPointAtLength(pulseTravel.t * total)
+              pulse.setAttribute('cx', String(pt.x))
+              pulse.setAttribute('cy', String(pt.y))
+            },
+            onComplete: () => { gsap.to(pulse, { opacity: 0, duration: 0.3 }) }
+          })
+        }
       }
       const leave = () => {
         gsap.to(lift, { y: 0, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
         gsap.to(edges[i]!, { scaleX: 0, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
         gsap.to(others, { opacity: 1, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
+        hubReadout.value = HUB_IDLE
+        gsap.to(routeRefs.value, { stroke: 'rgba(255,255,255,0.2)', duration: motionTier.microMax, overwrite: 'auto' })
       }
       lift.addEventListener('pointerenter', enter)
       lift.addEventListener('pointerleave', leave)
@@ -524,14 +581,14 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
       <div
         ref="signalRouteRef"
         aria-hidden="true"
-        class="absolute top-0 z-20 h-1/3 w-px origin-top bg-[color:rgba(37,99,235,0.4)]"
+        class="absolute top-0 z-[5] h-1/3 w-px origin-top bg-[color:rgba(37,99,235,0.4)]"
         :style="signalLeftStyle"
         :class="signalXFraction === null ? 'left-[64.5vw]' : undefined"
       />
       <span
         ref="signalDotRef"
         aria-hidden="true"
-        class="absolute top-1/3 z-20 h-2 w-2 -translate-x-1/2 rounded-full bg-cobalt shadow-[0_0_0_4px_rgba(37,99,235,0.18)]"
+        class="absolute top-1/3 z-[5] h-2 w-2 -translate-x-1/2 rounded-full bg-pastiYellow-500 shadow-[0_0_0_4px_rgba(251,186,0,0.18)]"
         :style="signalLeftStyle"
         :class="signalXFraction === null ? 'left-[64.5vw]' : undefined"
       />
@@ -616,6 +673,43 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
              [data-card-lift] takes hover lift / dimming. -->
         <div class="pointer-events-none absolute inset-0 z-40">
           <div class="relative mx-auto h-full max-w-5xl">
+            <!-- System map: PASTI as the hub, one orthogonal Signal route to
+                 each capability. It states a real relationship (one partner,
+                 four capabilities) and carries the hover state: a route
+                 lights and a Signal point travels to the card you're on. -->
+            <div aria-hidden="true" class="pointer-events-none absolute left-1/2 top-1/2 z-0 h-0 w-0">
+              <svg class="absolute left-0 top-0 overflow-visible" width="1" height="1">
+                <path
+                  v-for="n in 4"
+                  :key="`r${n}`"
+                  :ref="(el) => { if (el) routeRefs[n - 1] = el as unknown as SVGPathElement }"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.2)"
+                  stroke-width="1"
+                />
+                <rect
+                  v-for="n in 4"
+                  :key="`n${n}`"
+                  :ref="(el) => { if (el) routeNodeRefs[n - 1] = el as unknown as SVGRectElement }"
+                  width="5"
+                  height="5"
+                  fill="#0F172A"
+                  stroke="rgba(37,99,235,0.8)"
+                  stroke-width="1"
+                />
+                <circle ref="pulseRef" r="3" fill="#2563EB" opacity="0" />
+              </svg>
+              <div
+                ref="hubRef"
+                class="absolute left-0 top-0 flex flex-col items-center gap-2 rounded-token-sm border border-[color:rgba(37,99,235,0.5)] bg-slateNavy px-4 py-3 opacity-0"
+              >
+                <span class="absolute -left-px -top-px h-2 w-2 border-l border-t border-cobalt" />
+                <span class="absolute -bottom-px -right-px h-2 w-2 border-b border-r border-cobalt" />
+                <LayoutBrandMark :height="15" />
+                <span class="whitespace-nowrap font-display text-[10px] font-semibold tabular-nums tracking-[0.14em] text-[color:rgba(255,255,255,0.55)]">{{ hubReadout }}</span>
+              </div>
+            </div>
+
             <article
               v-for="(card, i) in cards"
               :key="card.key"
@@ -624,48 +718,14 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
               :class="CARD_STYLE[card.key].shell"
             >
               <div data-card-depth>
-                <div
-                  data-card-lift
-                  class="relative overflow-hidden rounded-card border bg-slateNavy"
-                  :class="CARD_STYLE[card.key].lift"
-                >
-                  <!-- Ghost numeral, cropped by the card edge (Editorial
-                       Crop / Large Type as Graphic). -->
-                  <span
-                    aria-hidden="true"
-                    class="pointer-events-none absolute -right-3 -top-4 select-none font-display font-bold leading-none tracking-[-0.06em] text-[color:rgba(255,255,255,0.06)]"
-                    :class="CARD_STYLE[card.key].numeral"
-                    >{{ card.service?.index }}</span
-                  >
-                  <div class="relative flex items-center gap-2">
-                    <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-[color:rgba(255,255,255,0.5)]">{{ card.service?.index }}</span>
-                    <span v-if="card.key === 'primary'" class="h-1.5 w-1.5 rounded-full bg-cobalt" aria-hidden="true" />
-                    <LayoutBrandMark :height="card.key === 'primary' ? 13 : card.key === 'accent' ? 9 : 11" class="ml-auto opacity-70" />
-                  </div>
-                  <div class="relative mt-4 text-[color:rgba(255,255,255,0.42)]" :class="CARD_STYLE[card.key].art">
-                    <HomeCapabilityArt :kind="card.kind" />
-                  </div>
-                  <h3
-                    class="relative mt-5 font-display font-semibold text-pureWhite"
-                    :class="card.key === 'primary' ? 'text-token-body-large' : card.key === 'accent' ? 'text-sm' : 'text-token-body'"
-                  >
-                    {{ card.service?.title }}
-                  </h3>
-                  <p
-                    v-if="card.key !== 'accent'"
-                    class="relative mt-2 text-[color:rgba(255,255,255,0.62)]"
-                    :class="card.key === 'primary' ? 'text-token-body' : 'text-[0.8125rem] leading-[1.5]'"
-                  >
-                    {{ card.service?.body }}
-                  </p>
-                  <span
-                    v-if="card.key === 'primary'"
-                    class="relative mt-5 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt"
-                  >
-                    {{ card.service?.cta }} <span aria-hidden="true">→</span>
-                  </span>
-                  <!-- Cobalt edge: draws left-to-right on hover. -->
-                  <span data-card-edge aria-hidden="true" class="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-cobalt" />
+                <div data-card-lift>
+                  <HomeCapabilityCard
+                    v-if="card.service"
+                    :service="card.service"
+                    :kind="card.kind"
+                    :size="card.key === 'primary' ? 'primary' : card.key === 'accent' ? 'accent' : 'medium'"
+                    interactive
+                  />
                 </div>
               </div>
             </article>
@@ -698,41 +758,14 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
       <p class="mt-3 max-w-md text-token-body text-[color:rgba(255,255,255,0.64)]">{{ supportLine }}</p>
 
       <div class="mt-10 flex flex-col gap-4 sm:grid sm:grid-cols-2">
-        <article
+        <div
           v-for="card in cards"
           :key="card.key"
           data-mobile-card
-          class="relative overflow-hidden rounded-card border bg-slateNavy p-5"
-          :class="[
-            card.key === 'accent' ? 'border-[color:rgba(37,99,235,0.35)]' : 'border-[color:rgba(255,255,255,0.12)]',
-            card.key === 'primary' ? 'sm:col-span-2' : ''
-          ]"
+          :class="card.key === 'primary' ? 'sm:col-span-2' : ''"
         >
-          <span
-            aria-hidden="true"
-            class="pointer-events-none absolute -right-2 -top-3 select-none font-display text-[88px] font-bold leading-none tracking-[-0.06em] text-[color:rgba(255,255,255,0.06)]"
-            >{{ card.service?.index }}</span
-          >
-          <div class="relative flex items-center">
-            <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-[color:rgba(255,255,255,0.5)]">{{ card.service?.index }}</span>
-            <LayoutBrandMark :height="12" class="ml-auto opacity-70" />
-          </div>
-          <div class="relative mt-3 h-20 text-[color:rgba(255,255,255,0.42)]">
-            <HomeCapabilityArt :kind="card.kind" />
-          </div>
-          <h3 class="relative mt-4 font-display font-semibold text-pureWhite" :class="card.key === 'primary' ? 'text-token-body-large' : 'text-token-body'">
-            {{ card.service?.title }}
-          </h3>
-          <p v-if="card.key !== 'accent'" class="relative mt-2 text-[color:rgba(255,255,255,0.62)]" :class="card.key === 'primary' ? 'text-token-body' : 'text-[0.8125rem] leading-[1.5]'">
-            {{ card.service?.body }}
-          </p>
-          <span
-            v-if="card.key === 'primary'"
-            class="relative mt-3 inline-flex items-center gap-1.5 text-token-metadata font-semibold uppercase tracking-[0.06em] text-cobalt"
-          >
-            {{ card.service?.cta }} <span aria-hidden="true">→</span>
-          </span>
-        </article>
+          <HomeCapabilityCard v-if="card.service" :service="card.service" :kind="card.kind" :size="card.key === 'primary' ? 'primary' : 'medium'" />
+        </div>
       </div>
     </BaseContainer>
   </BaseSection>

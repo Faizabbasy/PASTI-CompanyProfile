@@ -25,6 +25,11 @@
 <template>
   <HomeHero />
   <HomeSelectedWork />
+  <!-- Owner-directed addition (company-profile branding): who PASTI is,
+       straight from the brand guide, between the Hero and What We Build. -->
+  <!-- Temporarily hidden (owner request): Brand Promise + Brand Pillars.
+       Restore by uncommenting. -->
+  <!-- <HomeBrand /> -->
   <HomeWhatWeDo />
   <HomeTrust />
   <HomeTestimonials />

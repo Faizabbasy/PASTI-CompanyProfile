@@ -205,7 +205,7 @@ useGsapContext(() => {
         <span
           ref="markerRef"
           aria-hidden="true"
-          class="mb-4 h-1.5 w-1.5 rounded-full bg-cobalt"
+          class="mb-4 h-1.5 w-1.5 rounded-full bg-pastiYellow-500"
         />
         <h2 ref="headingRef" class="text-center text-display-sm">
           {{ heading }}

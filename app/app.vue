@@ -20,9 +20,9 @@ useLenis()
 // in every case that didn't render a decorative sequence (reduced motion,
 // or "no intro" selected) — Hero/Header never depended on anything
 // intro-specific, only on "it's now safe to animate."
-if (import.meta.client) {
-  markPageReady()
-}
+// Now flipped by <LayoutBrandIntro @done> — immediately when the intro is
+// skipped (reduced motion / repeat visit in the session), otherwise as the
+// intro panel starts lifting away, so Hero's entrance plays underneath it.
 
 // Reduced-motion foundation (08-implementation-plan.md §3.8 / §14 Milestone
 // 1): a single `data-reduced-motion` attribute on <html>, set once here,
@@ -118,6 +118,7 @@ async function onPageAfterEnter() {
     <NuxtRouteAnnouncer />
     <LayoutAmbientLight />
     <LayoutGrainOverlay />
+    <LayoutBrandIntro @done="markPageReady" />
     <LayoutCustomCursor />
     <LayoutSectionCurtain />
     <LayoutRouteCurtain />

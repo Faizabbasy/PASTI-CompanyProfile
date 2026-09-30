@@ -64,7 +64,7 @@ const tone = computed(() =>
     <LayoutBrandMark :surface="surface" :height="15" />
     <span class="relative block h-px flex-1">
       <span ref="lineRef" class="absolute inset-0 origin-left" :class="tone.line" />
-      <span ref="dotRef" class="absolute -right-px -top-[2.5px] h-1.5 w-1.5 rounded-full bg-cobalt" />
+      <span ref="dotRef" class="absolute -right-px -top-[2.5px] h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />
     </span>
     <component :is="as" class="font-display text-token-metadata font-semibold uppercase tracking-[0.12em]" :class="tone.text">
       {{ label }}

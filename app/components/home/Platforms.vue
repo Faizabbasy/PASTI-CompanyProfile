@@ -34,6 +34,16 @@ const signalRef = ref<HTMLElement | null>(null)
 // ScrollTrigger is even constructed below md.
 const mobileSectionComponentRef = ref<{ $el: HTMLElement } | null>(null)
 
+// The desktop pin, kept so the arrows can scroll to either world.
+let pinTrigger: ScrollTrigger | undefined
+function goToWorld(index: 0 | 1) {
+  if (!pinTrigger) return
+  const y = pinTrigger.start + (pinTrigger.end - pinTrigger.start) * (index === 0 ? 0.12 : 0.86)
+  const lenis = getLenisInstance()
+  if (lenis) lenis.scrollTo(y, { duration: 1.4 })
+  else window.scrollTo({ top: y, behavior: 'smooth' })
+}
+
 useGsapContext(() => {
   const mm = gsap.matchMedia()
 
@@ -95,7 +105,46 @@ useGsapContext(() => {
     // driven from onUpdate below.
     gsap.set(openFragments, { x: 0 })
     gsap.set(corpFragments, { x: 0 })
-    if (signalPoint) gsap.set(signalPoint, { y: 0 })
+    if (signalPoint) gsap.set(signalPoint, { x: 0 })
+
+    // --- OPEN product set ---
+    const openChars = Array.from(openWorld.querySelectorAll<HTMLElement>('[data-open-char]'))
+    const openCopy = Array.from(openWorld.querySelectorAll<HTMLElement>('[data-open-copy]'))
+    const openScreen = openWorld.querySelector<HTMLElement>('[data-open-screen]')
+    const panelL = openWorld.querySelector<HTMLElement>('[data-open-panel="left"]')
+    const panelR = openWorld.querySelector<HTMLElement>('[data-open-panel="right"]')
+    const openOrbits = Array.from(openWorld.querySelectorAll<SVGGeometryElement>('[data-open-orbit]'))
+    const openDot = openWorld.querySelector<SVGElement>('[data-open-dot]')
+    const openLight = openWorld.querySelector<HTMLElement>('[data-open-light]')
+    const openRings = Array.from(openWorld.querySelectorAll<SVGElement>('[data-open-ring]'))
+    for (const o of openOrbits) o.setAttribute('pathLength', '1')
+
+    const SCREEN_REST = { yPercent: -50, rotationY: -16, rotationX: 5, rotationZ: 1.5, x: 0, scale: 1, opacity: 1 }
+    gsap.set([panelL, panelR], { yPercent: -50 })
+    gsap.set(openScreen, SCREEN_REST)
+
+    // ENTRANCE — plays once the stage comes into view (reverses if the
+    // reader scrolls back up above it). Light rises, the orbit draws, the
+    // screen swings in from depth and settles at its resting tilt, the two
+    // panels slide out from behind it, the title rises letter by letter.
+    const openIn = gsap.timeline({ paused: true, defaults: { ease: approvedEase.gsapCinematic } })
+    openIn
+      .fromTo(openLight, { opacity: 0 }, { opacity: 1, duration: 1.4 }, 0)
+      .fromTo(openRings, { opacity: 0, scale: 0.82, transformOrigin: '1010px 468px' }, { opacity: 1, scale: 1, duration: 1.6, stagger: 0.07 }, 0)
+      .fromTo(openOrbits, { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.4, stagger: 0.15 }, 0.1)
+      .fromTo(openScreen, { rotationY: -55, rotationX: 14, x: 220, scale: 0.86, opacity: 0 }, { ...SCREEN_REST, duration: 1.4 }, 0.15)
+      .fromTo(panelL, { x: 160, opacity: 0 }, { x: 0, opacity: 1, duration: 1.1 }, 0.55)
+      .fromTo(panelR, { x: -160, opacity: 0 }, { x: 0, opacity: 1, duration: 1.1 }, 0.6)
+      .fromTo(openDot, { opacity: 0, scale: 0, transformOrigin: '50% 50%' }, { opacity: 1, scale: 1, duration: 0.5, ease: approvedEase.gsapPrimary }, 1.1)
+      .fromTo(openChars, { yPercent: 110 }, { yPercent: 0, duration: 0.9, stagger: 0.06, ease: approvedEase.gsapPrimary }, 0.2)
+      .fromTo(openCopy, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: 0.8, stagger: 0.1, ease: approvedEase.gsapStandard }, 0.45)
+    const openInTrigger = ScrollTrigger.create({
+      trigger: stage,
+      start: 'top 60%',
+      onEnter: () => openIn.play(),
+      onLeaveBack: () => openIn.reverse()
+    })
+    let lastTp = 0
 
     // Dwell distribution across the pin's total scroll distance (spec
     // "conceptual, not rigid": OPEN ~35% / transfer ~25-30% / e-CORPORATE
@@ -133,6 +182,19 @@ useGsapContext(() => {
           (p - OPEN_DWELL_END) / (TRANSFER_END - OPEN_DWELL_END)
         )
         gsap.set(openWorld, { yPercent: -30 * transferProgress })
+
+        // EXIT of the OPEN set (scrubbed with the transfer): the screen
+        // swings away and drops back, panels fold in behind it, orbit and
+        // light go out. Only written once the transfer has begun, so it
+        // never fights the entrance timeline.
+        if (transferProgress > 0 || lastTp > 0) {
+          const t = transferProgress
+          gsap.set(openScreen, { rotationY: -16 - 34 * t, rotationX: 5 + 12 * t, x: -80 * t, scale: 1 - 0.18 * t, opacity: 1 - 0.85 * t })
+          gsap.set(panelL, { x: 120 * t, opacity: 1 - t })
+          gsap.set(panelR, { x: -120 * t, opacity: 1 - t })
+          gsap.set([...openOrbits, ...openRings, openDot, openLight].filter(Boolean), { opacity: 1 - t })
+        }
+        lastTp = transferProgress
         gsap.set(corpWorld, { yPercent: 100 - 100 * transferProgress })
 
         // --- Crop/reframe (strong secondary, priority 2): outgoing world
@@ -147,9 +209,12 @@ useGsapContext(() => {
           const depth = i === 0 ? 4 : 8
           gsap.set(el, { y: -depth * transferProgress })
         })
+        // ENTRY of the e-CORPORATE set: fragments rise in sequence and
+        // flatten from a forward tilt as they land (structured, grid-tight).
         corpFragments.forEach((el, i) => {
-          const depth = i === 0 ? 4 : 6
-          gsap.set(el, { y: depth * (1 - transferProgress) })
+          const lp = gsap.utils.clamp(0, 1, (transferProgress - 0.15 - i * 0.12) / 0.6)
+          const e = 1 - Math.pow(1 - lp, 3)
+          gsap.set(el, { y: 90 * (1 - e), rotationX: 18 * (1 - e), transformPerspective: 1200, opacity: 0.2 + 0.8 * e })
         })
 
         // --- Mask-based title exit/entry (not opacity-only) ---
@@ -159,10 +224,8 @@ useGsapContext(() => {
         // --- Signal: horizontal state-transfer system (functional marker,
         // priority 3). Static at each state anchor, moves only during the
         // active transfer window. ---
-        if (signalPoint) gsap.set(signalPoint, { y: 57 * transferProgress })
+        if (signalPoint) gsap.set(signalPoint, { x: 57 * transferProgress })
         if (signalNumeral) signalNumeral.textContent = transferProgress < 0.5 ? '01 / 02' : '02 / 02'
-        signal?.classList.toggle('text-cyan', transferProgress > 0.05 && transferProgress < 0.95)
-        signal?.classList.toggle('text-cobalt', transferProgress <= 0.05 || transferProgress >= 0.95)
       }
     })
 
@@ -173,7 +236,8 @@ useGsapContext(() => {
     // transfer above owns the fragment's own transform, so the two never
     // fight. Amplitude stays inside the 4-8px depth budget's spirit (a
     // bit more, since it is user-driven, not idle).
-    const cleanups: Array<() => void> = [() => trigger.kill()]
+    pinTrigger = trigger
+    const cleanups: Array<() => void> = [() => trigger.kill(), () => openInTrigger.kill(), () => openIn.kill(), () => { pinTrigger = undefined }]
     if (window.matchMedia('(pointer: fine)').matches) {
       const pans = Array.from(stage.querySelectorAll<HTMLElement>('[data-pan]'))
       const panX = pans.map((el) => gsap.quickTo(el, 'x', { duration: 0.8, ease: approvedEase.gsapStandard }))
@@ -243,16 +307,26 @@ useGsapContext(() => {
       <!-- Signal: horizontal state-transfer system. Short structural route,
            two state anchors, one active point, optional 01/02 numeral.
            Fixed placement, does not move with the worlds. -->
-      <div
-        ref="signalRef"
-        aria-hidden="true"
-        class="pointer-events-none absolute right-[max(24px,3vw)] top-1/2 z-30 flex -translate-y-1/2 flex-col items-center gap-3 text-cobalt"
-      >
-        <div class="relative h-16 w-px bg-[color:rgba(255,255,255,0.15)]">
-          <span data-signal-point class="absolute -left-[3px] top-0 h-[7px] w-[7px] rounded-full bg-current" />
+      <!-- Controls + Signal: arrows step between the two worlds (they scroll
+           the pin, nothing pages); the short route and numeral carry state. -->
+      <BaseContainer class="absolute inset-x-0 bottom-10 z-30">
+        <div class="ml-auto flex w-fit items-center gap-6">
+          <div ref="signalRef" aria-hidden="true" class="flex items-center gap-3 text-pastiYellow-500">
+            <div class="relative h-px w-16 bg-[color:rgba(255,255,255,0.18)]">
+              <span data-signal-point class="absolute -top-[3px] left-0 h-[7px] w-[7px] rounded-full bg-current" />
+            </div>
+            <span data-signal-numeral class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.1em] text-pureWhite">01 / 02</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" aria-label="Show OPEN" class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:rgba(255,255,255,0.25)] text-pureWhite transition-colors duration-150 ease-editorial hover:border-pastiYellow-500 hover:text-pastiYellow-500 focus-visible:border-pastiYellow-500 focus-visible:outline-none" @click="goToWorld(0)">
+              <span aria-hidden="true">←</span>
+            </button>
+            <button type="button" aria-label="Show e-CORPORATE" class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:rgba(255,255,255,0.25)] text-pureWhite transition-colors duration-150 ease-editorial hover:border-pastiYellow-500 hover:text-pastiYellow-500 focus-visible:border-pastiYellow-500 focus-visible:outline-none" @click="goToWorld(1)">
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </div>
-        <span data-signal-numeral class="font-display text-token-metadata font-semibold tracking-[0.1em] text-current">01 / 02</span>
-      </div>
+      </BaseContainer>
 
       <!-- OPEN world: Expansive Precision. 1 Primary fragment + optional 1
            Secondary. Expansive, breathable, one dominant fragment, generous
@@ -262,41 +336,92 @@ useGsapContext(() => {
            character (spec §6 Color). The pointer-following measuring layer
            lives only here: OPEN is the expansive world, so the field is the
            thing that "opens". -->
-      <div ref="openWorldRef" class="absolute inset-0 z-10 bg-slateNavy">
-        <HomePrecisionField variant="stage" :show-routes="false" :focus="[0.72, 0.5]" />
-        <span
+      <div ref="openWorldRef" class="absolute inset-0 z-10 overflow-hidden bg-[#0b1120]">
+        <!-- Owner-directed "stage light": two directional pools of PASTI
+             Yellow falling in from opposite corners, like light on a product
+             set. Static, low opacity, fades in with the world and out with
+             the transfer — lighting for the product, not a floating blob. -->
+        <div
+          data-open-light
           aria-hidden="true"
-          class="pointer-events-none absolute -right-[2vw] top-[10vh] select-none font-display text-[clamp(200px,26vw,440px)] font-bold leading-none tracking-[-0.06em] text-[color:rgba(255,255,255,0.03)]"
-          >01</span
+          class="pointer-events-none absolute inset-0"
+          style="background: radial-gradient(ellipse 34% 30% at 100% 0%, rgba(251, 186, 0, 0.3), transparent 72%), radial-gradient(ellipse 26% 38% at 0% 100%, rgba(251, 186, 0, 0.2), transparent 72%), radial-gradient(ellipse 42% 48% at 70% 52%, rgba(37, 99, 235, 0.24), rgba(29, 78, 216, 0.08) 55%, transparent 78%), linear-gradient(155deg, #060b18 0%, #0b1224 45%, #111c38 100%)"
+        />
+        <!-- OPEN's own field (not the grid used elsewhere): concentric rings
+             radiating from the product — "opening outward", Expansive
+             Precision. Static once drawn; faded out toward the edges. -->
+        <svg
+          aria-hidden="true"
+          class="open-rings pointer-events-none absolute inset-0 h-full w-full"
+          viewBox="0 0 1440 900"
+          preserveAspectRatio="xMidYMid slice"
+          fill="none"
         >
+          <circle
+            v-for="n in 9"
+            :key="n"
+            data-open-ring
+            cx="1010"
+            cy="468"
+            :r="110 + n * 88"
+            :stroke="n === 4 ? 'rgba(251,186,0,0.45)' : 'rgba(255,255,255,0.11)'"
+            :stroke-dasharray="n === 4 ? '2 10' : n % 3 === 0 ? '1 6' : undefined"
+            stroke-width="1"
+          />
+          <path d="M1010 20V916M110 468H1436" stroke="rgba(255,255,255,0.035)" stroke-width="1" />
+        </svg>
+
         <BaseContainer class="relative flex h-full items-center">
           <div class="grid w-full grid-cols-12 items-center gap-8">
-            <div class="col-span-12 lg:col-span-5">
-              <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-cyan">{{ open.character }}</span>
-              <h3 data-world-title class="mt-4 font-display text-[clamp(3.5rem,9vw,8rem)] font-bold leading-[0.92] tracking-[-0.03em] text-pureWhite">
-                {{ open.name }}
+            <div class="col-span-5">
+              <span data-open-copy class="block font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-pastiYellow-500">{{ open.character }}</span>
+              <h3 data-world-title :aria-label="open.name" class="mt-4 font-display text-[clamp(3.5rem,8.4vw,8rem)] font-bold leading-[0.92] tracking-[-0.03em] text-pureWhite">
+                <span v-for="(ch, i) in open.name.split('')" :key="i" aria-hidden="true" class="inline-block overflow-hidden align-top"><span data-open-char class="inline-block">{{ ch }}</span></span>
               </h3>
-              <p class="mt-6 max-w-sm text-token-body text-[color:rgba(255,255,255,0.64)]">
+              <p data-open-copy class="mt-6 max-w-md text-token-body-large text-[color:rgba(255,255,255,0.78)]">
                 {{ open.positioning }}
               </p>
-              <div class="mt-8">
+              <div data-open-copy class="mt-8">
                 <HomePlatformCta :platform="open" />
               </div>
             </div>
 
-            <div class="relative col-span-12 lg:col-span-7">
-              <!-- Primary fragment: large, aggressively cropped, edge-bled — never a complete framed screenshot.
-                   The inner [data-pan] layer follows the pointer a few px so the crop
-                   feels like a window onto the product (Response, not idle motion). -->
-              <div data-fragment data-pan-host class="relative ml-auto aspect-[4/3] w-full max-w-2xl overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.08)]">
+            <!-- Product set: the OPEN screen, tilted in space, flanked by two
+                 statement panels (both lifted from OPEN's own positioning
+                 copy), inside an orbit carrying the Yellow Signal point. -->
+            <div class="relative col-span-7 h-[64svh]" style="perspective: 1600px">
+              <svg aria-hidden="true" class="pointer-events-none absolute inset-0 h-full w-full overflow-visible" viewBox="0 0 800 560" preserveAspectRatio="none" fill="none">
+                <ellipse data-open-orbit cx="400" cy="270" rx="385" ry="232" transform="rotate(-6 400 270)" stroke="rgba(251,186,0,0.5)" stroke-width="1.25" />
+                <ellipse data-open-orbit cx="400" cy="520" rx="330" ry="30" stroke="rgba(251,186,0,0.35)" stroke-width="1" />
+                <circle data-open-dot cx="330" cy="46" r="7" fill="#FBBA00" />
+              </svg>
+
+              <div
+                data-open-panel="left"
+                class="absolute left-0 top-1/2 flex h-[50%] w-[30%] flex-col rounded-card border border-[color:rgba(255,255,255,0.1)] bg-[color:rgba(15,23,42,0.82)] p-5"
+              >
+                <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(255,255,255,0.55)]">01</span>
+                <p class="mt-auto max-w-[62%] font-display text-token-body font-medium leading-snug text-pureWhite">From planning to contract.</p>
+                <span aria-hidden="true" class="mt-4 block h-[2px] w-8 bg-pastiYellow-500" />
+              </div>
+              <div
+                data-open-panel="right"
+                class="absolute right-0 top-1/2 flex h-[50%] w-[30%] flex-col items-end rounded-card border border-[color:rgba(251,186,0,0.35)] bg-[color:rgba(15,23,42,0.82)] p-5"
+              >
+                <span class="w-[62%] font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(255,255,255,0.55)]">02</span>
+                <p class="mt-auto w-[62%] font-display text-token-body font-medium leading-snug text-pureWhite">People, processes, vendors and approvals.</p>
+                <span aria-hidden="true" class="mt-4 block w-[62%]"><span class="block h-[2px] w-8 bg-pastiYellow-500" /></span>
+              </div>
+
+              <div
+                data-open-screen
+                data-pan-host
+                class="absolute left-[21%] right-[21%] top-1/2 aspect-[16/10] overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.14)] shadow-[0_60px_120px_-50px_rgba(0,0,0,0.9)]"
+              >
                 <div data-pan class="h-full w-full">
-                  <img :src="open.image" :alt="open.name" loading="lazy" class="h-full w-full scale-[1.15] object-cover object-left-top">
+                  <img :src="open.image" :alt="open.name" loading="lazy" class="h-full w-full scale-[1.06] object-cover object-left-top">
                 </div>
                 <HomePlatformChip :name="open.name" class="absolute bottom-3 right-3" />
-              </div>
-              <!-- Optional Secondary fragment: small, offset, partial. -->
-              <div data-fragment class="absolute -bottom-6 -left-6 hidden aspect-[4/3] w-40 overflow-hidden rounded-lg border border-[color:rgba(255,255,255,0.1)] bg-navy-900 shadow-2xl xl:block">
-                <img :src="open.image" :alt="`${open.name} detail`" loading="lazy" class="h-full w-full scale-[1.4] object-cover object-right-bottom opacity-90">
               </div>
             </div>
           </div>
@@ -403,3 +528,10 @@ useGsapContext(() => {
     </BaseContainer>
   </BaseSection>
 </template>
+
+<style scoped>
+.open-rings {
+  -webkit-mask-image: radial-gradient(ellipse 60% 70% at 70% 52%, #000 30%, transparent 85%);
+  mask-image: radial-gradient(ellipse 60% 70% at 70% 52%, #000 30%, transparent 85%);
+}
+</style>

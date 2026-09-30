@@ -215,7 +215,7 @@ watch(activeIndex, () => {
         <g :transform="`rotate(${ORBIT.rot} ${ORBIT.cx} ${ORBIT.cy})`">
           <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx" :ry="ORBIT.ry" stroke="rgba(15,23,42,0.14)" stroke-width="1" />
         </g>
-        <circle ref="orbitDotRef" r="5" fill="#2563EB" cx="160" cy="590" />
+        <circle ref="orbitDotRef" r="5" fill="#FBBA00" cx="160" cy="590" />
       </svg>
 
       <BaseContainer class="pointer-events-none absolute inset-x-0 top-10 z-30">
@@ -230,7 +230,7 @@ watch(activeIndex, () => {
           </h2>
           <div class="flex flex-col items-end gap-5 pt-4">
             <div class="flex items-center gap-3">
-              <span aria-hidden="true" class="h-1.5 w-1.5 shrink-0 rounded-full bg-cobalt" />
+              <span aria-hidden="true" class="h-1.5 w-1.5 shrink-0 rounded-full bg-pastiYellow-500" />
               <p class="font-display text-token-body-large font-semibold tabular-nums tracking-[-0.01em] text-slateNavy">
                 {{ String(activeIndex + 1).padStart(2, '0') }}<span class="text-[color:rgba(15,23,42,0.35)]"> / {{ String(N).padStart(2, '0') }}</span>
               </p>
