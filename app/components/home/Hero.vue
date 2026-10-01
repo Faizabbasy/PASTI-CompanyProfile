@@ -26,6 +26,16 @@ const headlineWords = ['Technology.', 'Creativity.', 'Impact.']
 const subtext = 'We build technology and creative solutions for businesses ready to move forward.'
 const ctaPrimary = { label: 'Explore our work' }
 const ctaSecondary = { label: 'Tell us about it' }
+// Owner-supplied hero furniture (reference comp, 2026-10-01). The service
+// list reuses the real titles from useServices() — no invented offers.
+const partnerCard = { label: 'Your Partner in', strong: 'Digital Transformation', to: '/about' }
+const ringTag = { from: 'Ideas', to: 'Real Solutions' }
+const sideNote = 'Innovation drives real business growth.'
+const { services } = useServices()
+const heroServices = services.slice(0, 4).map((s) => ({
+  title: s.title,
+  to: s.category === 'creative' ? '/creative' : '/technology'
+}))
 
 const { projects } = useSelectedWork()
 const { link: whatsappLink } = useWhatsapp()
@@ -52,6 +62,8 @@ const railRef = ref<HTMLElement | null>(null)
 const railWrapRef = ref<HTMLElement | null>(null)
 const numeralRef = ref<HTMLElement | null>(null)
 const successRef = ref<HTMLElement | null>(null)
+const lineRefs = ref<HTMLElement[]>([])
+const decorRef = ref<HTMLElement | null>(null)
 
 useMagnetic(ctaPrimaryRef, { strength: 0.2 })
 useMagnetic(ctaSecondaryRef, { strength: 0.2 })
@@ -70,31 +82,6 @@ function goToWork() {
   }
 }
 
-/** Wraps a word in the outer-clip / inner-translate mask structure. The
- * closing full stop is the headline's Signal point, kept Cobalt. */
-function wrapWord(word: string): { outer: HTMLSpanElement; inner: HTMLSpanElement } {
-  const outer = document.createElement('span')
-  outer.style.overflow = 'clip'
-  outer.style.display = 'inline-block'
-  outer.style.verticalAlign = 'top'
-  outer.style.margin = '-0.2em'
-
-  const inner = document.createElement('span')
-  inner.style.display = 'inline-block'
-  inner.style.padding = '0.2em'
-  if (word.endsWith('.')) {
-    inner.textContent = word.slice(0, -1)
-    const dot = document.createElement('span')
-    dot.className = 'text-cobalt'
-    dot.textContent = '.'
-    inner.appendChild(dot)
-  } else {
-    inner.textContent = word
-  }
-  outer.appendChild(inner)
-  return { outer, inner }
-}
-
 // Plain helper, not gsap.utils.clamp: this line runs during SSR, where the
 // server bundle can resolve `gsap` to its CJS module object (no `.utils`).
 const clamp = (min: number, max: number, v: number) => Math.min(max, Math.max(min, v))
@@ -110,18 +97,13 @@ useGsapContext(() => {
       onCleanup(() => mm.revert())
 
       mm.add(reducedMotionQuery.noPreference, () => {
-        const heading = headingRef.value
-        if (!heading) return
-        const words: HTMLElement[] = []
-        heading.textContent = ''
-        for (const part of headlineWords) {
-          const { outer, inner } = wrapWord(part)
-          heading.appendChild(outer)
-          words.push(inner)
-        }
+        const words = lineRefs.value
+        if (words.length === 0) return
+        const floats = chipsRef.value ? Array.from(chipsRef.value.querySelectorAll<HTMLElement>('[data-float]')) : []
         gsap.set(words, { yPercent: 120 })
         gsap.set([subtextRef.value, ctaRowRef.value].filter(Boolean), { opacity: 0, y: 14 })
         gsap.set(chipsRef.value, { opacity: 0 })
+        gsap.set(floats, { opacity: 0, x: 24 })
         gsap.set(ringRef.value, { opacity: 0, scale: 0.9 })
 
         const tl = gsap.timeline({ defaults: { ease: approvedEase.gsapStandard } })
@@ -130,6 +112,7 @@ useGsapContext(() => {
         tl.to(subtextRef.value, { opacity: 1, y: 0, duration: motionTier.standardMax }, '-=0.5')
         tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: motionTier.standardMax }, '-=0.4')
         tl.to(chipsRef.value, { opacity: 1, duration: motionTier.standardMax }, '-=0.3')
+        tl.to(floats, { opacity: 1, x: 0, duration: motionTier.cinematicMin, stagger: 0.08, ease: approvedEase.gsapCinematic }, '<')
         return () => tl.kill()
       })
     },
@@ -181,7 +164,9 @@ useGsapContext(() => {
     measure() // caption width changed → its wrapped height; settle once more
 
     // Animated state, driven by one scrubbed timeline.
-    const state = { enter: 0, b: 0, pos: 1, fade: 1 }
+    // `shift` is the visitor's own rotation of the resting arc (clicking a
+    // side card); it hands back to the scroll as B runs.
+    const state = { enter: 0, b: 0, pos: 1, fade: 1, shift: 0 }
     const easeB = gsap.parseEase('power2.inOut')
 
     let activeIndex = -1
@@ -218,10 +203,11 @@ useGsapContext(() => {
       const spacing = lerp(W * 0.68, W * 0.97, eB)
       const centerY = centerFinal
       const baseY = vh * 0.5 // cards are absolutely centered on the stage middle
+      const pos = state.pos + state.shift * (1 - eB)
 
       for (let i = 0; i < N; i++) {
         const el = cards[i]!
-        const d = i - state.pos
+        const d = i - pos
         const ad = Math.abs(d)
 
         // Scale: at rest the center card is largest and the arc's sides
@@ -234,7 +220,7 @@ useGsapContext(() => {
         // Arc: at rest the row sits at the bottom edge, the center card
         // highest and the sides falling away and tilting; it straightens
         // to a flat row at the final height.
-        const restY = vh * 0.87 + (H * scaleA) / 2 - baseY + arc * ad * ad * vh * 0.045
+        const restY = vh * 0.92 + (H * scaleA) / 2 - baseY + arc * ad * ad * vh * 0.045
         const y = lerp(restY, centerY - baseY, eB) + (1 - state.enter) * vh * 0.12
         const rotZ = arc * d * 5
         const rotY = arc * -d * 16
@@ -256,7 +242,7 @@ useGsapContext(() => {
       }
 
       // Caption follows the nearest card once the cards have grown.
-      const nearest = clamp(0, N - 1, Math.round(state.pos))
+      const nearest = clamp(0, N - 1, Math.round(pos))
       if (eB > 0.55 && nearest !== activeIndex) {
         setCaption(nearest, nearest >= activeIndex ? 1 : -1)
       }
@@ -302,6 +288,7 @@ useGsapContext(() => {
     tl.to(state, { pos: 0, duration: 24, ease: 'power2.inOut' }, 12)
     tl.to(copyRef.value, { opacity: 0, y: -70, duration: 14, ease: 'power2.in' }, 12)
     tl.to(chipsRef.value, { opacity: 0, duration: 10, ease: 'power2.in' }, 12)
+    tl.to(decorRef.value, { opacity: 0.35, duration: 20, ease: 'power2.inOut' }, 12)
     tl.to(ringRef.value, { scale: 0.6, yPercent: -22, opacity: 0, duration: 20, ease: 'power2.inOut' }, 12)
     // 36-94 (C): horizontal travel across all projects.
     tl.to(state, { pos: N - 1, duration: 58, ease: 'none' }, 36)
@@ -319,15 +306,42 @@ useGsapContext(() => {
       onUpdate: render
     })
 
-    // --- Pointer response: cards drift a few px at different depths ---
     const cleanups: Array<() => void> = []
+
+    // --- Arc navigation (resting state only): click a side card to centre it ---
+    const shiftTo = (restIndex: number) => {
+      const target = clamp(0, N - 1, restIndex) - 1
+      gsap.to(state, { shift: target, duration: motionTier.cinematicMin, ease: approvedEase.gsapCinematic, overwrite: 'auto', onUpdate: render })
+    }
+    const restIndex = () => Math.round(1 + state.shift)
+    cards.forEach((card, i) => {
+      const onClick = () => {
+        if (state.b < 0.05 && i !== restIndex()) shiftTo(i)
+      }
+      card.addEventListener('click', onClick)
+      cleanups.push(() => card.removeEventListener('click', onClick))
+    })
+
+    // --- Pointer response: cards drift a few px at different depths ---
     if (window.matchMedia('(pointer: fine)').matches) {
       const inners = cards.map((c) => c.querySelector<HTMLElement>('[data-card-inner]')!)
       const qx = inners.map((el) => gsap.quickTo(el, 'x', { duration: 0.9, ease: approvedEase.gsapStandard }))
       const qy = inners.map((el) => gsap.quickTo(el, 'y', { duration: 0.9, ease: approvedEase.gsapStandard }))
+      // Background furniture (blurred yellow forms, pearls, side card)
+      // drifts at its own data-depth — parallax, not follow.
+      const layers = [decorRef.value, chipsRef.value].flatMap((root) =>
+        root ? Array.from(root.querySelectorAll<HTMLElement>('[data-depth]')) : []
+      )
+      const lx = layers.map((el) => gsap.quickTo(el, 'x', { duration: 1.4, ease: approvedEase.gsapStandard }))
+      const ly = layers.map((el) => gsap.quickTo(el, 'y', { duration: 1.4, ease: approvedEase.gsapStandard }))
       const onMove = (event: PointerEvent) => {
         const nx = (event.clientX / window.innerWidth) * 2 - 1
         const ny = (event.clientY / window.innerHeight) * 2 - 1
+        layers.forEach((el, i) => {
+          const depth = Number(el.dataset.depth) || 10
+          lx[i]!(nx * -depth)
+          ly[i]!(ny * -depth * 0.7)
+        })
         inners.forEach((_, i) => {
           const depth = 6 + (i % 3) * 4
           qx[i]!(nx * depth)
@@ -376,104 +390,169 @@ useGsapContext(() => {
 
 <template>
   <BaseSection ref="sectionComponentRef" as="section" class="relative overflow-hidden bg-[#f6f9fb] py-0">
-    <div ref="stageRef" class="relative flex min-h-[100svh] items-center justify-center overflow-hidden desktop:h-[100svh]">
-      <!-- Background (owner revision 2026-09-30: light): white-to-mist with a
-           soft Cobalt lift behind the ring, a cool highlight top-right and a
-           faint #033C59 lift bottom-left, plus one thin orbit line and two
-           small marks. No grid, no particles, no blobs. -->
+    <div ref="stageRef" class="relative flex min-h-[100svh] flex-col overflow-hidden desktop:block desktop:h-[100svh]">
+      <!-- Background (owner reference comp, 2026-10-01): cool mist base with
+           soft, out-of-focus PASTI Yellow forms bleeding in from the edges
+           (as if more of the knot sat just outside the frame) and a few
+           pearl spheres. Each layer drifts at its own data-depth. -->
       <div
         aria-hidden="true"
         class="absolute inset-0"
-        style="background: radial-gradient(ellipse 52% 48% at 50% 44%, rgba(251, 186, 0, 0.16), rgba(251, 186, 0, 0.05) 50%, transparent 74%), radial-gradient(ellipse 40% 38% at 94% 4%, rgba(251, 186, 0, 0.14), transparent 70%), radial-gradient(ellipse 45% 42% at 4% 96%, rgba(3, 60, 89, 0.08), transparent 70%), linear-gradient(180deg, #ffffff 0%, #f5f8fb 55%, #eef3f7 100%)"
+        style="background: radial-gradient(ellipse 46% 44% at 62% 44%, rgba(251, 186, 0, 0.12), transparent 72%), radial-gradient(ellipse 50% 50% at 8% 90%, rgba(3, 60, 89, 0.06), transparent 70%), linear-gradient(180deg, #fbfcfd 0%, #f2f6f9 55%, #ebf1f5 100%)"
       />
-      <svg
-        aria-hidden="true"
-        class="pointer-events-none absolute inset-0 h-full w-full"
-        viewBox="0 0 1440 900"
-        preserveAspectRatio="xMidYMid slice"
-        fill="none"
-      >
-        <ellipse cx="720" cy="400" rx="470" ry="300" stroke="rgba(3,60,89,0.16)" stroke-width="1" transform="rotate(-14 720 400)" />
-        <circle cx="1094" cy="212" r="6" fill="#FBBA00" />
-        <path d="M22 500h16M30 492v16" stroke="rgba(3,60,89,0.35)" stroke-width="1" />
-        <path d="M1402 500h16M1410 492v16" stroke="rgba(3,60,89,0.25)" stroke-width="1" />
-      </svg>
-
-      <!-- Glass ring (Three.js, client-only) -->
-      <div
-        ref="ringRef"
-        aria-hidden="true"
-        class="pointer-events-none absolute left-1/2 top-[46%] z-0 h-[min(78vw,680px)] w-[min(78vw,680px)] -translate-x-1/2 -translate-y-1/2 desktop:top-[45%] desktop:h-[min(48vw,74svh,680px)] desktop:w-[min(48vw,74svh,680px)]"
-      >
-        <ClientOnly>
-          <HomeHeroRing />
-        </ClientOnly>
+      <div ref="decorRef" aria-hidden="true" class="pointer-events-none absolute inset-0 overflow-hidden">
+        <div data-depth="26" class="hero-blur absolute -right-[12vw] -top-[22vh] h-[56vh] w-[44vw] rotate-[-18deg] rounded-full" />
+        <div data-depth="34" class="hero-blur hero-blur--soft absolute -left-[9vw] top-[30%] h-[22vh] w-[22vw] rotate-[38deg] rounded-full" />
+        <div data-depth="40" class="hero-blur hero-blur--soft absolute -left-[6vw] bottom-[-8vh] h-[30vh] w-[18vw] rotate-[-30deg] rounded-full" />
+        <div data-depth="30" class="hero-blur hero-blur--soft absolute -right-[6vw] bottom-[12%] hidden h-[12vh] w-[30vw] rotate-[-22deg] rounded-full desktop:block" />
+        <span data-depth="18" class="hero-pearl absolute right-[7vw] top-[37%] hidden h-11 w-11 desktop:block" />
+        <span data-depth="12" class="hero-pearl absolute right-[24vw] top-[63%] hidden h-7 w-7 opacity-70 desktop:block" />
+        <span data-depth="22" class="hero-pearl absolute left-[30vw] top-[9%] h-5 w-5 opacity-60" />
       </div>
 
-      <!-- Copy: headline / supporting text / CTAs, centered. -->
-      <BaseContainer class="z-10 w-full">
+      <!-- Copy: marker / headline / supporting text / CTAs, left-aligned on
+           a stepped key line (each headline line indents a little further). -->
+      <BaseContainer class="relative z-10 w-full desktop:static">
         <div
           ref="copyRef"
-          class="mx-auto flex flex-col items-center px-2 pb-16 pt-28 text-center desktop:absolute desktop:inset-x-0 desktop:top-[22svh] desktop:mx-0 desktop:px-0 desktop:pb-0 desktop:pt-0"
+          class="flex flex-col items-start pb-6 pt-28 text-left tablet:pt-32 desktop:absolute desktop:left-[max(6vw,calc(50vw-640px))] desktop:top-[15svh] desktop:pb-0 desktop:pt-0"
         >
+          <div class="mb-5 flex items-center gap-3 font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(3,60,89,0.78)] desktop:mb-[3svh]">
+            <span class="h-2 w-2 rounded-full bg-pastiYellow-500 shadow-[0_0_0_4px_rgba(251,186,0,0.18)]" />
+            <span>01 / 04</span>
+            <span class="h-px w-14 bg-[color:rgba(3,60,89,0.4)]" />
+          </div>
+
           <h1
             ref="headingRef"
-            class="flex flex-col items-center text-center font-display text-[length:clamp(40px,14vw,72px)] font-bold leading-[0.92] tracking-[-0.04em] text-slateNavy md:text-token-display-xl desktop:flex-row desktop:justify-center desktop:gap-x-[0.1em] desktop:text-[length:clamp(64px,6.4vw,132px)]"
+            class="font-display text-[length:clamp(46px,13.5vw,84px)] font-bold leading-[0.9] tracking-[-0.045em] text-slateNavy desktop:text-[length:clamp(64px,min(7.2vw,11.5svh),128px)]"
           >
-            <span v-for="word in headlineWords" :key="word" class="block">{{ word.slice(0, -1) }}<span class="text-cobalt">.</span></span>
+            <span
+              v-for="(word, i) in headlineWords"
+              :key="word"
+              class="-mb-[0.14em] block overflow-clip pb-[0.14em]"
+              :class="i === 1 ? 'pl-[0.32em]' : i === 2 ? 'pl-[0.62em]' : ''"
+            >
+              <span :ref="(el) => { if (el) lineRefs[i] = el as HTMLElement }" class="inline-block">{{ word.slice(0, -1) }}<span class="text-pastiYellow-500">.</span></span>
+            </span>
           </h1>
 
-          <p ref="subtextRef" class="mx-auto mt-8 max-w-lg text-center text-token-body-large font-semibold text-[color:rgba(3,60,89,0.9)] [text-shadow:0_0_12px_rgba(255,255,255,0.95),0_0_26px_rgba(255,255,255,0.85)]">
+          <p
+            ref="subtextRef"
+            class="mt-6 max-w-[25rem] text-token-body-large font-medium text-[color:rgba(3,60,89,0.86)] desktop:ml-[0.9em] desktop:mt-[3svh] desktop:max-w-[27rem] desktop:text-[17px] desktop:leading-[1.6]"
+          >
             {{ subtext }}
           </p>
 
-          <!-- CTAs sit over the Cobalt 3D ring, so neither may be Cobalt at
-               rest: primary is solid Slate Navy (the header CTA's colour) with
-               a soft shadow lifting it off the render; secondary is a solid
-               white surface instead of bare text. Cobalt only as hover wipe.
-               Desktop: pinned to the left key line (4vw — header logo / 01·04
-               marker) at the same height as the right "Process Ready" chip
-               (22svh + 44svh = 66svh), so the ring sits centred between them. -->
-          <div ref="ctaRowRef" class="mt-9 flex w-full max-w-[21rem] flex-col items-stretch gap-3 tablet:w-auto tablet:max-w-none tablet:flex-row tablet:flex-wrap tablet:items-center tablet:justify-center tablet:gap-4 desktop:absolute desktop:left-[4vw] desktop:top-[44svh] desktop:mt-0 desktop:flex-col desktop:items-stretch desktop:gap-3 wide:flex-row wide:items-center wide:gap-4">
-            <div ref="ctaPrimaryRef" class="inline-block w-full tablet:w-auto desktop:w-full wide:w-auto">
+          <!-- CTAs: a yellow orb inside a white halo leading a glass pill
+               (primary), then a quiet text link (secondary, WhatsApp). -->
+          <div ref="ctaRowRef" class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4 desktop:mt-[3.6svh]">
+            <div ref="ctaPrimaryRef" class="inline-block">
               <a
                 href="#selected-work"
-                class="group relative flex items-center justify-between gap-4 overflow-hidden rounded-[14px] bg-slateNavy transition-transform duration-200 active:scale-[0.97] py-2.5 pl-6 pr-2.5 font-display text-[15px] font-bold text-pureWhite shadow-[0_18px_40px_-16px_rgba(3,60,89,0.7)]"
+                class="group flex items-center transition-transform duration-200 active:scale-[0.97]"
                 @click.prevent="goToWork"
               >
-                <span aria-hidden="true" class="absolute inset-0 origin-left scale-x-0 bg-cobalt transition-transform duration-500 ease-editorial group-hover:scale-x-100" />
-                <span class="relative z-10">{{ ctaPrimary.label }}</span>
-                <span class="relative z-10 grid h-10 w-10 place-items-center rounded-[10px] bg-pastiYellow-500 text-slateNavy transition-transform duration-300 ease-editorial group-hover:rotate-[-45deg]">
-                  <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+                <span class="relative z-10 grid h-[72px] w-[72px] place-items-center rounded-full border border-[color:rgba(3,60,89,0.08)] bg-[color:rgba(255,255,255,0.7)] shadow-[0_20px_44px_-20px_rgba(3,60,89,0.45),inset_0_1px_0_#fff] backdrop-blur-sm">
+                  <span class="grid h-12 w-12 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy shadow-[0_10px_24px_-8px_rgba(251,186,0,0.9),inset_0_-3px_6px_rgba(200,120,0,0.25),inset_0_2px_4px_rgba(255,255,255,0.6)] transition-transform duration-500 ease-editorial group-hover:rotate-[-45deg]">
+                    <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+                  </span>
+                </span>
+                <span class="relative -ml-5 flex h-[52px] items-center overflow-hidden rounded-full border border-[color:rgba(3,60,89,0.12)] bg-[color:rgba(255,255,255,0.72)] pl-10 pr-7 font-display text-[15px] font-bold text-slateNavy shadow-[0_16px_36px_-22px_rgba(3,60,89,0.5)] backdrop-blur-sm">
+                  <span aria-hidden="true" class="absolute inset-0 origin-left scale-x-0 bg-slateNavy transition-transform duration-500 ease-editorial group-hover:scale-x-100" />
+                  <span class="relative transition-colors duration-300 group-hover:text-pureWhite">{{ ctaPrimary.label }}</span>
                 </span>
               </a>
             </div>
-            <div ref="ctaSecondaryRef" class="inline-block w-full tablet:w-auto desktop:w-full wide:w-auto">
+            <div ref="ctaSecondaryRef" class="inline-block">
               <a
                 :href="whatsappLink"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="group flex items-center justify-between gap-4 rounded-[14px] border active:scale-[0.97] border-[color:rgba(3,60,89,0.14)] bg-pureWhite py-2.5 pl-6 pr-2.5 font-display text-[15px] font-bold text-slateNavy shadow-[0_18px_40px_-18px_rgba(3,60,89,0.45)] transition-colors duration-300 ease-editorial hover:border-slateNavy"
+                class="group relative inline-flex items-center gap-3 py-2 font-display text-[15px] font-semibold text-slateNavy"
               >
                 {{ ctaSecondary.label }}
-                <span class="grid h-10 w-10 place-items-center rounded-[10px] bg-[color:rgba(3,60,89,0.07)] text-slateNavy transition-colors duration-300 ease-editorial group-hover:bg-slateNavy group-hover:text-pureWhite">
-                  <svg viewBox="0 0 16 16" class="h-4 w-4 transition-transform duration-300 ease-editorial group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
-                </span>
+                <svg viewBox="0 0 16 16" class="h-4 w-4 transition-transform duration-300 ease-editorial group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+                <span aria-hidden="true" class="absolute inset-x-0 bottom-0 h-px origin-right scale-x-0 bg-slateNavy transition-transform duration-500 ease-editorial group-hover:origin-left group-hover:scale-x-100" />
               </a>
             </div>
           </div>
         </div>
       </BaseContainer>
 
-      <!-- Status chips (whitelisted neutral states). -->
-      <div ref="chipsRef" aria-hidden="true" class="hidden desktop:block">
-        <div class="absolute left-[4vw] top-[34svh] z-10 flex items-center gap-3 font-display text-token-metadata font-semibold tracking-[0.08em] text-[color:rgba(3,60,89,0.72)]">
-          <span>01 / 04</span>
-          <span class="h-px w-16 bg-cobalt" />
+      <!-- Glass knot (Three.js, client-only) with its tilted orbit and the
+           "Ideas → Real Solutions" tag. In flow under the copy on mobile;
+           right of centre, behind the headline's tail, on desktop. -->
+      <div
+        ref="ringRef"
+        aria-hidden="true"
+        class="pointer-events-none relative z-0 mx-auto -mt-4 mb-16 aspect-square w-[min(92vw,480px)] desktop:absolute desktop:left-[57%] desktop:top-[40%] desktop:m-0 desktop:h-[min(46vw,70svh,700px)] desktop:w-[min(46vw,70svh,700px)] desktop:-translate-x-1/2 desktop:-translate-y-1/2"
+      >
+        <svg class="absolute -inset-[12%] h-[124%] w-[124%] overflow-visible" viewBox="0 0 200 200" fill="none">
+          <defs>
+            <linearGradient id="hero-orbit" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#FBBA00" stop-opacity="0" />
+              <stop offset="0.35" stop-color="#FBBA00" stop-opacity="0.75" />
+              <stop offset="0.7" stop-color="#FBBA00" stop-opacity="0.35" />
+              <stop offset="1" stop-color="#FBBA00" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <ellipse cx="100" cy="100" rx="96" ry="34" stroke="url(#hero-orbit)" stroke-width="0.55" transform="rotate(-24 100 100)" />
+          <g transform="rotate(-24 100 100)">
+            <circle class="hero-orbit-dot" r="1.6" fill="#033C59">
+              <animateMotion dur="16s" repeatCount="indefinite" path="M4,100 a96,34 0 1,0 192,0 a96,34 0 1,0 -192,0" />
+            </circle>
+          </g>
+        </svg>
+        <ClientOnly>
+          <HomeHeroRing />
+        </ClientOnly>
+        <span class="absolute right-[2%] top-[9%] inline-flex rotate-[-7deg] items-center gap-2 rounded-full border border-[color:rgba(3,60,89,0.08)] bg-[color:rgba(255,255,255,0.86)] px-3.5 py-1.5 font-display text-[11px] font-bold text-slateNavy shadow-[0_14px_30px_-16px_rgba(3,60,89,0.45)] backdrop-blur-sm desktop:right-[-4%] desktop:top-[4%] desktop:text-[12px]">
+          {{ ringTag.from }}
+          <svg viewBox="0 0 16 16" class="h-3 w-3 text-pastiYellow-600" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+          <span class="font-semibold text-[color:rgba(3,60,89,0.8)]">{{ ringTag.to }}</span>
+        </span>
+      </div>
+
+      <!-- Desktop hero furniture: scroll cue (left), partner card + service
+           list and side note (right). Fades with the copy as the gallery
+           takes over. -->
+      <div ref="chipsRef" class="hidden desktop:block">
+        <div aria-hidden="true" class="absolute left-[2.2vw] top-[38svh] z-10 flex flex-col items-center gap-3">
+          <span class="h-16 w-px bg-gradient-to-b from-transparent to-[color:rgba(3,60,89,0.45)]" />
+          <span class="rotate-180 font-display text-[11px] font-semibold tracking-[0.06em] text-slateNavy [writing-mode:vertical-rl]">Scroll</span>
+          <span class="relative h-9 w-[22px] rounded-full border border-[color:rgba(3,60,89,0.45)]">
+            <span class="hero-wheel absolute left-1/2 top-1.5 h-1.5 w-[3px] -translate-x-1/2 rounded-full bg-slateNavy" />
+          </span>
         </div>
-        <div class="absolute right-[4vw] top-[66svh] z-30 flex items-center gap-3 rounded-button border border-[color:rgba(3,60,89,0.16)] bg-[color:rgba(255,255,255,0.75)] px-4 py-2.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-slateNavy shadow-[0_12px_30px_-20px_rgba(3,60,89,0.5)]">
-          <span class="h-1.5 w-1.5 rounded-full bg-cobalt" />
-          Process Ready
+
+        <div class="absolute right-[max(4vw,calc(50vw-660px))] top-[23svh] z-30 w-[min(21rem,24vw)]">
+          <div data-float data-depth="10">
+            <NuxtLink
+              :to="partnerCard.to"
+              class="group flex rotate-[-5deg] items-center gap-4 rounded-[18px] border border-[color:rgba(255,255,255,0.9)] bg-[color:rgba(255,255,255,0.72)] py-4 pl-5 pr-4 shadow-[0_24px_50px_-26px_rgba(3,60,89,0.45)] backdrop-blur-md transition-transform duration-500 ease-editorial hover:rotate-[-3deg]"
+            >
+              <span class="h-2.5 w-2.5 shrink-0 rounded-full bg-pastiYellow-500 shadow-[0_0_0_5px_rgba(251,186,0,0.16)]" />
+              <span class="min-w-0 flex-1 font-display text-[13px] font-semibold leading-snug text-[color:rgba(3,60,89,0.75)]">
+                {{ partnerCard.label }}<br><span class="font-bold text-slateNavy">{{ partnerCard.strong }}</span>
+              </span>
+              <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[color:rgba(3,60,89,0.1)] bg-pureWhite text-slateNavy transition-colors duration-300 group-hover:bg-slateNavy group-hover:text-pureWhite">
+                <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+              </span>
+            </NuxtLink>
+          </div>
+          <ul data-float data-depth="6" class="ml-8 mt-6 flex rotate-[-5deg] flex-col gap-3">
+            <li v-for="service in heroServices" :key="service.title">
+              <NuxtLink :to="service.to" class="group inline-flex items-center gap-3 font-display text-[13px] font-medium text-[color:rgba(3,60,89,0.82)] transition-colors hover:text-slateNavy">
+                <span class="text-[15px] leading-none text-slateNavy transition-transform duration-300 ease-editorial group-hover:rotate-90">+</span>
+                <span class="bg-[linear-gradient(currentColor,currentColor)] bg-[length:0%_1px] bg-left-bottom bg-no-repeat pb-0.5 transition-[background-size] duration-500 ease-editorial group-hover:bg-[length:100%_1px]">{{ service.title }}</span>
+              </NuxtLink>
+            </li>
+          </ul>
+        </div>
+
+        <div aria-hidden="true" data-float data-depth="14" class="absolute right-[max(3vw,calc(50vw-680px))] top-[58svh] z-10 flex max-w-[9.5rem] flex-col gap-3 wide:top-[56svh]">
+          <p class="font-display text-[12px] font-medium leading-snug text-[color:rgba(3,60,89,0.78)]">{{ sideNote }}</p>
         </div>
       </div>
 
@@ -495,18 +574,17 @@ useGsapContext(() => {
         >
           <div
             data-card-inner
-            class="relative h-full w-full overflow-hidden rounded-card border border-[color:rgba(3,60,89,0.14)] bg-slateNavy shadow-[0_50px_100px_-45px_rgba(3,60,89,0.55)]"
+            class="relative h-full w-full overflow-hidden rounded-card border border-[color:rgba(3,60,89,0.14)] bg-pureWhite shadow-[0_50px_100px_-45px_rgba(3,60,89,0.55)]"
           >
-            <!-- Posters are portrait (4:5) in a landscape card: show the WHOLE
-                 poster with breathing room (its baked-in headline stays
-                 readable), over a blurred, dimmed copy of itself as backdrop. -->
-            <img :src="project.image" alt="" aria-hidden="true" loading="lazy" class="absolute inset-0 h-full w-full scale-125 object-cover opacity-60 blur-2xl">
-            <span aria-hidden="true" class="absolute inset-0 bg-[color:rgba(3,60,89,0.35)]" />
-            <div class="absolute inset-0 flex items-center justify-center px-[6%] py-[4.5%]">
-              <img :src="project.image" :alt="project.title" :loading="i < 3 ? 'eager' : 'lazy'" class="h-full w-auto max-w-full rounded-[clamp(8px,0.8vw,14px)] object-contain shadow-[0_30px_60px_-20px_rgba(0,12,22,0.7)] ring-1 ring-[color:rgba(255,255,255,0.14)]">
-            </div>
-            <span class="absolute left-4 top-3 font-display text-token-metadata font-semibold tracking-[0.08em] text-pureWhite">{{ project.index }}</span>
-            <span class="absolute right-4 top-3.5 opacity-80"><LayoutBrandMark :height="11" /></span>
+            <!-- Portrait posters in a landscape card: anchored to the TOP so the
+                 client logo + headline are always whole (only the poster's
+                 bottom stats row falls outside the frame). -->
+            <img :src="project.image" :alt="project.title" :loading="i < 3 ? 'eager' : 'lazy'" class="h-full w-full object-cover object-top">
+            <span class="pointer-events-none absolute right-3 top-3 inline-flex items-center gap-2 rounded-full bg-[color:rgba(3,60,89,0.88)] px-2.5 py-1">
+              <LayoutBrandMark :height="9" />
+              <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.25)]" />
+              <span class="font-display text-[10px] font-semibold tabular-nums tracking-[0.08em] text-pureWhite">{{ project.index }}</span>
+            </span>
           </div>
         </article>
 
@@ -514,11 +592,11 @@ useGsapContext(() => {
              follows the same scrubbed timeline as the cards. -->
         <div
           ref="successRef"
-          class="absolute inset-x-0 top-[9svh] z-0 opacity-0"
+          class="absolute inset-x-0 top-[15svh] z-0 opacity-0"
         >
           <div class="container-page">
             <p class="flex items-center gap-4 font-display text-[length:clamp(36px,4.2vw,68px)] font-bold leading-[0.95] tracking-[-0.035em] text-slateNavy">
-              <span>Success Project<span class="text-cobalt">.</span></span>
+              <span>Success Project<span class="text-pastiYellow-500">.</span></span>
               <span aria-hidden="true" class="mt-[0.35em] hidden h-px flex-1 bg-[color:rgba(3,60,89,0.16)] md:block" />
               <LayoutBrandMark surface="light" :height="14" class="mt-[0.3em] hidden md:inline-block" />
             </p>
@@ -554,8 +632,45 @@ useGsapContext(() => {
 <style>
 /* Gallery is desktop-only and motion-only: with reduced motion the vertical
    Selected Work list carries every project. */
-[data-reduced-motion='true'] .hero-gallery {
+[data-reduced-motion='true'] .hero-gallery,
+[data-reduced-motion='true'] .hero-orbit-dot {
   display: none;
+}
+
+/* Out-of-focus PASTI Yellow forms at the frame edges. */
+.hero-blur {
+  background: radial-gradient(closest-side, rgba(253, 200, 31, 0.95), rgba(251, 186, 0, 0.6) 55%, rgba(251, 186, 0, 0) 100%);
+  filter: blur(36px);
+  opacity: 0.75;
+}
+.hero-blur--soft {
+  filter: blur(26px);
+  opacity: 0.55;
+}
+/* On phones the copy sits over the left edge forms — keep them quieter. */
+@media (max-width: 1023px) {
+  .hero-blur {
+    opacity: 0.4;
+  }
+}
+
+.hero-pearl {
+  border-radius: 9999px;
+  background: radial-gradient(circle at 32% 28%, #ffffff 0%, #f1f4f7 32%, #c9d3dc 72%, #e9eef2 100%);
+  box-shadow: 0 14px 26px -12px rgba(3, 60, 89, 0.35), inset -3px -4px 8px rgba(3, 60, 89, 0.12);
+}
+
+/* Scroll cue: the wheel dot travels down and resets (motion only). */
+.hero-wheel {
+  animation: hero-wheel 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes hero-wheel {
+  0% { transform: translate(-50%, 0); opacity: 1; }
+  70% { transform: translate(-50%, 12px); opacity: 0; }
+  100% { transform: translate(-50%, 0); opacity: 0; }
+}
+[data-reduced-motion='true'] .hero-wheel {
+  animation: none;
 }
 
 .hero-rail > span {
@@ -563,7 +678,7 @@ useGsapContext(() => {
   transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .hero-rail > span[data-on='past'] {
-  background: #2563eb;
+  background: #033C59;
 }
 .hero-rail > span[data-on='active'] {
   background: #fdc81f;
