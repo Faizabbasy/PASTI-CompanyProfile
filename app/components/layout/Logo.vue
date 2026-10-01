@@ -3,7 +3,7 @@ withDefaults(defineProps<{ inverted?: boolean }>(), { inverted: false })
 </script>
 
 <template>
-  <NuxtLink to="/" class="relative z-50 flex items-center">
+  <NuxtLink to="/" class="relative z-50 -my-2.5 flex items-center py-2.5">
     <!-- On light backgrounds, render the source PNG untouched — its dot is
          already positioned/colored correctly. On dark backgrounds it needs a
          CSS invert to read as white, but that would also turn the dot white,

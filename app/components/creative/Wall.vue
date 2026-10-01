@@ -14,7 +14,7 @@ if (import.meta.client) {
 // still scroll the page (touch-action: pan-y). Reduced motion: static grid.
 const { visuals } = useCreative()
 const COLS = 4
-const ROWS = 3
+const ROWS = 4 // 4 rows so the wrapped board always overfills the frame (no empty bands on phones)
 const tiles = Array.from({ length: COLS * ROWS }, (_, i) => ({ ...visuals[i % visuals.length]!, i }))
 
 const frameRef = ref<HTMLElement | null>(null)
@@ -40,7 +40,8 @@ useGsapContext(() => {
     const measure = () => {
       fw = frame.clientWidth
       fh = frame.clientHeight
-      cw = Math.max(200, Math.min(340, fw / 3.4))
+      // Phones: smaller tiles, ~2.3 across, so the board reads as a wall.
+      cw = fw < 640 ? Math.max(150, fw / 2.3) : Math.max(200, Math.min(340, fw / 3.4))
       ch = cw * 1.32
       els.forEach((el) => {
         el.style.width = `${cw - 28}px`
@@ -162,7 +163,7 @@ useGsapContext(() => {
 
     <div
       ref="frameRef"
-      class="cw-frame relative mt-12 h-[min(78svh,760px)] cursor-grab touch-pan-y overflow-hidden"
+      class="cw-frame relative mt-10 h-[min(68svh,560px)] tablet:mt-12 tablet:h-[min(78svh,760px)] cursor-grab touch-pan-y overflow-hidden"
       @mouseenter="setState('view', 'Drag')"
       @mouseleave="setState('default'); hovered = null"
     >

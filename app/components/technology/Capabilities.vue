@@ -160,9 +160,9 @@ useGsapContext(() => {
             >
               <div class="overflow-hidden">
                 <div class="pb-8">
-                  <div class="relative aspect-[16/10] overflow-hidden rounded-[18px] border border-[color:rgba(3,60,89,0.12)] bg-slateNavy">
-                    <img :src="s.image" alt="" loading="lazy" class="h-full w-full object-cover" style="object-position: 80% 40%">
-                    <span class="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
+                  <div class="relative aspect-[4/5] overflow-hidden rounded-[18px] border border-[color:rgba(3,60,89,0.12)] bg-slateNavy tablet:aspect-[16/10]">
+                    <img :src="s.image" alt="" loading="lazy" class="h-full w-full object-cover object-top">
+                    <span class="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
                       <LayoutBrandMark surface="dark" :height="9" />
                       <span class="font-mono text-[10px] tracking-[0.14em] text-pureWhite">{{ s.index }}</span>
                     </span>

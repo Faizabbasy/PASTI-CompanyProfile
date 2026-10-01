@@ -8,5 +8,4 @@
 <template>
   <InsightsMasthead />
   <InsightsContents />
-  <HomeFinalCta class="rounded-t-[2.5rem]" />
 </template>

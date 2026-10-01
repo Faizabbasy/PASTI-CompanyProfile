@@ -10,5 +10,4 @@
   <CreativeTapes />
   <CreativeServices />
   <CreativeWall />
-  <HomeFinalCta class="rounded-t-[2.5rem]" />
 </template>

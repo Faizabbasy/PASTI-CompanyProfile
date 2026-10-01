@@ -8,5 +8,4 @@
   <WorkHero />
   <WorkProjectIndex />
   <WorkCaseFiles />
-  <HomeFinalCta class="rounded-t-[2.5rem]" />
 </template>

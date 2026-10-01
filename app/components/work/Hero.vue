@@ -50,29 +50,32 @@ useGsapContext(() => {
 
   mm.add(reducedMotionQuery.reduce, () => {
     gsap.set([...words, ...fades], { yPercent: 0, autoAlpha: 1 })
-    cards.forEach((c, i) => gsap.set(c, { x: (i - mid) * 60, rotation: (i - mid) * 6, y: Math.abs(i - mid) * 10 }))
+    const step = window.innerWidth < 640 ? 32 : 60
+    cards.forEach((c, i) => gsap.set(c, { x: (i - mid) * step, rotation: (i - mid) * 6, y: Math.abs(i - mid) * 10 }))
   })
 
   mm.add(reducedMotionQuery.noPreference, () => {
     gsap.set(words, { yPercent: 115 })
     gsap.set(fades, { autoAlpha: 0, y: 16 })
     gsap.set(cards, { y: 260, rotation: 0, autoAlpha: 0 })
+    // Narrow phones get a tighter resting fan so the outer cards stay on screen.
+    const rest = window.innerWidth < 640 ? 0.32 : 0.45
     const intro = gsap.timeline({ delay: 0.2 })
     intro
       .to(words, { yPercent: 0, duration: motionTier.cinematicMax * 0.75, ease: approvedEase.gsapPrimary, stagger: 0.07 })
       .to(cards, { y: 0, autoAlpha: 1, duration: motionTier.cinematicMin + 0.2, ease: approvedEase.gsapCinematic, stagger: 0.06 }, 0.15)
       .to(fades, { autoAlpha: 1, y: 0, duration: motionTier.cinematicMin, ease: approvedEase.gsapStandard, stagger: 0.08 }, '-=0.6')
-      .add(() => layout(0.45, null))
+      .add(() => layout(rest, null))
 
     const fine = window.matchMedia('(pointer: fine)').matches
-    let spread = 0.45
+    let spread = rest
     const onMove = (e: PointerEvent) => {
       const r = stage.getBoundingClientRect()
       spread = 0.15 + Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * 0.75
       layout(spread, hovered.value)
     }
     const onLeave = () => {
-      spread = 0.45
+      spread = rest
       layout(spread, null)
     }
     if (fine) {
@@ -92,7 +95,7 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <section ref="stageRef" class="surface-light relative isolate flex min-h-[100svh] flex-col overflow-hidden pb-10 pt-28 desktop:pt-32" style="--lift-x: 70%; --lift-y: 40%">
+  <section ref="stageRef" class="surface-light relative isolate flex flex-col overflow-hidden pb-10 pt-28 desktop:min-h-[100svh] desktop:pt-32" style="--lift-x: 70%; --lift-y: 40%">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10 flex flex-1 flex-col">
       <BaseSectionMark surface="light" label="Work" :meta="`${pad(projects.length)} projects · ${pad(caseFiles.length)} case files`" />
@@ -119,8 +122,8 @@ useGsapContext(() => {
         </div>
 
         <!-- Deck -->
-        <div class="relative h-[min(46svh,420px)] desktop:col-span-6 desktop:h-[min(56svh,520px)]" @mouseleave="hovered = null">
-          <div class="absolute left-[46%] top-1/2 -translate-x-1/2 -translate-y-1/2">
+        <div class="relative mt-4 h-[min(52svh,400px)] desktop:col-span-6 desktop:mt-0 desktop:h-[min(56svh,520px)]" @mouseleave="hovered = null">
+          <div class="absolute left-1/2 top-1/2 desktop:left-[46%] -translate-x-1/2 -translate-y-1/2">
             <button
               v-for="(p, i) in projects"
               :key="p.index"

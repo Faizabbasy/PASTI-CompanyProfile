@@ -12,5 +12,4 @@
   <TechnologyCapabilities />
   <TechnologyPlatforms />
   <TechnologyWork />
-  <HomeFinalCta class="rounded-t-[2.5rem]" />
 </template>

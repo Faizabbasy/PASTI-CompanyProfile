@@ -124,10 +124,10 @@ const pad = (n: number) => String(n).padStart(2, '0')
                 :src="p.image"
                 :alt="p.title"
                 :loading="i < 2 ? 'eager' : 'lazy'"
-                class="h-full w-full scale-[1.14] object-cover transition-transform duration-700 ease-editorial group-hover/tw:scale-[1.2]"
+                class="h-full w-full origin-top scale-[1.14] object-cover object-top transition-transform duration-700 ease-editorial group-hover/tw:scale-[1.2]"
                 draggable="false"
               >
-              <span class="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-[color:rgba(3,60,89,0.92)] px-3 py-1.5">
+              <span class="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-[color:rgba(3,60,89,0.92)] px-3 py-1.5">
                 <LayoutBrandMark surface="dark" :height="9" />
                 <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.25)]" />
                 <span class="font-mono text-[10px] tracking-[0.14em] text-pureWhite">{{ pad(i + 1) }}</span>

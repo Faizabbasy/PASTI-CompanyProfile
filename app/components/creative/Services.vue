@@ -33,7 +33,9 @@ useGsapContext(() => {
   const triggers = cards.map((card, i) =>
     ScrollTrigger.create({ trigger: card, start: 'top 55%', end: 'bottom 55%', onToggle: (self) => self.isActive && (active.value = i) })
   )
-  mm.add(reducedMotionQuery.noPreference, () => {
+  // Parallax + clip reveal from desktop up only. On phones the poster sits
+  // still and whole in a portrait frame (no crop of its baked-in headline).
+  mm.add(`${reducedMotionQuery.noPreference} and ${breakpointQuery.desktopUp}`, () => {
     const tweens = cards.map((card) => {
       const img = card.querySelector<HTMLElement>('[data-cs-img]')
       const frame = card.querySelector<HTMLElement>('[data-cs-frame]')
@@ -94,9 +96,9 @@ useGsapContext(() => {
         <!-- Visual cards -->
         <div class="flex flex-col gap-16 desktop:col-span-7 desktop:gap-28">
           <article v-for="(s, i) in services" :key="s.index" :ref="(el) => { if (el) cardRefs[i] = el as HTMLElement }" class="group/cs">
-            <div data-cs-frame class="relative aspect-[4/3] overflow-hidden rounded-[28px] bg-slateNavy">
-              <img data-cs-img :src="s.image" :alt="`${s.title} — illustrative PASTI visual`" loading="lazy" :class="s.image.includes('/insights/') ? 'object-left' : 'object-top'" class="absolute inset-x-0 -top-[8%] h-[116%] w-full object-cover">
-              <span class="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
+            <div data-cs-frame class="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-slateNavy tablet:aspect-[4/3] desktop:rounded-[28px]">
+              <img data-cs-img :src="s.image" :alt="`${s.title} — illustrative PASTI visual`" loading="lazy" :class="s.image.includes('/insights/') ? 'object-left' : 'object-top'" class="absolute inset-0 h-full w-full object-cover desktop:-top-[8%] desktop:h-[116%]">
+              <span class="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
                 <LayoutBrandMark surface="dark" :height="10" />
                 <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.25)]" />
                 <span class="font-mono text-[10px] tracking-[0.14em] text-pureWhite">{{ s.index }}</span>

@@ -271,7 +271,7 @@ useGsapContext(() => {
               :href="whatsappLink"
               target="_blank"
               rel="noopener noreferrer"
-              class="mt-1 inline-block font-display text-body-md font-semibold tabular-nums text-paper transition-colors duration-150 ease-editorial hover:text-pastiYellow-500"
+              class="mt-1 inline-flex min-h-[44px] items-center font-display text-body-md font-semibold tabular-nums text-paper md:min-h-0 transition-colors duration-150 ease-editorial hover:text-pastiYellow-500"
               @mouseenter="setState('link')"
               @mouseleave="setState('default')"
             >{{ contact.whatsappDisplay }}</a>
@@ -361,8 +361,12 @@ useGsapContext(() => {
   display: inline-flex;
   width: fit-content;
   align-items: center;
-  /* 44px thumb target on touch screens; tight rhythm from md up. */
+  /* 44px thumb target on touch screens; tight rhythm from md up. Labels
+     that wrap to two lines (Services on phones) keep their own breathing
+     room instead of running into the next link. */
   min-height: 44px;
+  padding-block: 6px;
+  line-height: 1.3;
   font-family: var(--font-display);
   font-weight: 500;
   color: rgb(255 255 255 / 0.78);
@@ -388,6 +392,7 @@ useGsapContext(() => {
 @media (min-width: 768px) {
   .foot-link {
     min-height: 0;
+    padding-block: 0;
   }
 }
 .foot-link:hover .foot-link-dash,

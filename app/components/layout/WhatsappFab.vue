@@ -99,22 +99,23 @@ onBeforeUnmount(() => {
     <div ref="buttonRef" class="inline-block">
       <button
         type="button"
-        class="group relative flex items-center gap-3 rounded-full bg-slateNavy py-2 pl-2 pr-5 font-display text-[14px] font-bold text-pureWhite shadow-[0_18px_40px_-14px_rgba(3,30,46,0.7)] ring-1 ring-[color:rgba(255,255,255,0.12)] transition-transform duration-200 active:scale-95"
+        class="group relative flex items-center gap-3 rounded-full bg-slateNavy p-1.5 font-display text-[14px] font-bold text-pureWhite shadow-[0_18px_40px_-14px_rgba(3,30,46,0.7)] ring-1 ring-[color:rgba(255,255,255,0.12)] transition-transform duration-200 active:scale-95"
         :aria-expanded="open"
         aria-controls="wa-card"
         @click="open = !open"
         @mouseenter="setState('link')"
         @mouseleave="setState('default')"
       >
-        <span class="relative grid h-11 w-11 place-items-center rounded-full bg-[#25D366] text-pureWhite transition-transform duration-500 ease-editorial group-hover:rotate-[-12deg]">
+        <span class="relative grid h-12 w-12 place-items-center rounded-full bg-[#25D366] text-pureWhite transition-transform tablet:h-11 tablet:w-11 duration-500 ease-editorial group-hover:rotate-[-12deg]">
           <span aria-hidden="true" class="wa-ring absolute inset-0 rounded-full border-2 border-[#25D366]" />
           <span class="relative h-6 w-6">
             <LayoutSocialIcon v-if="!open" name="whatsapp" />
             <svg v-else viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" class="h-6 w-6 p-1"><path d="M3 3l10 10M13 3L3 13" /></svg>
           </span>
         </span>
-        Contact Us
-        <span aria-hidden="true" class="absolute right-3 top-2 h-2 w-2 rounded-full bg-pastiYellow-500" />
+        <!-- Phones: icon-only disc so it never covers copy; label from tablet up. -->
+        <span class="sr-only tablet:not-sr-only tablet:pr-3.5">Contact Us</span>
+        <span aria-hidden="true" class="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-pastiYellow-500 ring-2 ring-slateNavy tablet:right-3 tablet:top-2 tablet:h-2 tablet:w-2 tablet:ring-0" />
       </button>
     </div>
   </div>
