@@ -197,7 +197,7 @@ useGsapContext(() => {
     />
 
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Trusted" meta="05 / 10" />
+      <BaseSectionMark surface="light" label="Trusted" meta="06 / 11" />
 
       <div class="mt-16 flex flex-col items-center md:mt-20">
         <!-- Signal — Quiet Proof Marker: a single restrained Cobalt dot,

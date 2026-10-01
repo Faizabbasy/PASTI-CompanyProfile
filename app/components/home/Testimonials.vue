@@ -267,7 +267,7 @@ useGsapContext(() => {
       </svg>
 
       <BaseContainer class="pointer-events-none absolute inset-x-0 top-10 z-30">
-        <BaseSectionMark surface="light" label="Testimoni" meta="06 / 10" />
+        <BaseSectionMark surface="light" label="Testimoni" meta="07 / 11" />
       </BaseContainer>
 
       <!-- Left column: heading, the active voice in full, controls. -->
@@ -392,7 +392,7 @@ useGsapContext(() => {
   <BaseSection as="section" data-motion-stage="simple" class="surface-light relative overflow-hidden desktop:hidden">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Testimoni" meta="06 / 10" />
+      <BaseSectionMark surface="light" label="Testimoni" meta="07 / 11" />
       <h2 ref="mobileHeadingRef" class="mt-14 font-display text-token-section-monumental font-bold text-slateNavy">{{ label }}</h2>
       <p class="mt-4 font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.63)]">{{ total }} client voices</p>
     </BaseContainer>

@@ -329,7 +329,7 @@ watch(activeIndex, (next, prev) => {
       <div aria-hidden="true" class="pointer-events-none absolute bottom-[17svh] left-[8vw] z-10 h-[10svh] w-[62vw] rounded-[50%] bg-[radial-gradient(closest-side,rgba(3,60,89,0.16),transparent)] blur-md" />
 
       <BaseContainer class="pointer-events-none absolute inset-x-0 top-10 z-30">
-        <BaseSectionMark surface="light" label="Insight" meta="08 / 10" />
+        <BaseSectionMark surface="light" label="Insight" meta="09 / 11" />
       </BaseContainer>
 
       <!-- Title + topic tabs + progress + CTA. -->
@@ -491,10 +491,10 @@ watch(activeIndex, (next, prev) => {
   <BaseSection as="section" data-motion-stage="simple" class="surface-light relative overflow-hidden desktop:hidden">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Insight" meta="08 / 10" />
+      <BaseSectionMark surface="light" label="Insight" meta="09 / 11" />
 
-      <div class="mt-12 flex items-end justify-between gap-6">
-        <h2 ref="mobileHeadingRef" class="font-display text-token-display-xl font-bold text-slateNavy">
+      <div class="mt-12 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+        <h2 ref="mobileHeadingRef" class="min-w-0 font-display text-[length:clamp(52px,16vw,96px)] font-bold leading-[0.95] tracking-[-0.04em] text-slateNavy">
           {{ heading }}
         </h2>
         <NuxtLink

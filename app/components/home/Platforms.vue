@@ -357,7 +357,7 @@ useGsapContext(() => {
            on a stable grid line, does not travel with the horizontal world
            motion (spec: "orientation, not visual emphasis"). -->
       <BaseContainer class="pointer-events-none absolute inset-x-0 top-10 z-30">
-        <BaseSectionMark as="h2" surface="dark" :label="label" meta="07 / 10" />
+        <BaseSectionMark as="h2" surface="dark" :label="label" meta="08 / 11" />
       </BaseContainer>
 
       <!-- Signal: horizontal state-transfer system. Short structural route,
@@ -600,7 +600,7 @@ useGsapContext(() => {
   >
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark as="h2" surface="dark" :label="label" meta="07 / 10" />
+      <BaseSectionMark as="h2" surface="dark" :label="label" meta="08 / 11" />
 
       <div class="mt-12 flex flex-col gap-20">
         <article v-for="platform in platforms" :key="platform.index" data-mobile-world class="relative">

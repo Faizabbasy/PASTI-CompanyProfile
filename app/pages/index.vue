@@ -35,6 +35,9 @@
        Approved exception to the locked 9-section sequence — see the header
        comment in WhoWeAre.vue. Trusted (below) is unchanged. -->
   <HomeWhoWeAre />
+  <!-- Owner-directed addition (2026-10-01): Why Choose Us / Delivery Console.
+       Approved exception to the locked sequence — see WhyChooseUs.vue. -->
+  <HomeWhyChooseUs />
   <HomeTrust />
   <HomeTestimonials />
   <HomePlatforms />

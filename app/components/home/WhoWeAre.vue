@@ -178,7 +178,7 @@ useGsapContext(() => {
     />
 
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="PASTI People" meta="04 / 10" />
+      <BaseSectionMark surface="light" label="PASTI People" meta="04 / 11" />
 
       <div class="mt-14 grid items-center gap-16 desktop:mt-20 desktop:grid-cols-12 desktop:gap-8">
         <!-- Portrait constellation -->

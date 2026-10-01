@@ -4,7 +4,7 @@ import gsap from 'gsap'
 // FAQ — "Question index + reading panel" (owner-directed redesign; copy is
 // unchanged from useFaq(), sourced from the content-mapping doc §13/§14).
 //
-//   [PASTI] ───────────────────────────────── PAQ   09 / 10
+//   [PASTI] ───────────────────────────────── PAQ   10 / 11
 //   FAQ.                      │ 01  What can PASTI help ...      [–]
 //                             │     answer, word by word
 //    ┌──────┐                 │ 02  What technology services ... [+]
@@ -51,7 +51,7 @@ watch(activeIndex, (next, prev) => {
     <BaseGridLines tone="light" />
 
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="PAQ" meta="09 / 10" />
+      <BaseSectionMark surface="light" label="PAQ" meta="10 / 11" />
 
       <div class="mt-14 grid grid-cols-1 gap-12 md:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <!-- Reading panel -->
