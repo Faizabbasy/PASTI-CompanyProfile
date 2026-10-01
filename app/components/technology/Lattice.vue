@@ -56,7 +56,7 @@ onMounted(() => {
       const d = Math.hypot(dx, dy)
       if (d < radius * 0.62) {
         const a = (1 - d / (radius * 0.62)) * 0.55
-        ctx.strokeStyle = `rgba(37, 99, 235, ${a.toFixed(3)})`
+        ctx.strokeStyle = `rgba(251, 186, 0, ${a.toFixed(3)})`
         ctx.beginPath()
         ctx.moveTo(node.x, node.y)
         ctx.lineTo(p.x, p.y)

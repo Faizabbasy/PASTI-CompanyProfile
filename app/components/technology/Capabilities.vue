@@ -103,7 +103,7 @@ useGsapContext(() => {
           </div>
           <div class="mt-4 overflow-hidden pb-2">
             <h2 data-cap-head class="font-display text-[length:clamp(44px,7vw,112px)] font-extrabold leading-[0.92] tracking-[-0.045em] text-slateNavy">
-              {{ servicesHeading }}<span class="text-cobalt">.</span>
+              {{ servicesHeading }}<span class="text-pastiYellow-500">.</span>
             </h2>
           </div>
         </div>

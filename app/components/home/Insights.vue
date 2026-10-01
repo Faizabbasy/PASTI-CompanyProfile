@@ -321,7 +321,7 @@ watch(activeIndex, (next, prev) => {
       >
         <g :transform="`rotate(${ORBIT.rot} ${ORBIT.cx} ${ORBIT.cy})`">
           <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx" :ry="ORBIT.ry" stroke="rgba(3,60,89,0.14)" stroke-width="1" />
-          <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx + 70" :ry="ORBIT.ry + 46" stroke="rgba(37,99,235,0.14)" stroke-width="1" stroke-dasharray="2 9" />
+          <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx + 70" :ry="ORBIT.ry + 46" stroke="rgba(3, 60, 89,0.14)" stroke-width="1" stroke-dasharray="2 9" />
         </g>
         <circle ref="orbitDotRef" r="5" fill="#FBBA00" cx="160" cy="590" />
       </svg>

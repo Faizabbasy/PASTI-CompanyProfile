@@ -55,7 +55,7 @@ useGsapContext(() => {
             :aria-hidden="copy === 2 || r === 2 ? 'true' : undefined"
           >
             <span :class="r === 1 ? 'tm-outline' : 'text-pureWhite'">{{ name }}</span>
-            <span aria-hidden="true" class="mx-[0.35em] inline-block h-[0.16em] w-[0.16em] rounded-full" :class="r === 1 ? 'bg-pastiYellow-500' : 'bg-cobalt'" />
+            <span aria-hidden="true" class="mx-[0.35em] inline-block h-[0.16em] w-[0.16em] rounded-full" :class="r === 1 ? 'bg-pastiYellow-500' : 'bg-pastiYellow-500'" />
           </span>
         </template>
       </div>

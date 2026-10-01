@@ -64,7 +64,7 @@ useGsapContext(() => {
         </div>
         <div class="mt-3 overflow-hidden pb-1">
           <h2 data-sw-head class="font-display text-[length:clamp(40px,11vw,64px)] font-extrabold leading-[0.95] tracking-[-0.04em] text-slateNavy">
-            Success Project<span class="text-cobalt">.</span>
+            Success Project<span class="text-pastiYellow-500">.</span>
           </h2>
         </div>
       </BaseContainer>

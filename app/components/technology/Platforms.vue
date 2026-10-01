@@ -51,7 +51,7 @@ useGsapContext(() => {
 
       <div class="mt-12 grid gap-6 desktop:mt-16 desktop:grid-cols-2 desktop:gap-8">
         <div v-for="(p, i) in platforms" :key="p.name" :ref="(el) => { cardRefs[i]!.value = el as HTMLElement | null }" style="transform-style: preserve-3d">
-          <article data-tp-card class="group/pf relative flex h-full flex-col overflow-hidden rounded-[24px] border border-[color:rgba(255,255,255,0.1)] bg-[linear-gradient(160deg,#0a4a6b_0%,#04354f_100%)]">
+          <article data-tp-card class="group/pf relative flex h-full flex-col overflow-hidden rounded-[24px] border border-[color:rgba(255,255,255,0.1)] bg-[linear-gradient(160deg,#033C59_0%,#022436_100%)]">
             <div class="relative aspect-[16/10] overflow-hidden">
               <img :src="p.image" :alt="`${p.name} platform`" loading="lazy" class="h-full w-full object-cover transition-transform duration-700 ease-editorial group-hover/pf:scale-105">
               <span class="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
@@ -62,7 +62,7 @@ useGsapContext(() => {
             </div>
             <div class="flex flex-1 flex-col p-6 tablet:p-8">
               <p class="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.55)]">
-                <span class="h-1.5 w-1.5 rounded-full bg-cobalt" />{{ p.character }}
+                <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ p.character }}
               </p>
               <h3 class="mt-3 font-display text-[length:clamp(36px,4vw,60px)] font-extrabold text-pureWhite leading-none tracking-[-0.04em]">{{ p.name }}</h3>
               <p class="mt-4 max-w-[46ch] text-token-body text-[color:rgba(255,255,255,0.7)]">{{ p.positioning }}</p>

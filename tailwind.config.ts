@@ -120,8 +120,10 @@ export default <Partial<Config>>{
         },
         pureWhite: '#FFFFFF',
         surfaceNeutral: '#F8FAFC',
-        cobalt: '#2563EB',
-        cyan: '#06B6D4',
+        // Owner revision (2026-10-01): one blue only — PASTI Blue #033C59. The
+        // former Cobalt/Cyan accents now alias the brand blue / PASTI Yellow.
+        cobalt: '#033C59',
+        cyan: '#FBBA00',
         // Yellow: exact production HEX is PENDING_MASTER_LOGO_SAMPLE per
         // tokens.json — do not guess the official brand value. This is the
         // same placeholder scale already in the codebase, kept only so
@@ -165,13 +167,13 @@ export default <Partial<Config>>{
         // any genuinely new interaction-accent need — never retrofit an
         // existing legacy navy step for that. ---
         navy: {
-          50: '#EAF1F4',
-          100: '#CFE0E7',
-          200: '#9FC1CF',
-          300: '#6FA2B7',
-          400: '#3F839F',
-          500: '#1C5E7C', // reverted — see regression note above; this was never Cobalt's real role
-          600: '#124A64',
+          50: '#F0F3F5',
+          100: '#E1E8EB',
+          200: '#C0CED6',
+          300: '#95ADB9',
+          400: '#6D8E9F',
+          500: '#4A7387', // reverted — see regression note above; this was never Cobalt's real role
+          600: '#265770',
           700: '#033C59', // = slateNavy (owner revision 2026-09-30) — was #0B3954 (guessed), now the real primary dark
           800: '#082A3E',
           900: '#051B28',

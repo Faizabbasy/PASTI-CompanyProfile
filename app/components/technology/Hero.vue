@@ -97,7 +97,7 @@ useGsapContext(() => {
     <div
       aria-hidden="true"
       class="pointer-events-none absolute inset-0 -z-10"
-      style="background: radial-gradient(ellipse 55% 60% at 70% 50%, rgba(37, 99, 235, 0.22), transparent 70%), linear-gradient(90deg, rgba(3, 60, 89, 0.9) 0%, rgba(3, 60, 89, 0.35) 55%, transparent 100%)"
+      style="background: radial-gradient(ellipse 55% 60% at 70% 50%, rgba(251, 186, 0, 0.22), transparent 70%), linear-gradient(90deg, rgba(3, 60, 89, 0.9) 0%, rgba(3, 60, 89, 0.35) 55%, transparent 100%)"
     />
 
     <BaseContainer class="pointer-events-none relative z-10 flex flex-1 flex-col">
@@ -124,7 +124,7 @@ useGsapContext(() => {
       <div class="mt-6 grid gap-8 desktop:grid-cols-12 desktop:items-end">
         <!-- Terminal readout -->
         <p data-th-fade class="font-mono text-[13px] text-[color:rgba(255,255,255,0.75)] desktop:col-span-4" aria-live="off">
-          <span class="text-cobalt">&gt;</span> building <span class="text-[color:rgba(255,255,255,0.4)]">▸</span>
+          <span class="text-pastiYellow-500">&gt;</span> building <span class="text-[color:rgba(255,255,255,0.4)]">▸</span>
           <span ref="typedRef" class="text-pureWhite" /><span class="th-caret ml-0.5 inline-block h-[1.05em] w-[0.55em] translate-y-[0.18em] bg-pastiYellow-500" aria-hidden="true" />
         </p>
 

@@ -114,8 +114,10 @@ useGsapContext(() => {
         </div>
       </div>
 
-      <div ref="footerRef" class="mt-16 flex flex-col items-start gap-6 border-t border-navy-800 pt-10 sm:flex-row sm:items-center sm:justify-between md:mt-24">
-        <NuxtLink v-if="email" :to="`mailto:${email}`" class="btn-outline border-navy-700 text-paper hover:border-paper">
+      <!-- Contact row only once real contact data exists (no empty "Our
+           office" label with nothing under it). -->
+      <div v-if="email" ref="footerRef" class="mt-16 flex flex-col items-start gap-6 border-t border-navy-800 pt-10 sm:flex-row sm:items-center sm:justify-between md:mt-24">
+        <NuxtLink :to="`mailto:${email}`" class="btn-outline border-navy-700 text-paper hover:border-paper">
           {{ email }}
         </NuxtLink>
 

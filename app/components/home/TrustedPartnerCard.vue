@@ -84,7 +84,7 @@ useGsapContext(() => {
       </div>
 
       <!-- Work With Us panel -->
-      <div class="relative min-h-[300px] overflow-hidden rounded-[clamp(12px,1.2vw,20px)] bg-[linear-gradient(150deg,#0b5a80_0%,#064567_55%,#04354f_100%)] tablet:col-span-2 desktop:col-span-4 desktop:min-h-[340px]">
+      <div class="relative min-h-[300px] overflow-hidden rounded-[clamp(12px,1.2vw,20px)] ring-1 ring-[color:rgba(255,255,255,0.12)] bg-[linear-gradient(150deg,#033C59_0%,#022f47_60%,#022436_100%)] tablet:col-span-2 desktop:col-span-4 desktop:min-h-[340px]">
         <svg aria-hidden="true" viewBox="0 0 400 340" preserveAspectRatio="xMaxYMax slice" class="absolute inset-0 h-full w-full">
           <path
             ref="arcRef"
@@ -174,7 +174,7 @@ useGsapContext(() => {
 .tp-glow {
   background: radial-gradient(
     circle var(--spotlight-radius, 400px) at var(--spotlight-x, -9999px) var(--spotlight-y, -9999px),
-    rgba(37, 99, 235, 0.32),
+    rgba(251, 186, 0, 0.32),
     rgba(251, 186, 0, 0.06) 45%,
     transparent 70%
   );

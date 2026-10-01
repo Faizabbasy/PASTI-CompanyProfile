@@ -251,12 +251,12 @@ useGsapContext(() => {
             :aria-disabled="link.comingSoon ? 'true' : undefined"
             :title="link.comingSoon ? `${link.label} — coming soon` : undefined"
             class="group inline-flex w-fit flex-col items-start gap-1.5 font-display text-body-md font-medium text-paper"
-            :class="link.comingSoon ? 'cursor-default' : 'hover:text-cobalt'"
+            :class="link.comingSoon ? 'cursor-default' : 'hover:text-pastiYellow-500'"
             @mouseenter="link.comingSoon ? undefined : setState('link')"
             @mouseleave="setState('default')"
           >
             <span class="inline-flex items-center gap-1.5" :class="link.comingSoon ? 'opacity-60' : ''">
-              <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-cobalt" aria-hidden="true" />
+              <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-pastiYellow-500" aria-hidden="true" />
               {{ link.label }}
             </span>
             <span v-if="link.comingSoon" class="ml-3 rounded-token-sm border border-navy-700 px-1.5 py-0.5 font-display text-[10px] font-semibold uppercase tracking-[0.08em] text-navy-400">Coming soon</span>

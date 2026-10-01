@@ -401,7 +401,7 @@ useGsapContext(() => {
           data-open-light
           aria-hidden="true"
           class="pointer-events-none absolute inset-0"
-          style="background: radial-gradient(ellipse 34% 30% at 100% 0%, rgba(251, 186, 0, 0.3), transparent 72%), radial-gradient(ellipse 26% 38% at 0% 100%, rgba(251, 186, 0, 0.2), transparent 72%), radial-gradient(ellipse 42% 48% at 70% 52%, rgba(37, 99, 235, 0.24), rgba(29, 78, 216, 0.08) 55%, transparent 78%), linear-gradient(155deg, #011826 0%, #022F47 45%, #022F47 100%)"
+          style="background: radial-gradient(ellipse 34% 30% at 100% 0%, rgba(251, 186, 0, 0.3), transparent 72%), radial-gradient(ellipse 26% 38% at 0% 100%, rgba(251, 186, 0, 0.2), transparent 72%), radial-gradient(ellipse 42% 48% at 70% 52%, rgba(251, 186, 0, 0.24), rgba(29, 78, 216, 0.08) 55%, transparent 78%), linear-gradient(155deg, #011826 0%, #022F47 45%, #022F47 100%)"
         />
         <!-- OPEN's own field (not the grid used elsewhere): concentric rings
              radiating from the product — "opening outward", Expansive
@@ -496,7 +496,7 @@ useGsapContext(() => {
           data-corp-light
           aria-hidden="true"
           class="pointer-events-none absolute inset-0"
-          style="background: radial-gradient(ellipse 30% 36% at 0% 0%, rgba(251, 186, 0, 0.16), transparent 72%), radial-gradient(ellipse 44% 50% at 72% 60%, rgba(37, 99, 235, 0.22), transparent 74%), linear-gradient(200deg, #022F47 0%, #022436 55%, #011826 100%)"
+          style="background: radial-gradient(ellipse 30% 36% at 0% 0%, rgba(251, 186, 0, 0.16), transparent 72%), radial-gradient(ellipse 44% 50% at 72% 60%, rgba(251, 186, 0, 0.22), transparent 74%), linear-gradient(200deg, #022F47 0%, #022436 55%, #011826 100%)"
         />
         <!-- Vertical light rails behind the stack (a skyline of light). -->
         <div aria-hidden="true" class="pointer-events-none absolute inset-y-0 left-[48%] right-[4%]">
@@ -547,7 +547,7 @@ useGsapContext(() => {
                 <div data-corp-floor aria-hidden="true" class="corp-floor pointer-events-none absolute -inset-[55%]" />
 
                 <!-- 03 Information: the data layer. -->
-                <div data-corp-plate class="corp-plate absolute inset-0 rounded-card border border-[color:rgba(37,99,235,0.45)] bg-[color:rgba(8,15,34,0.92)]">
+                <div data-corp-plate class="corp-plate absolute inset-0 rounded-card border border-[color:rgba(251, 186, 0,0.45)] bg-[color:rgba(8,15,34,0.92)]">
                   <div aria-hidden="true" class="corp-plate__blocks absolute inset-5" />
                   <span class="corp-plate__label">03 Information</span>
                 </div>
@@ -568,7 +568,7 @@ useGsapContext(() => {
                 <div data-corp-plate class="corp-plate absolute inset-0 rounded-card border border-[color:rgba(255,255,255,0.18)] bg-[color:rgba(15,27,58,0.72)]">
                   <svg aria-hidden="true" viewBox="0 0 400 250" class="absolute inset-0 h-full w-full" fill="none">
                     <path d="M80 70L190 120L310 64M190 120L130 196M190 120L280 190M310 64L340 150M80 70L60 160" stroke="rgba(255,255,255,0.25)" />
-                    <circle v-for="(c, k) in [[80, 70], [190, 120], [310, 64], [130, 196], [280, 190], [340, 150], [60, 160]]" :key="k" :cx="c[0]" :cy="c[1]" :r="k === 1 ? 12 : 8" :fill="k === 1 ? '#2563EB' : '#033C59'" stroke="rgba(255,255,255,0.7)" />
+                    <circle v-for="(c, k) in [[80, 70], [190, 120], [310, 64], [130, 196], [280, 190], [340, 150], [60, 160]]" :key="k" :cx="c[0]" :cy="c[1]" :r="k === 1 ? 12 : 8" :fill="k === 1 ? '#FBBA00' : '#033C59'" stroke="rgba(255,255,255,0.7)" />
                   </svg>
                   <span class="corp-plate__label">01 People</span>
                 </div>
@@ -610,7 +610,7 @@ useGsapContext(() => {
             >{{ platform.index }}</span
           >
           <div class="relative flex items-center gap-2">
-            <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-cobalt" />
+            <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />
             <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-pastiYellow-500">{{ platform.character }}</span>
           </div>
           <h3 class="relative mt-3 font-display text-[clamp(2.5rem,13vw,4rem)] font-bold leading-[0.94] tracking-[-0.02em] text-pureWhite">
@@ -664,7 +664,7 @@ useGsapContext(() => {
   color: rgba(255, 255, 255, 0.7);
 }
 .corp-plate__blocks {
-  background-image: radial-gradient(rgba(37, 99, 235, 0.55) 1.5px, transparent 1.6px);
+  background-image: radial-gradient(rgba(251, 186, 0, 0.55) 1.5px, transparent 1.6px);
   background-size: 16px 16px;
 }
 .corp-outcome {

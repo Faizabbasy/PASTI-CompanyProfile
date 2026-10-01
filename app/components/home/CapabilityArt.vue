@@ -34,8 +34,8 @@ defineProps<{
       <path data-stroke d="M68 118V90H108V118" />
       <path data-stroke d="M116 118V74H156V118" />
       <path data-stroke d="M164 118V58H204V118" />
-      <path data-accent d="M20 98L88 82L136 66L184 50L226 22" stroke="#2563EB" stroke-width="1.75" />
-      <path data-accent d="M212 22H226V36" stroke="#2563EB" stroke-width="1.75" />
+      <path data-accent d="M20 98L88 82L136 66L184 50L226 22" stroke="#033C59" stroke-width="1.75" />
+      <path data-accent d="M212 22H226V36" stroke="#033C59" stroke-width="1.75" />
     </template>
 
     <!-- Enterprise: structured network, orthogonal links, shared bus -->
@@ -43,7 +43,7 @@ defineProps<{
       <rect data-stroke x="104" y="14" width="32" height="20" />
       <path data-stroke d="M120 34V54M52 54H188M52 54V72M120 54V72M188 54V72" />
       <rect data-stroke x="32" y="72" width="40" height="24" />
-      <rect data-accent x="100" y="72" width="40" height="24" stroke="#2563EB" stroke-width="1.75" />
+      <rect data-accent x="100" y="72" width="40" height="24" stroke="#033C59" stroke-width="1.75" />
       <rect data-stroke x="168" y="72" width="40" height="24" />
       <path data-stroke d="M52 96V116M120 96V116M188 96V116" />
       <path data-stroke d="M20 116H220" opacity="0.6" />
@@ -54,7 +54,7 @@ defineProps<{
       <rect data-stroke x="88" y="8" width="64" height="124" rx="8" />
       <path data-stroke d="M112 16H128" opacity="0.6" />
       <rect data-stroke x="96" y="26" width="48" height="10" />
-      <rect data-accent x="96" y="42" width="48" height="40" stroke="#2563EB" stroke-width="1.75" />
+      <rect data-accent x="96" y="42" width="48" height="40" stroke="#033C59" stroke-width="1.75" />
       <path data-stroke d="M96 92H144M96 100H128M96 108H136" />
       <path data-stroke d="M112 124H128" opacity="0.6" />
       <path data-stroke d="M28 70H76M164 70H212" opacity="0.45" />
@@ -65,7 +65,7 @@ defineProps<{
     <template v-else>
       <path data-stroke d="M22 36V22H36M204 22H218V36M218 104V118H204M36 118H22V104" opacity="0.7" />
       <rect data-stroke x="42" y="38" width="156" height="64" />
-      <circle data-accent cx="94" cy="70" r="20" stroke="#2563EB" stroke-width="1.75" />
+      <circle data-accent cx="94" cy="70" r="20" stroke="#033C59" stroke-width="1.75" />
       <path data-stroke d="M132 92L172 48" />
       <path data-stroke d="M132 60H160M132 70H150" opacity="0.6" />
     </template>

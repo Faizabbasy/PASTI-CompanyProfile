@@ -249,7 +249,7 @@ useGsapContext(() => {
               :href="whatsappLink"
               target="_blank"
               rel="noopener noreferrer"
-              class="btn-primary !rounded-[14px] !bg-slateNavy !text-pureWhite hover:!bg-cobalt"
+              class="btn-primary !rounded-[14px] !bg-slateNavy !text-pureWhite hover:!bg-pastiYellow-500 hover:!text-slateNavy"
               :class="{ 'ring-1 ring-[color:rgba(255,255,255,0.35)]': darkMode }"
             >
               {{ primaryCta.label }}
@@ -266,7 +266,7 @@ useGsapContext(() => {
            own yellow dot — the brand's one signature colour, riding the
            Signal. ~6px, so Yellow stays scarce (00-brand-guide.md §05). -->
       <div class="relative" aria-hidden="true">
-        <div ref="progressRef" class="h-px w-full origin-left bg-yellow-500" :class="{ '!bg-cobalt': heroIsDark }" />
+        <div ref="progressRef" class="h-px w-full origin-left bg-yellow-500" :class="{ '!bg-pastiYellow-500': heroIsDark }" />
         <span ref="progressDotRef" class="absolute -top-[2.5px] left-0 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-yellow-500 opacity-0" />
       </div>
     </div>

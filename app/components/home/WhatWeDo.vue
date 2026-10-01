@@ -442,7 +442,7 @@ useGsapContext(() => {
         gsap.to(others, { opacity: 0.55, duration: motionTier.standardMin, ease: approvedEase.gsapStandard, overwrite: 'auto' })
         hubReadout.value = `${cards[i]?.service?.index ?? ''} / ${String(cards.length).padStart(2, '0')}`
         routeRefs.value.forEach((r, j) => {
-          gsap.to(r, { stroke: j === i ? '#2563EB' : 'rgba(3,60,89,0.130)', duration: motionTier.microMax, overwrite: 'auto' })
+          gsap.to(r, { stroke: j === i ? '#033C59' : 'rgba(3,60,89,0.130)', duration: motionTier.microMax, overwrite: 'auto' })
         })
         const route = routeRefs.value[i]
         const pulse = pulseRef.value
@@ -566,11 +566,11 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
            color snap. Slides up on a single vertical axis; its trailing
            edge is a Cobalt rule with 12-column ticks. -->
       <div ref="curtainRef" aria-hidden="true" class="pointer-events-none absolute inset-0 z-30 bg-[linear-gradient(180deg,#eef3f7_0%,#f6f9fb_100%)]">
-        <div class="absolute inset-x-0 bottom-0 h-px bg-[color:rgba(37,99,235,0.7)]" />
+        <div class="absolute inset-x-0 bottom-0 h-px bg-[color:rgba(3, 60, 89,0.7)]" />
         <div class="absolute inset-x-0 bottom-px">
           <div class="container-page">
             <div class="grid grid-cols-12">
-              <span v-for="n in 12" :key="n" class="h-2 border-l border-[color:rgba(37,99,235,0.7)]" />
+              <span v-for="n in 12" :key="n" class="h-2 border-l border-[color:rgba(3, 60, 89,0.7)]" />
             </div>
           </div>
         </div>
@@ -581,7 +581,7 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
       <div
         ref="signalRouteRef"
         aria-hidden="true"
-        class="absolute top-0 z-[5] h-1/3 w-px origin-top bg-[color:rgba(37,99,235,0.4)]"
+        class="absolute top-0 z-[5] h-1/3 w-px origin-top bg-[color:rgba(3, 60, 89,0.4)]"
         :style="signalLeftStyle"
         :class="signalXFraction === null ? 'left-[64.5vw]' : undefined"
       />
@@ -635,7 +635,7 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
                 >{{ word }}</span
               >
             </span>
-            <span data-dot aria-hidden="true" class="-ml-[0.24em] text-cobalt">.</span>
+            <span data-dot aria-hidden="true" class="-ml-[0.24em] text-pastiYellow-500">.</span>
           </h2>
           <p
             ref="supportRef"
@@ -694,14 +694,14 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
                   width="5"
                   height="5"
                   fill="#FFFFFF"
-                  stroke="rgba(37,99,235,0.8)"
+                  stroke="rgba(3, 60, 89,0.8)"
                   stroke-width="1"
                 />
-                <circle ref="pulseRef" r="3" fill="#2563EB" opacity="0" />
+                <circle ref="pulseRef" r="3" fill="#033C59" opacity="0" />
               </svg>
               <div
                 ref="hubRef"
-                class="absolute left-0 top-0 flex flex-col items-center gap-2 rounded-token-sm border border-[color:rgba(37,99,235,0.5)] bg-pureWhite px-4 py-3 opacity-0 shadow-[0_12px_30px_-18px_rgba(3,60,89,0.45)]"
+                class="absolute left-0 top-0 flex flex-col items-center gap-2 rounded-token-sm border border-[color:rgba(3, 60, 89,0.5)] bg-pureWhite px-4 py-3 opacity-0 shadow-[0_12px_30px_-18px_rgba(3,60,89,0.45)]"
               >
                 <span class="absolute -left-px -top-px h-2 w-2 border-l border-t border-cobalt" />
                 <span class="absolute -bottom-px -right-px h-2 w-2 border-b border-r border-cobalt" />
@@ -753,7 +753,7 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
         <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.63)]">{{ eyebrow }}</span>
       </div>
       <h2 data-mobile-heading class="mt-4 font-display text-token-h2 font-bold text-slateNavy">
-        {{ headlineFinal }}<span class="text-cobalt">.</span>
+        {{ headlineFinal }}<span class="text-pastiYellow-500">.</span>
       </h2>
       <p class="mt-3 max-w-md text-token-body text-[color:rgba(3,60,89,0.82)]">{{ supportLine }}</p>
 

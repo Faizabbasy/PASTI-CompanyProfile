@@ -138,7 +138,7 @@ useGsapContext(() => {
       <div
         aria-hidden="true"
         class="pointer-events-none absolute inset-0"
-        style="background: linear-gradient(180deg, transparent 72%, #033C59 100%), radial-gradient(ellipse 45% 55% at 78% 55%, rgba(37, 99, 235, 0.16), transparent 72%), linear-gradient(90deg, #022436 0%, #033C59 55%, #022F47 100%)"
+        style="background: linear-gradient(180deg, transparent 72%, #033C59 100%), radial-gradient(ellipse 45% 55% at 78% 55%, rgba(251, 186, 0, 0.16), transparent 72%), linear-gradient(90deg, #022436 0%, #033C59 55%, #022F47 100%)"
       />
 
       <BaseContainer class="relative z-10 desktop:pt-10">
@@ -176,7 +176,7 @@ useGsapContext(() => {
                 :key="i"
                 :ref="(el) => { if (el) pathRefs[i] = el as unknown as SVGPathElement }"
                 :d="d"
-                :stroke="i === 6 ? '#2563EB' : 'rgba(255,255,255,0.26)'"
+                :stroke="i === 6 ? '#FBBA00' : 'rgba(255,255,255,0.26)'"
                 :stroke-width="i === 6 ? 1.6 : 1"
               />
               <circle v-for="(r, i) in routes" :key="`o${i}`" cx="0" :cy="r.y0" r="2.5" fill="rgba(255,255,255,0.5)" />

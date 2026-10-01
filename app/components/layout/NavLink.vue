@@ -39,7 +39,7 @@ const { setState } = useCustomCursor()
     <span
       v-if="item.isPlatform"
       class="mt-[0.55em] h-1.5 w-1.5 shrink-0 self-start rounded-full transition-transform duration-400 ease-editorial group-hover:scale-125"
-      :class="dark ? 'bg-cobalt' : 'bg-yellow-500'"
+      :class="'bg-pastiYellow-500'"
       aria-hidden="true"
     />
     <span ref="labelRef" class="relative block overflow-clip">

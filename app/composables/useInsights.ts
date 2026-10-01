@@ -34,6 +34,8 @@ export interface InsightAccentLine {
  */
 export interface InsightPage {
   category: string
+  /** Topic group for the /insights index filter. */
+  topic: 'Technology' | 'Business' | 'Creative'
   headline: InsightAccentLine
   tagline?: InsightAccentLine
   description: string
@@ -77,7 +79,7 @@ export function useInsights() {
       role: 'featured',
       status: 'existing-unverified',
       page: {
-        category: 'Security',
+        category: 'Security', topic: 'Technology',
         headline: { text: 'Cybersecurity', accent: '' },
         tagline: { text: 'Protect What Matters.', accent: 'Build With Confidence.' },
         description: 'Advanced security solutions to safeguard your data, systems, and digital future.',
@@ -92,7 +94,7 @@ export function useInsights() {
       role: 'supporting',
       status: 'existing-unverified',
       page: {
-        category: 'Enterprise',
+        category: 'Enterprise', topic: 'Technology',
         headline: { text: 'Enterprise', accent: 'Technology' },
         description: 'Scalable solutions and robust systems that power enterprises, streamline operations, and drive long-term value.',
         points: ['Cloud', 'Applications', 'Data', 'Security'],
@@ -106,7 +108,7 @@ export function useInsights() {
       role: 'supporting',
       status: 'existing-unverified',
       page: {
-        category: 'AI',
+        category: 'AI', topic: 'Technology',
         headline: { text: 'AI & Digital', accent: 'Transformation' },
         description: 'Leveraging AI and emerging technologies to transform operations, elevate customer experiences, and drive sustainable growth.',
         points: ['AI Overview', 'Data Insights', 'Automation', 'Analytics'],
@@ -120,7 +122,7 @@ export function useInsights() {
       role: 'supporting',
       status: 'existing-unverified',
       page: {
-        category: 'Business',
+        category: 'Business', topic: 'Business',
         headline: { text: 'The Future of Business', accent: '' },
         tagline: { text: 'Innovate Today.', accent: 'Lead Tomorrow.' },
         description: 'Embracing change, technology, and human potential to create a better tomorrow.',
@@ -128,9 +130,48 @@ export function useInsights() {
         focus: '68% 27%'
       }
     },
-    { index: '05', title: 'Creative & Brand', image: '/images/insights/creative-and-brand.png', role: 'supporting', status: 'existing-unverified' },
-    { index: '06', title: 'Ideas That Move Business Forward.', image: '/images/insights/ideas-that-move-business.png', role: 'supporting', status: 'existing-unverified' },
-    { index: '07', title: 'Digital Product & UX', image: '/images/insights/digital-product-ux.png', role: 'supporting', status: 'existing-unverified' }
+    {
+      index: '05',
+      title: 'Creative & Brand',
+      image: '/images/insights/creative-and-brand.png',
+      role: 'supporting',
+      status: 'existing-unverified',
+      page: {
+        category: 'Brand', topic: 'Creative',
+        headline: { text: 'Creative', accent: '& Brand' },
+        description: 'Ideas that connect, stories that resonate, and brands that leave a lasting impact.',
+        points: ['Concept', 'Visual Identity', 'Typography', 'Storytelling'],
+        focus: '70% 40%'
+      }
+    },
+    {
+      index: '06',
+      title: 'Ideas That Move Business Forward.',
+      image: '/images/insights/ideas-that-move-business.png',
+      role: 'supporting',
+      status: 'existing-unverified',
+      page: {
+        category: 'Strategy', topic: 'Business',
+        headline: { text: 'Ideas That Move', accent: 'Business Forward.' },
+        description: 'Insights, trends, and strategies to help you build, scale, and lead in the digital era.',
+        points: ['Insights', 'Trends', 'Strategies'],
+        focus: '66% 60%'
+      }
+    },
+    {
+      index: '07',
+      title: 'Digital Product & UX',
+      image: '/images/insights/digital-product-ux.png',
+      role: 'supporting',
+      status: 'existing-unverified',
+      page: {
+        category: 'Product', topic: 'Creative',
+        headline: { text: 'Digital Product', accent: '& UX' },
+        description: 'Designing intuitive experiences and digital products that delight users and solve real problems.',
+        points: ['Intuitive Experiences', 'Digital Products', 'Real Problems'],
+        focus: '72% 45%'
+      }
+    }
   ]
 
   return { articles }

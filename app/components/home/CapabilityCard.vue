@@ -95,7 +95,7 @@ function onLeave() {
   <div
     ref="rootRef"
     class="cap-card group/cap relative overflow-hidden rounded-card border bg-[linear-gradient(180deg,#FFFFFF_0%,#F4F8FB_100%)] shadow-[0_24px_50px_-34px_rgba(3,60,89,0.45)]"
-    :class="[sz.pad, size === 'accent' ? 'border-[color:rgba(37,99,235,0.45)]' : 'border-[color:rgba(3,60,89,0.120)]']"
+    :class="[sz.pad, size === 'accent' ? 'border-[color:rgba(3, 60, 89,0.45)]' : 'border-[color:rgba(3,60,89,0.120)]']"
     @pointermove="onMove"
     @pointerenter="onEnter"
     @pointerleave="onLeave"
@@ -124,10 +124,10 @@ function onLeave() {
       <span aria-hidden="true" class="cap-card__grid pointer-events-none absolute inset-0" />
       <span aria-hidden="true" class="cap-card__grid cap-card__grid--hot pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 ease-editorial group-hover/cap:opacity-100" />
       <!-- Corner registration ticks. -->
-      <span aria-hidden="true" class="pointer-events-none absolute left-1.5 top-1.5 h-2 w-2 border-l border-t border-[color:rgba(37,99,235,0.7)]" />
-      <span aria-hidden="true" class="pointer-events-none absolute right-1.5 top-1.5 h-2 w-2 border-r border-t border-[color:rgba(37,99,235,0.7)]" />
-      <span aria-hidden="true" class="pointer-events-none absolute bottom-1.5 left-1.5 h-2 w-2 border-b border-l border-[color:rgba(37,99,235,0.7)]" />
-      <span aria-hidden="true" class="pointer-events-none absolute bottom-1.5 right-1.5 h-2 w-2 border-b border-r border-[color:rgba(37,99,235,0.7)]" />
+      <span aria-hidden="true" class="pointer-events-none absolute left-1.5 top-1.5 h-2 w-2 border-l border-t border-[color:rgba(3, 60, 89,0.7)]" />
+      <span aria-hidden="true" class="pointer-events-none absolute right-1.5 top-1.5 h-2 w-2 border-r border-t border-[color:rgba(3, 60, 89,0.7)]" />
+      <span aria-hidden="true" class="pointer-events-none absolute bottom-1.5 left-1.5 h-2 w-2 border-b border-l border-[color:rgba(3, 60, 89,0.7)]" />
+      <span aria-hidden="true" class="pointer-events-none absolute bottom-1.5 right-1.5 h-2 w-2 border-b border-r border-[color:rgba(3, 60, 89,0.7)]" />
       <div class="relative h-full w-full">
         <HomeCapabilityArt :kind="kind" />
       </div>
@@ -181,7 +181,7 @@ function onLeave() {
 
 .cap-card__grid--hot {
   background-image:
-    linear-gradient(to right, rgba(37, 99, 235, 0.35) 1px, transparent 1px),
+    linear-gradient(to right, rgba(3, 60, 89, 0.35) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(251, 186, 0, 0.22) 1px, transparent 1px);
   -webkit-mask-image: radial-gradient(circle 110px at var(--wx, 50%) var(--wy, 50%), #000 0%, transparent 100%);
   mask-image: radial-gradient(circle 110px at var(--wx, 50%) var(--wy, 50%), #000 0%, transparent 100%);

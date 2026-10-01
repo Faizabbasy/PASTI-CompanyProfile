@@ -186,7 +186,7 @@ useGsapContext(() => {
           <div ref="constellationRef" class="relative mx-auto aspect-[650/540] w-full max-w-[640px]" @mouseleave="hovered = null">
             <svg aria-hidden="true" viewBox="0 0 100 100" class="absolute inset-0 h-full w-full overflow-visible">
               <circle data-ring cx="50" cy="50" r="49" fill="none" stroke="rgba(3,60,89,0.16)" vector-effect="non-scaling-stroke" pathLength="1" stroke-dasharray="1" transform="rotate(-90 50 50)" />
-              <circle data-ring cx="50" cy="50" r="36" fill="none" stroke="rgba(37,99,235,0.28)" vector-effect="non-scaling-stroke" pathLength="1" stroke-dasharray="1" transform="rotate(-90 50 50)" />
+              <circle data-ring cx="50" cy="50" r="36" fill="none" stroke="rgba(3, 60, 89,0.28)" vector-effect="non-scaling-stroke" pathLength="1" stroke-dasharray="1" transform="rotate(-90 50 50)" />
               <circle data-ring cx="50" cy="50" r="23" fill="none" stroke="rgba(3,60,89,0.1)" vector-effect="non-scaling-stroke" pathLength="1" stroke-dasharray="1" transform="rotate(-90 50 50)" />
             </svg>
 
@@ -281,7 +281,7 @@ useGsapContext(() => {
                 rel="noopener noreferrer"
                 class="group relative flex items-center gap-5 overflow-hidden rounded-[14px] bg-slateNavy py-3 pl-6 pr-3 font-display text-[15px] font-bold text-pureWhite"
               >
-                <span aria-hidden="true" class="absolute inset-0 origin-left scale-x-0 bg-cobalt transition-transform duration-500 ease-editorial group-hover:scale-x-100" />
+                <span aria-hidden="true" class="absolute inset-0 origin-left scale-x-0 bg-navy-900 transition-transform duration-500 ease-editorial group-hover:scale-x-100" />
                 <span class="relative z-10">{{ cta.label }}</span>
                 <span class="relative z-10 grid h-10 w-10 place-items-center rounded-[10px] bg-pastiYellow-500 text-slateNavy transition-transform duration-300 ease-editorial group-hover:rotate-[-45deg]">
                   <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>

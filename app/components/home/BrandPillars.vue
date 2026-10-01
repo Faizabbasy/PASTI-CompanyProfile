@@ -248,7 +248,7 @@ useGsapContext(() => {
           <svg viewBox="0 0 520 520" class="h-[min(62svh,560px)] w-auto overflow-visible" fill="none" aria-hidden="true">
             <rect x="10" y="10" width="500" height="500" stroke="rgba(255,255,255,0.06)" stroke-dasharray="2 8" />
             <path d="M10 22V10H22M498 10H510V22M510 498V510H498M22 510H10V498" stroke="rgba(251,186,0,0.6)" />
-            <path ref="traceRef" stroke="rgba(37,99,235,0.45)" stroke-width="1" :d="toTrace(formations[0]!)" />
+            <path ref="traceRef" stroke="rgba(3, 60, 89,0.45)" stroke-width="1" :d="toTrace(formations[0]!)" />
             <circle
               v-for="i in N"
               :key="i"
@@ -288,7 +288,7 @@ useGsapContext(() => {
       <ol class="mt-8 flex flex-col gap-12">
         <li v-for="(p, i) in pillars" :key="p.index" class="grid grid-cols-[96px_1fr] gap-5 border-t border-[color:rgba(255,255,255,0.14)] pt-6 sm:grid-cols-[140px_1fr]">
           <svg viewBox="0 0 520 520" class="h-auto w-full" fill="none" aria-hidden="true">
-            <path stroke="rgba(37,99,235,0.45)" stroke-width="2" :d="toTrace(formations[i]!)" />
+            <path stroke="rgba(3, 60, 89,0.45)" stroke-width="2" :d="toTrace(formations[i]!)" />
             <circle v-for="(pt, k) in formations[i]" :key="k" :cx="pt[0]" :cy="pt[1]" :r="k === YELLOW ? 16 : 8" :fill="k === YELLOW ? '#FBBA00' : '#FFFFFF'" />
           </svg>
           <div>

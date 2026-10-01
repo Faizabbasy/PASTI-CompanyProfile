@@ -93,7 +93,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
             </div>
             <div class="mt-3 overflow-hidden pb-1">
               <h2 data-tw-head class="font-display text-[length:clamp(40px,5.6vw,88px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-slateNavy">
-                Technology at work<span class="text-cobalt">.</span>
+                Technology at work<span class="text-pastiYellow-500">.</span>
               </h2>
             </div>
           </div>

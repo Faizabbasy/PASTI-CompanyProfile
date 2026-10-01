@@ -33,7 +33,7 @@ withDefaults(
           v-for="n in 12"
           :key="n"
           class="h-2 border-l"
-          :class="tone === 'dark' ? 'border-[color:rgba(37,99,235,0.55)]' : 'border-[color:rgba(37,99,235,0.4)]'"
+          :class="tone === 'dark' ? 'border-[color:rgba(251,186,0,0.5)]' : 'border-[color:rgba(3, 60, 89,0.4)]'"
         />
       </div>
     </div>

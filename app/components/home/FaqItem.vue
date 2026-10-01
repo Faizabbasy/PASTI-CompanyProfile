@@ -56,7 +56,7 @@ function onSummary(event: MouseEvent) {
     @focusin="emit('hover')"
   >
     <!-- Hover sweep: a light Cobalt wash drawn in from the left edge. -->
-    <span aria-hidden="true" class="faq-row__sweep pointer-events-none absolute inset-0 origin-left bg-[linear-gradient(90deg,rgba(37,99,235,0.07),rgba(37,99,235,0))]" />
+    <span aria-hidden="true" class="faq-row__sweep pointer-events-none absolute inset-0 origin-left bg-[linear-gradient(90deg,rgba(3, 60, 89,0.07),rgba(3, 60, 89,0))]" />
     <!-- Active Signal: left bar (the section's Signal, spec §8) + Yellow point. -->
     <span aria-hidden="true" class="faq-row__bar absolute -left-px top-0 h-full w-[3px] origin-top bg-cobalt" />
 
@@ -116,7 +116,7 @@ function onSummary(event: MouseEvent) {
 .faq-row:hover .faq-row__index,
 .faq-row:focus-within .faq-row__index,
 .faq-row[data-open='true'] .faq-row__index {
-  color: #2563eb;
+  color: #033C59;
 }
 .faq-row__q {
   display: inline-block;
@@ -132,8 +132,8 @@ function onSummary(event: MouseEvent) {
   transition: background-color 0.2s, border-color 0.2s, color 0.2s, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .faq-row:hover .faq-row__icon {
-  border-color: #2563eb;
-  color: #2563eb;
+  border-color: #033C59;
+  color: #033C59;
 }
 .faq-row[data-open='true'] .faq-row__icon {
   background: #033c59;
@@ -152,7 +152,7 @@ summary::-webkit-details-marker {
 }
 summary:focus-visible .faq-row__q {
   text-decoration: underline;
-  text-decoration-color: #2563eb;
+  text-decoration-color: #033C59;
   text-underline-offset: 6px;
 }
 @media (prefers-reduced-motion: reduce) {

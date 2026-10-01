@@ -124,7 +124,7 @@ watch(activeIndex, (next, prev) => {
   transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1), -webkit-text-stroke-color 0.3s;
 }
 .faq-numeral.is-open {
-  color: #2563eb;
-  -webkit-text-stroke-color: #2563eb;
+  color: #033C59;
+  -webkit-text-stroke-color: #033C59;
 }
 </style>

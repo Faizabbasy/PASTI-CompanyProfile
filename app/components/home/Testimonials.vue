@@ -250,7 +250,7 @@ useGsapContext(() => {
       <!-- Orbit + the single Yellow Signal point riding it. -->
       <svg aria-hidden="true" class="pointer-events-none absolute inset-0 z-0 h-full w-full" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" fill="none">
         <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx" :ry="ORBIT.ry" stroke="rgba(3,60,89,0.130)" stroke-width="1" />
-        <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx - 60" :ry="ORBIT.ry - 60" stroke="rgba(37,99,235,0.14)" stroke-width="1" />
+        <ellipse :cx="ORBIT.cx" :cy="ORBIT.cy" :rx="ORBIT.rx - 60" :ry="ORBIT.ry - 60" stroke="rgba(3, 60, 89,0.14)" stroke-width="1" />
         <ellipse
           ref="orbitArcRef"
           :cx="ORBIT.cx"
@@ -380,7 +380,7 @@ useGsapContext(() => {
               v-for="n in N"
               :key="n"
               class="h-[3px] w-6 transition-colors duration-200 ease-editorial"
-              :class="n - 1 === active ? 'bg-pastiYellow-500' : n - 1 < active ? 'bg-[color:rgba(37,99,235,0.45)]' : 'bg-[color:rgba(3,60,89,0.192)]'"
+              :class="n - 1 === active ? 'bg-pastiYellow-500' : n - 1 < active ? 'bg-[color:rgba(3, 60, 89,0.45)]' : 'bg-[color:rgba(3,60,89,0.192)]'"
             />
           </span>
         </div>

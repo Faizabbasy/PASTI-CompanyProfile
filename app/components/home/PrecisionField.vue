@@ -128,12 +128,12 @@ useGsapContext(() => {
     <div
       v-if="variant === 'hero'"
       class="absolute inset-0"
-      style=" background: radial-gradient(ellipse 60% 45% at 50% 34%, rgba(37, 99, 235, 0.1), transparent 70%), radial-gradient(ellipse 45% 40% at 100% 0%, rgba(251, 186, 0, 0.05), transparent 70%), linear-gradient(180deg, #0a1020 0%, #033C59 42%, #033C59 100%); "
+      style=" background: radial-gradient(ellipse 60% 45% at 50% 34%, rgba(3, 60, 89, 0.1), transparent 70%), radial-gradient(ellipse 45% 40% at 100% 0%, rgba(251, 186, 0, 0.05), transparent 70%), linear-gradient(180deg, #0a1020 0%, #033C59 42%, #033C59 100%); "
     />
     <div
       v-else
       class="absolute inset-0"
-      style="background: radial-gradient(ellipse 55% 50% at 50% 52%, rgba(37, 99, 235, 0.08), transparent 70%)"
+      style="background: radial-gradient(ellipse 55% 50% at 50% 52%, rgba(3, 60, 89, 0.08), transparent 70%)"
     />
 
     <!-- Resting grid: the 12-column macro grid, 1px structural rules. -->
@@ -156,7 +156,7 @@ useGsapContext(() => {
           <div
             v-for="n in COLUMNS"
             :key="n"
-            class="h-full border-l border-[color:rgba(37,99,235,0.55)]"
+            class="h-full border-l border-[color:rgba(3, 60, 89,0.55)]"
             :class="n === COLUMNS ? 'border-r' : ''"
           />
         </div>
@@ -181,7 +181,7 @@ useGsapContext(() => {
       >
         <span
           :ref="(el) => { if (el) routeRefs[i] = el as HTMLElement }"
-          class="absolute inset-0 origin-top bg-gradient-to-b from-[color:rgba(37,99,235,0)] via-[color:rgba(37,99,235,0.7)] to-cobalt"
+          class="absolute inset-0 origin-top bg-gradient-to-b from-[color:rgba(3, 60, 89,0)] via-[color:rgba(3, 60, 89,0.7)] to-cobalt"
         />
         <span
           :ref="(el) => { if (el) headRefs[i] = el as HTMLElement }"
