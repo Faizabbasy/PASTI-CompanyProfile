@@ -107,7 +107,7 @@ useGsapContext(() => {
         </div>
 
         <!-- Copy + proof -->
-        <div class="desktop:col-span-5">
+        <div class="m-center desktop:col-span-5">
           <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.55)]">Where PASTI sits</p>
           <h2 class="mt-4 font-display text-[length:clamp(36px,4.4vw,68px)] font-extrabold leading-[0.98] tracking-[-0.04em] text-pureWhite">
             {{ positioning.split('×')[0] }}<span class="text-pastiYellow-500">×</span>{{ positioning.split('×')[1] }}
@@ -117,15 +117,15 @@ useGsapContext(() => {
           </p>
 
           <dl class="mt-10 grid grid-cols-2 gap-6 border-t border-[color:rgba(255,255,255,0.14)] pt-8">
-            <div v-for="(s, i) in stats" :key="s.label" class="flex flex-col-reverse">
+            <div v-for="(s, i) in stats" :key="s.label" class="m-center-col flex flex-col-reverse">
               <dt class="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">{{ s.label }}</dt>
-              <dd class="flex items-start font-display text-[clamp(48px,5vw,80px)] font-extrabold leading-none tracking-[-0.05em] text-pureWhite">
+              <dd class="m-center-row flex items-start font-display text-[clamp(48px,5vw,80px)] font-extrabold leading-none tracking-[-0.05em] text-pureWhite">
                 <span :ref="(el) => { statEls[i]!.value = el as HTMLElement | null }">{{ s.value }}</span><span class="text-[0.5em] text-pastiYellow-500">{{ s.suffix }}</span>
               </dd>
             </div>
           </dl>
 
-          <p class="mt-8 flex flex-wrap items-center gap-x-3 gap-y-2 font-display text-[15px] font-semibold text-[color:rgba(255,255,255,0.75)]">
+          <p class="m-center-row mt-8 flex flex-wrap items-center gap-x-3 gap-y-2 font-display text-[15px] font-semibold text-[color:rgba(255,255,255,0.75)]">
             <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.45)]">Core emotion</span>
             <template v-for="(e, i) in coreEmotion" :key="e">
               <span v-if="i" aria-hidden="true" class="text-pastiYellow-500">+</span>{{ e }}

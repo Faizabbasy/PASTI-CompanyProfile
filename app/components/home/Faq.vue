@@ -56,7 +56,7 @@ watch(activeIndex, (next, prev) => {
       <div class="mt-14 grid grid-cols-1 gap-12 md:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <!-- Reading panel -->
         <aside class="desktop:col-span-5">
-          <div class="desktop:sticky desktop:top-28">
+          <div class="m-center desktop:sticky desktop:top-28">
             <h2 ref="headingRef" class="font-display text-token-display-xl font-bold text-slateNavy">
               {{ heading }}
             </h2>

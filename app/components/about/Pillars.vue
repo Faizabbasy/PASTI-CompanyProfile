@@ -41,7 +41,7 @@ useGsapContext(() => {
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
       <BaseSectionMark surface="light" label="Brand pillars" :meta="`${String(pillars.length).padStart(2, '0')} principles`" />
-      <div class="mt-14 flex flex-wrap items-end justify-between gap-6 desktop:mt-20">
+      <div class="m-stack mt-14 flex flex-wrap items-end justify-between gap-6 desktop:mt-20">
         <div class="overflow-hidden pb-2">
           <h2 data-pl-head class="font-display text-[length:clamp(40px,6.4vw,104px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-slateNavy">
             How PASTI behaves<span class="text-pastiYellow-500">.</span>

@@ -101,12 +101,12 @@ useGsapContext(() => {
       <BaseSectionMark surface="light" label="Work" :meta="`${pad(projects.length)} projects · ${pad(caseFiles.length)} case files`" />
 
       <div class="grid flex-1 items-center gap-6 py-6 desktop:grid-cols-12 desktop:gap-10 desktop:py-10">
-        <div class="desktop:col-span-6">
+        <div class="m-center desktop:col-span-6">
           <h1 class="font-display text-[length:clamp(56px,10vw,176px)] font-extrabold leading-[0.88] tracking-[-0.055em] text-slateNavy">
             <span class="wh-mask block"><span data-wh-word class="inline-block">Selected</span></span>
             <span class="wh-mask block"><span data-wh-word class="inline-block">work<span class="text-pastiYellow-500">.</span></span></span>
           </h1>
-          <p data-wh-fade class="mt-8 max-w-[42ch] text-token-body-large text-[color:rgba(3,60,89,0.72)]">
+          <p data-wh-fade class="m-center mt-8 max-w-[42ch] text-token-body-large text-[color:rgba(3,60,89,0.72)]">
             A closer look at how we work with our clients — real projects, from the brief to the result that's running today.
           </p>
           <div data-wh-fade class="mt-8 hidden gap-12 border-t tablet:flex border-[color:rgba(3,60,89,0.14)] pt-6">
@@ -142,7 +142,7 @@ useGsapContext(() => {
               </span>
             </button>
           </div>
-          <p data-wh-fade class="absolute bottom-0 right-0 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.5)]">
+          <p data-wh-fade class="absolute bottom-0 right-0 font-mono left-0 text-center desktop:left-auto desktop:text-left text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.5)]">
             <span class="hidden desktop:inline">Move to fan · click to open</span><span class="desktop:hidden">Tap a project</span>
           </p>
         </div>

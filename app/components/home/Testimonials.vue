@@ -393,8 +393,8 @@ useGsapContext(() => {
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
       <BaseSectionMark surface="light" label="Testimoni" meta="07 / 11" />
-      <h2 ref="mobileHeadingRef" class="mt-14 font-display text-token-section-monumental font-bold text-slateNavy">{{ label }}</h2>
-      <p class="mt-4 font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.63)]">{{ total }} client voices</p>
+      <h2 ref="mobileHeadingRef" class="m-center mt-14 font-display text-token-section-monumental font-bold text-slateNavy">{{ label }}</h2>
+      <p class="m-center mt-4 font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.63)]">{{ total }} client voices</p>
     </BaseContainer>
     <div class="relative z-10 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-gutter px-gutter pb-4 [scrollbar-width:none]">
       <article

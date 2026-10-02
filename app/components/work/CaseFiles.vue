@@ -33,7 +33,7 @@ useGsapContext(() => {
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
       <BaseSectionMark surface="dark" label="Case files" meta="Brief → Result" />
-      <h2 class="mt-12 font-display text-[length:clamp(40px,6vw,96px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-pureWhite desktop:mt-16">
+      <h2 class="m-center mt-12 font-display text-[length:clamp(40px,6vw,96px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-pureWhite desktop:mt-16">
         From brief <span class="text-pastiYellow-500">to result.</span>
       </h2>
 

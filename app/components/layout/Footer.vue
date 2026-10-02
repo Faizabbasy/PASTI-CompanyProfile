@@ -126,7 +126,7 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10">
       <!-- Closing band: approved Final CTA copy + direct actions + socials. -->
       <div class="grid grid-cols-1 items-end gap-12 desktop:grid-cols-12 desktop:gap-8">
-        <div class="desktop:col-span-7">
+        <div class="m-center desktop:col-span-7">
           <p class="footer-reveal inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">
             <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ eyebrowLine }}
           </p>
@@ -136,8 +136,8 @@ useGsapContext(() => {
           </h2>
         </div>
 
-        <div class="flex flex-col gap-8 desktop:col-span-5 desktop:items-end">
-          <div class="footer-reveal flex flex-wrap items-center gap-3">
+        <div class="m-center-col flex flex-col gap-8 desktop:col-span-5 desktop:items-end">
+          <div class="m-center-row footer-reveal flex flex-wrap items-center gap-3">
             <a
               :href="whatsappLink"
               target="_blank"
@@ -163,9 +163,9 @@ useGsapContext(() => {
             </a>
           </div>
 
-          <div class="flex flex-col gap-3 desktop:items-end">
+          <div class="m-center-col flex flex-col gap-3 desktop:items-end">
             <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">Follow PASTI</p>
-            <ul class="flex flex-wrap items-center gap-2.5">
+            <ul class="m-center-row flex flex-wrap items-center gap-2.5">
               <li v-for="(s, i) in socials" :key="s.key">
                 <div :ref="(el) => { socialRefs[i]!.value = s.url ? (el as HTMLElement | null) : null }" data-foot-social class="inline-block">
                   <a

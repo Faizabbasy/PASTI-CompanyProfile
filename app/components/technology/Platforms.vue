@@ -43,8 +43,8 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10">
       <BaseSectionMark surface="dark" label="Platforms" meta="Built by PASTI" />
 
-      <div class="mt-14 overflow-hidden pb-2 desktop:mt-20">
-        <h2 data-tp-head class="font-display text-[length:clamp(40px,6vw,96px)] font-extrabold text-pureWhite leading-[0.95] tracking-[-0.045em]">
+      <div class="m-center mt-14 overflow-hidden pb-2 desktop:mt-20">
+        <h2 data-tp-head class="font-display text-[length:clamp(34px,6vw,96px)] font-extrabold text-pureWhite leading-[0.95] tracking-[-0.045em]">
           Our own <span class="text-pastiYellow-500">platforms.</span>
         </h2>
       </div>

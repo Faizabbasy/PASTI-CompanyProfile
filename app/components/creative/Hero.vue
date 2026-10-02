@@ -153,15 +153,15 @@ useGsapContext(() => {
         </span>
       </div>
 
-      <div class="pointer-events-none flex flex-1 items-center py-12">
-        <h1 class="font-display text-[length:clamp(54px,11vw,190px)] font-extrabold leading-[0.88] tracking-[-0.055em]">
+      <div class="m-center-row pointer-events-none flex flex-1 items-center py-12">
+        <h1 class="m-center font-display text-[length:clamp(54px,11vw,190px)] font-extrabold leading-[0.88] tracking-[-0.055em]">
           <template v-for="(w, i) in words" :key="i"><span class="ch-mask"><span data-ch-word class="inline-block will-change-transform" :class="i === words.length - 1 ? 'ch-outline' : ''">{{ w }}{{ i === words.length - 1 ? '.' : '' }}</span></span>{{ ' ' }}</template>
         </h1>
       </div>
 
       <div class="grid gap-8 border-t-2 border-slateNavy pt-6 desktop:grid-cols-12 desktop:items-end">
-        <p data-ch-fade class="max-w-[46ch] text-token-body-large font-medium desktop:col-span-6">{{ introBody }}</p>
-        <div data-ch-fade class="flex flex-wrap items-center gap-5 desktop:col-span-6 desktop:justify-end">
+        <p data-ch-fade class="m-center max-w-[46ch] text-token-body-large font-medium desktop:col-span-6">{{ introBody }}</p>
+        <div data-ch-fade class="m-center-row flex flex-wrap items-center gap-5 desktop:col-span-6 desktop:justify-end">
           <div ref="ctaRef" class="inline-block">
             <a :href="whatsappLink" target="_blank" rel="noopener noreferrer" class="group relative flex items-center gap-4 overflow-hidden rounded-full bg-slateNavy py-2.5 pl-6 pr-2.5 font-display text-[15px] font-bold text-pureWhite transition-transform duration-200 active:scale-[0.97]">
               <span aria-hidden="true" class="absolute inset-0 origin-left scale-x-0 bg-pureWhite transition-transform duration-500 ease-editorial group-hover:scale-x-100" />

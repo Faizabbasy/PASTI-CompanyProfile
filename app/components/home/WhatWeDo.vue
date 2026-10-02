@@ -748,14 +748,14 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
     class="surface-light relative overflow-hidden desktop:hidden"
   >
     <BaseContainer>
-      <div class="flex items-center gap-2">
+      <div class="m-center-row flex items-center gap-2">
         <span data-mobile-signal-dot aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-cobalt" />
         <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.63)]">{{ eyebrow }}</span>
       </div>
-      <h2 data-mobile-heading class="mt-4 font-display text-token-h2 font-bold text-slateNavy">
+      <h2 data-mobile-heading class="m-center mt-4 font-display text-token-h2 font-bold text-slateNavy">
         {{ headlineFinal }}<span class="text-pastiYellow-500">.</span>
       </h2>
-      <p class="mt-3 max-w-md text-token-body text-[color:rgba(3,60,89,0.82)]">{{ supportLine }}</p>
+      <p class="m-center mt-3 max-w-md text-token-body text-[color:rgba(3,60,89,0.82)]">{{ supportLine }}</p>
 
       <div class="mt-10 flex flex-col gap-4 sm:grid sm:grid-cols-2">
         <div

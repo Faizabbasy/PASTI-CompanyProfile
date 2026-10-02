@@ -58,11 +58,11 @@ useGsapContext(() => {
       class="surface-light relative overflow-hidden desktop:hidden"
     >
       <BaseContainer>
-        <div class="flex items-center gap-2 overflow-hidden">
+        <div class="m-center-row flex items-center gap-2 overflow-hidden">
           <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-cobalt" />
           <p data-sw-head class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.68)]">Selected Work</p>
         </div>
-        <div class="mt-3 overflow-hidden pb-1">
+        <div class="m-center mt-3 overflow-hidden pb-1">
           <h2 data-sw-head class="font-display text-[length:clamp(40px,11vw,64px)] font-extrabold leading-[0.95] tracking-[-0.04em] text-slateNavy">
             Success Project<span class="text-pastiYellow-500">.</span>
           </h2>

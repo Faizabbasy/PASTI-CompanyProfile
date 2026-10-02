@@ -249,8 +249,8 @@ useGsapContext(() => {
         </div>
 
         <!-- Copy -->
-        <div ref="copyRef" class="desktop:col-span-5 desktop:col-start-8">
-          <p data-copy-item class="flex items-center gap-3 font-display text-token-metadata font-semibold uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">
+        <div ref="copyRef" class="m-center desktop:col-span-5 desktop:col-start-8">
+          <p data-copy-item class="m-center-row flex items-center gap-3 font-display text-token-metadata font-semibold uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">
             <span class="h-px w-8 bg-cobalt" />{{ eyebrow }}
           </p>
 
@@ -273,7 +273,7 @@ useGsapContext(() => {
             </div>
           </dl>
 
-          <div data-copy-item class="mt-10 flex items-center gap-6">
+          <div data-copy-item class="m-center-row mt-10 flex items-center gap-6">
             <div ref="ctaRef" class="inline-block">
               <a
                 :href="whatsappLink"

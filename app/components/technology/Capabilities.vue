@@ -95,7 +95,7 @@ useGsapContext(() => {
       <BaseSectionMark surface="light" label="Capabilities" :meta="`${String(services.length).padStart(2, '0')} services`" />
 
       <div class="mt-14 grid gap-6 desktop:mt-20 desktop:grid-cols-12 desktop:items-end">
-        <div class="desktop:col-span-7">
+        <div class="m-center desktop:col-span-7">
           <div class="overflow-hidden">
             <p data-cap-head class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
               <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ servicesEyebrow }}
@@ -107,7 +107,7 @@ useGsapContext(() => {
             </h2>
           </div>
         </div>
-        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)] desktop:col-span-4 desktop:col-start-9 desktop:text-right">
+        <p class="m-center font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)] desktop:col-span-4 desktop:col-start-9 desktop:text-right">
           <span class="hidden desktop:inline">Hover to preview</span><span class="desktop:hidden">Tap to expand</span>
         </p>
       </div>

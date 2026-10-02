@@ -50,7 +50,7 @@ useGsapContext(() => {
       <div class="flex flex-col gap-6 desktop:flex-row desktop:items-end desktop:justify-between">
         <div>
           <BaseSectionMark surface="light" label="Contents" :meta="`${String(articles.length).padStart(2, '0')} articles`" class="desktop:w-[34rem]" />
-          <h2 class="mt-8 font-display text-[length:clamp(36px,4.6vw,72px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-slateNavy">In this issue<span class="text-pastiYellow-500">.</span></h2>
+          <h2 class="m-center mt-8 font-display text-[length:clamp(36px,4.6vw,72px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-slateNavy">In this issue<span class="text-pastiYellow-500">.</span></h2>
         </div>
         <div class="snap-rail -mx-gutter flex gap-2 overflow-x-auto px-gutter desktop:mx-0 desktop:px-0" role="tablist" aria-label="Filter by topic">
           <button

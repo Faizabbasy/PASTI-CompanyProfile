@@ -112,7 +112,7 @@ useGsapContext(() => {
       </div>
 
       <div class="flex flex-1 flex-col justify-center py-14">
-        <h1 class="font-display text-[length:clamp(52px,10.4vw,176px)] font-extrabold text-pureWhite leading-[0.9] tracking-[-0.05em]">
+        <h1 class="m-center font-display text-[length:clamp(52px,10.4vw,176px)] font-extrabold text-pureWhite leading-[0.9] tracking-[-0.05em]">
           <span v-for="(line, li) in lines" :key="li" class="block">
             <template v-for="(w, wi) in line" :key="wi"><span class="th-mask"><span data-th-word class="inline-block" :class="li === lines.length - 1 ? 'text-pastiYellow-500' : ''">{{ w }}{{ li === lines.length - 1 && wi === line.length - 1 ? '.' : '' }}</span></span>{{ ' ' }}</template>
           </span>
@@ -123,16 +123,16 @@ useGsapContext(() => {
 
       <div class="mt-6 grid gap-8 desktop:grid-cols-12 desktop:items-end">
         <!-- Terminal readout -->
-        <p data-th-fade class="font-mono text-[13px] text-[color:rgba(255,255,255,0.75)] desktop:col-span-4" aria-live="off">
+        <p data-th-fade class="m-center font-mono text-[13px] text-[color:rgba(255,255,255,0.75)] desktop:col-span-4" aria-live="off">
           <span class="text-pastiYellow-500">&gt;</span> building <span class="text-[color:rgba(255,255,255,0.4)]">▸</span>
           <span ref="typedRef" class="text-pureWhite" /><span class="th-caret ml-0.5 inline-block h-[1.05em] w-[0.55em] translate-y-[0.18em] bg-pastiYellow-500" aria-hidden="true" />
         </p>
 
-        <p data-th-fade class="max-w-[44ch] text-token-body-large text-[color:rgba(255,255,255,0.72)] desktop:col-span-4 desktop:col-start-5">
+        <p data-th-fade class="m-center max-w-[44ch] text-token-body-large text-[color:rgba(255,255,255,0.72)] desktop:col-span-4 desktop:col-start-5">
           {{ introBody }}
         </p>
 
-        <div data-th-fade class="pointer-events-auto flex flex-wrap items-center gap-5 desktop:col-span-4 desktop:col-start-9 desktop:justify-end">
+        <div data-th-fade class="m-center-row pointer-events-auto flex flex-wrap items-center gap-5 desktop:col-span-4 desktop:col-start-9 desktop:justify-end">
           <div ref="ctaRef" class="inline-block">
             <a
               :href="whatsappLink"

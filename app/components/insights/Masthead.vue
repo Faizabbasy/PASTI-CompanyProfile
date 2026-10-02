@@ -52,7 +52,7 @@ useGsapContext(() => {
         <span>{{ pad(count) }} articles · {{ pad(topics.length) }} topics</span>
       </div>
 
-      <h1 class="im-mask relative mt-6 select-none font-display text-[length:clamp(84px,19vw,330px)] font-extrabold leading-[0.86] tracking-[-0.065em]" aria-label="Insights">
+      <h1 class="m-center im-mask relative mt-6 select-none font-display text-[length:clamp(84px,19vw,330px)] font-extrabold leading-[0.86] tracking-[-0.065em]" aria-label="Insights">
         <span data-im-word class="relative block" aria-hidden="true">
           <span class="im-outline block">Insights<span class="text-pastiYellow-500" style="-webkit-text-stroke: 0">.</span></span>
           <span
@@ -66,10 +66,10 @@ useGsapContext(() => {
       </h1>
 
       <div class="mt-16 grid gap-6 desktop:grid-cols-12 desktop:items-end">
-        <p data-im-fade class="max-w-[46ch] text-token-body-large text-[color:rgba(3,60,89,0.72)] desktop:col-span-6">
+        <p data-im-fade class="m-center max-w-[46ch] text-token-body-large text-[color:rgba(3,60,89,0.72)] desktop:col-span-6">
           Perspectives on technology, creative, and business — from the work we do with our clients every day.
         </p>
-        <p data-im-fade class="flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)] desktop:col-span-6 desktop:justify-end">
+        <p data-im-fade class="m-center-row flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)] desktop:col-span-6 desktop:justify-end">
           <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />
           Now showing · <span class="text-slateNavy">{{ articles[shown]?.title }}</span>
         </p>

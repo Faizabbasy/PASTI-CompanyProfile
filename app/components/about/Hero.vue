@@ -91,7 +91,7 @@ useGsapContext(() => {
       <BaseSectionMark surface="light" :label="eyebrow" meta="Brand foundation" />
 
       <div class="flex flex-1 flex-col justify-center py-12">
-        <h1 class="font-display text-[length:clamp(48px,9vw,152px)] font-extrabold leading-[0.92] tracking-[-0.05em] text-slateNavy" :aria-label="promise">
+        <h1 class="m-center font-display text-[length:clamp(48px,9vw,152px)] font-extrabold leading-[0.92] tracking-[-0.05em] text-slateNavy" :aria-label="promise">
           <span class="ah-mask block" aria-hidden="true"><span data-ah-word class="inline-block">{{ lead }}</span></span>
           <span class="block py-[0.06em]" aria-hidden="true">
             <span data-ah-fade class="inline-block">
@@ -108,7 +108,7 @@ useGsapContext(() => {
         </h1>
       </div>
 
-      <div class="grid gap-6 border-t border-[color:rgba(3,60,89,0.16)] pt-6 tablet:grid-cols-3 desktop:grid-cols-12 desktop:items-end">
+      <div class="m-center grid gap-6 border-t border-[color:rgba(3,60,89,0.16)] pt-6 tablet:grid-cols-3 desktop:grid-cols-12 desktop:items-end">
         <div data-ah-fade class="desktop:col-span-3">
           <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.5)]">Brand essence</p>
           <p class="mt-1.5 font-display text-[16px] font-bold text-slateNavy">{{ essence }}</p>

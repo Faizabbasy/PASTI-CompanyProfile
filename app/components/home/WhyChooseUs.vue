@@ -284,8 +284,8 @@ useGsapContext(() => {
 
         <div class="mt-12 grid gap-12 desktop:mt-[5svh] desktop:grid-cols-12 desktop:items-center desktop:gap-10">
           <!-- Copy -->
-          <div ref="copyRef" class="desktop:col-span-5">
-            <p data-copy-item class="flex items-center gap-3 font-display text-token-metadata font-semibold uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">
+          <div ref="copyRef" class="m-center desktop:col-span-5">
+            <p data-copy-item class="m-center-row flex items-center gap-3 font-display text-token-metadata font-semibold uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">
               <span class="h-px w-8 bg-cobalt" />{{ eyebrow }}
             </p>
 
@@ -307,7 +307,7 @@ useGsapContext(() => {
                 :ref="(el) => { if (el) reasonRefs[i] = el as HTMLElement }"
                 data-copy-item
                 data-on="false"
-                class="wcu-reason flex items-center gap-3 border-b border-[color:rgba(3,60,89,0.14)] py-4 tablet:[&:nth-child(odd)]:pr-6"
+                class="wcu-reason m-center-row flex items-center gap-3 border-b border-[color:rgba(3,60,89,0.14)] py-4 tablet:[&:nth-child(odd)]:pr-6"
               >
                 <span class="wcu-reason-dot h-2.5 w-2.5 shrink-0 rounded-full" />
                 <span class="font-mono text-[10px] tracking-[0.14em] text-[color:rgba(3,60,89,0.45)]">{{ pad(i + 1) }}</span>

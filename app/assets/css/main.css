@@ -396,3 +396,26 @@ html {
 .snap-rail::-webkit-scrollbar {
   display: none;
 }
+
+/* Mobile section heads (owner request 2026-10-02): below `desktop` the head
+   of a section — eyebrow, heading, intro, hint, head CTA — sits centred;
+   content (lists, accordions, cards) keeps its left edge. Plain rules after
+   @tailwind utilities so they win on phones; desktop is untouched. */
+@media (max-width: 1023.98px) {
+  .m-center {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .m-center-row {
+    justify-content: center;
+  }
+  .m-center-col {
+    align-items: center;
+  }
+  .m-stack {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}

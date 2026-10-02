@@ -84,8 +84,8 @@ const pad = (n: number) => String(n).padStart(2, '0')
 
       <BaseContainer class="relative z-10">
         <BaseSectionMark surface="light" label="In production" :meta="`${pad(projects.length)} projects`" />
-        <div class="mt-10 flex items-end justify-between gap-8 desktop:mt-8">
-          <div>
+        <div class="m-center-row mt-10 flex items-end justify-between gap-8 desktop:mt-8">
+          <div class="m-center">
             <div class="overflow-hidden">
               <p data-tw-head class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
                 <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Selected Work

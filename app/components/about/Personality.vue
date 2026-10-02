@@ -67,8 +67,8 @@ useGsapContext(() => {
       <div class="mt-14 grid gap-16 desktop:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <!-- Is / is not -->
         <div class="desktop:col-span-7">
-          <h2 class="font-display text-[length:clamp(36px,4.4vw,64px)] font-extrabold leading-[0.98] tracking-[-0.04em] text-slateNavy">PASTI is<span class="text-pastiYellow-500">.</span></h2>
-          <ul class="mt-6 flex flex-wrap gap-2.5">
+          <h2 class="m-center font-display text-[length:clamp(36px,4.4vw,64px)] font-extrabold leading-[0.98] tracking-[-0.04em] text-slateNavy">PASTI is<span class="text-pastiYellow-500">.</span></h2>
+          <ul class="m-center-row mt-6 flex flex-wrap gap-2.5">
             <li
               v-for="w in personalityIs"
               :key="w"
@@ -79,8 +79,8 @@ useGsapContext(() => {
             </li>
           </ul>
 
-          <h3 class="mt-14 font-display text-[length:clamp(28px,3vw,44px)] font-extrabold leading-none tracking-[-0.035em] text-[color:rgba(3,60,89,0.45)]">PASTI is not</h3>
-          <ul class="mt-6 flex flex-wrap gap-2.5">
+          <h3 class="m-center mt-14 font-display text-[length:clamp(28px,3vw,44px)] font-extrabold leading-none tracking-[-0.035em] text-[color:rgba(3,60,89,0.45)]">PASTI is not</h3>
+          <ul class="m-center-row mt-6 flex flex-wrap gap-2.5">
             <li
               v-for="w in personalityIsNot"
               :key="w"
@@ -95,7 +95,7 @@ useGsapContext(() => {
 
         <!-- Spectrum -->
         <div class="desktop:col-span-5">
-          <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">Personality spectrum</p>
+          <p class="m-center font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">Personality spectrum</p>
           <ul class="mt-6 flex flex-col gap-7">
             <li v-for="(s, i) in spectrum" :key="s.a">
               <div class="flex justify-between font-display text-[14px] font-bold">

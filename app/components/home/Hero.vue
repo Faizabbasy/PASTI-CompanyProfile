@@ -407,7 +407,7 @@ useGsapContext(() => {
         <div data-depth="30" class="hero-blur hero-blur--soft absolute -right-[6vw] bottom-[12%] hidden h-[12vh] w-[30vw] rotate-[-22deg] rounded-full desktop:block" />
         <span data-depth="18" class="hero-pearl absolute right-[7vw] top-[37%] hidden h-11 w-11 desktop:block" />
         <span data-depth="12" class="hero-pearl absolute right-[24vw] top-[63%] hidden h-7 w-7 opacity-70 desktop:block" />
-        <span data-depth="22" class="hero-pearl absolute left-[30vw] top-[9%] h-5 w-5 opacity-60" />
+        <span data-depth="22" class="hero-pearl absolute left-[84vw] top-[13%] h-5 w-5 opacity-60 desktop:left-[30vw] desktop:top-[9%]" />
       </div>
 
       <!-- Copy: marker / headline / supporting text / CTAs, left-aligned on
@@ -415,9 +415,10 @@ useGsapContext(() => {
       <BaseContainer class="relative z-10 w-full desktop:static">
         <div
           ref="copyRef"
-          class="flex flex-col items-start pb-6 pt-28 text-left tablet:pt-32 desktop:absolute desktop:left-[max(6vw,calc(50vw-640px))] desktop:top-[15svh] desktop:pb-0 desktop:pt-0"
+          class="flex flex-col items-center pb-6 pt-28 text-center tablet:pt-32 desktop:absolute desktop:items-start desktop:text-left desktop:left-[max(6vw,calc(50vw-640px))] desktop:top-[15svh] desktop:pb-0 desktop:pt-0"
         >
           <div class="mb-5 flex items-center gap-3 font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(3,60,89,0.78)] desktop:mb-[3svh]">
+            <span class="h-px w-14 bg-[color:rgba(3,60,89,0.4)] desktop:hidden" />
             <span class="h-2 w-2 rounded-full bg-pastiYellow-500 shadow-[0_0_0_4px_rgba(251,186,0,0.18)]" />
             <span>01 / 04</span>
             <span class="h-px w-14 bg-[color:rgba(3,60,89,0.4)]" />
@@ -431,7 +432,7 @@ useGsapContext(() => {
               v-for="(word, i) in headlineWords"
               :key="word"
               class="-mb-[0.14em] block overflow-clip pb-[0.14em]"
-              :class="i === 1 ? 'pl-[0.32em]' : i === 2 ? 'pl-[0.62em]' : ''"
+              :class="i === 1 ? 'desktop:pl-[0.32em]' : i === 2 ? 'desktop:pl-[0.62em]' : ''"
             >
               <span :ref="(el) => { if (el) lineRefs[i] = el as HTMLElement }" class="inline-block">{{ word.slice(0, -1) }}<span class="text-pastiYellow-500">.</span></span>
             </span>
@@ -439,14 +440,14 @@ useGsapContext(() => {
 
           <p
             ref="subtextRef"
-            class="mt-6 max-w-[25rem] text-token-body-large font-medium text-[color:rgba(3,60,89,0.86)] desktop:ml-[0.9em] desktop:mt-[3svh] desktop:max-w-[27rem] desktop:text-[17px] desktop:leading-[1.6]"
+            class="mx-auto mt-6 max-w-[25rem] text-token-body-large font-medium desktop:mx-0 text-[color:rgba(3,60,89,0.86)] desktop:ml-[0.9em] desktop:mt-[3svh] desktop:max-w-[27rem] desktop:text-[17px] desktop:leading-[1.6]"
           >
             {{ subtext }}
           </p>
 
           <!-- CTAs: a yellow orb inside a white halo leading a glass pill
                (primary), then a quiet text link (secondary, WhatsApp). -->
-          <div ref="ctaRowRef" class="mt-8 flex flex-wrap items-center gap-x-7 gap-y-4 desktop:mt-[3.6svh]">
+          <div ref="ctaRowRef" class="mt-8 flex flex-wrap items-center justify-center gap-x-7 gap-y-4 desktop:mt-[3.6svh] desktop:justify-start">
             <div ref="ctaPrimaryRef" class="inline-block">
               <a
                 href="#selected-work"

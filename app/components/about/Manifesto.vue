@@ -63,9 +63,9 @@ useGsapContext(() => {
   <section ref="sectionRef" class="surface-light relative overflow-hidden py-24 tablet:py-36" style="--lift-x: 10%; --lift-y: 80%">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <div class="grid gap-10 desktop:grid-cols-12">
-        <p class="inline-flex h-fit items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)] desktop:col-span-3 desktop:pt-4">
-          <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ introHeading }}
+      <div class="m-center grid gap-10 desktop:grid-cols-12">
+        <p class="h-fit font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)] desktop:col-span-3 desktop:inline-flex desktop:items-center desktop:gap-2.5 desktop:pt-4">
+          <span class="mr-2.5 inline-block h-1.5 w-1.5 rounded-full bg-pastiYellow-500 align-middle desktop:mr-0" />{{ introHeading }}
         </p>
         <p data-mf-text class="font-display text-[length:clamp(28px,3.6vw,58px)] font-bold leading-[1.12] tracking-[-0.03em] text-slateNavy desktop:col-span-9">
           <template v-for="(w, i) in words" :key="i"><span data-mf-word class="mf-word" :class="accent.has(w.toLowerCase()) ? 'mf-accent' : ''">{{ w }}</span>{{ ' ' }}</template>

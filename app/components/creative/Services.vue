@@ -61,7 +61,7 @@ useGsapContext(() => {
       <div class="mt-14 grid gap-12 desktop:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <!-- Sticky index -->
         <div class="desktop:col-span-5">
-          <div class="desktop:sticky desktop:top-28">
+          <div class="m-center desktop:sticky desktop:top-28">
             <p class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
               <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ servicesEyebrow }}
             </p>

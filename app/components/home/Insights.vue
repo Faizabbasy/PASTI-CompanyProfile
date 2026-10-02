@@ -493,7 +493,7 @@ watch(activeIndex, (next, prev) => {
     <BaseContainer class="relative z-10">
       <BaseSectionMark surface="light" label="Insight" meta="09 / 11" />
 
-      <div class="mt-12 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+      <div class="m-stack mt-12 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
         <h2 ref="mobileHeadingRef" class="min-w-0 font-display text-[length:clamp(52px,16vw,96px)] font-bold leading-[0.95] tracking-[-0.04em] text-slateNavy">
           {{ heading }}
         </h2>
