@@ -16,16 +16,18 @@ export interface NavItem {
 /**
  * Single source of truth for primary navigation, per
  * .docs/PASTI_Cuberto_Template_Content_Mapping.docx section 01 — NAVIGATION.
- * OPEN and e-CORPORATE were removed from the bar (owner request 2026-10-05):
- * they already have their own homepage section (Platforms) and footer column.
- * `isPlatform`/`comingSoon` stay on NavItem so they can return once real
- * platform pages exist.
+ * Platform items (owner request 2026-10-06): OPEN, SHIFTLY and e-CORPORATE
+ * are back in the bar. None has a page yet, so they render as non-navigating
+ * "coming soon" labels (comingSoon) until real routes exist.
  */
 export function useNavigation() {
   const navItems: NavItem[] = [
     { label: 'Home', to: '/' },
     { label: 'Technology', to: '/technology' },
     { label: 'Creative', to: '/creative' },
+    { label: 'OPEN', to: '/open', isPlatform: true, comingSoon: true },
+    { label: 'SHIFTLY', to: '/shiftly', isPlatform: true, comingSoon: true },
+    { label: 'e-CORPORATE', to: '/e-corporate', isPlatform: true, comingSoon: true },
     { label: 'Work', to: '/work' },
     { label: 'About', to: '/about' },
     { label: 'Insights', to: '/insights' }

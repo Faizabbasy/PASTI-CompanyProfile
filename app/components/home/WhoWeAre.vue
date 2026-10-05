@@ -169,7 +169,7 @@ useGsapContext(() => {
     <BaseGridLines tone="light" />
     <!-- Ghost PASTI wordmark, cropped by the section edge (same ~3% texture device as Trusted). -->
     <img
-      src="/images/pasti-logo.png"
+      src="/images/pasti-logo.webp"
       alt=""
       aria-hidden="true"
       draggable="false"

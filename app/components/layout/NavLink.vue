@@ -19,7 +19,7 @@ const { setState } = useCustomCursor()
     :to="item.comingSoon ? undefined : item.to"
     :aria-disabled="item.comingSoon ? 'true' : undefined"
     :title="item.comingSoon ? `${item.label} — coming soon` : undefined"
-    class="group relative flex items-center gap-1.5 py-2 font-display text-sm font-bold tracking-tight transition-opacity duration-400 ease-editorial"
+    class="group relative flex items-center gap-1.5 whitespace-nowrap py-2 font-display text-sm font-bold tracking-tight transition-opacity duration-400 ease-editorial"
     :class="[
       dark
         ? ['text-pureWhite/80', { 'text-pureWhite': route.path === item.to }]

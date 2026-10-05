@@ -33,6 +33,21 @@ export default defineNuxtConfig({
     }
   },
 
+  // Performance (2026-10-06): three.js (~865 KB) is only imported by the
+  // hero knot on capable desktops (see useDeviceTier.ts / HeroRing.vue).
+  // Nuxt adds a <link rel="prefetch"> for every dynamic chunk, which made
+  // phones download it anyway — drop the hint for three's chunks only.
+  hooks: {
+    'build:manifest'(manifest) {
+      for (const key of Object.keys(manifest)) {
+        if (key.includes('node_modules/three')) {
+          manifest[key]!.prefetch = false
+          manifest[key]!.preload = false
+        }
+      }
+    }
+  },
+
   tailwindcss: {
     cssPath: '~/assets/css/main.css',
     configPath: 'tailwind.config.ts'

@@ -188,9 +188,10 @@ useGsapContext(() => {
          ~4% — it is texture you notice only when you look for it. -->
     <BaseGridLines tone="light" edge="top" />
     <img
-      src="/images/pasti-logo.png"
+      src="/images/pasti-logo.webp"
       alt=""
       aria-hidden="true"
+      loading="lazy"
       draggable="false"
       class="pointer-events-none absolute -bottom-[14%] -right-[6%] z-0 w-auto max-w-none select-none opacity-[0.03]"
       style="height: clamp(200px, 38vw, 560px)"
@@ -236,6 +237,7 @@ useGsapContext(() => {
           <img
             :src="client.logo"
             :alt="client.name"
+            decoding="async"
             class="max-h-full max-w-full object-contain"
             :class="{
               'wordpress-logo scale-150': client.name === 'WordPress',

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 
-// TECHNOLOGY HERO — "engineering console". Dark full-screen stage over the
-// interactive Signal lattice; the approved heading set as three masked lines
-// with the last word on the PASTI Yellow accent; a terminal readout that
-// types each real service name in turn. Entrance plays on mount.
+// TECHNOLOGY HERO — "engineering console", on the shared page-hero system
+// (2026-10-05: title scale, marker and CTAs shared with the homepage hero;
+// the dark Slate Navy stage is kept by owner decision). The interactive
+// Signal lattice fills the stage; the approved heading sits left as three masked lines with "forward."
+// on the yellow marker; a glass console card types each real service name in
+// turn. Entrance plays on mount.
 const { eyebrow, heading, introBody, services } = useTechnology()
 const { link: whatsappLink } = useWhatsapp()
 
@@ -14,8 +16,6 @@ const lines = [words.slice(0, 2), words.slice(2, 5), words.slice(5)]
 
 const rootRef = ref<HTMLElement | null>(null)
 const typedRef = ref<HTMLElement | null>(null)
-const ctaRef = ref<HTMLElement | null>(null)
-useMagnetic(ctaRef, { strength: 0.3 })
 
 const scrollToCapabilities = () => {
   const el = document.getElementById('capabilities')
@@ -31,25 +31,25 @@ useGsapContext(() => {
   const mm = gsap.matchMedia()
   const lineEls = root.querySelectorAll<HTMLElement>('[data-th-word]')
   const fades = root.querySelectorAll<HTMLElement>('[data-th-fade]')
-  const rule = root.querySelector<HTMLElement>('[data-th-rule]')
+  const marker = root.querySelector<HTMLElement>('[data-th-marker]')
   const typed = typedRef.value
 
   mm.add(reducedMotionQuery.reduce, () => {
     gsap.set(lineEls, { yPercent: 0 })
     gsap.set(fades, { autoAlpha: 1, y: 0 })
-    if (rule) gsap.set(rule, { scaleX: 1 })
+    if (marker) gsap.set(marker, { scaleX: 1 })
     if (typed) typed.textContent = services[0]?.title ?? ''
   })
 
   mm.add(reducedMotionQuery.noPreference, () => {
     gsap.set(lineEls, { yPercent: 118 })
     gsap.set(fades, { autoAlpha: 0, y: 18 })
-    if (rule) gsap.set(rule, { scaleX: 0, transformOrigin: 'left center' })
+    if (marker) gsap.set(marker, { scaleX: 0 })
 
     const intro = gsap.timeline({ delay: 0.25 })
     intro
       .to(lineEls, { yPercent: 0, duration: motionTier.cinematicMax * 0.75, ease: approvedEase.gsapPrimary, stagger: 0.07 })
-      .to(rule, { scaleX: 1, duration: motionTier.cinematicMax, ease: approvedEase.gsapCinematic }, '-=0.6')
+      .to(marker ?? {}, { scaleX: 1, duration: motionTier.standardMax, ease: approvedEase.gsapCinematic }, '-=0.5')
       .to(fades, { autoAlpha: 1, y: 0, duration: motionTier.cinematicMin, ease: approvedEase.gsapStandard, stagger: 0.08 }, '-=1.1')
 
     // Terminal readout: type → hold → delete → next service, forever.
@@ -89,10 +89,10 @@ useGsapContext(() => {
   <section
     ref="rootRef"
     data-header-theme="dark"
-    class="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-slateNavy pb-10 pt-28 text-pureWhite desktop:pb-12 desktop:pt-32"
+    class="relative isolate flex flex-col overflow-hidden bg-slateNavy pb-16 pt-28 text-pureWhite desktop:min-h-[100svh] desktop:pb-12 desktop:pt-32"
   >
     <TechnologyLattice />
-    <!-- Depth: a Cobalt lift behind the lattice's resting node and a vignette
+    <!-- Depth: a yellow lift behind the lattice's resting node and a vignette
          that keeps the copy side calm and readable. -->
     <div
       aria-hidden="true"
@@ -100,67 +100,54 @@ useGsapContext(() => {
       style="background: radial-gradient(ellipse 55% 60% at 70% 50%, rgba(251, 186, 0, 0.22), transparent 70%), linear-gradient(90deg, rgba(3, 60, 89, 0.9) 0%, rgba(3, 60, 89, 0.35) 55%, transparent 100%)"
     />
 
-    <BaseContainer class="pointer-events-none relative z-10 flex flex-1 flex-col">
-      <!-- Console header row -->
-      <div data-th-fade class="flex items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.55)]">
-        <span class="inline-flex items-center gap-2.5">
-          <LayoutBrandMark surface="dark" :height="12" />
-          <span aria-hidden="true" class="h-3 w-px bg-[color:rgba(255,255,255,0.25)]" />
-          {{ eyebrow }}
-        </span>
-        <span class="hidden tablet:inline">{{ String(services.length).padStart(2, '0') }} capabilities</span>
-      </div>
+    <BaseContainer class="pointer-events-none relative z-10 flex flex-1 flex-col desktop:justify-center">
+      <div class="grid items-center gap-12 desktop:grid-cols-12 desktop:gap-8">
+        <div class="m-center desktop:col-span-7">
+          <div data-th-fade><BaseHeroMarker surface="dark" :label="eyebrow" :meta="`${String(services.length).padStart(2, '0')} capabilities`" /></div>
 
-      <div class="flex flex-1 flex-col justify-center py-14">
-        <h1 class="m-center font-display text-[length:clamp(52px,10.4vw,176px)] font-extrabold text-pureWhite leading-[0.9] tracking-[-0.05em]">
-          <span v-for="(line, li) in lines" :key="li" class="block">
-            <template v-for="(w, wi) in line" :key="wi"><span class="th-mask"><span data-th-word class="inline-block" :class="li === lines.length - 1 ? 'text-pastiYellow-500' : ''">{{ w }}{{ li === lines.length - 1 && wi === line.length - 1 ? '.' : '' }}</span></span>{{ ' ' }}</template>
-          </span>
-        </h1>
-      </div>
-
-      <span data-th-rule aria-hidden="true" class="block h-px w-full bg-[color:rgba(255,255,255,0.18)]" />
-
-      <div class="mt-6 grid gap-8 desktop:grid-cols-12 desktop:items-end">
-        <!-- Terminal readout -->
-        <p data-th-fade class="m-center font-mono text-[13px] text-[color:rgba(255,255,255,0.75)] desktop:col-span-4" aria-live="off">
-          <span class="text-pastiYellow-500">&gt;</span> building <span class="text-[color:rgba(255,255,255,0.4)]">▸</span>
-          <span ref="typedRef" class="text-pureWhite" /><span class="th-caret ml-0.5 inline-block h-[1.05em] w-[0.55em] translate-y-[0.18em] bg-pastiYellow-500" aria-hidden="true" />
-        </p>
-
-        <p data-th-fade class="m-center max-w-[44ch] text-token-body-large text-[color:rgba(255,255,255,0.72)] desktop:col-span-4 desktop:col-start-5">
-          {{ introBody }}
-        </p>
-
-        <div data-th-fade class="m-center-row pointer-events-auto flex flex-wrap items-center gap-5 desktop:col-span-4 desktop:col-start-9 desktop:justify-end">
-          <div ref="ctaRef" class="inline-block">
-            <a
-              :href="whatsappLink"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="group relative flex items-center gap-4 overflow-hidden rounded-[14px] bg-pastiYellow-500 py-2.5 pl-6 pr-2.5 font-display text-[15px] font-bold text-slateNavy transition-transform duration-200 active:scale-[0.97]"
-            >
-              <span aria-hidden="true" class="absolute inset-0 origin-left scale-x-0 bg-pureWhite transition-transform duration-500 ease-editorial group-hover:scale-x-100" />
-              <span class="relative z-10">Start a project</span>
-              <span class="relative z-10 grid h-10 w-10 place-items-center rounded-[10px] bg-slateNavy text-pastiYellow-500 transition-transform duration-300 ease-editorial group-hover:rotate-[-45deg]">
-                <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
-              </span>
-            </a>
-          </div>
-          <button
-            type="button"
-            class="group inline-flex min-h-11 items-center gap-3 font-display text-[13px] font-bold uppercase tracking-[0.1em] text-pureWhite"
-            @click="scrollToCapabilities"
-          >
-            <span class="grid h-11 w-11 place-items-center rounded-full border border-[color:rgba(255,255,255,0.25)] transition-colors duration-300 ease-editorial group-hover:border-pastiYellow-500 group-hover:bg-pastiYellow-500 group-hover:text-slateNavy">
-              <svg viewBox="0 0 16 16" class="h-4 w-4 rotate-90" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+          <h1 class="hero-title hero-title--dark mt-6 desktop:mt-[3svh]">
+            <span v-for="(line, li) in lines" :key="li" class="block">
+              <template v-for="(w, wi) in line" :key="wi"><span class="th-mask"><span data-th-word class="relative inline-block"><span v-if="li === lines.length - 1" data-th-marker aria-hidden="true" class="absolute -inset-x-[0.04em] bottom-[0.1em] -z-10 h-[0.36em] origin-left rounded-[4px] bg-pastiYellow-500" />{{ w }}<template v-if="li === lines.length - 1 && wi === line.length - 1"><span class="text-pastiYellow-500">.</span></template></span></span>{{ ' ' }}</template>
             </span>
-            Explore
-          </button>
+          </h1>
+
+          <p data-th-fade class="hero-lede hero-lede--dark m-center mt-6 desktop:mt-[3svh]">{{ introBody }}</p>
+
+          <div data-th-fade class="pointer-events-auto mt-8 desktop:mt-[4svh]">
+            <BaseHeroCtas
+              surface="dark"
+              :primary="{ label: 'Start a project', href: whatsappLink }"
+              :secondary="{ label: 'Explore capabilities', down: true }"
+              @secondary="scrollToCapabilities"
+            />
+          </div>
+        </div>
+
+        <!-- Console card: types each real service in turn. -->
+        <div data-th-fade class="mx-auto w-full max-w-[22rem] desktop:col-span-4 desktop:col-start-9 desktop:mx-0 desktop:justify-self-end">
+          <div class="rotate-[-3deg] rounded-[20px] border border-[color:rgba(255,255,255,0.14)] bg-[color:rgba(2,36,54,0.72)] p-5 shadow-[0_30px_60px_-30px_rgba(0,10,20,0.8)] backdrop-blur-md">
+            <div class="flex items-center justify-between">
+              <span class="inline-flex items-center gap-2.5">
+                <LayoutBrandMark surface="dark" :height="11" />
+                <span aria-hidden="true" class="h-3 w-px bg-[color:rgba(255,255,255,0.25)]" />
+                <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)]">Console</span>
+              </span>
+              <span class="inline-flex gap-1.5" aria-hidden="true">
+                <span class="h-2 w-2 rounded-full bg-[color:rgba(255,255,255,0.18)]" /><span class="h-2 w-2 rounded-full bg-[color:rgba(255,255,255,0.18)]" /><span class="h-2 w-2 rounded-full bg-pastiYellow-500" />
+              </span>
+            </div>
+            <p class="mt-4 min-h-[3.2em] font-mono text-[13px] leading-relaxed text-[color:rgba(255,255,255,0.7)]" aria-live="off">
+              <span class="font-bold text-pastiYellow-500">&gt;</span> building <span class="text-[color:rgba(255,255,255,0.4)]">▸</span>
+              <span ref="typedRef" class="font-semibold text-pureWhite" /><span class="th-caret ml-0.5 inline-block h-[1.05em] w-[0.55em] translate-y-[0.18em] bg-pastiYellow-500" aria-hidden="true" />
+            </p>
+            <div class="mt-4 flex items-center justify-between border-t border-[color:rgba(255,255,255,0.12)] pt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">
+              <span>{{ String(services.length).padStart(2, '0') }} capabilities</span>
+              <span class="inline-flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Live</span>
+            </div>
+          </div>
         </div>
       </div>
     </BaseContainer>
-
   </section>
 </template>
 

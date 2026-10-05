@@ -29,7 +29,7 @@ export function usePlatforms() {
       name: 'OPEN',
       character: 'Expansive Precision',
       positioning: 'Digitize your procurement from planning to contract. e-Procurement connects people, processes, vendors, approvals, and documents into one structured digital workflow.',
-      image: '/images/platforms/open.png',
+      image: '/images/platforms/open.webp',
       to: '/open',
       comingSoon: true
     },
@@ -38,7 +38,7 @@ export function usePlatforms() {
       name: 'e-CORPORATE',
       character: 'Structured Precision',
       positioning: 'e-CORPORATE is an enterprise digital platform that connects people, processes, and information in one integrated environment — helping organizations work smarter, collaborate better, and operate with greater control.',
-      image: '/images/platforms/e-corporate.png',
+      image: '/images/platforms/e-corporate.webp',
       to: '/e-corporate',
       comingSoon: true
     }

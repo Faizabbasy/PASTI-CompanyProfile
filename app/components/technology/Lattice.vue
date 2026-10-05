@@ -6,6 +6,9 @@
 // network. With no input for a moment, the node drifts on its own path so the
 // field never looks dead. 2D canvas, not WebGL; paused while off-screen;
 // under reduced motion it renders one static frame.
+// `tone="light"` (2026-10-05): navy points + stronger yellow links for the
+// light hero ground the page heroes now share with the homepage.
+const props = withDefaults(defineProps<{ tone?: 'dark' | 'light' }>(), { tone: 'dark' })
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 
 onMounted(() => {
@@ -14,6 +17,8 @@ onMounted(() => {
   if (!canvas || !ctx) return
   const host = canvas.parentElement!
   const reduce = window.matchMedia(reducedMotionQuery.reduce).matches
+  const light = props.tone === 'light'
+  const restFill = light ? 'rgba(3, 60, 89, 0.16)' : 'rgba(255, 222, 140, 0.14)'
 
   let w = 0
   let h = 0
@@ -55,7 +60,7 @@ onMounted(() => {
       const dy = p.y - node.y
       const d = Math.hypot(dx, dy)
       if (d < radius * 0.62) {
-        const a = (1 - d / (radius * 0.62)) * 0.55
+        const a = (1 - d / (radius * 0.62)) * (light ? 0.8 : 0.55)
         ctx.strokeStyle = `rgba(251, 186, 0, ${a.toFixed(3)})`
         ctx.beginPath()
         ctx.moveTo(node.x, node.y)
@@ -72,7 +77,11 @@ onMounted(() => {
       const push = k * k * 10
       const x = p.x + (dx / d) * push
       const y = p.y + (dy / d) * push
-      ctx.fillStyle = k > 0 ? `rgba(255, ${Math.round(222 - 36 * k)}, ${Math.round(140 - 140 * k)}, ${(0.14 + 0.8 * k).toFixed(3)})` : 'rgba(255, 222, 140, 0.14)'
+      ctx.fillStyle = k > 0
+        ? light
+          ? `rgba(${Math.round(3 + 248 * k)}, ${Math.round(60 + 126 * k)}, ${Math.round(89 - 89 * k)}, ${(0.16 + 0.8 * k).toFixed(3)})`
+          : `rgba(255, ${Math.round(222 - 36 * k)}, ${Math.round(140 - 140 * k)}, ${(0.14 + 0.8 * k).toFixed(3)})`
+        : restFill
       ctx.beginPath()
       ctx.arc(x, y, 1 + 1.4 * k, 0, Math.PI * 2)
       ctx.fill()
@@ -117,8 +126,9 @@ onMounted(() => {
 
   let raf = 0
   let running = false
+  const gate = createFrameGate()
   const loop = () => {
-    tick()
+    if (gate()) tick()
     raf = requestAnimationFrame(loop)
   }
   const start = () => {

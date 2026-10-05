@@ -17,7 +17,7 @@ withDefaults(defineProps<{ inverted?: boolean }>(), { inverted: false })
          needing to crop/rescale the image itself. -->
     <img
       v-if="!inverted"
-      src="/images/pasti-logo.png"
+      src="/images/pasti-logo.webp"
       alt="PASTI"
       class="h-6 w-auto md:h-7"
       width="1205"
@@ -25,7 +25,7 @@ withDefaults(defineProps<{ inverted?: boolean }>(), { inverted: false })
     />
     <span v-else class="relative inline-block h-6 w-auto md:h-7" style="aspect-ratio: 1205 / 527">
       <img
-        src="/images/pasti-logo.png"
+        src="/images/pasti-logo.webp"
         alt="PASTI"
         class="h-full w-auto brightness-0 invert"
         width="1205"

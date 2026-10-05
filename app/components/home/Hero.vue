@@ -19,11 +19,47 @@ if (import.meta.client) {
 // gallery: the hero is a static composition and the existing vertical
 // Selected Work list (SelectedWork.vue) carries every project.
 //
-// Copy: headline/subtext are owner-supplied; project copy comes straight from
+// Copy: slide copy is owner/client-supplied (see `slides`); project copy comes straight from
 // useSelectedWork() (the 6 real projects; placeholders removed 2026-09-30).
 
-const headlineWords = ['Technology.', 'Creativity.', 'Impact.']
-const subtext = 'We build technology and creative solutions for businesses ready to move forward.'
+// Hero copy is a 2-slide text slideshow (client revision 2026-10-06). Slide 1
+// is client-supplied verbatim (title set in normal case, "FCP" on the yellow
+// marker bar); slide 2 is the previous headline/subtext. Only the text block
+// rotates — knot, cards, CTAs and the scroll gallery are shared.
+interface HeroSlide {
+  lines: string[]
+  /** Word set on the PASTI Yellow marker bar. */
+  highlight?: string
+  body: string
+  /** Longer lines → one step smaller title. */
+  compact?: boolean
+}
+const slides: HeroSlide[] = [
+  {
+    lines: ['The first', 'FCP technology', 'agency in Indonesia.'],
+    highlight: 'FCP',
+    body: 'Indonesia’s first technology agency focused on Framework Code Products (FCP). We build customizable technology foundations that adapt to your business, processes, and ecosystem.',
+    compact: true
+  },
+  {
+    lines: ['Technology.', 'Creativity.', 'Impact.'],
+    body: 'We build technology and creative solutions for businesses ready to move forward.'
+  }
+]
+const SLIDE_MS = 6000
+const pad2 = (n: number) => String(n).padStart(2, '0')
+
+/** Splits a title line into plain text, the marker word and a yellow full stop. */
+function lineParts(line: string, highlight?: string) {
+  const dot = line.endsWith('.')
+  const text = dot ? line.slice(0, -1) : line
+  const at = highlight ? text.indexOf(highlight) : -1
+  if (at < 0) return { before: text, mark: '', after: '', dot }
+  return { before: text.slice(0, at), mark: highlight!, after: text.slice(at + highlight!.length), dot }
+}
+
+const activeSlide = ref(0)
+const leavingSlide = ref(-1)
 const ctaPrimary = { label: 'Explore our work' }
 const ctaSecondary = { label: 'Tell us about it' }
 // Owner-supplied hero furniture (reference comp, 2026-10-01). The service
@@ -44,9 +80,10 @@ const { playTo } = useSectionCurtain()
 
 const sectionComponentRef = ref<{ $el: HTMLElement } | null>(null)
 const stageRef = ref<HTMLElement | null>(null)
-const headingRef = ref<HTMLElement | null>(null)
 const copyRef = ref<HTMLElement | null>(null)
-const subtextRef = ref<HTMLElement | null>(null)
+const slideLineRefs = ref<HTMLElement[][]>(slides.map(() => []))
+const slideBodyRefs = ref<HTMLElement[]>([])
+const segFillRefs = ref<HTMLElement[]>([])
 const ctaRowRef = ref<HTMLElement | null>(null)
 const ctaPrimaryRef = ref<HTMLElement | null>(null)
 const ctaSecondaryRef = ref<HTMLElement | null>(null)
@@ -62,7 +99,6 @@ const railRef = ref<HTMLElement | null>(null)
 const railWrapRef = ref<HTMLElement | null>(null)
 const numeralRef = ref<HTMLElement | null>(null)
 const successRef = ref<HTMLElement | null>(null)
-const lineRefs = ref<HTMLElement[]>([])
 const decorRef = ref<HTMLElement | null>(null)
 
 useMagnetic(ctaPrimaryRef, { strength: 0.2 })
@@ -87,7 +123,114 @@ function goToWork() {
 const clamp = (min: number, max: number, v: number) => Math.min(max, Math.max(min, v))
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t
 
+// --- Text slideshow controller. `holds` pause autoplay (hover, the scroll
+// gallery taking over, hidden tab, hero off-screen); reduced motion never
+// autoplays and swaps instantly. ---
+const holds = { hover: false, scroll: false, hidden: false, away: false }
+let progress: gsap.core.Tween | undefined
+let switching: gsap.core.Timeline | undefined
+let autoplay = false
+
+const syncProgress = () => {
+  if (!progress) return
+  const held = holds.hover || holds.scroll || holds.hidden || holds.away
+  if (held) progress.pause()
+  else progress.resume()
+}
+
+const runProgress = () => {
+  progress?.kill()
+  segFillRefs.value.forEach((el, i) => gsap.set(el, { scaleX: i < activeSlide.value ? 1 : 0 }))
+  if (!autoplay) return
+  const fill = segFillRefs.value[activeSlide.value]
+  if (!fill) return
+  progress = gsap.fromTo(fill, { scaleX: 0 }, {
+    scaleX: 1,
+    duration: SLIDE_MS / 1000,
+    ease: 'none',
+    onComplete: () => goToSlide((activeSlide.value + 1) % slides.length)
+  })
+  syncProgress()
+}
+
+async function goToSlide(n: number) {
+  if (n === activeSlide.value || n < 0 || n >= slides.length) return
+  const from = activeSlide.value
+  switching?.progress(1)
+  leavingSlide.value = from
+  activeSlide.value = n
+  await nextTick()
+  const outLines = slideLineRefs.value[from] ?? []
+  const inLines = slideLineRefs.value[n] ?? []
+  const outBody = slideBodyRefs.value[from]
+  const inBody = slideBodyRefs.value[n]
+  const done = () => {
+    leavingSlide.value = -1
+    runProgress()
+  }
+  if (window.matchMedia(reducedMotionQuery.reduce).matches) {
+    gsap.set(inLines, { yPercent: 0, y: 0 })
+    if (inBody) gsap.set(inBody, { opacity: 1, y: 0 })
+    done()
+    return
+  }
+  const tl = gsap.timeline({ defaults: { ease: approvedEase.gsapStandard }, onComplete: done })
+  tl.to(outLines, { yPercent: -110, duration: 0.55, stagger: 0.05 }, 0)
+  if (outBody) tl.to(outBody, { opacity: 0, y: -10, duration: 0.4 }, 0)
+  tl.fromTo(inLines, { yPercent: 110, y: 0 }, { yPercent: 0, y: 0, duration: motionTier.cinematicMin, stagger: motionStagger.loose, ease: approvedEase.gsapCinematic }, 0.3)
+  if (inBody) tl.fromTo(inBody, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: motionTier.standardMax }, 0.65)
+  switching = tl
+}
+
+const slideshow = {
+  start() {
+    autoplay = !window.matchMedia(reducedMotionQuery.reduce).matches
+    runProgress()
+  }
+}
+
 useGsapContext(() => {
+  // --- Slideshow inputs: hover pause, hidden tab, off-screen, swipe. ---
+  const copy = copyRef.value
+  const stageEl = stageRef.value
+  const inputCleanups: Array<() => void> = []
+  if (copy && stageEl) {
+    const enter = () => { holds.hover = true; syncProgress() }
+    const leave = () => { holds.hover = false; syncProgress() }
+    const vis = () => { holds.hidden = document.hidden; syncProgress() }
+    const io = new IntersectionObserver(([e]) => { holds.away = !e?.isIntersecting; syncProgress() })
+    io.observe(stageEl)
+    let sx = 0
+    let sy = 0
+    const down = (e: PointerEvent) => { sx = e.clientX; sy = e.clientY }
+    const up = (e: PointerEvent) => {
+      if (e.pointerType !== 'touch') return
+      const dx = e.clientX - sx
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(e.clientY - sy)) {
+        goToSlide((activeSlide.value + (dx < 0 ? 1 : slides.length - 1)) % slides.length)
+      }
+    }
+    copy.addEventListener('pointerenter', enter)
+    copy.addEventListener('pointerleave', leave)
+    copy.addEventListener('pointerdown', down, { passive: true })
+    copy.addEventListener('pointerup', up, { passive: true })
+    document.addEventListener('visibilitychange', vis)
+    // Reduced motion has no entrance timeline to hand over: settle now
+    // (static, no autoplay). Otherwise the entrance calls slideshow.start().
+    if (window.matchMedia(reducedMotionQuery.reduce).matches) slideshow.start()
+    inputCleanups.push(() => {
+      copy.removeEventListener('pointerenter', enter)
+      copy.removeEventListener('pointerleave', leave)
+      copy.removeEventListener('pointerdown', down)
+      copy.removeEventListener('pointerup', up)
+      document.removeEventListener('visibilitychange', vis)
+      io.disconnect()
+      progress?.kill()
+      switching?.kill()
+      progress = undefined
+    })
+  }
+
   // --- Entrance (all widths; skipped under reduced motion) ---
   watch(
     pageReady,
@@ -97,11 +240,12 @@ useGsapContext(() => {
       onCleanup(() => mm.revert())
 
       mm.add(reducedMotionQuery.noPreference, () => {
-        const words = lineRefs.value
+        const words = slideLineRefs.value[0] ?? []
+        const firstBody = slideBodyRefs.value[0]
         if (words.length === 0) return
         const floats = chipsRef.value ? Array.from(chipsRef.value.querySelectorAll<HTMLElement>('[data-float]')) : []
         gsap.set(words, { yPercent: 120 })
-        gsap.set([subtextRef.value, ctaRowRef.value].filter(Boolean), { opacity: 0, y: 14 })
+        gsap.set([firstBody, ctaRowRef.value].filter(Boolean), { opacity: 0, y: 14 })
         gsap.set(chipsRef.value, { opacity: 0 })
         gsap.set(floats, { opacity: 0, x: 24 })
         gsap.set(ringRef.value, { opacity: 0, scale: 0.9 })
@@ -109,10 +253,11 @@ useGsapContext(() => {
         const tl = gsap.timeline({ defaults: { ease: approvedEase.gsapStandard } })
         tl.to(ringRef.value, { opacity: 1, scale: 1, duration: motionTier.cinematicMax, ease: approvedEase.gsapCinematic }, 0)
         tl.to(words, { yPercent: 0, duration: motionTier.cinematicMin, stagger: motionStagger.loose }, 0.1)
-        tl.to(subtextRef.value, { opacity: 1, y: 0, duration: motionTier.standardMax }, '-=0.5')
+        tl.to(firstBody ?? {}, { opacity: 1, y: 0, duration: motionTier.standardMax }, '-=0.5')
         tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: motionTier.standardMax }, '-=0.4')
         tl.to(chipsRef.value, { opacity: 1, duration: motionTier.standardMax }, '-=0.3')
         tl.to(floats, { opacity: 1, x: 0, duration: motionTier.cinematicMin, stagger: 0.08, ease: approvedEase.gsapCinematic }, '<')
+        tl.call(() => slideshow.start())
         return () => tl.kill()
       })
     },
@@ -249,6 +394,11 @@ useGsapContext(() => {
       // Ring has faded out by the end of B — stop rendering it (HeroRing skips
       // frames while this flag is set) so the GPU isn't drawing invisible glass.
       if (ringRef.value) ringRef.value.dataset.paused = String(state.b > 0.85)
+      const engaged = state.b > 0.02
+      if (engaged !== holds.scroll) {
+        holds.scroll = engaged
+        syncProgress()
+      }
       const captionOpacity = String(clamp(0, 1, (eB - 0.6) / 0.3) * state.fade)
       if (captionRef.value) captionRef.value.style.opacity = captionOpacity
       // "Success Project" title: arrives with the grown cards, holds through
@@ -385,6 +535,8 @@ useGsapContext(() => {
       cleanups.forEach((fn) => fn())
     }
   })
+
+  return () => inputCleanups.forEach((fn) => fn())
 })
 </script>
 
@@ -415,35 +567,70 @@ useGsapContext(() => {
       <BaseContainer class="relative z-10 w-full desktop:static">
         <div
           ref="copyRef"
-          class="flex flex-col items-center pb-6 pt-28 text-center tablet:pt-32 desktop:absolute desktop:items-start desktop:text-left desktop:left-[max(6vw,calc(50vw-640px))] desktop:top-[15svh] desktop:pb-0 desktop:pt-0"
+          class="flex flex-col items-center pb-6 pt-28 text-center tablet:pt-32 desktop:absolute desktop:z-10 desktop:items-start desktop:text-left desktop:left-[max(6vw,calc(50vw-640px))] desktop:top-[15svh] desktop:pb-0 desktop:pt-0"
         >
+          <!-- Slide control: "● 01 / 02" + one progress segment per slide
+               (fills while the slide is up; click to jump). -->
           <div class="mb-5 flex items-center gap-3 font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(3,60,89,0.78)] desktop:mb-[3svh]">
-            <span class="h-px w-14 bg-[color:rgba(3,60,89,0.4)] desktop:hidden" />
             <span class="h-2 w-2 rounded-full bg-pastiYellow-500 shadow-[0_0_0_4px_rgba(251,186,0,0.18)]" />
-            <span>01 / 04</span>
-            <span class="h-px w-14 bg-[color:rgba(3,60,89,0.4)]" />
+            <span aria-live="polite">{{ pad2(activeSlide + 1) }} / {{ pad2(slides.length) }}</span>
+            <span class="flex items-center gap-1.5">
+              <button
+                v-for="(slide, i) in slides"
+                :key="i"
+                type="button"
+                class="group/seg relative grid h-8 w-10 place-items-center"
+                :aria-label="`Show slide ${i + 1}`"
+                :aria-current="i === activeSlide ? 'true' : undefined"
+                @click="goToSlide(i)"
+              >
+                <span class="relative block h-[3px] w-full overflow-hidden rounded-full bg-[color:rgba(3,60,89,0.16)] transition-colors group-hover/seg:bg-[color:rgba(3,60,89,0.3)]">
+                  <span :ref="(el) => { if (el) segFillRefs[i] = el as HTMLElement }" class="absolute inset-0 origin-left scale-x-0 rounded-full bg-slateNavy" />
+                </span>
+              </button>
+            </span>
           </div>
 
-          <h1
-            ref="headingRef"
-            class="font-display text-[length:clamp(46px,13.5vw,84px)] font-bold leading-[0.9] tracking-[-0.045em] text-slateNavy desktop:text-[length:clamp(64px,min(7.2vw,11.5svh),128px)]"
-          >
-            <span
-              v-for="(word, i) in headlineWords"
-              :key="word"
-              class="-mb-[0.14em] block overflow-clip pb-[0.14em]"
-              :class="i === 1 ? 'desktop:pl-[0.32em]' : i === 2 ? 'desktop:pl-[0.62em]' : ''"
-            >
-              <span :ref="(el) => { if (el) lineRefs[i] = el as HTMLElement }" class="inline-block">{{ word.slice(0, -1) }}<span class="text-pastiYellow-500">.</span></span>
-            </span>
-          </h1>
+          <!-- Accessible title = the active slide; visual titles are hidden from AT. -->
+          <h1 class="sr-only">{{ slides[activeSlide]!.lines.join(' ') }}</h1>
 
-          <p
-            ref="subtextRef"
-            class="mx-auto mt-6 max-w-[25rem] text-token-body-large font-medium desktop:mx-0 text-[color:rgba(3,60,89,0.86)] desktop:ml-[0.9em] desktop:mt-[3svh] desktop:max-w-[27rem] desktop:text-[17px] desktop:leading-[1.6]"
-          >
-            {{ subtext }}
-          </p>
+          <!-- Slides stacked in one grid cell: the block keeps the taller
+               slide's height, so CTAs never jump between slides. -->
+          <div class="grid w-full touch-pan-y desktop:w-auto">
+            <div
+              v-for="(slide, si) in slides"
+              :key="si"
+              class="[grid-area:1/1]"
+              :class="si === activeSlide || si === leavingSlide ? '' : 'invisible'"
+              :aria-hidden="si === activeSlide ? undefined : 'true'"
+              :inert="si === activeSlide ? undefined : true"
+            >
+              <p
+                aria-hidden="true"
+                class="font-display font-bold leading-[0.9] tracking-[-0.045em] text-slateNavy"
+                :class="slide.compact
+                  ? 'text-[length:clamp(36px,10vw,64px)] desktop:text-[length:clamp(44px,min(4.4vw,8svh),80px)]'
+                  : 'text-[length:clamp(46px,13.5vw,84px)] desktop:text-[length:clamp(64px,min(7.2vw,11.5svh),128px)]'"
+              >
+                <span
+                  v-for="(line, i) in slide.lines"
+                  :key="line"
+                  class="-mb-[0.14em] block overflow-clip pb-[0.14em]"
+                  :class="i === 1 ? 'desktop:pl-[0.32em]' : i === 2 ? 'desktop:pl-[0.62em]' : ''"
+                >
+                  <span :ref="(el) => { if (el) slideLineRefs[si]![i] = el as HTMLElement }" class="inline-block" :class="si === 0 ? '' : 'translate-y-[110%]'"><template v-for="part in [lineParts(line, slide.highlight)]" :key="line">{{ part.before }}<span v-if="part.mark" class="relative isolate inline-block"><span aria-hidden="true" class="absolute -inset-x-[0.06em] bottom-[0.1em] -z-10 h-[0.36em] rounded-[4px] bg-pastiYellow-500" />{{ part.mark }}</span>{{ part.after }}<span v-if="part.dot" class="text-pastiYellow-500">.</span></template></span>
+                </span>
+              </p>
+
+              <p
+                :ref="(el) => { if (el) slideBodyRefs[si] = el as HTMLElement }"
+                class="mx-auto mt-6 max-w-[25rem] text-token-body-large font-medium text-[color:rgba(3,60,89,0.86)] desktop:mx-0 desktop:ml-[0.9em] desktop:mt-[3svh] desktop:max-w-[27rem] desktop:text-[17px] desktop:leading-[1.6]"
+                :class="si === 0 ? '' : 'opacity-0'"
+              >
+                {{ slide.body }}
+              </p>
+            </div>
+          </div>
 
           <!-- CTAs: a yellow orb inside a white halo leading a glass pill
                (primary), then a quiet text link (secondary, WhatsApp). -->
@@ -505,6 +692,18 @@ useGsapContext(() => {
             </circle>
           </g>
         </svg>
+        <!-- Touch devices: the knot's pre-rendered image ships in the server
+             HTML (paints with the text, no three.js); HeroRing then skips. -->
+        <img
+          src="/images/hero-knot.webp"
+          alt=""
+          width="960"
+          height="960"
+          fetchpriority="high"
+          decoding="async"
+          draggable="false"
+          class="hero-knot-img hero-knot-touch absolute inset-0 h-full w-full select-none object-contain"
+        >
         <ClientOnly>
           <HomeHeroRing />
         </ClientOnly>
@@ -636,29 +835,6 @@ useGsapContext(() => {
 [data-reduced-motion='true'] .hero-gallery,
 [data-reduced-motion='true'] .hero-orbit-dot {
   display: none;
-}
-
-/* Out-of-focus PASTI Yellow forms at the frame edges. */
-.hero-blur {
-  background: radial-gradient(closest-side, rgba(253, 200, 31, 0.95), rgba(251, 186, 0, 0.6) 55%, rgba(251, 186, 0, 0) 100%);
-  filter: blur(36px);
-  opacity: 0.75;
-}
-.hero-blur--soft {
-  filter: blur(26px);
-  opacity: 0.55;
-}
-/* On phones the copy sits over the left edge forms — keep them quieter. */
-@media (max-width: 1023px) {
-  .hero-blur {
-    opacity: 0.4;
-  }
-}
-
-.hero-pearl {
-  border-radius: 9999px;
-  background: radial-gradient(circle at 32% 28%, #ffffff 0%, #f1f4f7 32%, #c9d3dc 72%, #e9eef2 100%);
-  box-shadow: 0 14px 26px -12px rgba(3, 60, 89, 0.35), inset -3px -4px 8px rgba(3, 60, 89, 0.12);
 }
 
 /* Scroll cue: the wheel dot travels down and resets (motion only). */

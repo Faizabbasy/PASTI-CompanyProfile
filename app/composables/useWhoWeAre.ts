@@ -35,9 +35,9 @@ export function useWhoWeAre() {
   ]
 
   const portraits: WhoWeArePortrait[] = [
-    { src: '/images/people/who-01.png', alt: 'Smiling PASTI client holding a tablet and coffee', tag: 'Client · 01' },
-    { src: '/images/people/who-02.png', alt: 'Smiling PASTI client in a yellow jacket', tag: 'Client · 02' },
-    { src: '/images/people/who-03.png', alt: 'Happy PASTI client making an OK sign', tag: 'Client · 03' }
+    { src: '/images/people/who-01.webp', alt: 'Smiling PASTI client holding a tablet and coffee', tag: 'Client · 01' },
+    { src: '/images/people/who-02.webp', alt: 'Smiling PASTI client in a yellow jacket', tag: 'Client · 02' },
+    { src: '/images/people/who-03.webp', alt: 'Happy PASTI client making an OK sign', tag: 'Client · 03' }
   ]
 
   const clientStat: WhoWeAreStat = { value: 130, suffix: '+', label: 'Happy clients' }
@@ -46,7 +46,7 @@ export function useWhoWeAre() {
     kicker: "Let's Development",
     panelTitle: 'Work With Us',
     panelBody: 'Together we build your product.',
-    portrait: { src: '/images/people/work-with-us.png', alt: 'Smiling woman holding a laptop' },
+    portrait: { src: '/images/people/work-with-us.webp', alt: 'Smiling woman holding a laptop' },
     title: 'Trusted Partner',
     body: 'for Technology and Creative Marketing, delivering impactful growth.',
     stats: [

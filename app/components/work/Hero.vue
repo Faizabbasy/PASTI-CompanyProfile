@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 
-// WORK HERO — the portfolio as a physical deck. Six real project posters sit
+// WORK HERO — on the shared page-hero system (2026-10-05: light ground,
+// title scale, marker and CTAs shared with the homepage hero). The portfolio as a physical deck. Six real project posters sit
 // stacked; moving the pointer across the stage fans the deck open (further
 // right = wider fan), the hovered card lifts out, and clicking a card jumps
 // to that project in the index. Touch: the deck rests half-open and each tap
@@ -13,6 +14,15 @@ const stageRef = ref<HTMLElement | null>(null)
 const cardRefs = ref<HTMLElement[]>([])
 const hovered = ref<number | null>(null)
 const { setState } = useCustomCursor()
+
+const { link: whatsappLink } = useWhatsapp()
+const toIndex = () => {
+  const el = document.getElementById('work-index')
+  if (!el) return
+  const lenis = getLenisInstance()
+  if (lenis) lenis.scrollTo(el, { duration: 1.4 })
+  else el.scrollIntoView({ behavior: 'smooth' })
+}
 
 const jump = (i: number) => {
   const el = document.getElementById(`work-${projects[i]!.index}`)
@@ -95,29 +105,25 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <section ref="stageRef" class="surface-light relative isolate flex flex-col overflow-hidden pb-10 pt-28 desktop:min-h-[100svh] desktop:pt-32" style="--lift-x: 70%; --lift-y: 40%">
+  <section ref="stageRef" class="surface-light relative isolate flex flex-col overflow-hidden pb-14 pt-28 desktop:min-h-[100svh] desktop:pt-32" style="--lift-x: 70%; --lift-y: 40%">
     <BaseGridLines tone="light" />
-    <BaseContainer class="relative z-10 flex flex-1 flex-col">
-      <BaseSectionMark surface="light" label="Work" :meta="`${pad(projects.length)} projects · ${pad(caseFiles.length)} case files`" />
-
-      <div class="grid flex-1 items-center gap-6 py-6 desktop:grid-cols-12 desktop:gap-10 desktop:py-10">
+    <BaseContainer class="relative z-10 flex flex-1 flex-col desktop:justify-center">
+      <div class="grid items-center gap-6 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-6">
-          <h1 class="font-display text-[length:clamp(56px,10vw,176px)] font-extrabold leading-[0.88] tracking-[-0.055em] text-slateNavy">
+          <div data-wh-fade><BaseHeroMarker label="Work" :meta="`${pad(projects.length)} projects · ${pad(caseFiles.length)} case files`" /></div>
+          <h1 class="hero-title mt-6 desktop:mt-[3svh]">
             <span class="wh-mask block"><span data-wh-word class="inline-block">Selected</span></span>
             <span class="wh-mask block"><span data-wh-word class="inline-block">work<span class="text-pastiYellow-500">.</span></span></span>
           </h1>
-          <p data-wh-fade class="m-center mt-8 max-w-[42ch] text-token-body-large text-[color:rgba(3,60,89,0.72)]">
+          <p data-wh-fade class="hero-lede m-center mt-6 desktop:mt-[3svh]">
             A closer look at how we work with our clients — real projects, from the brief to the result that's running today.
           </p>
-          <div data-wh-fade class="mt-8 hidden gap-12 border-t tablet:flex border-[color:rgba(3,60,89,0.14)] pt-6">
-            <div>
-              <p class="font-display text-[52px] font-extrabold leading-none tracking-[-0.05em] text-slateNavy">{{ pad(projects.length) }}</p>
-              <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">Selected projects</p>
-            </div>
-            <div>
-              <p class="font-display text-[52px] font-extrabold leading-none tracking-[-0.05em] text-slateNavy">{{ pad(caseFiles.length) }}</p>
-              <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">Case files</p>
-            </div>
+          <div data-wh-fade class="mt-8 desktop:mt-[4svh]">
+            <BaseHeroCtas
+              :primary="{ label: 'Browse projects' }"
+              :secondary="{ label: 'Tell us about it', href: whatsappLink }"
+              @primary="toIndex"
+            />
           </div>
         </div>
 

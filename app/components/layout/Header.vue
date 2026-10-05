@@ -235,21 +235,23 @@ useGsapContext(() => {
     />
     <div class="container-page relative h-full">
       <div class="flex h-full items-center px-5 md:px-7">
-        <div ref="logoRef" class="transition-transform duration-300 ease-editorial hover:scale-[1.03]">
+        <div ref="logoRef" class="shrink-0 transition-transform duration-300 ease-editorial hover:scale-[1.03]">
           <LayoutLogo :inverted="darkMode" />
         </div>
 
-        <nav ref="navRef" class="header-nav ml-auto hidden items-center gap-10 lg:flex">
+        <!-- 9 items since the platform labels returned (2026-10-06): the gap
+             steps down below `wide` so the bar fits from 1024px. -->
+        <nav ref="navRef" class="header-nav ml-auto hidden items-center gap-5 pl-6 lg:flex xl:gap-7 wide:gap-10">
           <LayoutNavLink v-for="item in navItems" :key="item.to" :item="item" :dark="darkMode" />
         </nav>
 
-        <div ref="ctaRef" class="ml-10 hidden lg:block">
+        <div ref="ctaRef" class="ml-6 hidden shrink-0 lg:block wide:ml-10">
           <div ref="ctaLinkRef" class="inline-block">
             <a
               :href="whatsappLink"
               target="_blank"
               rel="noopener noreferrer"
-              class="btn-primary !rounded-[14px] !bg-slateNavy !text-pureWhite hover:!bg-pastiYellow-500 hover:!text-slateNavy"
+              class="btn-primary whitespace-nowrap !rounded-[14px] !bg-slateNavy !text-pureWhite hover:!bg-pastiYellow-500 hover:!text-slateNavy"
               :class="{ 'ring-1 ring-[color:rgba(255,255,255,0.35)]': darkMode }"
             >
               {{ primaryCta.label }}

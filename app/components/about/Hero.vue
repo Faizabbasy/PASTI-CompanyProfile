@@ -6,7 +6,8 @@ if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-// ABOUT HERO — the brand promise performed. "complexity" enters as scattered,
+// ABOUT HERO — on the shared page-hero system (2026-10-05: light ground,
+// title scale, marker and CTAs shared with the homepage hero). The brand promise performed. "complexity" enters as scattered,
 // tilted letters over a scattered stroke field; scrolling (a short pin)
 // straightens every letter and aligns the whole field into the precision
 // grid, while "certainty." gets its PASTI Yellow marker. The pointer orders
@@ -18,6 +19,15 @@ const lead = 'We turn'
 const chaosWord = 'complexity'
 const tail = 'into certainty'
 void promise
+
+const { link: whatsappLink } = useWhatsapp()
+const toManifesto = () => {
+  const el = document.getElementById('about-manifesto')
+  if (!el) return
+  const lenis = getLenisInstance()
+  if (lenis) lenis.scrollTo(el, { duration: 1.4 })
+  else el.scrollIntoView({ behavior: 'smooth' })
+}
 
 const rootRef = ref<HTMLElement | null>(null)
 const order = ref(0)
@@ -88,10 +98,9 @@ useGsapContext(() => {
     <div aria-hidden="true" class="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(246,249,251,0.92)_0%,rgba(246,249,251,0.6)_45%,rgba(246,249,251,0)_75%)]" />
 
     <BaseContainer class="pointer-events-none relative z-10 flex flex-1 flex-col">
-      <BaseSectionMark surface="light" :label="eyebrow" meta="Brand foundation" />
-
-      <div class="flex flex-1 flex-col justify-center py-12">
-        <h1 class="m-center font-display text-[length:clamp(48px,9vw,152px)] font-extrabold leading-[0.92] tracking-[-0.05em] text-slateNavy" :aria-label="promise">
+      <div class="m-center flex flex-1 flex-col justify-center py-12">
+        <div data-ah-fade><BaseHeroMarker :label="eyebrow" meta="Brand foundation" /></div>
+        <h1 class="hero-title m-center mt-6 desktop:mt-[3svh]" :aria-label="promise">
           <span class="ah-mask block" aria-hidden="true"><span data-ah-word class="inline-block">{{ lead }}</span></span>
           <span class="block py-[0.06em]" aria-hidden="true">
             <span data-ah-fade class="inline-block">
@@ -106,6 +115,13 @@ useGsapContext(() => {
             </span>
           </span>
         </h1>
+        <div data-ah-fade class="pointer-events-auto mt-8 desktop:mt-[4.5svh]">
+          <BaseHeroCtas
+            :primary="{ label: 'Work with us', href: whatsappLink }"
+            :secondary="{ label: 'How PASTI works', down: true }"
+            @secondary="toManifesto"
+          />
+        </div>
       </div>
 
       <div class="m-center grid gap-6 border-t border-[color:rgba(3,60,89,0.16)] pt-6 tablet:grid-cols-3 desktop:grid-cols-12 desktop:items-end">

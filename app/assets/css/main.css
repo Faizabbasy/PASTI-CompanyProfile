@@ -423,3 +423,134 @@ html {
     text-align: center;
   }
 }
+
+/* ---- Page hero system (owner/boss feedback 2026-10-05): every hero shares
+   the homepage's language — one title scale, one lede, the soft PASTI
+   Yellow atmosphere. Secondary page titles are sentences (2-3 lines), so they
+   sit clearly below the homepage title: home ≈ 103px @1440 / 53px @390,
+   pages ≈ 66px / 37px (boss feedback: page heroes read too big). ---- */
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  color: #033c59;
+  font-size: clamp(32px, 9.5vw, 52px);
+}
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: clamp(44px, min(4.6vw, 8svh), 76px);
+  }
+}
+/* Single-word masthead (Insights): a notch larger so its poster fill reads. */
+.hero-title--word {
+  font-size: clamp(46px, 14vw, 68px);
+}
+@media (min-width: 1024px) {
+  .hero-title--word {
+    font-size: clamp(56px, min(6.2vw, 10.5svh), 92px);
+  }
+}
+.hero-lede {
+  font-size: 17px;
+  line-height: 1.6;
+  font-weight: 500;
+  color: rgba(3, 60, 89, 0.86);
+  max-width: 27rem;
+}
+/* Page heroes keep their own grounds (owner decision): navy and yellow. */
+.hero-title--dark {
+  color: #fff;
+}
+.hero-lede--dark {
+  color: rgba(255, 255, 255, 0.78);
+}
+.hero-lede--strong {
+  color: #033c59;
+}
+
+/* Out-of-focus PASTI Yellow forms at the frame edges. */
+.hero-blur {
+  background: radial-gradient(closest-side, rgba(253, 200, 31, 0.95), rgba(251, 186, 0, 0.6) 55%, rgba(251, 186, 0, 0) 100%);
+  filter: blur(36px);
+  opacity: 0.75;
+}
+.hero-blur--soft {
+  filter: blur(26px);
+  opacity: 0.55;
+}
+/* On phones the copy sits over the left edge forms — keep them quieter. */
+@media (max-width: 1023px) {
+  .hero-blur {
+    opacity: 0.4;
+  }
+}
+
+.hero-pearl {
+  border-radius: 9999px;
+  background: radial-gradient(circle at 32% 28%, #ffffff 0%, #f1f4f7 32%, #c9d3dc 72%, #e9eef2 100%);
+  box-shadow: 0 14px 26px -12px rgba(3, 60, 89, 0.35), inset -3px -4px 8px rgba(3, 60, 89, 0.12);
+}
+
+
+/* ---- Lite tier (mid/low-end devices; see useDeviceTier.ts). Same design,
+   cheaper paint: no full-screen blend layer, no live blur filters, no
+   backdrop sampling. Keyed off both the coarse-pointer media query (works
+   before hydration) and <html data-lite> (low-core / low-memory desktops). */
+@media (pointer: coarse) {
+  .grain-overlay,
+  .ambient-light {
+    display: none !important;
+  }
+  .hero-blur,
+  .hero-blur--soft {
+    filter: none;
+    opacity: 0.45;
+  }
+  .backdrop-blur-sm,
+  .backdrop-blur-md,
+  .backdrop-blur {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+}
+[data-lite='true'] .grain-overlay,
+[data-lite='true'] .ambient-light {
+  display: none !important;
+}
+[data-lite='true'] .hero-blur,
+[data-lite='true'] .hero-blur--soft {
+  filter: none;
+  opacity: 0.45;
+}
+[data-lite='true'] .backdrop-blur-sm,
+[data-lite='true'] .backdrop-blur-md,
+[data-lite='true'] .backdrop-blur,
+[data-lite='true'] .hero-arrow {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* Hero knot image (lite tier): only shown on touch devices from the server
+   HTML; a slow CSS float keeps it alive at near-zero cost. */
+.hero-knot-touch {
+  display: none;
+}
+@media (pointer: coarse) {
+  .hero-knot-touch {
+    display: block;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-knot-img {
+    animation: hero-knot-float 9s ease-in-out infinite alternate;
+  }
+}
+@keyframes hero-knot-float {
+  from {
+    transform: translate3d(0, -1.5%, 0) rotate(-3deg);
+  }
+  to {
+    transform: translate3d(0, 1.5%, 0) rotate(3deg);
+  }
+}

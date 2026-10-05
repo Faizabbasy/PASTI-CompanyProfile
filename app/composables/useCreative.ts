@@ -37,52 +37,52 @@ export function useCreative() {
       index: '01',
       title: 'Creative Communication',
       body: 'Strategy turned into communication that builds attention, trust, and lasting brand impact.',
-      image: '/images/insights/creative-and-brand.png'
+      image: '/images/insights/creative-and-brand.webp'
     },
     {
       index: '02',
       title: 'Integrated Campaign Strategy',
       body: 'Campaigns planned across channels from a single strategy, so every touchpoint pulls in the same direction.',
-      image: '/images/selected-work/pertamina.png'
+      image: '/images/selected-work/pertamina.webp'
     },
     {
       index: '03',
       title: 'Social Media Playbooks & Management',
       body: 'Content systems and day-to-day management built to keep your brand consistent and active where your audience is.',
-      image: '/images/insights/ideas-that-move-business.png'
+      image: '/images/insights/ideas-that-move-business.webp'
     },
     {
       index: '04',
       title: 'Vertical Video Development',
       body: 'Short-form video built for how people actually watch today, from concept to a finished, platform-ready cut.',
-      image: '/images/selected-work/powerhours.png'
+      image: '/images/selected-work/powerhours.webp'
     },
     {
       index: '05',
       title: 'Production House Services',
       body: 'Full production support — shoot, edit, and post — for campaigns and content that need to look and feel premium.',
-      image: '/images/selected-work/octo-mobile.png'
+      image: '/images/selected-work/octo-mobile.webp'
     },
     {
       index: '06',
       title: 'Brand Identity & UI/UX Design',
       body: 'Visual identity and product design built together, so your brand feels the same everywhere someone meets it.',
-      image: '/images/insights/digital-product-ux.png'
+      image: '/images/insights/digital-product-ux.webp'
     }
   ]
 
   // Studio wall: existing PASTI-made visuals (project posters + insight
   // artwork). Labels are the project / article names already used on the site.
   const visuals: CreativeVisual[] = [
-    { src: '/images/selected-work/pertamina.png', label: 'Pertamina — Energi Untuk Negeri' },
-    { src: '/images/insights/creative-and-brand.png', label: 'Creative & Brand' },
-    { src: '/images/selected-work/octo-mobile.png', label: 'OCTO Mobile — CIMB Niaga' },
-    { src: '/images/insights/ideas-that-move-business.png', label: 'Ideas That Move Business' },
-    { src: '/images/selected-work/hdi-healthy-lifestyle.png', label: 'HDI Healthy Lifestyle' },
-    { src: '/images/insights/digital-product-ux.png', label: 'Digital Product & UX' },
-    { src: '/images/selected-work/powerhours.png', label: 'PowerHours' },
-    { src: '/images/selected-work/ikea-indonesia.png', label: 'IKEA Indonesia' },
-    { src: '/images/insights/future-of-business.png', label: 'The Future of Business' }
+    { src: '/images/selected-work/pertamina.webp', label: 'Pertamina — Energi Untuk Negeri' },
+    { src: '/images/insights/creative-and-brand.webp', label: 'Creative & Brand' },
+    { src: '/images/selected-work/octo-mobile.webp', label: 'OCTO Mobile — CIMB Niaga' },
+    { src: '/images/insights/ideas-that-move-business.webp', label: 'Ideas That Move Business' },
+    { src: '/images/selected-work/hdi-healthy-lifestyle.webp', label: 'HDI Healthy Lifestyle' },
+    { src: '/images/insights/digital-product-ux.webp', label: 'Digital Product & UX' },
+    { src: '/images/selected-work/powerhours.webp', label: 'PowerHours' },
+    { src: '/images/selected-work/ikea-indonesia.webp', label: 'IKEA Indonesia' },
+    { src: '/images/insights/future-of-business.webp', label: 'The Future of Business' }
   ]
 
   return { eyebrow, heading, introBody, servicesEyebrow, servicesHeading, services, visuals }

@@ -47,7 +47,7 @@ export function useSelectedWork() {
       title: 'IKEA Indonesia',
       category: 'Omnichannel E-Commerce',
       description: 'An interactive web and mobile shopping experience connecting inspiration, products and people — from shop-by-room browsing to a seamless checkout journey.',
-      image: '/images/selected-work/ikea-indonesia.png',
+      image: '/images/selected-work/ikea-indonesia.webp',
       status: 'existing-unverified',
       // Opener gets its own pacing per spec (04-homepage-spec.md §3).
       treatment: 'slower-showcase'
@@ -57,7 +57,7 @@ export function useSelectedWork() {
       title: 'JM-Click — Jasa Marga',
       category: 'Enterprise Platform',
       description: 'An integrated dashboard and mobile app digitalizing operations across Jasa Marga Group — real-time traffic, toll transactions, maintenance and incidents in one place.',
-      image: '/images/selected-work/jm-click.png',
+      image: '/images/selected-work/jm-click.webp',
       status: 'existing-unverified',
       treatment: 'standard'
     },
@@ -66,7 +66,7 @@ export function useSelectedWork() {
       title: 'PowerHours',
       category: 'Fitness & Wellness App',
       description: 'A digital wellness companion with personalized workout plans, nutrition tracking and progress insights that help people move better and live healthier.',
-      image: '/images/selected-work/powerhours.png',
+      image: '/images/selected-work/powerhours.webp',
       status: 'existing-unverified',
       // Pattern break roughly mid-sequence — media-dominant widens the visual proof.
       treatment: 'media-dominant'
@@ -76,7 +76,7 @@ export function useSelectedWork() {
       title: 'HDI Healthy Lifestyle',
       category: 'Employee Wellness Platform',
       description: 'An employee wellness app that makes healthy habits engaging — activity tracking, step challenges, reward points and personal insights.',
-      image: '/images/selected-work/hdi-healthy-lifestyle.png',
+      image: '/images/selected-work/hdi-healthy-lifestyle.webp',
       status: 'existing-unverified',
       treatment: 'standard'
     },
@@ -85,7 +85,7 @@ export function useSelectedWork() {
       title: 'Pertamina',
       category: 'Corporate Campaign',
       description: 'The “Energi Untuk Negeri” campaign — a digital presence connecting Pertamina with communities across Indonesia through stories of energy, innovation and sustainability.',
-      image: '/images/selected-work/pertamina.png',
+      image: '/images/selected-work/pertamina.webp',
       status: 'existing-unverified',
       treatment: 'accelerated'
     },
@@ -94,7 +94,7 @@ export function useSelectedWork() {
       title: 'OCTO Mobile — CIMB Niaga',
       category: 'Mobile Banking',
       description: 'A digital banking experience for CIMB Niaga’s OCTO Mobile — seamless transactions, smarter money management and better everyday banking.',
-      image: '/images/selected-work/octo-mobile.png',
+      image: '/images/selected-work/octo-mobile.webp',
       status: 'existing-unverified',
       // Closer gets its own pacing per spec, distinct from mid-sequence Standard.
       treatment: 'closing'

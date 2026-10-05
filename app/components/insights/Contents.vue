@@ -45,7 +45,7 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <section class="relative bg-pureWhite py-20 tablet:py-28">
+  <section id="insights-contents" class="relative bg-pureWhite py-20 tablet:py-28">
     <BaseContainer>
       <div class="flex flex-col gap-6 desktop:flex-row desktop:items-end desktop:justify-between">
         <div>

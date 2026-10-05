@@ -75,7 +75,7 @@ export function useInsights() {
     {
       index: '01',
       title: 'Cybersecurity: Protect What Matters. Build With Confidence.',
-      image: '/images/insights/cybersecurity-compliance.png',
+      image: '/images/insights/cybersecurity-compliance.webp',
       role: 'featured',
       status: 'existing-unverified',
       page: {
@@ -90,7 +90,7 @@ export function useInsights() {
     {
       index: '02',
       title: 'Enterprise Technology',
-      image: '/images/insights/enterprise-technology.png',
+      image: '/images/insights/enterprise-technology.webp',
       role: 'supporting',
       status: 'existing-unverified',
       page: {
@@ -104,7 +104,7 @@ export function useInsights() {
     {
       index: '03',
       title: 'AI & Digital Transformation',
-      image: '/images/insights/ai-digital-transformation.png',
+      image: '/images/insights/ai-digital-transformation.webp',
       role: 'supporting',
       status: 'existing-unverified',
       page: {
@@ -118,7 +118,7 @@ export function useInsights() {
     {
       index: '04',
       title: 'The Future of Business: Innovate Today. Lead Tomorrow.',
-      image: '/images/insights/future-of-business.png',
+      image: '/images/insights/future-of-business.webp',
       role: 'supporting',
       status: 'existing-unverified',
       page: {
@@ -133,7 +133,7 @@ export function useInsights() {
     {
       index: '05',
       title: 'Creative & Brand',
-      image: '/images/insights/creative-and-brand.png',
+      image: '/images/insights/creative-and-brand.webp',
       role: 'supporting',
       status: 'existing-unverified',
       page: {
@@ -147,7 +147,7 @@ export function useInsights() {
     {
       index: '06',
       title: 'Ideas That Move Business Forward.',
-      image: '/images/insights/ideas-that-move-business.png',
+      image: '/images/insights/ideas-that-move-business.webp',
       role: 'supporting',
       status: 'existing-unverified',
       page: {
@@ -161,7 +161,7 @@ export function useInsights() {
     {
       index: '07',
       title: 'Digital Product & UX',
-      image: '/images/insights/digital-product-ux.png',
+      image: '/images/insights/digital-product-ux.webp',
       role: 'supporting',
       status: 'existing-unverified',
       page: {

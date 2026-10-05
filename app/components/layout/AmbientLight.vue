@@ -11,6 +11,6 @@ useAmbientLight(canvasRef)
   <canvas
     ref="canvasRef"
     aria-hidden="true"
-    class="pointer-events-none fixed inset-0 z-[5] hidden motion-safe:block"
+    class="ambient-light pointer-events-none fixed inset-0 z-[5] hidden motion-safe:block"
   />
 </template>

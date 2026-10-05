@@ -37,6 +37,8 @@ useLenis()
 if (import.meta.client) {
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   document.documentElement.dataset.reducedMotion = String(prefersReducedMotion)
+  // Performance tier for mid/low-end devices (see useDeviceTier.ts).
+  document.documentElement.dataset.lite = String(isLiteDevice())
 }
 
 // Every ScrollTrigger created during initial mount (Hero, WhatWeDo, Service

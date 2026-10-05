@@ -12,13 +12,13 @@ export interface TrustedClient {
  */
 export function useTrustedClients() {
   const clients: TrustedClient[] = [
-    { name: 'Google', logo: '/logos/google.png' },
-    { name: 'Microsoft', logo: '/logos/microsoft.png' },
-    { name: 'Meta', logo: '/logos/meta.png' },
-    { name: 'Shopify', logo: '/logos/shopify.png' },
-    { name: 'Shopee', logo: '/logos/shopee.png' },
-    { name: 'TikTok', logo: '/logos/tiktok.jpg' },
-    { name: 'WordPress', logo: '/logos/wordpress.png' }
+    { name: 'Google', logo: '/logos/google.webp' },
+    { name: 'Microsoft', logo: '/logos/microsoft.webp' },
+    { name: 'Meta', logo: '/logos/meta.webp' },
+    { name: 'Shopify', logo: '/logos/shopify.webp' },
+    { name: 'Shopee', logo: '/logos/shopee.webp' },
+    { name: 'TikTok', logo: '/logos/tiktok.webp' },
+    { name: 'WordPress', logo: '/logos/wordpress.webp' }
   ]
 
   return { clients }

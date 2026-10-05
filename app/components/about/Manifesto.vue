@@ -60,7 +60,7 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <section ref="sectionRef" class="surface-light relative overflow-hidden py-24 tablet:py-36" style="--lift-x: 10%; --lift-y: 80%">
+  <section id="about-manifesto" ref="sectionRef" class="surface-light relative overflow-hidden py-24 tablet:py-36" style="--lift-x: 10%; --lift-y: 80%">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
       <div class="m-center grid gap-10 desktop:grid-cols-12">

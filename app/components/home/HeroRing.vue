@@ -14,6 +14,11 @@ import gsap from 'gsap'
 
 const hostRef = ref<HTMLElement | null>(null)
 const failed = ref(false)
+// Lite tier (mid/low-end devices, see useDeviceTier.ts): show the knot's
+// pre-rendered image (public/images/hero-knot.webp, captured from this very
+// scene) instead of loading three.js (~865 KB) and compiling a transmission
+// shader. A slow CSS float keeps it alive at near-zero cost.
+const lite = ref(false)
 
 let cleanup: (() => void) | undefined
 let disposed = false
@@ -21,6 +26,12 @@ let disposed = false
 onMounted(async () => {
   const host = hostRef.value
   if (!host) return
+
+  if (isLiteDevice()) {
+    // Touch devices already show the server-rendered image (Hero.vue).
+    lite.value = !window.matchMedia('(pointer: coarse)').matches
+    return
+  }
 
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const isSmall = window.matchMedia('(max-width: 1023px)').matches
@@ -179,6 +190,17 @@ onBeforeUnmount(() => {
 
 <template>
   <div ref="hostRef" aria-hidden="true" class="relative h-full w-full">
+    <img
+      v-if="lite"
+      src="/images/hero-knot.webp"
+      alt=""
+      width="960"
+      height="960"
+      decoding="async"
+      fetchpriority="high"
+      draggable="false"
+      class="hero-knot-img absolute inset-0 h-full w-full select-none object-contain"
+    >
     <!-- Fallback only if WebGL is unavailable: a flat gradient ring. -->
     <div
       v-if="failed"

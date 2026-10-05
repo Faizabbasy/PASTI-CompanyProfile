@@ -97,9 +97,10 @@ onMounted(() => {
 
   let raf = 0
   let running = false
+  const gate = createFrameGate()
   const loop = () => {
     time += 1 / 60
-    draw()
+    if (gate()) draw()
     raf = requestAnimationFrame(loop)
   }
   const start = () => {

@@ -33,7 +33,7 @@ const dotCut = {
     :style="{ height: height ? `${height}px` : undefined, aspectRatio: '1205 / 527' }"
   >
     <img
-      src="/images/pasti-logo.png"
+      src="/images/pasti-logo.webp"
       alt=""
       draggable="false"
       class="h-full w-auto max-w-none"

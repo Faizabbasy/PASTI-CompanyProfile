@@ -33,37 +33,37 @@ export function useTechnology() {
       index: '01',
       title: 'Technology Development',
       body: 'Modern web and mobile products built on solid architecture, from first line of code to production-ready release.',
-      image: '/images/selected-work/ikea-indonesia.png'
+      image: '/images/selected-work/ikea-indonesia.webp'
     },
     {
       index: '02',
       title: 'Custom Built AI Solutions',
       body: 'Bespoke AI systems designed around your workflow, from internal automation to customer-facing intelligent features.',
-      image: '/images/insights/ai-digital-transformation.png'
+      image: '/images/insights/ai-digital-transformation.webp'
     },
     {
       index: '03',
       title: 'Enterprise Platforms',
       body: 'Scalable systems built to handle real operational load, integrated with the tools your business already runs on.',
-      image: '/images/selected-work/jm-click.png'
+      image: '/images/selected-work/jm-click.webp'
     },
     {
       index: '04',
       title: 'Mobile App Development & MVP',
       body: 'From validated idea to shipped product, built lean and fast without cutting corners on quality.',
-      image: '/images/selected-work/powerhours.png'
+      image: '/images/selected-work/powerhours.webp'
     },
     {
       index: '05',
       title: 'Cybersecurity & Compliance Architecture',
       body: 'Security built into the foundation, not bolted on after — protecting your systems and meeting compliance from day one.',
-      image: '/images/insights/cybersecurity-compliance.png'
+      image: '/images/insights/cybersecurity-compliance.webp'
     },
     {
       index: '06',
       title: 'System Maintenance & SLA Support',
       body: 'Ongoing care and guaranteed response times, so what we build keeps running long after launch.',
-      image: '/images/insights/enterprise-technology.png'
+      image: '/images/insights/enterprise-technology.webp'
     }
   ]
 

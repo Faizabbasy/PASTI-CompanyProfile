@@ -69,7 +69,7 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <section class="relative bg-pureWhite py-24 tablet:py-32">
+  <section id="work-index" class="relative bg-pureWhite py-24 tablet:py-32">
     <BaseContainer>
       <BaseSectionMark surface="light" label="Index" meta="Filter · Grid / List" />
 
