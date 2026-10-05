@@ -29,7 +29,10 @@ export function useLenis() {
     easing: (t) => 1 - Math.pow(1 - t, 3),
     smoothWheel: true,
     wheelMultiplier: 1,
-    syncTouch: true
+    // Touch stays 100% native (owner request 2026-10-05): with syncTouch the
+    // finger's scroll was eased and fought the horizontal snap rails on
+    // phones. Wheel/trackpad smoothing on desktop is unchanged.
+    syncTouch: false
   })
 
   lenis.on('scroll', ScrollTrigger.update)

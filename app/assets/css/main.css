@@ -396,6 +396,10 @@ html {
 .snap-rail::-webkit-scrollbar {
   display: none;
 }
+/* One swipe = one card on phones: a flick can't skip past the next card. */
+.snap-rail > * {
+  scroll-snap-stop: always;
+}
 
 /* Mobile section heads (owner request 2026-10-02): below `desktop` the head
    of a section — eyebrow, heading, intro, hint, head CTA — sits centred;

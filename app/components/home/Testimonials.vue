@@ -396,7 +396,7 @@ useGsapContext(() => {
       <h2 ref="mobileHeadingRef" class="m-center mt-14 font-display text-token-section-monumental font-bold text-slateNavy">{{ label }}</h2>
       <p class="m-center mt-4 font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.63)]">{{ total }} client voices</p>
     </BaseContainer>
-    <div class="relative z-10 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-gutter px-gutter pb-4 [scrollbar-width:none]">
+    <div class="snap-rail relative z-10 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-gutter px-gutter pb-4">
       <article
         v-for="(v, i) in voices"
         :key="v.name"
