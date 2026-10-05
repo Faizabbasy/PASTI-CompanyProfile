@@ -28,7 +28,9 @@ export function usePlatforms() {
       index: '01',
       name: 'OPEN',
       character: 'Expansive Precision',
-      positioning: 'Digitize your procurement from planning to contract. e-Procurement connects people, processes, vendors, approvals, and documents into one structured digital workflow.',
+      // docs/open/00-open-landing-page-brief.md — OPEN is the ecosystem;
+      // e-Procurement is one core solution inside it, never OPEN's definition.
+      positioning: 'OPEN connects procurement, sourcing, e-Auction, vendor management, contracts, catalog, workflows, monitoring, and enterprise integrations in one transparent, integrated, and audit-ready procurement ecosystem.',
       image: '/images/platforms/open.webp',
       to: '/open',
       comingSoon: true

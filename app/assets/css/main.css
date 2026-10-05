@@ -554,3 +554,19 @@ html {
     transform: translate3d(0, 1.5%, 0) rotate(3deg);
   }
 }
+
+/* OPEN page (2026-10-05): the homepage's soft PASTI Yellow atmosphere as a
+   plain radial gradient — no `filter: blur`, so it costs nothing to scroll. */
+.open-glow {
+  background: radial-gradient(closest-side, rgba(253, 200, 31, 0.42), rgba(251, 186, 0, 0.16) 55%, rgba(251, 186, 0, 0) 100%);
+}
+/* Ghost wordmark behind a section, like the homepage's faint PASTI mark. */
+.open-ghost {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 0.8;
+  letter-spacing: -0.06em;
+  color: rgba(3, 60, 89, 0.04);
+  user-select: none;
+  pointer-events: none;
+}

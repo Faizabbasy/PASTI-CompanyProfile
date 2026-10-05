@@ -8,5 +8,5 @@ export function useWhatsapp() {
   const message = 'Halo, saya tertarik untuk berdiskusi dengan tim PASTI'
   const link = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
 
-  return { link }
+  return { link, phone }
 }
