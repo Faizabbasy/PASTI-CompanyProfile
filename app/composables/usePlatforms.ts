@@ -32,8 +32,7 @@ export function usePlatforms() {
       // e-Procurement is one core solution inside it, never OPEN's definition.
       positioning: 'OPEN connects procurement, sourcing, e-Auction, vendor management, contracts, catalog, workflows, monitoring, and enterprise integrations in one transparent, integrated, and audit-ready procurement ecosystem.',
       image: '/images/platforms/open.webp',
-      to: '/open',
-      comingSoon: true
+      to: '/open'
     },
     {
       index: '02',
@@ -41,8 +40,7 @@ export function usePlatforms() {
       character: 'Structured Precision',
       positioning: 'e-CORPORATE is an enterprise digital platform that connects people, processes, and information in one integrated environment — helping organizations work smarter, collaborate better, and operate with greater control.',
       image: '/images/platforms/e-corporate.webp',
-      to: '/e-corporate',
-      comingSoon: true
+      to: '/e-corporate'
     }
   ]
 

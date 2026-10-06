@@ -25,9 +25,9 @@ export function useNavigation() {
     { label: 'Home', to: '/' },
     { label: 'Technology', to: '/technology' },
     { label: 'Creative', to: '/creative' },
-    { label: 'OPEN', to: '/open', isPlatform: true, comingSoon: true },
+    { label: 'OPEN', to: '/open', isPlatform: true },
     { label: 'SHIFTLY', to: '/shiftly', isPlatform: true, comingSoon: true },
-    { label: 'e-CORPORATE', to: '/e-corporate', isPlatform: true, comingSoon: true },
+    { label: 'e-CORPORATE', to: '/e-corporate', isPlatform: true },
     { label: 'Work', to: '/work' },
     { label: 'About', to: '/about' },
     { label: 'Insights', to: '/insights' }

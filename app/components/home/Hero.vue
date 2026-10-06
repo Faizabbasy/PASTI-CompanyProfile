@@ -714,18 +714,10 @@ useGsapContext(() => {
         </span>
       </div>
 
-      <!-- Desktop hero furniture: scroll cue (left), partner card + service
-           list and side note (right). Fades with the copy as the gallery
+      <!-- Desktop hero furniture: partner card + service list and side note
+           (right). Scroll cue removed (owner request 2026-10-06). Fades with the copy as the gallery
            takes over. -->
       <div ref="chipsRef" class="hidden desktop:block">
-        <div aria-hidden="true" class="absolute left-[2.2vw] top-[38svh] z-10 flex flex-col items-center gap-3">
-          <span class="h-16 w-px bg-gradient-to-b from-transparent to-[color:rgba(3,60,89,0.45)]" />
-          <span class="rotate-180 font-display text-[11px] font-semibold tracking-[0.06em] text-slateNavy [writing-mode:vertical-rl]">Scroll</span>
-          <span class="relative h-9 w-[22px] rounded-full border border-[color:rgba(3,60,89,0.45)]">
-            <span class="hero-wheel absolute left-1/2 top-1.5 h-1.5 w-[3px] -translate-x-1/2 rounded-full bg-slateNavy" />
-          </span>
-        </div>
-
         <div class="absolute right-[max(4vw,calc(50vw-660px))] top-[23svh] z-30 w-[min(21rem,24vw)]">
           <div data-float data-depth="10">
             <NuxtLink
@@ -835,19 +827,6 @@ useGsapContext(() => {
 [data-reduced-motion='true'] .hero-gallery,
 [data-reduced-motion='true'] .hero-orbit-dot {
   display: none;
-}
-
-/* Scroll cue: the wheel dot travels down and resets (motion only). */
-.hero-wheel {
-  animation: hero-wheel 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-}
-@keyframes hero-wheel {
-  0% { transform: translate(-50%, 0); opacity: 1; }
-  70% { transform: translate(-50%, 12px); opacity: 0; }
-  100% { transform: translate(-50%, 0); opacity: 0; }
-}
-[data-reduced-motion='true'] .hero-wheel {
-  animation: none;
 }
 
 .hero-rail > span {

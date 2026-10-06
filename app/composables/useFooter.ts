@@ -38,8 +38,8 @@ export function useFooter() {
   ]
 
   const platformLinks: FooterLink[] = [
-    { label: 'OPEN', to: '/open', comingSoon: true },
-    { label: 'e-CORPORATE', to: '/e-corporate', comingSoon: true }
+    { label: 'OPEN', to: '/open' },
+    { label: 'e-CORPORATE', to: '/e-corporate' }
   ]
 
   // Service links: labels are the real service titles (useServices); each
