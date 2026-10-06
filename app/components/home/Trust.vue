@@ -68,7 +68,7 @@ useGsapContext(() => {
 
     watch(paused, (isPaused) => {
       if (isPaused) tween.pause()
-      else tween.play()
+      else if (running) tween.play()
     })
 
     let hoveredName: string | null = null
@@ -104,35 +104,31 @@ useGsapContext(() => {
     const opacityRange = isBelowDesktop ? [0.85, 1] : [0.75, 1] as const
     const focalHalfWidth = () => window.innerWidth * 0.1 // ~20% width zone, centered
 
-    interface LogoMetrics { name: string; offset: number; scaleTo: (v: number) => void; opacityTo: (v: number) => void; yTo: (v: number) => void }
+    // Performance pass (2026-10-06): the per-frame loop used to restart
+    // three quickTo tweens per logo every tick (~60 tween restarts/frame)
+    // and ran forever, even off-screen. Now each logo eases toward its
+    // target with a plain lerp and one combined transform write, and the
+    // whole marquee (tween + loop) only runs while the section is on screen.
+    interface LogoMetrics { el: HTMLElement; name: string; offset: number; s: number; o: number; y: number }
     let metrics: LogoMetrics[] = []
     let trackLeft = 0
 
-    // Batch ALL reads first (offsetLeft, getBoundingClientRect), then set
-    // up ALL the GSAP writers afterward — never interleaved, per the
-    // guardrail against layout thrashing. Re-run on mount and on resize;
-    // never inside the per-frame tick below.
+    // Batch ALL reads first, then build the state — never interleaved; re-run
+    // on mount and on resize, never inside the per-frame tick below.
     function measure() {
       if (!track) return
       trackLeft = track.getBoundingClientRect().left - (gsap.getProperty(track, 'x') as number)
       const offsets = logos.map((el) => el.offsetLeft + el.offsetWidth / 2)
-      metrics = logos.map((el, i) => ({
-        name: el.dataset.clientName ?? '',
-        offset: offsets[i]!,
-        scaleTo: gsap.quickTo(el, 'scale', { duration: motionDuration.hover, ease: motionEase.standard }),
-        opacityTo: gsap.quickTo(el, 'opacity', { duration: motionDuration.hover, ease: motionEase.standard }),
-        yTo: gsap.quickTo(el, 'y', { duration: motionDuration.hover, ease: motionEase.standard })
-      }))
+      metrics = logos.map((el, i) => ({ el, name: el.dataset.clientName ?? '', offset: offsets[i]!, s: 1, o: 1, y: 0 }))
     }
     measure()
 
     const resizeObserver = new ResizeObserver(measure)
     resizeObserver.observe(track)
 
-    // Mobile throttles the per-frame update to every 3rd tick to save
-    // compute on weaker devices, per the mobile adaptation note.
+    // Below desktop the depth update runs every 2nd tick (weaker devices).
     let frameCount = 0
-    const throttle = isBelowDesktop ? 3 : 1
+    const throttle = isBelowDesktop ? 2 : 1
 
     function onTick() {
       frameCount++
@@ -142,11 +138,10 @@ useGsapContext(() => {
       const trackX = gsap.getProperty(track, 'x') as number
       const viewportCenter = window.innerWidth / 2
       const half = focalHalfWidth()
+      const k = 0.18 * throttle
 
       for (const m of metrics) {
-        // Logo's live viewport x = its cached static offset within the
-        // track, shifted by the track's own cached left edge and its
-        // current live translate (the marquee tween already driving it) —
+        // Live viewport x from cached offsets + the track's live translate —
         // no DOM read in this loop.
         const viewportX = trackLeft + trackX + m.offset
         const distance = Math.abs(viewportX - viewportCenter)
@@ -155,25 +150,41 @@ useGsapContext(() => {
         const depthScale = gsap.utils.mapRange(0, 1, scaleRange[0], scaleRange[1], proximity)
         const depthOpacity = gsap.utils.mapRange(0, 1, opacityRange[0], opacityRange[1], proximity)
 
-        // Hover adds a boost on top of whatever depth value currently
-        // applies (never an override): the hovered logo scales up further
-        // and every other logo dims, on top of its own depth-driven state.
+        // Hover boost on top of the depth value (never an override).
         const isHovered = hoveredName === m.name
         const isDimmed = hoveredName !== null && !isHovered
-        m.scaleTo(isHovered ? depthScale * 1.08 : depthScale)
-        m.opacityTo(isDimmed ? depthOpacity * 0.6 : depthOpacity)
-        // Subtle mutual vertical pull as a pair approaches the focal zone
-        // from both sides, hinting at lens compression without touching
-        // horizontal marquee spacing.
-        m.yTo(proximity > 0.6 ? -(proximity - 0.6) * 10 : 0)
+        const ts = isHovered ? depthScale * 1.08 : depthScale
+        const to = isDimmed ? depthOpacity * 0.6 : depthOpacity
+        const ty = proximity > 0.6 ? -(proximity - 0.6) * 10 : 0
+        m.s += (ts - m.s) * k
+        m.o += (to - m.o) * k
+        m.y += (ty - m.y) * k
+        m.el.style.transform = `translate3d(0, ${m.y.toFixed(2)}px, 0) scale(${m.s.toFixed(4)})`
+        m.el.style.opacity = m.o.toFixed(3)
       }
     }
 
-    gsap.ticker.add(onTick)
+    // Run only while the marquee is on screen.
+    let running = false
+    const setRunning = (on: boolean) => {
+      if (on === running) return
+      running = on
+      if (on) {
+        if (!paused.value) tween.play()
+        gsap.ticker.add(onTick)
+      } else {
+        tween.pause()
+        gsap.ticker.remove(onTick)
+      }
+    }
+    tween.pause()
+    const io = new IntersectionObserver(([e]) => setRunning(!!e?.isIntersecting), { rootMargin: '100px 0px' })
+    io.observe(track)
 
     return () => {
       tween.kill()
       gsap.ticker.remove(onTick)
+      io.disconnect()
       resizeObserver.disconnect()
     }
   })

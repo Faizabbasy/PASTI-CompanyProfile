@@ -50,12 +50,26 @@ export function useAmbientLight(canvasRef: Ref<HTMLCanvasElement | null>) {
     const dampedTween = gsap.quickTo(damped, 'x', { duration: motionDuration.slow, ease: motionEase.standard })
     const dampedTweenY = gsap.quickTo(damped, 'y', { duration: motionDuration.slow, ease: motionEase.standard })
 
+    // Performance pass (2026-10-06): the loop used to clear and refill the
+    // full-viewport canvas every frame forever. It now runs only while the
+    // light is moving and sleeps once it has settled; a pointer move wakes it.
+    let rafId = 0
+    let running = false
+    let still = 0
+    const wake = () => {
+      still = 0
+      if (running) return
+      running = true
+      rafId = requestAnimationFrame(draw)
+    }
+
     const handleMove = (event: PointerEvent) => {
       raw.x = event.clientX
       raw.y = event.clientY
       hasPointer = true
       dampedTween(raw.x)
       dampedTweenY(raw.y)
+      wake()
     }
 
     window.addEventListener('pointermove', handleMove)
@@ -64,11 +78,11 @@ export function useAmbientLight(canvasRef: Ref<HTMLCanvasElement | null>) {
     const handleVisibility = () => { visible = document.visibilityState === 'visible' }
     document.addEventListener('visibilitychange', handleVisibility)
 
-    let rafId = 0
-
-    const draw = () => {
-      rafId = requestAnimationFrame(draw)
-      if (!visible || !hasPointer) return
+    function draw() {
+      if (!visible || !hasPointer) {
+        running = false
+        return
+      }
 
       velocity = {
         x: damped.x - prevDamped.x,
@@ -98,9 +112,15 @@ export function useAmbientLight(canvasRef: Ref<HTMLCanvasElement | null>) {
       ctx.ellipse(0, 0, baseRadius, baseRadius, 0, 0, Math.PI * 2)
       ctx.fill()
       ctx.restore()
-    }
 
-    rafId = requestAnimationFrame(draw)
+      // Settled for ~10 frames → stop until the pointer moves again.
+      still = speed < 0.05 ? still + 1 : 0
+      if (still > 10) {
+        running = false
+        return
+      }
+      rafId = requestAnimationFrame(draw)
+    }
 
     onBeforeUnmount(() => {
       cancelAnimationFrame(rafId)

@@ -470,13 +470,14 @@ html {
 }
 
 /* Out-of-focus PASTI Yellow forms at the frame edges. */
+/* Performance pass (2026-10-06): the soft edge now comes from a long
+   gradient falloff instead of `filter: blur()` — the large blurred layers
+   were re-rasterised as they drifted with the pointer. */
 .hero-blur {
-  background: radial-gradient(closest-side, rgba(253, 200, 31, 0.95), rgba(251, 186, 0, 0.6) 55%, rgba(251, 186, 0, 0) 100%);
-  filter: blur(36px);
+  background: radial-gradient(closest-side, rgba(253, 200, 31, 0.9), rgba(252, 194, 20, 0.62) 32%, rgba(251, 186, 0, 0.28) 62%, rgba(251, 186, 0, 0.08) 82%, rgba(251, 186, 0, 0) 100%);
   opacity: 0.75;
 }
 .hero-blur--soft {
-  filter: blur(26px);
   opacity: 0.55;
 }
 /* On phones the copy sits over the left edge forms — keep them quieter. */
@@ -531,16 +532,8 @@ html {
   backdrop-filter: none !important;
 }
 
-/* Hero knot image (lite tier): only shown on touch devices from the server
-   HTML; a slow CSS float keeps it alive at near-zero cost. */
-.hero-knot-touch {
-  display: none;
-}
-@media (pointer: coarse) {
-  .hero-knot-touch {
-    display: block;
-  }
-}
+/* Hero knot image (every device since the 2026-10-06 performance pass —
+   the live three.js knot was removed): a slow CSS float keeps it alive. */
 @media (prefers-reduced-motion: no-preference) {
   .hero-knot-img {
     animation: hero-knot-float 9s ease-in-out infinite alternate;
