@@ -85,11 +85,11 @@ useGsapContext(() => {
 
           <h1 class="mt-6 desktop:mt-[3svh]">
             <span class="sr-only">{{ name }} — {{ expansion }}</span>
-            <span aria-hidden="true" class="m-center-row flex items-center gap-[0.14em] font-display text-[length:clamp(84px,24vw,124px)] font-extrabold leading-[0.86] tracking-[-0.05em] text-slateNavy desktop:text-[length:clamp(104px,min(11.5vw,20svh),190px)]">
+            <span aria-hidden="true" class="m-center-row flex items-center gap-[0.14em] font-display text-[length:clamp(64px,17vw,96px)] tablet:text-[length:clamp(96px,16vw,124px)] font-extrabold leading-[0.86] tracking-[-0.05em] text-slateNavy desktop:text-[length:clamp(104px,min(11.5vw,20svh),190px)]">
               <span class="oh-mask"><span data-oh-letter class="inline-block"><OpenMark class="h-[0.72em] w-[0.72em]" /></span></span>
               <span class="oh-mask"><span v-for="(l, i) in name.split('')" :key="i" data-oh-letter class="inline-block">{{ l }}</span></span>
             </span>
-            <span aria-hidden="true" class="oh-mask mt-3 block"><span data-oh-letter class="block font-display text-[length:clamp(18px,4.6vw,24px)] font-bold italic tracking-[-0.01em] text-slateNavy desktop:text-[length:clamp(22px,1.8vw,28px)]">{{ expansion }}</span></span>
+            <span aria-hidden="true" class="oh-mask mt-3 block"><span data-oh-letter class="block font-display text-[length:clamp(16px,4.2vw,22px)] font-bold italic tracking-[-0.01em] text-slateNavy desktop:text-[length:clamp(22px,1.8vw,28px)]">{{ expansion }}</span></span>
           </h1>
 
           <p data-oh-fade class="hero-lede m-center mt-6 max-w-[33rem] desktop:mt-[3svh]">{{ positioning }}</p>
