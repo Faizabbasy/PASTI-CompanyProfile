@@ -36,7 +36,9 @@ interface HeroSlide {
 }
 const slides: HeroSlide[] = [
   {
-    lines: ['The first', 'FCP technology', 'agency in Indonesia.'],
+    // Boss feedback 2026-10-06: the "agency in Indonesia." line ran too long.
+    // Re-balanced into three even lines, set flush-left (no staircase).
+    lines: ['The first FCP', 'technology agency', 'in Indonesia.'],
     highlight: 'FCP',
     body: 'Indonesia’s first technology agency focused on Framework Code Products (FCP). We build customizable technology foundations that adapt to your business, processes, and ecosystem.',
     compact: true
@@ -637,7 +639,7 @@ useGsapContext(() => {
                   v-for="(line, i) in slide.lines"
                   :key="line"
                   class="-mb-[0.14em] block overflow-clip pb-[0.14em]"
-                  :class="i === 1 ? 'desktop:pl-[0.32em]' : i === 2 ? 'desktop:pl-[0.62em]' : ''"
+                  :class="slide.compact ? '' : i === 1 ? 'desktop:pl-[0.32em]' : i >= 2 ? 'desktop:pl-[0.62em]' : ''"
                 >
                   <span :ref="(el) => { if (el) slideLineRefs[si]![i] = el as HTMLElement }" class="inline-block" :class="si === 0 ? '' : 'translate-y-[110%]'"><template v-for="part in [lineParts(line, slide.highlight)]" :key="line">{{ part.before }}<span v-if="part.mark" class="relative isolate inline-block"><span aria-hidden="true" class="absolute -inset-x-[0.06em] bottom-[0.1em] -z-10 h-[0.36em] rounded-[4px] bg-pastiYellow-500" />{{ part.mark }}</span>{{ part.after }}<span v-if="part.dot" class="text-pastiYellow-500">.</span></template></span>
                 </span>
@@ -645,8 +647,8 @@ useGsapContext(() => {
 
               <p
                 :ref="(el) => { if (el) slideBodyRefs[si] = el as HTMLElement }"
-                class="mx-auto mt-6 max-w-[25rem] text-token-body-large font-medium text-[color:rgba(3,60,89,0.86)] desktop:mx-0 desktop:ml-[0.9em] desktop:mt-[3svh] desktop:max-w-[27rem] desktop:text-[17px] desktop:leading-[1.6]"
-                :class="si === 0 ? '' : 'opacity-0'"
+                class="mx-auto mt-6 max-w-[25rem] text-token-body-large font-medium text-[color:rgba(3,60,89,0.86)] desktop:mx-0 desktop:mt-[3svh] desktop:max-w-[27rem] desktop:text-[17px] desktop:leading-[1.6]"
+                :class="[si === 0 ? '' : 'opacity-0', slide.compact ? '' : 'desktop:ml-[0.9em]']"
               >
                 {{ slide.body }}
               </p>
