@@ -6,120 +6,121 @@ if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-// DEDICATED e-AUCTION — the page's signature moment. A bid board fragment
-// whose ranking reshuffles as you scroll: illustrative only — no prices, no
-// timers, no speed claims (BUTUH DATA: real e-Auction UI and flow copy).
-// The "Up to 40%" proof stays in Business Impact with its case context.
-const { auctionBody, flow } = useOpen()
+// e-AUCTION SPOTLIGHT (slide 11) — "More than just online bidding."
+// Deep navy. The eight-step process as a single readout: a big step word
+// with its line, over an eight-segment rail. As the rail crosses the
+// viewport (no pin) the readout advances Create → … → Trace; segments are
+// buttons too. The ordered list underneath is the real content (all eight
+// steps, always readable); the readout is a visual duplicate (aria-hidden).
+// Then the six capabilities and five principles from the deck.
+const { auction } = useOpen()
 const { requestDemo } = useOpenDemo()
-const step = flow.findIndex((s) => s.module === 'e-auction')
-const before = flow[step - 1]?.label
-const after = flow[step + 1]?.label
-
-// Ranking per round (indexes into bidders); bar = relative position only.
-const bidders = ['Vendor A', 'Vendor B', 'Vendor C', 'Vendor D']
-const rounds = [
-  [0, 1, 2, 3],
-  [2, 0, 3, 1],
-  [3, 2, 0, 1],
-  [1, 3, 2, 0]
-]
-const round = ref(0)
-const rankOf = (b: number) => rounds[round.value]!.indexOf(b)
-
-const sectionRef = ref<HTMLElement | null>(null)
+const steps = auction.steps
+const active = ref(0)
+const railRef = ref<HTMLElement | null>(null)
 
 useGsapContext(() => {
-  const section = sectionRef.value
-  if (!section) return
-  const board = section.querySelector<HTMLElement>('[data-au-board]')
+  const rail = railRef.value
+  if (!rail) return
   const mm = gsap.matchMedia()
   mm.add(reducedMotionQuery.noPreference, () => {
     const st = ScrollTrigger.create({
-      trigger: board,
+      trigger: rail,
       start: 'top 75%',
-      end: 'bottom 25%',
+      end: 'bottom 30%',
       onUpdate: (self) => {
-        round.value = Math.min(rounds.length - 1, Math.floor(self.progress * rounds.length))
+        const i = Math.min(steps.length - 1, Math.floor(self.progress * steps.length))
+        if (i !== active.value) active.value = i
       }
     })
     return () => st.kill()
-  })
-  mm.add(reducedMotionQuery.reduce, () => {
-    round.value = rounds.length - 1
   })
 })
 </script>
 
 <template>
-  <section id="e-auction" ref="sectionRef" data-header-theme="dark" class="relative isolate overflow-hidden bg-slateNavy py-24 text-pureWhite tablet:py-32">
-    <!-- Depth: navy-family gradient + one yellow lift + orbit lines (as in
-         the homepage Platforms world). Static, gradient-only. -->
-    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10" style="background: radial-gradient(ellipse 60% 70% at 78% 45%, rgba(251,186,0,0.16), transparent 65%), radial-gradient(ellipse 70% 60% at 10% 100%, #022436, transparent 70%), linear-gradient(180deg, #033C59 0%, #022F47 100%)" />
-    <BaseGridLines tone="dark" />
-    <svg aria-hidden="true" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" class="pointer-events-none absolute inset-0 -z-10 h-full w-full" fill="none">
-      <ellipse cx="880" cy="360" rx="520" ry="210" stroke="rgba(251,186,0,0.35)" stroke-width="1" transform="rotate(-12 880 360)" />
-      <ellipse cx="880" cy="360" rx="380" ry="140" stroke="rgba(255,255,255,0.08)" stroke-width="1" transform="rotate(-12 880 360)" />
-      <circle cx="1390" cy="250" r="5" fill="#FBBA00" transform="rotate(-12 880 360)" />
-    </svg>
-    <span aria-hidden="true" class="open-ghost absolute -bottom-[6%] right-[-2%] text-[length:clamp(140px,24vw,380px)] !text-[color:rgba(255,255,255,0.035)]">BID</span>
+  <section id="e-auction" data-header-theme="dark" class="relative isolate overflow-hidden bg-slateNavy py-24 text-pureWhite tablet:py-32">
+    <div aria-hidden="true" class="pointer-events-none absolute inset-0 -z-10" style="background: radial-gradient(ellipse 55% 60% at 15% 20%, rgba(251,186,0,0.13), transparent 70%), linear-gradient(180deg, #022F47 0%, #022436 100%)" />
+    <div aria-hidden="true" class="op-rules--dark pointer-events-none absolute inset-0 -z-10" />
 
-    <BaseContainer class="relative z-10">
-      <BaseSectionMark label="e-Auction" meta="05 / 11" />
+    <BaseContainer>
+      <OpenTag :n="7" label="e-Auction" surface="dark" />
 
-      <div class="mt-12 grid items-center gap-14 desktop:grid-cols-12 desktop:gap-8">
-        <div class="m-center desktop:col-span-5">
-          <p class="m-center-row inline-flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)]">
-            <span>{{ before }}</span><span aria-hidden="true">→</span>
-            <span class="rounded-full bg-pastiYellow-500 px-2 py-0.5 text-slateNavy">Step {{ flow[step]?.index }}</span>
-            <span aria-hidden="true">→</span><span>{{ after }}</span>
-          </p>
-          <OpenHeading class="mt-5" surface="dark" before="e-Auction / " mark="Bidding" :lede="auctionBody" />
-          <div class="mt-8">
-            <BaseHeroCtas surface="dark" :primary="{ label: 'Request Demo' }" @primary="requestDemo('e-auction')" />
+      <div class="mt-14 grid gap-12 desktop:grid-cols-12 desktop:gap-10">
+        <div class="desktop:col-span-5">
+          <OpenHeading :lines="auction.title" surface="dark" size="xl" :lede="auction.body" />
+          <p class="mt-8 font-display text-[19px] font-bold leading-snug">{{ auction.line[0] }}<br><span class="text-pastiYellow-500">{{ auction.line[1] }}</span></p>
+          <div class="mt-9">
+            <BaseHeroCtas surface="dark" :primary="{ label: 'Request a Demo' }" @primary="requestDemo('e-auction')" />
           </div>
         </div>
 
-        <!-- Bid board (illustrative) — a white product card on navy -->
-        <div data-au-board class="desktop:col-span-6 desktop:col-start-7">
-          <div class="overflow-hidden rounded-[24px] bg-pureWhite text-slateNavy shadow-[0_60px_120px_-40px_rgba(0,12,22,0.85)] desktop:rotate-[-2deg]">
-            <div class="flex items-center justify-between border-b border-[color:rgba(3,60,89,0.08)] px-5 py-4">
-              <span class="inline-flex items-center gap-2.5">
-                <OpenMark :size="20" />
-                <span class="font-display text-[14px] font-bold">Lot · Lorem ipsum</span>
-              </span>
-              <span class="inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1 font-mono text-[10px] uppercase tracking-[0.16em] text-pureWhite">
-                <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Round {{ round + 1 }} / {{ rounds.length }}
-              </span>
-            </div>
-            <ol class="relative h-[288px]" aria-label="Illustrative bid ranking">
-              <li
-                v-for="(b, i) in bidders"
-                :key="b"
-                class="absolute inset-x-0 flex h-[72px] items-center gap-4 border-b border-[color:rgba(3,60,89,0.06)] px-5 transition-transform duration-700 ease-editorial"
-                :style="{ transform: `translateY(${rankOf(i) * 72}px)` }"
-              >
-                <span
-                  class="grid h-9 w-9 shrink-0 place-items-center rounded-full font-mono text-[12px] font-semibold transition-colors duration-500"
-                  :class="rankOf(i) === 0 ? 'bg-pastiYellow-500 text-slateNavy shadow-[0_0_0_5px_rgba(251,186,0,0.2)]' : 'bg-[color:rgba(3,60,89,0.06)] text-[color:rgba(3,60,89,0.6)]'"
-                >{{ rankOf(i) + 1 }}</span>
-                <span class="w-24 shrink-0 font-display text-[15px] font-bold">{{ b }}</span>
-                <span class="relative h-2 flex-1 overflow-hidden rounded-full bg-[color:rgba(3,60,89,0.07)]">
-                  <span
-                    class="absolute inset-y-0 left-0 rounded-full transition-[width,background-color] duration-700 ease-editorial"
-                    :class="rankOf(i) === 0 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(3,60,89,0.28)]'"
-                    :style="{ width: `${92 - rankOf(i) * 18}%` }"
-                  />
-                </span>
-              </li>
-            </ol>
-            <div class="flex items-center justify-between px-5 py-3.5 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">
-              <span>Illustrative · UI placeholder</span>
-              <LayoutBrandMark surface="light" :height="10" />
-            </div>
+        <!-- Process readout -->
+        <div ref="railRef" class="desktop:col-span-7 desktop:pl-6">
+          <p class="text-[14px] font-semibold text-[color:rgba(255,255,255,0.6)]">e-Auction process in OPEN</p>
+          <div aria-hidden="true" class="relative mt-4 h-[148px] overflow-hidden tablet:h-[188px]">
+            <Transition name="bid" mode="out-in">
+              <div :key="active" class="absolute inset-0 flex flex-col justify-end">
+                <span class="op-num font-display text-[15px] font-bold text-pastiYellow-500">{{ String(active + 1).padStart(2, '0') }} / {{ String(steps.length).padStart(2, '0') }}</span>
+                <span class="op-display mt-1 text-[length:clamp(64px,10vw,140px)] !leading-[0.85]">{{ steps[active]?.label }}</span>
+              </div>
+            </Transition>
           </div>
+          <p aria-hidden="true" class="mt-3 min-h-[1.6em] text-[17px] text-[color:rgba(255,255,255,0.75)]">{{ steps[active]?.body }}</p>
+
+          <ol class="mt-8 grid grid-cols-2 gap-x-3 gap-y-5 tablet:grid-cols-4 desktop:grid-cols-8 desktop:gap-1.5">
+            <li v-for="(s, i) in steps" :key="s.label">
+              <button
+                type="button"
+                class="group block w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pastiYellow-500"
+                :aria-current="i === active ? 'step' : undefined"
+                @click="active = i"
+              >
+                <span class="block h-[5px] rounded-full transition-colors duration-300" :class="i <= active ? 'bg-pastiYellow-500' : 'bg-[color:rgba(255,255,255,0.14)] group-hover:bg-[color:rgba(255,255,255,0.3)]'" />
+                <span class="mt-3 block font-display text-[14px] font-extrabold" :class="i === active ? 'text-pureWhite' : 'text-[color:rgba(255,255,255,0.6)]'">{{ s.label }}</span>
+                <span class="mt-0.5 block text-[12px] leading-snug text-[color:rgba(255,255,255,0.5)] desktop:hidden">{{ s.body }}</span>
+              </button>
+            </li>
+          </ol>
         </div>
       </div>
+
+      <!-- Key capabilities -->
+      <div class="mt-20 desktop:mt-24">
+        <p class="font-display text-[20px] font-extrabold">Key capabilities</p>
+        <ul class="mt-6 grid border-t border-[color:rgba(255,255,255,0.14)] tablet:grid-cols-2 desktop:grid-cols-3">
+          <li v-for="c in auction.capabilities" :key="c.label" class="border-b border-[color:rgba(255,255,255,0.14)] py-4 tablet:py-6 tablet:pr-8">
+            <p class="font-display text-[19px] font-extrabold tracking-[-0.015em]">{{ c.label }}</p>
+            <p class="mt-2 text-[14.5px] text-[color:rgba(255,255,255,0.68)]">{{ c.body }}</p>
+          </li>
+        </ul>
+      </div>
+
+      <ul class="mt-12 grid gap-3 tablet:grid-cols-2 desktop:grid-cols-5">
+        <li v-for="p in auction.principles" :key="p.label" class="rounded-[18px] bg-[color:rgba(255,255,255,0.05)] p-5">
+          <p class="flex items-center gap-2 font-display text-[15px] font-extrabold"><span class="h-2 w-2 rounded-full bg-pastiYellow-500" />{{ p.label }}</p>
+          <p class="mt-2 text-[13.5px] leading-snug text-[color:rgba(255,255,255,0.65)]">{{ p.body }}</p>
+        </li>
+      </ul>
     </BaseContainer>
   </section>
 </template>
+
+<style scoped>
+.bid-enter-active,
+.bid-leave-active {
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bid-enter-from {
+  transform: translateY(40%);
+  opacity: 0;
+}
+.bid-leave-to {
+  transform: translateY(-40%);
+  opacity: 0;
+}
+[data-reduced-motion='true'] .bid-enter-active,
+[data-reduced-motion='true'] .bid-leave-active {
+  transition: none;
+}
+</style>

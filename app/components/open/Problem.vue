@@ -1,126 +1,123 @@
 <script setup lang="ts">
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+// PROCUREMENT PROBLEM (slides 2, 3). Part one: the deck's paper pile, told
+// with its own words — six sheets ("More people." … "More risks.") fall
+// from a scatter into one pile as the section enters, and the five symptoms
+// are pinned to it. Then the verdict: "The process works — but the
+// visibility doesn't." Part two (navy): the real problem as five questions
+// any procurement decision must answer — WHO / WHY / WHEN / WHAT / TRACE.
+// All motion is one class switch per part (CSS transitions).
+const { problem } = useOpen()
 
-if (import.meta.client) {
-  gsap.registerPlugin(ScrollTrigger)
-}
+const pileRef = ref<HTMLElement | null>(null)
+const pileIn = useOpenInView(pileRef, 0.3)
+const qRef = ref<HTMLElement | null>(null)
+const qIn = useOpenInView(qRef, 0.3)
 
-// PROBLEM → SOLUTION — one composition that changes state, told with the
-// brief's own mental model. State A: "e-Procurement digitizes the procurement
-// process." — the ecosystem's parts are digital but scattered. State B:
-// "OPEN connects the entire procurement ecosystem." — the same parts lock
-// into one frame, each checked. Desktop + motion: a short pin scrubs A → B.
-// Below desktop / reduced motion: the connected state, both lines stacked.
-const { mentalModel, ecosystemParts, problemBody } = useOpen()
-
-const sectionRef = ref<HTMLElement | null>(null)
-
-// "OPEN connects…" → "OPEN" sits on the yellow marker.
-const connectsHead = mentalModel.connects.split(' ')[0]
-const connectsRest = mentalModel.connects.slice(connectsHead!.length)
-
-// Deterministic scatter (SSR-safe): x/y in px, rotation in deg.
-const scatter = [
-  [-40, -70, -12], [30, -96, 8], [90, -50, 14],
-  [-50, 20, 9], [10, 40, -6], [80, 16, -15],
-  [-30, 90, 5], [40, 110, -10], [70, 80, 11]
-]
-
-useGsapContext(() => {
-  const section = sectionRef.value
-  if (!section) return
-  const mm = gsap.matchMedia()
-  const chips = section.querySelectorAll<HTMLElement>('[data-pr-chip]')
-  const checks = section.querySelectorAll<HTMLElement>('[data-pr-check]')
-  const frame = section.querySelector<HTMLElement>('[data-pr-frame]')
-  const lineA = section.querySelector<HTMLElement>('[data-pr-a]')
-  const lineB = section.querySelector<HTMLElement>('[data-pr-b]')
-  const stage = section.querySelector<HTMLElement>('[data-pr-stage]')
-
-  mm.add(`${reducedMotionQuery.noPreference} and ${breakpointQuery.desktopUp}`, () => {
-    gsap.set(lineB, { yPercent: 105 })
-    chips.forEach((c, i) => {
-      const [x, y, r] = scatter[i] ?? [0, 0, 0]
-      gsap.set(c, { x, y, rotation: r, opacity: 0.55 })
-    })
-    gsap.set(checks, { scale: 0, transformOrigin: 'center' })
-    gsap.set(frame, { opacity: 0, scale: 1.06 })
-
-    const tl = gsap.timeline({
-      scrollTrigger: { trigger: stage, start: 'top top', end: '+=120%', scrub: 0.8, pin: true, anticipatePin: 1, invalidateOnRefresh: true }
-    })
-    tl.to({}, { duration: 0.15 })
-      .to(chips, { x: 0, y: 0, rotation: 0, opacity: 1, duration: 1, ease: approvedEase.gsapStandard, stagger: 0.03 })
-      .to(lineA, { yPercent: -105, duration: 0.35, ease: approvedEase.gsapStandard }, '-=0.7')
-      .to(lineB, { yPercent: 0, duration: 0.35, ease: approvedEase.gsapStandard }, '<')
-      .to(frame, { opacity: 1, scale: 1, duration: 0.5, ease: approvedEase.gsapStandard }, '-=0.3')
-      .to(checks, { scale: 1, duration: 0.3, ease: approvedEase.gsapStandard, stagger: 0.03 }, '-=0.4')
-      .to({}, { duration: 0.2 })
-
-    return () => {
-      tl.scrollTrigger?.kill()
-      tl.kill()
-      gsap.set([chips, checks, frame, lineA, lineB], { clearProps: 'all' })
-    }
-  })
-})
+// Deterministic scatter → pile (SSR-safe). x/y in %, r in deg.
+const sheets = problem.pressures.map((p, i) => ({
+  text: p,
+  from: [[-60, -80, -24], [70, -60, 18], [-80, 30, 14], [80, 40, -20], [-30, 90, 8], [40, -110, -12]][i]!,
+  // Final pile: a cascade (each sheet ~44% of its height lower) so every label stays readable.
+  to: [i % 2 ? 2 : -2, i * 44, [-3, 2, -1.5, 2.5, -1, 1][i]!]
+}))
 </script>
 
 <template>
-  <section ref="sectionRef" class="surface-light relative overflow-hidden" style="--lift-x: 15%; --lift-y: 80%">
-    <div data-pr-stage class="relative flex flex-col justify-center py-24 tablet:py-32 desktop:h-[100svh] desktop:min-h-[680px] desktop:py-0">
-      <BaseGridLines tone="light" />
-      <div aria-hidden="true" class="open-glow pointer-events-none absolute -right-[10%] top-[10%] h-[44vw] max-h-[620px] w-[44vw] max-w-[620px] opacity-80" />
-      <span aria-hidden="true" class="open-ghost absolute -bottom-[4%] -left-[2%] hidden desktop:block text-[length:clamp(160px,30vw,460px)]">OPEN</span>
+  <section id="problem" class="surface-light relative overflow-hidden py-24 tablet:py-32" style="--lift-x: 10%; --lift-y: 30%">
+    <BaseContainer>
+      <OpenTag :n="2" label="The procurement problem" />
 
-      <BaseContainer class="relative z-10">
-        <BaseSectionMark surface="light" label="The shift" meta="02 / 11" />
-
-        <div class="mt-12 grid items-center gap-14 desktop:mt-14 desktop:grid-cols-12 desktop:gap-8">
-          <div class="m-center desktop:col-span-5">
-            <p class="m-center-row inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
-              <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Problem → Solution
-            </p>
-            <!-- Desktop: A swaps to B. Below desktop: both lines, stacked. -->
-            <div class="relative mt-5 hidden overflow-hidden pb-3 desktop:block">
-              <h2 data-pr-a class="font-display text-[length:clamp(36px,3.6vw,58px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-[color:rgba(3,60,89,0.42)]">{{ mentalModel.digitizes }}</h2>
-              <h2 data-pr-b aria-hidden="true" class="absolute inset-x-0 top-0 isolate font-display text-[length:clamp(36px,3.6vw,58px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-slateNavy">
-                <span class="relative inline-block"><span aria-hidden="true" class="absolute -inset-x-[0.06em] bottom-[0.08em] -z-10 h-[0.38em] rounded-[4px] bg-pastiYellow-500" />{{ connectsHead }}</span>{{ connectsRest }}
-              </h2>
-            </div>
-            <div class="mt-5 desktop:hidden">
-              <p class="font-display text-[22px] font-bold leading-[1.15] tracking-[-0.02em] text-[color:rgba(3,60,89,0.45)] tablet:text-[28px]">{{ mentalModel.digitizes }}</p>
-              <h2 class="isolate mt-4 font-display text-[34px] font-extrabold leading-[1.04] tracking-[-0.035em] text-slateNavy tablet:text-[44px]">
-                <span class="relative inline-block"><span aria-hidden="true" class="absolute -inset-x-[0.06em] bottom-[0.08em] -z-10 h-[0.38em] rounded-[4px] bg-pastiYellow-500" />{{ connectsHead }}</span>{{ connectsRest }}
-              </h2>
-            </div>
-            <p class="m-center mt-6 max-w-[28rem] text-[16px] leading-relaxed text-[color:rgba(3,60,89,0.72)]">{{ problemBody }}</p>
-          </div>
-
-          <div class="relative desktop:col-span-6 desktop:col-start-7">
-            <div data-pr-frame aria-hidden="true" class="absolute -inset-x-2.5 -inset-y-5 rounded-[24px] border border-dashed border-[color:rgba(3,60,89,0.28)] bg-[color:rgba(255,255,255,0.5)] tablet:-inset-6 tablet:rounded-[28px]">
-              <span class="absolute -top-4 left-5 inline-flex items-center gap-2 rounded-full bg-slateNavy py-1.5 pl-1.5 pr-3.5 shadow-[0_14px_30px_-14px_rgba(3,60,89,0.8)]">
-                <OpenMark :size="22" />
-                <span class="font-display text-[12px] font-extrabold tracking-[0.04em] text-pureWhite">OPEN ecosystem</span>
-              </span>
-            </div>
-            <ul class="relative grid grid-cols-2 gap-2.5 tablet:grid-cols-3 tablet:gap-3">
-              <li
-                v-for="p in ecosystemParts"
-                :key="p"
-                data-pr-chip
-                class="flex min-h-[58px] items-center justify-between gap-2 rounded-[16px] border border-[color:rgba(3,60,89,0.08)] bg-pureWhite px-4 py-3 shadow-[0_18px_40px_-26px_rgba(3,60,89,0.55)] tablet:min-h-[72px]"
-              >
-                <span class="font-display text-[14px] font-bold leading-tight text-slateNavy tablet:text-[16px]">{{ p }}</span>
-                <span data-pr-check class="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy">
-                  <svg viewBox="0 0 16 16" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M3 8.5l3 3 7-7" /></svg>
-                </span>
-              </li>
-            </ul>
-          </div>
+      <div class="mt-14 grid items-center gap-16 desktop:grid-cols-12 desktop:gap-10">
+        <div class="desktop:col-span-6">
+          <OpenHeading :lines="problem.title" size="lg" />
+          <p class="mt-6 max-w-[28rem] text-[16px] leading-[1.65] text-[color:rgba(3,60,89,0.78)] tablet:text-[17px]">{{ problem.intro }}</p>
+          <!-- The pile is decorative; this is its readable form. -->
+          <ul class="sr-only">
+            <li v-for="p in problem.pressures" :key="p" class="font-display text-[18px] font-extrabold tracking-[-0.02em] text-slateNavy">{{ p }}</li>
+          </ul>
         </div>
-      </BaseContainer>
-    </div>
+
+        <!-- The pile -->
+        <div ref="pileRef" class="relative desktop:col-span-6" :class="{ 'is-in': pileIn }">
+          <div class="relative mx-auto aspect-[5/4] w-full max-w-[520px] desktop:ml-0 desktop:mr-auto desktop:max-w-[440px]" aria-hidden="true">
+            <div
+              v-for="(s, i) in sheets"
+              :key="s.text"
+              class="op-sheet absolute left-[6%] top-[3%] flex h-[30%] w-[88%] items-start justify-between gap-3 rounded-[8px] border border-[color:rgba(3,60,89,0.12)] bg-pureWhite px-5 py-3.5 shadow-[0_-10px_30px_-22px_rgba(3,60,89,0.45)] tablet:px-6"
+              :style="{
+                '--fx': `${s.from[0]}%`, '--fy': `${s.from[1]}%`, '--fr': `${s.from[2]}deg`,
+                '--tx': `${s.to[0]}%`, '--ty': `${s.to[1]}%`, '--tr': `${s.to[2]}deg`,
+                '--d': `${i * 90}ms`, zIndex: i
+              }"
+            >
+              <span class="whitespace-nowrap font-display text-[length:clamp(18px,4.6vw,24px)] font-extrabold leading-none tracking-[-0.03em] text-slateNavy desktop:text-[22px]">{{ s.text }}</span>
+              <span class="mt-1.5 flex w-1/4 flex-col gap-1.5"><span class="h-1.5 rounded-full bg-[color:rgba(3,60,89,0.1)]" /><span class="h-1.5 w-2/3 rounded-full bg-[color:rgba(3,60,89,0.07)]" /></span>
+            </div>
+          </div>
+
+          <!-- Symptoms pinned to the pile -->
+          <ul class="relative z-20 mt-6 flex flex-wrap justify-center gap-2 desktop:absolute desktop:right-0 desktop:top-0 desktop:mt-0 desktop:h-full desktop:flex-col desktop:items-end desktop:justify-around desktop:gap-0" aria-label="Gejala">
+            <li
+              v-for="(s, i) in problem.symptoms"
+              :key="s"
+              class="op-fade flex items-center gap-2 rounded-full border border-[color:rgba(3,60,89,0.14)] bg-pureWhite py-1.5 pl-1.5 pr-3.5 shadow-[0_14px_30px_-20px_rgba(3,60,89,0.6)]"
+              :style="{ '--d': `${700 + i * 110}ms` }"
+            >
+              <span class="grid h-5 w-5 place-items-center rounded-full bg-slateNavy font-display text-[11px] font-extrabold text-pastiYellow-500">!</span>
+              <span class="font-display text-[13px] font-bold text-slateNavy">{{ s }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Verdict -->
+      <p class="mt-20 max-w-[60rem] op-display text-[length:clamp(30px,4.4vw,64px)] text-slateNavy desktop:mt-24">
+        {{ problem.verdict[0] }} <span class="text-[color:rgba(3,60,89,0.42)]">{{ problem.verdict[1] }}</span>
+      </p>
+
+      <!-- The real problem -->
+      <div ref="qRef" data-header-theme="dark" class="relative isolate mt-16 overflow-hidden rounded-[28px] bg-slateNavy px-5 py-12 text-pureWhite tablet:px-10 tablet:py-14 desktop:mt-20 desktop:px-14 desktop:py-16" :class="{ 'is-in': qIn }">
+        <div aria-hidden="true" class="op-rules--dark pointer-events-none absolute inset-0 -z-10" />
+        <div class="grid gap-8 desktop:grid-cols-12 desktop:items-end">
+          <OpenHeading class="desktop:col-span-7" :lines="problem.realTitle" surface="dark" size="md" />
+          <p class="text-[16px] text-[color:rgba(255,255,255,0.7)] desktop:col-span-4 desktop:col-start-9">{{ problem.realIntro }}</p>
+        </div>
+
+        <dl class="mt-12 grid grid-cols-1 border-t border-[color:rgba(255,255,255,0.14)] tablet:grid-cols-5">
+          <div
+            v-for="(q, i) in problem.questions"
+            :key="q.key"
+            class="flex items-baseline justify-between gap-4 border-b border-[color:rgba(255,255,255,0.14)] py-5 tablet:flex-col tablet:items-start tablet:border-b-0 tablet:border-r tablet:px-4 tablet:py-6 tablet:last:border-r-0 tablet:first:pl-0"
+          >
+            <dt class="op-line"><span class="op-display text-[length:clamp(34px,4.2vw,64px)]" :class="q.key === 'TRACE' ? 'text-pastiYellow-500' : 'text-pureWhite'" :style="{ '--d': `${i * 90}ms` }">{{ q.key }}</span></dt>
+            <dd class="op-fade text-right text-[15px] text-[color:rgba(255,255,255,0.72)] tablet:mt-3 tablet:text-left" :style="{ '--d': `${300 + i * 90}ms` }">{{ q.q }}</dd>
+          </div>
+        </dl>
+
+        <p class="mt-10 flex flex-wrap items-baseline gap-x-3 gap-y-2 font-display text-[length:clamp(19px,2vw,26px)] font-bold tracking-[-0.015em]">
+          <span class="text-[color:rgba(255,255,255,0.65)]">{{ problem.needsIntro }}</span>
+          <template v-for="(n, i) in problem.needs" :key="n">
+            <span v-if="i" aria-hidden="true" class="text-pastiYellow-500">+</span>
+            <span class="text-pureWhite underline decoration-pastiYellow-500 decoration-[3px] underline-offset-[6px]">{{ n }}</span>
+          </template>
+          <span class="text-[color:rgba(255,255,255,0.65)]">.</span>
+        </p>
+      </div>
+    </BaseContainer>
   </section>
 </template>
+
+<style scoped>
+.op-sheet {
+  transform: translate(var(--tx), var(--ty)) rotate(var(--tr));
+  transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0ms), opacity 0.6s ease var(--d, 0ms);
+}
+:global(html[data-reduced-motion='false']) .op-sheet {
+  transform: translate(var(--fx), var(--fy)) rotate(var(--fr));
+  opacity: 0;
+}
+:global(html[data-reduced-motion='false']) .is-in .op-sheet {
+  transform: translate(var(--tx), var(--ty)) rotate(var(--tr));
+  opacity: 1;
+}
+</style>

@@ -1,23 +1,34 @@
 <script setup lang="ts">
-// /open — OPEN by PASTI, One Procurement Ecosystem Network. Section order and
-// rules: docs/open/01-open-page-structure.md (source: docs/open/00-open-
-// landing-page-brief.md). OPEN is the ecosystem; e-Procurement is one core
-// solution inside it. Global header/footer come from app.vue.
-// Copy: useOpen (placeholders marked BUTUH DATA there).
-useHead({ title: 'OPEN — One Procurement Ecosystem Network · PASTI' })
+// /open — OPEN by PASTI Technology, One Procurement Ecosystem Network.
+// Primary source: OPEN PRODUCT 2026.pdf (notes: docs/open/02-open-product-
+// 2026-notes.md); section order and rules: docs/open/01-open-page-structure.md.
+// OPEN is a customizable, ready-to-develop procurement framework — never
+// "OPEN = e-Procurement", never plug-and-play SaaS. Copy lives in useOpen.
+// Global header/footer come from app.vue (sections 01 and 14).
+const { seo } = useOpen()
+
+useSeoMeta({
+  title: seo.title,
+  description: seo.description,
+  ogTitle: seo.title,
+  ogDescription: seo.description,
+  ogImage: '/images/platforms/open.webp',
+  twitterCard: 'summary_large_image'
+})
 </script>
 
 <template>
   <OpenSubNav />
   <OpenHero />
   <OpenProblem />
-  <OpenFlow />
+  <OpenNotSaas />
+  <OpenFramework />
+  <OpenEcosystem />
   <OpenModules />
   <OpenAuction />
-  <OpenIntegration />
   <OpenGovernance />
-  <OpenCases />
-  <OpenImpact />
-  <OpenWhyPasti />
+  <OpenSystems />
+  <OpenCustomization />
+  <OpenAdvantage />
   <OpenDemo />
 </template>

@@ -28,9 +28,9 @@ export function usePlatforms() {
       index: '01',
       name: 'OPEN',
       character: 'Expansive Precision',
-      // docs/open/00-open-landing-page-brief.md — OPEN is the ecosystem;
-      // e-Procurement is one core solution inside it, never OPEN's definition.
-      positioning: 'OPEN connects procurement, sourcing, e-Auction, vendor management, contracts, catalog, workflows, monitoring, and enterprise integrations in one transparent, integrated, and audit-ready procurement ecosystem.',
+      // OPEN PRODUCT 2026.pdf (owner approved the update, 2026-10-07): a
+      // ready-to-develop procurement framework, not e-Procurement / SaaS.
+      positioning: 'OPEN is a ready-to-develop procurement framework that connects procurement, vendors, catalogs, governance, approvals, monitoring, and enterprise integrations — customized around your organization.',
       image: '/images/platforms/open.webp',
       to: '/open'
     },
