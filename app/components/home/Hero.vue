@@ -796,10 +796,27 @@ useGsapContext(() => {
             data-card-inner
             class="relative h-full w-full overflow-hidden rounded-card border border-[color:rgba(3,60,89,0.14)] bg-pureWhite shadow-[0_50px_100px_-45px_rgba(3,60,89,0.55)]"
           >
-            <!-- Portrait posters in a landscape card: anchored to the TOP so the
-                 client logo + headline are always whole (only the poster's
-                 bottom stats row falls outside the frame). -->
-            <img :src="project.image" :alt="project.title" :loading="i < 3 ? 'eager' : 'lazy'" class="h-full w-full object-cover object-top">
+            <!-- Portrait (4:5) posters in a landscape (16:10) card, shown WHOLE
+                 (owner request 2026-10-06: nothing cropped): the poster sits
+                 centred at full card height; the side bands are the same
+                 poster, pre-blurred offline into a ~1KB backdrop
+                 (public/images/selected-work/backdrop/) — no runtime filter,
+                 so the scrubbed gallery stays cheap. -->
+            <img
+              :src="project.image.replace('/selected-work/', '/selected-work/backdrop/')"
+              alt=""
+              aria-hidden="true"
+              class="absolute inset-0 h-full w-full scale-110 object-cover"
+              draggable="false"
+            >
+            <span aria-hidden="true" class="absolute inset-0 bg-[color:rgba(3,60,89,0.08)]" />
+            <img
+              :src="project.image"
+              :alt="project.title"
+              :loading="i < 3 ? 'eager' : 'lazy'"
+              class="relative mx-auto h-full w-auto object-contain shadow-[0_0_60px_-10px_rgba(3,36,54,0.55)]"
+              draggable="false"
+            >
             <span class="pointer-events-none absolute right-3 top-3 inline-flex items-center gap-2 rounded-full bg-[color:rgba(3,60,89,0.88)] px-2.5 py-1">
               <LayoutBrandMark :height="9" />
               <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.25)]" />
