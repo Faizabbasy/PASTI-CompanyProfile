@@ -23,6 +23,9 @@ export interface FinalCtaContent {
  *
  * "Our office" is used as a label only; no office address is set here because the
  * source doc doesn't provide one and none should be invented.
+ *
+ * Email (2026-10-07): klien@pastipeople.id, from the COMPRO 2025 company profile
+ * (p.2 and p.42).
  */
 export function useFinalCta(): FinalCtaContent {
   return {
@@ -30,6 +33,6 @@ export function useFinalCta(): FinalCtaContent {
     headingLine: "Let's build what matters",
     ctaTo: '/contact',
     officeLabel: 'Our office',
-    email: null
+    email: 'klien@pastipeople.id'
   }
 }

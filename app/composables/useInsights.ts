@@ -41,6 +41,17 @@ export interface InsightPage {
   description: string
   points: string[]
   focus: string
+  /** PASTI's own take, from the COMPRO 2025 company profile (2026-10-07):
+   * the matching capability / vision / founder sentence verbatim, plus links
+   * to PASTI work on the topic. Nothing external, no new claims or figures. */
+  pasti?: InsightPerspective
+}
+
+export interface InsightPerspective {
+  label: string
+  text: string
+  source: string
+  links: { label: string; to: string }[]
 }
 
 export interface InsightArticle {
@@ -71,6 +82,23 @@ export interface InsightArticle {
  * §11's verification task (or be replaced/marked placeholder).
  */
 export function useInsights() {
+  // PASTI perspective per article (owner 2026-10-07: "jangan sampe diluar
+  // konteks atau dari PASTI") — sentences pulled from the same COMPRO
+  // sources the service pages use, so the copy lives in one place.
+  const tech = useTechnology().services
+  const creative = useCreative().services
+  const company = useCompany()
+  const body = (list: { title: string; body: string }[], title: string) => list.find((x) => x.title === title)!.body
+  const perspective: Record<string, InsightPerspective> = {
+    '01': { label: 'How PASTI approaches it', text: body(tech, 'Cybersecurity & Compliance Architecture'), source: 'COMPRO 2025 p.34', links: [{ label: 'Technology capabilities', to: '/technology#capabilities' }] },
+    '02': { label: 'How PASTI approaches it', text: body(tech, 'Enterprise Platforms'), source: 'COMPRO 2025 p.32', links: [{ label: 'Textile Production Monitoring', to: '/work#case-textile' }, { label: 'Workflow Automation (AT-WF)', to: '/work#case-at-wf' }] },
+    '03': { label: 'How PASTI approaches it', text: body(tech, 'Custom Built AI Solutions'), source: 'COMPRO 2025 p.31', links: [{ label: 'Technology capabilities', to: '/technology#capabilities' }] },
+    '04': { label: 'Our vision', text: company.vision, source: 'COMPRO 2025 p.27', links: [{ label: 'About PASTI', to: '/about' }] },
+    '05': { label: 'How PASTI approaches it', text: body(creative, 'Brand Identity & UI/UX Design'), source: 'COMPRO 2025 p.41', links: [{ label: 'Pertamina — Energi Untuk Negeri', to: '/work#work-05' }, { label: 'Selected creative work', to: '/creative#creative-work' }] },
+    '06': { label: `${company.founder.name}, ${company.founder.role}`, text: company.founder.quote, source: 'COMPRO 2025 p.6', links: [{ label: 'OCTO Mobile strategy', to: '/creative#creative-work' }, { label: 'About PASTI', to: '/about' }] },
+    '07': { label: 'How PASTI approaches it', text: body(tech, 'Mobile App Development & MVP'), source: 'COMPRO 2025 p.33', links: [{ label: 'PowerHours', to: '/work#case-powerhours' }, { label: 'HDI Healthy Lifestyle', to: '/work#case-hdi' }] }
+  }
+
   const articles: InsightArticle[] = [
     {
       index: '01',
@@ -173,6 +201,8 @@ export function useInsights() {
       }
     }
   ]
+
+  for (const a of articles) if (a.page && perspective[a.index]) a.page.pasti = perspective[a.index]
 
   return { articles }
 }

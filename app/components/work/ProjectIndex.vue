@@ -11,11 +11,33 @@ if (import.meta.client) {
 // GSAP Flip: cards physically travel / resize into their new slots, filtered
 // ones scale away. Grid: poster cards with a pointer tilt. List: editorial
 // rows with thumbnail, category and description. Reduced motion: instant.
+// Cards whose project has a public Featured Case Study (p.caseId) carry a
+// "Case study" badge and a stretched link that scrolls to and opens that
+// case; the others are plain, non-interactive cards — no "View" cursor or
+// arrow promising a detail page that doesn't exist (2026-10-07).
 const { projects, groups } = useWorkPortfolio()
 const filter = ref('All')
 const view = ref<'grid' | 'list'>('grid')
 const listRef = ref<HTMLElement | null>(null)
 const { setState } = useCustomCursor()
+const { openCase } = useActiveCase()
+
+// Deep link #work-<index> (e.g. from /technology): scroll the project card
+// into view once the page is scrollable.
+let cancelDeepLink: (() => void) | undefined
+onMounted(() => {
+  const m = location.hash.match(/^#work-(\d+)$/)
+  if (!m) return
+  cancelDeepLink = whenScrollable(() => {
+    const el = document.getElementById(`work-${m[1]}`)
+    if (!el) return
+    const lenis = getLenisInstance()
+    const reduce = window.matchMedia(reducedMotionQuery.reduce).matches
+    if (lenis) lenis.scrollTo(el, { offset: -120, duration: 1.4 })
+    else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 120, behavior: reduce ? 'auto' : 'smooth' })
+  })
+})
+onBeforeUnmount(() => cancelDeepLink?.())
 
 const visible = computed(() => projects.filter((p) => filter.value === 'All' || p.group === filter.value))
 const countFor = (g: string) => (g === 'All' ? projects.length : projects.filter((p) => p.group === g).length)
@@ -115,10 +137,10 @@ useGsapContext(() => {
           :key="p.index"
           data-wi-card
           :data-flip-id="`card-${p.index}`"
-          class="group/wi"
+          class="group/wi relative"
           :class="view === 'list' ? 'grid grid-cols-[96px_1fr] items-center gap-5 border-t border-[color:rgba(3,60,89,0.14)] py-6 last:border-b tablet:grid-cols-[160px_1fr_auto] tablet:gap-8' : ''"
           @pointermove="onTilt"
-          @pointerenter="setState('view', 'View')"
+          @pointerenter="p.caseId && setState('view', 'Case study')"
           @pointerleave="offTilt"
         >
           <div
@@ -133,6 +155,9 @@ useGsapContext(() => {
               <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.25)]" />
               <span class="font-mono text-[10px] text-pureWhite">{{ p.index }}</span>
             </span>
+            <span v-if="p.caseId" class="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-pastiYellow-500 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-slateNavy" :class="view === 'list' ? 'hidden tablet:inline-flex' : ''">
+              Case study
+            </span>
           </div>
           <div :class="view === 'grid' ? 'mt-5 px-1' : 'min-w-0'">
             <p class="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">
@@ -143,9 +168,17 @@ useGsapContext(() => {
             </h3>
             <p class="mt-2 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.7)]" :class="view === 'grid' ? 'line-clamp-2' : 'line-clamp-2 max-w-[60ch] tablet:line-clamp-none'">{{ p.description }}</p>
           </div>
-          <span v-if="view === 'list'" class="hidden h-12 w-12 place-items-center rounded-full border border-[color:rgba(3,60,89,0.2)] text-slateNavy transition-[transform,background-color,border-color] duration-500 ease-editorial group-hover/wi:-rotate-45 group-hover/wi:border-pastiYellow-500 group-hover/wi:bg-pastiYellow-500 tablet:grid">
+          <span v-if="view === 'list' && p.caseId" aria-hidden="true" class="hidden h-12 w-12 place-items-center rounded-full border border-[color:rgba(3,60,89,0.2)] text-slateNavy transition-[transform,background-color,border-color] duration-500 ease-editorial group-hover/wi:-rotate-45 group-hover/wi:border-pastiYellow-500 group-hover/wi:bg-pastiYellow-500 tablet:grid">
             <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
           </span>
+          <!-- Stretched link: the whole card opens its Featured Case Study. -->
+          <a
+            v-if="p.caseId"
+            :href="`#case-${p.caseId}`"
+            class="absolute inset-0 z-10 rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slateNavy"
+            :aria-label="`Read the ${p.title} case study`"
+            @click.prevent="openCase(p.caseId)"
+          />
         </li>
       </ul>
     </BaseContainer>

@@ -9,6 +9,11 @@ export interface TrustedClient {
  *
  * Assets confirmed by the client as approved-for-publication, supplied in
  * .docs/LOGO/ and copied to public/logos/.
+ *
+ * Owner decision 2026-10-07: these are technologies/platforms PASTI builds
+ * with, not clients. They now render in HomeTechStrip ("Technologies we build
+ * with", above the Trusted Partner card); the Trust marquee shows real
+ * clients from useClients instead.
  */
 export function useTrustedClients() {
   const clients: TrustedClient[] = [

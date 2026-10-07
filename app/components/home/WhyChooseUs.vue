@@ -14,7 +14,7 @@ if (import.meta.client) {
 // Concept: the timeline IS the argument for "fast work". A sprint board whose
 // lanes are PASTI's own method (useAbout().method) runs as you scroll: the
 // Signal — a PASTI Yellow playhead — sweeps the weeks, bars fill and count,
-// finished steps flip to Slate Navy, and the four legacy reasons on the left
+// finished steps flip to Slate Navy, and the four COMPRO standards on the left
 // light up in step. The playhead is also draggable (and the grid tappable) so
 // the visitor can scrub it by hand. The sprint is illustrative, not a client
 // project or a delivery-time claim; no invented people (role dots T / C stand

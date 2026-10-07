@@ -16,7 +16,12 @@ export interface WhoWeAreStat {
  * (owner decision 2026-09-30 — see WhoWeAre.vue header). Heading/body and the
  * Trusted Partner copy come from the owner's reference (legacy site, see
  * docs/legacy/PASTIPEOPLE_EXISTING_CONTENT_SOURCE.md §Trusted Partner) with
- * typo fixes only. The 200+/130+ figures were confirmed verified by the owner.
+ * typo fixes only.
+ *
+ * COMPRO 2025 enrichment (owner decision 2026-10-07): proof figures follow the
+ * company profile — 70+ projects / 50+ clients (p.25–26), replacing the
+ * earlier 200+/130+. Established 2020 (p.2) and the client-sector sentence
+ * (p.25) come from the same document; no other figures are added.
  *
  * Portraits (who-01..03) and the Trusted Partner cutout (work-with-us) are
  * cropped from the owner's reference images (2026-09-30).
@@ -26,10 +31,10 @@ export function useWhoWeAre() {
   // `highlight` is rendered on the PASTI Yellow marker bar.
   const heading = { before: 'Trusted', highlight: '100%', after: 'by many people, gradually.' }
   const body =
-    'Our commitment to reliable IT solutions and strategic digital marketing has earned the trust of businesses across Indonesia.'
+    'Our commitment to reliable IT solutions and strategic digital marketing has earned the trust of businesses across Indonesia — from state-owned enterprises and multinational corporations to leading brands in finance, FMCG and lifestyle.'
 
   const facts = [
-    { label: 'Company', value: 'PT Hidup Pasti Bahagia' },
+    { label: 'Company · Est. 2020', value: 'PT Hidup Pasti Bahagia' },
     { label: 'Positioning', value: 'Technology × Creative Execution Partner' },
     { label: 'Essence', value: 'Certainty Through Execution' }
   ]
@@ -40,7 +45,7 @@ export function useWhoWeAre() {
     { src: '/images/people/who-03.webp', alt: 'Happy PASTI client making an OK sign', tag: 'Client · 03' }
   ]
 
-  const clientStat: WhoWeAreStat = { value: 130, suffix: '+', label: 'Happy clients' }
+  const clientStat: WhoWeAreStat = { value: 50, suffix: '+', label: 'Happy clients' }
 
   const partner = {
     kicker: "Let's Development",
@@ -50,8 +55,8 @@ export function useWhoWeAre() {
     title: 'Trusted Partner',
     body: 'for Technology and Creative Marketing, delivering impactful growth.',
     stats: [
-      { value: 200, suffix: '+', label: 'Completed Projects' },
-      { value: 130, suffix: '+', label: 'Clients Delivered' }
+      { value: 70, suffix: '+', label: 'Completed Projects' },
+      { value: 50, suffix: '+', label: 'Clients Delivered' }
     ] as WhoWeAreStat[]
   }
 

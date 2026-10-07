@@ -17,8 +17,8 @@ export interface NavItem {
  * Single source of truth for primary navigation, per
  * .docs/PASTI_Cuberto_Template_Content_Mapping.docx section 01 — NAVIGATION.
  * Platform items (owner request 2026-10-06): OPEN, SHIFTLY and e-CORPORATE
- * are back in the bar. None has a page yet, so they render as non-navigating
- * "coming soon" labels (comingSoon) until real routes exist.
+ * are back in the bar. All three now have live pages (SHIFTLY since
+ * 2026-10-07); `comingSoon` stays available for future items without a route.
  */
 export function useNavigation() {
   const navItems: NavItem[] = [
@@ -26,7 +26,7 @@ export function useNavigation() {
     { label: 'Technology', to: '/technology' },
     { label: 'Creative', to: '/creative' },
     { label: 'OPEN', to: '/open', isPlatform: true },
-    { label: 'SHIFTLY', to: '/shiftly', isPlatform: true, comingSoon: true },
+    { label: 'SHIFTLY', to: '/shiftly', isPlatform: true },
     { label: 'e-CORPORATE', to: '/e-corporate', isPlatform: true },
     { label: 'Work', to: '/work' },
     { label: 'About', to: '/about' },

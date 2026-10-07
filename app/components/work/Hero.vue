@@ -7,7 +7,8 @@ import gsap from 'gsap'
 // right = wider fan), the hovered card lifts out, and clicking a card jumps
 // to that project in the index. Touch: the deck rests half-open and each tap
 // jumps. Reduced motion: a static fan.
-const { projects, caseFiles } = useWorkPortfolio()
+const { projects } = useWorkPortfolio()
+const { publicCases } = useFeaturedCases()
 const pad = (n: number) => String(n).padStart(2, '0')
 
 const stageRef = ref<HTMLElement | null>(null)
@@ -110,7 +111,7 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10 flex flex-1 flex-col desktop:justify-center">
       <div class="grid items-center gap-6 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-6">
-          <div data-wh-fade><BaseHeroMarker label="Work" :meta="`${pad(projects.length)} projects · ${pad(caseFiles.length)} case files`" /></div>
+          <div data-wh-fade><BaseHeroMarker label="Work" :meta="`${pad(projects.length)} projects · ${pad(publicCases.length)} case studies`" /></div>
           <h1 class="hero-title mt-6 desktop:mt-[3svh]">
             <span class="wh-mask block"><span data-wh-word class="inline-block">Selected</span></span>
             <span class="wh-mask block"><span data-wh-word class="inline-block">work<span class="text-pastiYellow-500">.</span></span></span>

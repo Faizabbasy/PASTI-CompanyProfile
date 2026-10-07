@@ -6,13 +6,14 @@ if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-// MANIFESTO — the company intro as an editorial paragraph that "comes into
-// focus" word by word with the scroll (faint → PASTI Blue; key words get the
-// Yellow accent), then the five-step method from the brand guide §01 as a
+// OUR DNA — COMPRO 2025 "What We Stand For" (p.25) as an editorial paragraph
+// that "comes into focus" word by word with the scroll (key words get the
+// Yellow accent), then the rest of the story beside the company facts
+// (COMPRO p.2), then the five-step method from the brand guide §01 as a
 // timeline whose rail fills and whose nodes light up in sequence.
-const { introHeading, introBody, method } = useAbout()
+const { introHeading, introBody, method, storyMore, company } = useAbout()
 
-const accent = new Set(['exceptional', 'expertise', 'excellence,', 'efficient', 'impactful', 'rapid', 'effective'])
+const accent = new Set(['technology', 'creativity', 'unified', 'scalable', 'measurable'])
 const words = introBody.split(' ')
 
 const sectionRef = ref<HTMLElement | null>(null)
@@ -67,9 +68,22 @@ useGsapContext(() => {
         <p class="h-fit font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)] desktop:col-span-3 desktop:inline-flex desktop:items-center desktop:gap-2.5 desktop:pt-4">
           <span class="mr-2.5 inline-block h-1.5 w-1.5 rounded-full bg-pastiYellow-500 align-middle desktop:mr-0" />{{ introHeading }}
         </p>
-        <p data-mf-text class="font-display text-[length:clamp(28px,3.6vw,58px)] font-bold leading-[1.12] tracking-[-0.03em] text-slateNavy desktop:col-span-9">
+        <p data-mf-text class="font-display text-[length:clamp(24px,2.7vw,42px)] font-bold leading-[1.18] tracking-[-0.03em] text-slateNavy desktop:col-span-9">
           <template v-for="(w, i) in words" :key="i"><span data-mf-word class="mf-word" :class="accent.has(w.toLowerCase()) ? 'mf-accent' : ''">{{ w }}</span>{{ ' ' }}</template>
         </p>
+      </div>
+
+      <!-- Story + company facts -->
+      <div class="mt-16 grid gap-12 border-t border-[color:rgba(3,60,89,0.14)] pt-12 desktop:mt-24 desktop:grid-cols-12 desktop:gap-10">
+        <div class="space-y-6 desktop:col-span-6 desktop:col-start-4">
+          <p v-for="(para, i) in storyMore" :key="i" class="text-token-body-large leading-relaxed text-[color:rgba(3,60,89,0.78)]">{{ para }}</p>
+        </div>
+        <dl class="grid grid-cols-1 gap-x-6 gap-y-5 tablet:grid-cols-2 desktop:col-span-3 desktop:grid-cols-1">
+          <div v-for="f in company.facts" :key="f.label" class="border-t border-[color:rgba(3,60,89,0.14)] pt-3">
+            <dt class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)]">{{ f.label }}</dt>
+            <dd class="mt-1 font-display text-[15px] font-semibold leading-snug text-slateNavy">{{ f.value }}</dd>
+          </div>
+        </dl>
       </div>
 
       <!-- Method timeline -->

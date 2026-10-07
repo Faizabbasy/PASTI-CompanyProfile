@@ -153,7 +153,7 @@ useGsapContext(() => {
       <BaseSectionMark surface="dark" label="Studio wall" :meta="`${String(visuals.length).padStart(2, '0')} visuals`" />
       <div class="m-stack mt-12 flex flex-wrap items-end justify-between gap-6 desktop:mt-16">
         <div class="overflow-hidden pb-2">
-          <h2 data-cw-head class="font-display text-[length:clamp(40px,6.4vw,104px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-pureWhite">
+          <h2 data-cw-head class="hero-title hero-title--dark">
             Made in the <span class="text-pastiYellow-500">studio.</span>
           </h2>
         </div>

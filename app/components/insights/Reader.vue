@@ -57,7 +57,7 @@ onBeforeUnmount(() => {
   <Teleport to="body">
     <Transition name="rd">
       <div v-if="article" class="fixed inset-0 z-[80] flex items-end bg-[color:rgba(2,20,32,0.6)] tablet:items-stretch" role="dialog" aria-modal="true" :aria-label="article.title" @click.self="emit('close')">
-        <div ref="sheetRef" class="rd-sheet relative flex h-[94svh] w-full flex-col overflow-y-auto rounded-t-[28px] bg-slateNavy text-pureWhite tablet:m-4 tablet:h-auto tablet:rounded-[28px] desktop:overflow-hidden">
+        <div ref="sheetRef" class="rd-sheet relative flex h-[94svh] w-full flex-col overflow-y-auto rounded-t-[28px] bg-slateNavy text-pureWhite tablet:m-4 tablet:h-auto tablet:rounded-[28px] desktop:max-h-[calc(100svh-2rem)]">
           <!-- Top bar -->
           <div class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-[color:rgba(255,255,255,0.1)] bg-slateNavy px-5 py-4 tablet:px-8">
             <span class="inline-flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">
@@ -99,6 +99,22 @@ onBeforeUnmount(() => {
                   <span aria-hidden="true" class="h-px w-4 bg-pastiYellow-500" />{{ pt }}
                 </li>
               </ul>
+              <!-- PASTI perspective (COMPRO 2025) + links to PASTI's own work. -->
+              <div v-if="article.page?.pasti" data-rd-part class="mt-7 rounded-[18px] bg-[color:rgba(255,255,255,0.06)] p-5 ring-1 ring-[color:rgba(255,255,255,0.1)]">
+                <p class="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.18em] text-pastiYellow-500">
+                  <LayoutBrandMark surface="dark" :height="9" />{{ article.page.pasti.label }}
+                </p>
+                <p class="mt-3 text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.86)]">{{ article.page.pasti.text }}</p>
+                <div class="mt-4 flex flex-wrap gap-x-4 gap-y-1">
+                  <NuxtLink
+                    v-for="l in article.page.pasti.links"
+                    :key="l.to + l.label"
+                    :to="l.to"
+                    class="inline-flex min-h-10 items-center text-[14px] font-semibold text-pureWhite underline decoration-pastiYellow-500 decoration-2 underline-offset-4 hover:decoration-pureWhite"
+                    @click="emit('close')"
+                  >{{ l.label }} <span aria-hidden="true" class="ml-1">↗</span></NuxtLink>
+                </div>
+              </div>
               <p data-rd-part class="mt-8 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.4)]">← → to browse · Esc to close</p>
             </div>
           </div>

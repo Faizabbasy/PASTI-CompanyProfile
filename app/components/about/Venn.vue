@@ -109,7 +109,7 @@ useGsapContext(() => {
         <!-- Copy + proof -->
         <div class="m-center desktop:col-span-5">
           <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.55)]">Where PASTI sits</p>
-          <h2 class="mt-4 font-display text-[length:clamp(36px,4.4vw,68px)] font-extrabold leading-[0.98] tracking-[-0.04em] text-pureWhite">
+          <h2 class="hero-title hero-title--dark mt-4">
             {{ positioning.split('×')[0] }}<span class="text-pastiYellow-500">×</span>{{ positioning.split('×')[1] }}
           </h2>
           <p class="mt-5 max-w-[44ch] text-token-body text-[color:rgba(255,255,255,0.7)]">

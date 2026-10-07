@@ -5,20 +5,13 @@ export interface AboutPillar {
   visual: string
 }
 
-export interface AboutSpectrum {
-  a: string
-  b: string
-  /** Bias toward pole A, 0–10 (brand guide §03 dots). */
-  bias: number
-}
-
 /**
  * /about content (owner decision 2026-10-01): the old page quoted placeholder
  * WordPress-template copy ("Live out your life.", one repeated filler line for
  * six services, "2M+ Get Awards" / "Cup of Coffee" stats). It is replaced by
  * the official brand foundation from docs/rework-v2/00-brand-guide.md
  * (§01 Brand Core, §02 Brand Pillars, §03 Personality) plus the company intro
- * from the live site. Proof numbers are the owner-verified 200+ / 130+ shared
+ * from the live site. Proof numbers are the COMPRO 2025 70+ / 50+ shared
  * with the homepage (useWhoWeAre) — nothing new is claimed here.
  */
 export function useAbout() {
@@ -27,11 +20,17 @@ export function useAbout() {
   const essence = 'Certainty Through Execution'
   const positioning = 'Technology × Creative Execution Partner'
   const companyName = 'PT Hidup Pasti Bahagia'
-  const brandName = 'PASTI People'
+  const brandName = 'PASTI'
 
-  const introHeading = 'Unlocking the Power of Technology and Creativity'
-  const introBody =
-    'At PT Hidup Pasti Bahagia, we are dedicated to providing you with exceptional services that cater to your business needs. With our expertise and commitment to excellence, we deliver efficient IT solutions and impactful digital marketing, ensuring rapid and effective results for your business.'
+  // COMPRO 2025 rebuild (2026-10-07): company story, facts, vision/mission,
+  // standards, milestones and the founder come from useCompany (COMPRO).
+  // The brand-guide pillars stay as "How we work"; the brand-guide
+  // personality block (is / is not, spectrum) was dropped from the public
+  // page as an internal guideline.
+  const company = useCompany()
+  const introHeading = 'Our DNA'
+  const introBody = company.story[0]!
+  const storyMore = company.story.slice(1)
 
   // Brand guide §01 — what PASTI does, in order.
   const method = ['Understands the problem', 'Structures it', 'Builds the solution', 'Delivers it', 'Supports what comes next']
@@ -45,17 +44,6 @@ export function useAbout() {
     { index: '05', name: 'Impact', meaning: 'Judge work by what changes for the business or user.', visual: 'Real proof, projects, outcomes, measurable value.' }
   ]
 
-  const personalityIs = ['Certain', 'Precise', 'Confident', 'Agile', 'Modern', 'Practical', 'Impact-driven']
-  const personalityIsNot = ['Chaotic', 'Gimmicky', 'Childish', 'Overly futuristic', 'Pretentious', 'Template-driven', 'Overly corporate', 'Hesitant']
-  const spectrum: AboutSpectrum[] = [
-    { a: 'Expert', b: 'Approachable', bias: 7 },
-    { a: 'Fast', b: 'Deliberate', bias: 8 },
-    { a: 'Clean', b: 'Decorative', bias: 9 },
-    { a: 'Direct', b: 'Expressive', bias: 7 },
-    { a: 'Modern', b: 'Traditional', bias: 8 }
-  ]
-
-  // Owner-verified figures, shared with the homepage Trusted Partner card.
   const { partner } = useWhoWeAre()
   const stats = partner.stats
 
@@ -71,9 +59,8 @@ export function useAbout() {
     method,
     coreEmotion,
     pillars,
-    personalityIs,
-    personalityIsNot,
-    spectrum,
-    stats
+    stats,
+    storyMore,
+    company
   }
 }

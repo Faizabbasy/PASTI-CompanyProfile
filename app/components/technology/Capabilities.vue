@@ -6,7 +6,10 @@ if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-// CAPABILITY INDEX — the six services as a large editorial index.
+// CAPABILITY INDEX — the six COMPRO 2025 technology capabilities as one
+// editorial chapter (owner 2026-10-07: merged instead of six thin sections).
+// Each row: COMPRO sentence, the key terms from that sentence, and "Related
+// work" links where a matching case exists (none for AI / Cyber / SLA).
 // Desktop (fine pointer): hovering a row floods it with Slate Navy from the
 // bottom, the index turns PASTI Yellow and a preview card follows the cursor,
 // tilting with the pointer's horizontal speed and swapping images per row.
@@ -102,7 +105,7 @@ useGsapContext(() => {
             </p>
           </div>
           <div class="mt-4 overflow-hidden pb-2">
-            <h2 data-cap-head class="font-display text-[length:clamp(44px,7vw,112px)] font-extrabold leading-[0.92] tracking-[-0.045em] text-slateNavy">
+            <h2 data-cap-head class="hero-title">
               {{ servicesHeading }}<span class="text-pastiYellow-500">.</span>
             </h2>
           </div>
@@ -119,20 +122,29 @@ useGsapContext(() => {
           <!-- Desktop row -->
           <div
             class="group/row relative hidden cursor-default overflow-hidden desktop:grid desktop:grid-cols-12 desktop:items-center desktop:gap-8 desktop:py-9"
-            @mouseenter="hovered = i; setState('view', 'View')"
+            @mouseenter="hovered = i; setState('view', s.title)"
             @mouseleave="setState('default')"
           >
             <span aria-hidden="true" class="absolute inset-0 origin-bottom scale-y-0 bg-slateNavy transition-transform duration-500 ease-editorial group-hover/row:scale-y-100" />
             <span class="relative z-10 col-span-1 pl-4 font-mono text-[13px] tabular-nums text-[color:rgba(3,60,89,0.5)] transition-colors duration-300 group-hover/row:text-pastiYellow-500">{{ s.index }}</span>
-            <h3 class="relative z-10 col-span-6 font-display text-[length:clamp(30px,3.2vw,52px)] font-bold leading-[1.02] tracking-[-0.03em] text-slateNavy transition-[color,transform] duration-500 ease-editorial group-hover/row:translate-x-3 group-hover/row:text-pureWhite">
-              {{ s.title }}
-            </h3>
-            <p class="relative z-10 col-span-4 text-token-body text-[color:rgba(3,60,89,0.7)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.72)]">{{ s.body }}</p>
-            <span class="relative z-10 col-span-1 flex justify-end pr-4">
-              <span class="grid h-12 w-12 place-items-center rounded-full border border-[color:rgba(3,60,89,0.2)] text-slateNavy transition-[transform,background-color,border-color,color] duration-500 ease-editorial group-hover/row:-rotate-45 group-hover/row:border-pastiYellow-500 group-hover/row:bg-pastiYellow-500">
-                <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
-              </span>
-            </span>
+            <div class="relative z-10 col-span-6 transition-transform duration-500 ease-editorial group-hover/row:translate-x-3">
+              <h3 class="font-display text-[length:clamp(26px,2.4vw,38px)] font-bold leading-[1.08] tracking-[-0.03em] text-slateNavy transition-colors duration-500 group-hover/row:text-pureWhite">
+                {{ s.title }}
+              </h3>
+              <ul class="mt-4 flex flex-wrap gap-1.5" :aria-label="`${s.title} — key areas`">
+                <li v-for="k in s.keywords" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.75)] group-hover/row:ring-[color:rgba(255,255,255,0.22)]">{{ k }}</li>
+              </ul>
+            </div>
+            <div class="relative z-10 col-span-5 pr-4">
+              <p class="text-token-body text-[color:rgba(3,60,89,0.72)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.78)]">{{ s.body }}</p>
+              <div v-if="s.related.length" class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)] transition-colors duration-300 group-hover/row:text-pastiYellow-500">Related work</span>
+                <template v-for="w in s.related" :key="w.label">
+                  <NuxtLink v-if="w.to" :to="w.to" class="cap-link text-[14px] font-semibold text-slateNavy transition-colors duration-300 group-hover/row:text-pureWhite">{{ w.label }} <span aria-hidden="true">↗</span></NuxtLink>
+                  <span v-else class="text-[14px] font-semibold text-[color:rgba(3,60,89,0.72)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.72)]">{{ w.label }}</span>
+                </template>
+              </div>
+            </div>
           </div>
 
           <!-- Touch / small-screen row: accordion -->
@@ -145,7 +157,7 @@ useGsapContext(() => {
               @click="toggle(i)"
             >
               <span class="mt-2 font-mono text-[12px] tabular-nums" :class="open === i ? 'text-cobalt' : 'text-[color:rgba(3,60,89,0.5)]'">{{ s.index }}</span>
-              <span class="flex-1 font-display text-[26px] font-bold leading-[1.1] tracking-[-0.02em] text-slateNavy tablet:text-[34px]">{{ s.title }}</span>
+              <span class="flex-1 font-display text-[24px] font-bold leading-[1.1] tracking-[-0.02em] text-slateNavy tablet:text-[30px]">{{ s.title }}</span>
               <span
                 class="mt-1 grid h-11 w-11 shrink-0 place-items-center rounded-full transition-[transform,background-color,color] duration-300 ease-editorial"
                 :class="open === i ? 'rotate-45 bg-pastiYellow-500 text-slateNavy' : 'bg-slateNavy text-pureWhite'"
@@ -168,6 +180,18 @@ useGsapContext(() => {
                     </span>
                   </div>
                   <p class="mt-4 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.75)]">{{ s.body }}</p>
+                  <ul class="mt-4 flex flex-wrap gap-1.5">
+                    <li v-for="k in s.keywords" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)]">{{ k }}</li>
+                  </ul>
+                  <div v-if="s.related.length" class="mt-5 border-t border-[color:rgba(3,60,89,0.12)] pt-4">
+                    <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">Related work</p>
+                    <ul class="mt-2 flex flex-col gap-1">
+                      <li v-for="w in s.related" :key="w.label">
+                        <NuxtLink v-if="w.to" :to="w.to" class="inline-flex min-h-11 items-center gap-2 text-[15px] font-semibold text-slateNavy underline decoration-pastiYellow-500 decoration-2 underline-offset-4">{{ w.label }} <span aria-hidden="true">↗</span></NuxtLink>
+                        <span v-else class="inline-flex min-h-11 items-center text-[15px] font-semibold text-[color:rgba(3,60,89,0.72)]">{{ w.label }}</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -206,3 +230,17 @@ useGsapContext(() => {
     </div>
   </section>
 </template>
+
+<style scoped>
+.cap-link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s;
+}
+.cap-link:hover,
+.cap-link:focus-visible {
+  background-size: 100% 1px;
+}
+</style>

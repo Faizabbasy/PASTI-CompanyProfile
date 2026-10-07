@@ -21,6 +21,8 @@ export interface Service {
  * so that row's link 404s until that page is built, same as /technology
  * 404'd before this task.
  */
+// COMPRO 2025 enrichment (2026-10-07): bodies of rows 02, 03 and 05 condensed
+// from the company profile's service pages (p.31, p.32, p.33).
 export function useServices() {
   const services: Service[] = [
     {
@@ -33,14 +35,14 @@ export function useServices() {
     {
       index: '02',
       title: 'Enterprise Platforms',
-      body: 'We build enterprise platforms that connect people, processes and data.',
+      body: 'End-to-end ERP, CRM, LMS and dashboard platforms that connect people, processes and real-time data.',
       cta: 'Explore',
       category: 'technology'
     },
     {
       index: '03',
       title: 'Mobile App Development',
-      body: 'We design and develop mobile products and MVPs built for launch, validation and growth.',
+      body: 'iOS and Android apps in Flutter or native stacks, plus MVPs that validate business ideas quickly.',
       cta: 'Explore',
       category: 'technology'
     },
@@ -54,7 +56,7 @@ export function useServices() {
     {
       index: '05',
       title: 'Cybersecurity & Compliance',
-      body: 'We help businesses build secure digital foundations through architecture, protection and compliance.',
+      body: 'Secure-by-design systems with encryption, penetration testing and data governance aligned to industry standards.',
       cta: 'Explore',
       category: 'technology'
     }

@@ -39,6 +39,7 @@ export function useFooter() {
 
   const platformLinks: FooterLink[] = [
     { label: 'OPEN', to: '/open' },
+    { label: 'SHIFTLY', to: '/shiftly' },
     { label: 'e-CORPORATE', to: '/e-corporate' }
   ]
 
@@ -55,11 +56,13 @@ export function useFooter() {
   // yet — no such data exists in the brief or repo and none may be invented —
   // so they are null and the Footer simply omits those rows (no placeholder
   // copy). Fill them in here when the owner supplies them.
+  // Address + email (2026-10-07) come from the COMPRO 2025 company profile
+  // (p.2, p.42); maps link and hours are still unknown.
   const { email } = useFinalCta()
   const contact = {
     whatsappDisplay: '+62 821-2549-2299',
     email,
-    address: null as string | null,
+    address: 'Mutu Work – RS Fatmawati No. 39, Cilandak, South Jakarta 12430' as string | null,
     mapsUrl: null as string | null,
     hours: null as string | null,
     entity: 'PT Hidup Pasti Bahagia',

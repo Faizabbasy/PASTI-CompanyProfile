@@ -1,21 +1,45 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 
-// Copy sourced verbatim from .docs/PASTI_Cuberto_Template_Content_Mapping.docx, section 05 — TRUST.
-const heading = 'Trusted by leading organizations'
+// Owner decision 2026-10-07: "Our Beloved Client" (the COMPRO 2025 client-wall
+// title, p.7) replaces the mapping doc's "Trusted by leading organizations".
+const heading = 'Our Beloved Client'
+// Client-sector line condensed from COMPRO 2025 p.25 (same source as useWhoWeAre).
+const lede = 'State-owned enterprises, multinational corporations and leading brands across Indonesia.'
 
-const { clients } = useTrustedClients()
-// Marquee needs a duplicated run so the loop can wrap seamlessly at -50%.
-const marqueeClients = [...clients, ...clients]
+// Owner decisions 2026-10-07: the marquee shows real clients (useClients)
+// instead of the 7 platform logos (moved to HomeTechStrip), and the section
+// was re-laid out for the larger list ("perbagus lagi design dan layout"):
+// an editorial head (heading left, live count right) and TWO counter-moving
+// rows instead of one long line. Overrides the 04-homepage-spec
+// "existing logo order" lock; the focal-depth / hover-pause / edge-mask
+// mechanism is kept, now running across both rows.
+type ShownClient = { name: string; logo: string; ratio: number }
+const clients: ShownClient[] = useClients().clients.filter((c) => c.trusted && c.logo).map((c) => ({ name: c.name, logo: c.logo!, ratio: c.ratio }))
+// Alternate the list into two rows so sectors stay mixed in both.
+const rows = [clients.filter((_, i) => i % 2 === 0), clients.filter((_, i) => i % 2 === 1)]
+
+// Optical sizing: every logo gets the same visual AREA (not the same height),
+// so wide wordmarks don't dwarf square marks — capped by the slot. Sizes are
+// in px at desktop and scaled by --tl-scale below desktop (CSS).
+const AREA = 4000
+const MAX_W = 196
+const MAX_H = 66
+const size = (r: number) => {
+  let w = Math.sqrt(AREA * r)
+  let h = Math.sqrt(AREA / r)
+  if (h > MAX_H) { h = MAX_H; w = h * r }
+  if (w > MAX_W) { w = MAX_W; h = w / r }
+  return { width: `calc(${w.toFixed(1)}px * var(--tl-scale))`, height: `calc(${h.toFixed(1)}px * var(--tl-scale))` }
+}
 
 const headingRef = ref<HTMLElement | null>(null)
-const trackRef = ref<HTMLElement | null>(null)
+const trackRefs = ref<HTMLElement[]>([])
 const markerRef = ref<HTMLElement | null>(null)
 const hoveredClient = ref<string | null>(null)
 const paused = ref(false)
 // Reduced-motion still needs the plain Tailwind hover dim/scale (GSAP's
-// depth-driven scale/opacity never runs in that branch) — read once, not
-// watched, matching the same one-shot read used inside useGsapContext.
+// depth-driven scale/opacity never runs in that branch) — read once.
 const motionSafe = import.meta.client ? window.matchMedia('(prefers-reduced-motion: no-preference)').matches : true
 
 const { setState } = useCustomCursor()
@@ -25,12 +49,9 @@ const countRef = ref<HTMLElement | null>(null)
 useMaskedReveal(headingRef, { by: 'word' })
 useCountUp(countRef, { value: clients.length, duration: 1.4, format: (n) => String(Math.round(n)).padStart(2, '0') })
 
-// Signal — Quiet Proof Marker (04-homepage-spec.md §4 "The Signal"): Selected
-// Work's editorial spine visually resolves into this restrained Cobalt
-// marker near the Trusted heading. One subtle activation on entry, then
-// fully static — no progress percentage, no numeral, no repeated pulse, no
-// logo tracking, no persistent animated rail. This is the section's only
-// Signal element; it does not track hovered/focal logos.
+// Signal — Quiet Proof Marker (04-homepage-spec.md §4 "The Signal"): one
+// restrained marker near the heading, a single activation on entry, then
+// static. It does not track hovered/focal logos.
 useGsapContext(() => {
   const marker = markerRef.value
   if (!marker) return
@@ -54,135 +75,101 @@ useGsapContext(() => {
 })
 
 useGsapContext(() => {
-  const track = trackRef.value
-  if (!track) return
+  const tracks = trackRefs.value.filter(Boolean)
+  if (!tracks.length) return
   const mm = gsap.matchMedia()
 
   mm.add('(prefers-reduced-motion: no-preference)', () => {
-    const tween = gsap.to(track, {
-      xPercent: -50,
-      duration: 32,
-      ease: 'none',
-      repeat: -1
+    const isBelowDesktop = window.matchMedia(breakpointQuery.belowDesktop).matches
+    // Row 0 drifts left, row 1 drifts right, at slightly different speeds
+    // (px/s) so the two never lock into step. Duration follows track length.
+    const speeds = isBelowDesktop ? [30, 24] : [42, 34]
+    const tweens = tracks.map((track, i) => {
+      const half = track.scrollWidth / 2
+      const duration = Math.max(20, half / speeds[i % 2]!)
+      return i % 2 === 0
+        ? gsap.fromTo(track, { xPercent: 0 }, { xPercent: -50, duration, ease: 'none', repeat: -1 })
+        : gsap.fromTo(track, { xPercent: -50 }, { xPercent: 0, duration, ease: 'none', repeat: -1 })
     })
 
     watch(paused, (isPaused) => {
-      if (isPaused) tween.pause()
-      else if (running) tween.play()
+      tweens.forEach((t) => (isPaused ? t.pause() : running && t.play()))
     })
 
     let hoveredName: string | null = null
     watch(hoveredClient, (name) => { hoveredName = name })
 
-    // Focal-depth zone: logos passing the horizontal center read sharper/
-    // larger (peak clarity), logos further out shrink/fade (perspective
-    // compression) — a corridor with real depth, not a flat marquee. Per
-    // the mandatory performance guardrail: each logo's static offset
-    // within the track is cached once (on mount, and again on resize via
-    // ResizeObserver) — never re-measured with getBoundingClientRect()
-    // inside the per-frame loop. Per frame, only the track's own live
-    // xPercent (already being driven by the tween above) combines with
-    // that cached offset to derive where each logo currently sits.
-    // Milestone 5A final closure: this `isMobile` flag is a presentation
-    // optimization only (gentler focal-depth range + lower per-frame
-    // throttle for weaker devices), NOT a Heavy-vs-reduced pin gate — the
-    // marquee itself runs identically at every viewport width, per the
-    // spec's "Trusted is Quiet, the marquee may remain at Tablet only if
-    // it remains readable/performant/visually quiet" (it does). Per the
-    // frozen tier model, the same gentler tuning that was previously only
-    // "below 768px" is extended to cover the whole sub-desktop range
-    // (Tablet + Mobile, i.e. below 1024px) rather than just true-Mobile —
-    // Tablet is "Reduced Complexity" too, and this optimization already
-    // reads as reduced complexity, not a Heavy desktop-only device.
-    const logos = Array.from(track.querySelectorAll<HTMLElement>('.trust-logo'))
-    const isBelowDesktop = window.matchMedia(breakpointQuery.belowDesktop).matches
-    const scaleRange = isBelowDesktop ? [1, 1.15] : [1, 1.3] as const
-    // Raised the far-from-focus floor from 0.4/0.55 to 0.75/0.85 — logos
-    // outside the focal zone still recede, but read as clearly visible
-    // brand marks rather than washed out, per feedback that the marquee
-    // overall needed to feel brighter.
-    const opacityRange = isBelowDesktop ? [0.85, 1] : [0.75, 1] as const
-    const focalHalfWidth = () => window.innerWidth * 0.1 // ~20% width zone, centered
+    // Focal-depth zone: logos passing the horizontal centre read slightly
+    // larger and fully opaque; further out they recede. Each logo's offset
+    // in its track is cached (mount + ResizeObserver) — never measured in
+    // the per-frame loop, which only combines it with the track's live x.
+    const scaleRange = isBelowDesktop ? [1, 1.1] : [1, 1.18] as const
+    const opacityRange = isBelowDesktop ? [0.88, 1] : [0.78, 1] as const
+    const focalHalfWidth = () => window.innerWidth * 0.12
 
-    // Performance pass (2026-10-06): the per-frame loop used to restart
-    // three quickTo tweens per logo every tick (~60 tween restarts/frame)
-    // and ran forever, even off-screen. Now each logo eases toward its
-    // target with a plain lerp and one combined transform write, and the
-    // whole marquee (tween + loop) only runs while the section is on screen.
-    interface LogoMetrics { el: HTMLElement; name: string; offset: number; s: number; o: number; y: number }
-    let metrics: LogoMetrics[] = []
-    let trackLeft = 0
+    interface LogoMetrics { el: HTMLElement; name: string; offset: number; s: number; o: number }
+    interface TrackMetrics { el: HTMLElement; left: number; logos: LogoMetrics[] }
+    let state: TrackMetrics[] = []
 
-    // Batch ALL reads first, then build the state — never interleaved; re-run
-    // on mount and on resize, never inside the per-frame tick below.
     function measure() {
-      if (!track) return
-      trackLeft = track.getBoundingClientRect().left - (gsap.getProperty(track, 'x') as number)
-      const offsets = logos.map((el) => el.offsetLeft + el.offsetWidth / 2)
-      metrics = logos.map((el, i) => ({ el, name: el.dataset.clientName ?? '', offset: offsets[i]!, s: 1, o: 1, y: 0 }))
+      state = tracks.map((track) => {
+        const left = track.getBoundingClientRect().left - (gsap.getProperty(track, 'x') as number)
+        const els = Array.from(track.querySelectorAll<HTMLElement>('.trust-logo'))
+        const offsets = els.map((el) => el.offsetLeft + el.offsetWidth / 2)
+        return { el: track, left, logos: els.map((el, i) => ({ el, name: el.dataset.clientName ?? '', offset: offsets[i]!, s: 1, o: 1 })) }
+      })
     }
     measure()
-
     const resizeObserver = new ResizeObserver(measure)
-    resizeObserver.observe(track)
+    tracks.forEach((t) => resizeObserver.observe(t))
 
-    // Below desktop the depth update runs every 2nd tick (weaker devices).
     let frameCount = 0
     const throttle = isBelowDesktop ? 2 : 1
 
     function onTick() {
       frameCount++
       if (frameCount % throttle !== 0) return
-      if (!metrics.length) return
-
-      const trackX = gsap.getProperty(track, 'x') as number
       const viewportCenter = window.innerWidth / 2
       const half = focalHalfWidth()
       const k = 0.18 * throttle
-
-      for (const m of metrics) {
-        // Live viewport x from cached offsets + the track's live translate —
-        // no DOM read in this loop.
-        const viewportX = trackLeft + trackX + m.offset
-        const distance = Math.abs(viewportX - viewportCenter)
-        const proximity = 1 - Math.min(distance / (half * 3), 1) // 0 far, 1 at center
-
-        const depthScale = gsap.utils.mapRange(0, 1, scaleRange[0], scaleRange[1], proximity)
-        const depthOpacity = gsap.utils.mapRange(0, 1, opacityRange[0], opacityRange[1], proximity)
-
-        // Hover boost on top of the depth value (never an override).
-        const isHovered = hoveredName === m.name
-        const isDimmed = hoveredName !== null && !isHovered
-        const ts = isHovered ? depthScale * 1.08 : depthScale
-        const to = isDimmed ? depthOpacity * 0.6 : depthOpacity
-        const ty = proximity > 0.6 ? -(proximity - 0.6) * 10 : 0
-        m.s += (ts - m.s) * k
-        m.o += (to - m.o) * k
-        m.y += (ty - m.y) * k
-        m.el.style.transform = `translate3d(0, ${m.y.toFixed(2)}px, 0) scale(${m.s.toFixed(4)})`
-        m.el.style.opacity = m.o.toFixed(3)
+      for (const t of state) {
+        const trackX = gsap.getProperty(t.el, 'x') as number
+        for (const m of t.logos) {
+          const distance = Math.abs(t.left + trackX + m.offset - viewportCenter)
+          const proximity = 1 - Math.min(distance / (half * 3), 1)
+          const depthScale = gsap.utils.mapRange(0, 1, scaleRange[0], scaleRange[1], proximity)
+          const depthOpacity = gsap.utils.mapRange(0, 1, opacityRange[0], opacityRange[1], proximity)
+          const isHovered = hoveredName === m.name
+          const isDimmed = hoveredName !== null && !isHovered
+          const ts = isHovered ? Math.max(depthScale, 1.1) : depthScale
+          const to = isHovered ? 1 : isDimmed ? depthOpacity * 0.45 : depthOpacity
+          m.s += (ts - m.s) * k
+          m.o += (to - m.o) * k
+          m.el.style.transform = `scale(${m.s.toFixed(4)})`
+          m.el.style.opacity = m.o.toFixed(3)
+        }
       }
     }
 
-    // Run only while the marquee is on screen.
+    // Run only while the section is on screen.
     let running = false
     const setRunning = (on: boolean) => {
       if (on === running) return
       running = on
       if (on) {
-        if (!paused.value) tween.play()
+        if (!paused.value) tweens.forEach((t) => t.play())
         gsap.ticker.add(onTick)
       } else {
-        tween.pause()
+        tweens.forEach((t) => t.pause())
         gsap.ticker.remove(onTick)
       }
     }
-    tween.pause()
+    tweens.forEach((t) => t.pause())
     const io = new IntersectionObserver(([e]) => setRunning(!!e?.isIntersecting), { rootMargin: '100px 0px' })
-    io.observe(track)
+    io.observe(tracks[0]!.parentElement!.parentElement!)
 
     return () => {
-      tween.kill()
+      tweens.forEach((t) => t.kill())
       gsap.ticker.remove(onTick)
       io.disconnect()
       resizeObserver.disconnect()
@@ -195,8 +182,7 @@ useGsapContext(() => {
   <BaseSection as="section" class="surface-light relative overflow-hidden">
     <!-- Brand environment (light reset): the 12-column grid made visible with
          top-edge ticks, and a single ghost PASTI wordmark cropped by the
-         section corner (Large Type as Graphic / Editorial Crop). Static,
-         ~4% — it is texture you notice only when you look for it. -->
+         section corner. Static, ~3%. -->
     <BaseGridLines tone="light" edge="top" />
     <img
       src="/images/pasti-logo.webp"
@@ -211,75 +197,97 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10">
       <BaseSectionMark surface="light" label="Trusted" meta="06 / 11" />
 
-      <div class="mt-16 flex flex-col items-center md:mt-20">
-        <!-- Signal — Quiet Proof Marker: a single restrained Cobalt dot,
-             settling near the heading, one-shot activation then static. -->
-        <span
-          ref="markerRef"
-          aria-hidden="true"
-          class="mb-4 h-1.5 w-1.5 rounded-full bg-pastiYellow-500"
-        />
-        <h2 ref="headingRef" class="text-center text-display-sm">
-          {{ heading }}
-        </h2>
+      <!-- Editorial head: heading left, live client count right. -->
+      <div class="mt-16 grid items-end gap-10 md:mt-20 desktop:grid-cols-12 desktop:gap-8">
+        <div class="m-center desktop:col-span-8">
+          <span ref="markerRef" aria-hidden="true" class="mb-5 block h-1.5 w-1.5 rounded-full bg-pastiYellow-500 max-desktop:mx-auto" />
+          <h2 ref="headingRef" class="max-w-[16ch] text-display-sm max-desktop:mx-auto">
+            {{ heading }}
+          </h2>
+        </div>
+        <div class="m-stack flex items-end gap-5 desktop:col-span-4 desktop:justify-end">
+          <span ref="countRef" class="font-display text-[clamp(64px,7vw,112px)] font-extrabold leading-[0.8] tracking-[-0.05em] text-slateNavy">{{ String(clients.length).padStart(2, '0') }}</span>
+          <div class="pb-1 desktop:max-w-[22ch]">
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">Clients</p>
+            <p class="mt-1.5 text-[14px] leading-snug text-[color:rgba(3,60,89,0.72)]">{{ lede }}</p>
+          </div>
+        </div>
       </div>
     </BaseContainer>
 
-    <div v-if="clients.length" class="relative z-10 mt-16 [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+    <!-- Two counter-moving rows between hairline rules. Logos stay unframed
+         (04-spec §Partner Logo Respect); PASTI's line language sits around them. -->
+    <div
+      v-if="clients.length"
+      class="tl-field relative z-10 mt-14 border-y border-structural-light md:mt-20"
+      @mouseenter="paused = true"
+      @mouseleave="paused = false; hoveredClient = null"
+    >
       <div
-        ref="trackRef"
-        class="flex w-max flex-wrap items-center justify-center gap-x-16 gap-y-14 motion-safe:flex-nowrap motion-safe:justify-start md:gap-x-24"
-        @mouseenter="paused = true"
-        @mouseleave="paused = false; hoveredClient = null"
+        v-for="(row, r) in rows"
+        :key="r"
+        class="overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
+        :class="r > 0 ? 'border-t border-structural-light' : ''"
       >
-        <div
-          v-for="(client, i) in marqueeClients"
-          :key="`${client.name}-${i}`"
-          :data-client-name="client.name"
-          class="trust-logo group relative flex h-24 w-56 shrink-0 items-center justify-center transition-all duration-400 ease-editorial motion-reduce:transition-none"
-          :class="[
-            i >= clients.length ? 'motion-reduce:hidden' : '',
-            hoveredClient === client.name ? 'motion-reduce:scale-110' : 'motion-reduce:scale-100'
-          ]"
-          :style="{ opacity: !motionSafe && hoveredClient && hoveredClient !== client.name ? 0.3 : undefined }"
-          @mouseenter="hoveredClient = client.name; setState('view')"
-          @mouseleave="setState('default')"
+        <ul
+          :ref="(el) => { if (el) trackRefs[r] = el as HTMLElement }"
+          class="flex w-max items-center motion-reduce:w-full motion-reduce:flex-wrap motion-reduce:justify-center"
+          :aria-label="r === 0 ? 'Client logos' : undefined"
         >
-          <img
-            :src="client.logo"
-            :alt="client.name"
-            decoding="async"
-            class="max-h-full max-w-full object-contain"
-            :class="{
-              'wordpress-logo scale-150': client.name === 'WordPress',
-              'scale-150': client.name === 'Shopify'
-            }"
-            loading="lazy"
-          />
-          <!-- Precision tick: PASTI's line language sits around the partner
-               logo, never on it (04-homepage-spec.md §4 Partner Logo Respect). -->
-          <span
-            aria-hidden="true"
-            class="absolute bottom-1 left-1/2 h-px w-10 -translate-x-1/2 origin-center scale-x-0 bg-cobalt transition-transform duration-200 ease-editorial group-hover:scale-x-100"
-          />
-        </div>
+          <li
+            v-for="(client, i) in [...row, ...row]"
+            :key="`${client.name}-${i}`"
+            :data-client-name="client.name"
+            class="trust-logo group relative flex h-24 shrink-0 items-center justify-center px-6 transition-[opacity,transform] duration-300 ease-editorial motion-reduce:h-20 tablet:h-28 tablet:px-10 desktop:h-32 desktop:px-12"
+            :class="[
+              i >= row.length ? 'motion-reduce:hidden' : '',
+              hoveredClient === client.name ? 'motion-reduce:scale-110' : 'motion-reduce:scale-100'
+            ]"
+            :aria-hidden="i >= row.length ? 'true' : undefined"
+            :style="{ opacity: !motionSafe && hoveredClient && hoveredClient !== client.name ? 0.4 : undefined }"
+            @mouseenter="hoveredClient = client.name; setState('view', client.name)"
+            @mouseleave="setState('default')"
+          >
+            <img
+              :src="client.logo"
+              :alt="i >= row.length ? '' : client.name"
+              :style="size(client.ratio)"
+              decoding="async"
+              loading="lazy"
+              draggable="false"
+              class="max-w-none object-contain"
+            >
+            <!-- Precision tick under the hovered logo. -->
+            <span
+              aria-hidden="true"
+              class="absolute bottom-3 left-1/2 h-px w-8 -translate-x-1/2 origin-center scale-x-0 bg-pastiYellow-500 transition-transform duration-300 ease-editorial group-hover:scale-x-100"
+            />
+          </li>
+        </ul>
       </div>
     </div>
 
-    <!-- Proof line: the count is the real length of the approved logo list —
-         no invented metric. -->
-    <BaseContainer class="relative z-10 mt-14 md:mt-20">
-      <div class="flex items-center gap-4 border-t border-structural-light pt-6">
-        <span ref="countRef" class="font-display text-token-h2 font-bold leading-none tracking-[-0.03em] text-slateNavy">{{ String(clients.length).padStart(2, '0') }}</span>
-        <span class="font-display text-token-metadata font-semibold uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.55)]">Approved partner logos</span>
-        <LayoutBrandMark surface="light" :height="13" class="ml-auto" />
+    <BaseContainer class="relative z-10 mt-6">
+      <div class="m-center-row flex items-center gap-4">
+        <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.45)]">Est. 2020 · PT Hidup Pasti Bahagia</span>
+        <LayoutBrandMark surface="light" :height="13" class="ml-auto max-desktop:hidden" />
       </div>
     </BaseContainer>
   </BaseSection>
 </template>
 
 <style scoped>
-.wordpress-logo {
-  filter: brightness(1.08) contrast(2.2);
+.tl-field {
+  --tl-scale: 0.8;
+}
+@media (min-width: 640px) {
+  .tl-field {
+    --tl-scale: 0.86;
+  }
+}
+@media (min-width: 1024px) {
+  .tl-field {
+    --tl-scale: 1;
+  }
 }
 </style>

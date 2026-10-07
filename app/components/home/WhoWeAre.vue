@@ -11,7 +11,7 @@ if (import.meta.client) {
 //   - Adds a 10th homepage section between What We Build and Trusted
 //     (04-homepage-spec.md locks 9). Trusted itself stays untouched (§4 lock);
 //     the Trusted Partner card lives HERE, as this section's closing band.
-//   - Shows 200+ / 130+ — figures supplied and confirmed verified by the owner.
+//   - Shows 70+ / 50+ — COMPRO 2025 figures (owner decision 2026-10-07).
 //   - Uses PASTI Yellow (pastiYellow-500, docs HEX still pending) as accent
 //     only: marker bar, orbit dot, "+" marks, CTA fill. Never text on white.
 //   - Portraits are placeholders (public/images/people/) until real photos land.
@@ -295,6 +295,8 @@ useGsapContext(() => {
     </BaseContainer>
 
     <BaseContainer class="relative z-10 mt-24 desktop:mt-32">
+      <!-- Owner decision 2026-10-07: platform logos strip, above the card. -->
+      <HomeTechStrip class="mb-10 desktop:mb-12" />
       <HomeTrustedPartnerCard />
     </BaseContainer>
   </section>

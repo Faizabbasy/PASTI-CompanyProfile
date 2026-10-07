@@ -16,7 +16,9 @@ export interface DeliveryLane {
  * WhyChooseUs.vue header). Heading/body come from the legacy site's Why
  * Choose Us block (docs/legacy/PASTIPEOPLE_EXISTING_CONTENT_SOURCE.md §Why
  * Choose Us; same sentence in useAbout.ts), typo fixed. The reasons are the
- * legacy "existing messaging" bullets, labels only. Timeline lanes reuse the
+ * four "Standards We Live By" from COMPRO 2025 p.28 (owner decision
+ * 2026-10-07), labels only — they replaced the legacy "existing messaging"
+ * bullets. They sit beside the brand-guide pillars, not in place of them. Timeline lanes reuse the
  * brand method steps from useAbout() — an illustrative sprint, not a client
  * project and not a delivery-time claim.
  */
@@ -27,7 +29,7 @@ export function useWhyChooseUs() {
   const body =
     'We deliver efficient IT solutions and impactful digital marketing, ensuring rapid and effective results for your business.'
 
-  const reasons = ['Fast work', 'Reliability', 'Technology solutions', 'Creative & digital marketing']
+  const reasons = ['Innovation', 'Security', 'Efficiency', 'Integrity']
 
   const { method } = useAbout()
   const spans: Array<Omit<DeliveryLane, 'label'>> = [
