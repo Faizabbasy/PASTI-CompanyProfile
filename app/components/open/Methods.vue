@@ -24,8 +24,8 @@ const envLabel = { teknis: 'Teknis', harga: 'Harga', 'teknis+harga': 'Teknis + H
   <div class="rounded-[24px] border border-[color:rgba(3,60,89,0.12)] bg-pureWhite p-5 tablet:p-8">
     <div class="grid gap-8 desktop:grid-cols-12">
       <div class="desktop:col-span-4">
-        <p class="font-display text-[22px] font-extrabold tracking-[-0.02em] text-slateNavy">Metode procurement yang didukung</p>
-        <p class="mt-3 text-[14.5px] leading-relaxed text-[color:rgba(3,60,89,0.72)]">{{ procurement.methodsIntro }}</p>
+        <p class="m-center font-display text-[22px] font-extrabold tracking-[-0.02em] text-slateNavy">Metode procurement yang didukung</p>
+        <p class="m-center mt-3 text-[14.5px] leading-relaxed text-[color:rgba(3,60,89,0.72)]">{{ procurement.methodsIntro }}</p>
         <div role="radiogroup" aria-label="Metode procurement" class="mt-6 grid grid-cols-3 gap-1 rounded-full bg-[color:rgba(3,60,89,0.06)] p-1">
           <button
             v-for="(m, i) in methods"

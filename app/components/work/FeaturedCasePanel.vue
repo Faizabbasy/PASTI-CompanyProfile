@@ -1,143 +1,110 @@
 <script setup lang="ts">
 import type { FeaturedCase } from '~/composables/useFeaturedCases'
 
-// One Featured Case's detail — shared by the desktop tab panel and the mobile
-// accordion body. Every block renders only when the case has source-backed
-// data for it (no placeholders), and only 'approved' visuals / metrics are
-// ever shown. The first approved visual leads (posters crop to 4:5, UI
-// screenshots / dashboards keep their full frame); further approved visuals
-// sit under it as supporting proof. Without any approved visual, a neutral
-// typographic tile keeps the layout from collapsing. Elements marked [data-cp-anim] are animated by
-// FeaturedCases on case change.
+// One Featured Case as a dossier of numbered chapters (right side of the
+// case dossier in FeaturedCases). A chapter renders only when the case has
+// source-backed data for it; only 'approved' metrics / visuals are shown.
+// The lead visual lives in the reel strip above, so the Gallery chapter shows
+// the remaining approved visuals at their own ratio.
+// Rows marked [data-cp-anim] settle in on case change (FeaturedCases).
 const props = defineProps<{ item: FeaturedCase }>()
 
-const visuals = computed(() => approvedVisuals(props.item))
-const visual = computed(() => visuals.value[0] ?? null)
-const extras = computed(() => visuals.value.slice(1))
+const gallery = computed(() => approvedVisuals(props.item).slice(1))
 const metrics = computed(() => approvedMetrics(props.item))
-const second = computed(() =>
-  props.item.solution?.length
-    ? { label: 'What we built', items: props.item.solution }
-    : props.item.request?.length
-      ? { label: 'What was requested', items: props.item.request }
-      : null
-)
 const weeks = computed(() => props.item.timeline?.steps.reduce((n, s) => n + s.weeks, 0) ?? 0)
+
+type ChapterKey = 'challenge' | 'second' | 'outcome' | 'insight' | 'timeline' | 'stack' | 'gallery'
+const chapters = computed(() => {
+  const c = props.item
+  const out: Array<{ key: ChapterKey; label: string }> = []
+  if (c.challenge?.length) out.push({ key: 'challenge', label: 'Challenge' })
+  if (c.solution?.length) out.push({ key: 'second', label: 'What we built' })
+  else if (c.request?.length) out.push({ key: 'second', label: 'What was requested' })
+  if (c.outcome?.length || metrics.value.length) out.push({ key: 'outcome', label: 'Outcome' })
+  if (c.insight) out.push({ key: 'insight', label: 'Insight' })
+  if (c.timeline) out.push({ key: 'timeline', label: 'Delivery timeline' })
+  if (c.technologyStack?.length) out.push({ key: 'stack', label: 'Technology stack' })
+  if (gallery.value.length) out.push({ key: 'gallery', label: 'Inside the product' })
+  return out
+})
+const secondItems = computed(() => props.item.solution ?? props.item.request ?? [])
 </script>
 
 <template>
-  <div class="grid gap-8 desktop:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] desktop:gap-10">
-    <!-- Visuals (or neutral tile) -->
-    <div class="w-full desktop:self-start" :class="!visual || visual.kind === 'poster' ? 'tablet:max-w-[420px] desktop:max-w-none' : ''">
-      <div data-cp-visual class="relative overflow-hidden rounded-[20px] bg-[color:rgba(255,255,255,0.06)] ring-1 ring-[color:rgba(255,255,255,0.1)]" :class="visual && visual.kind !== 'poster' ? 'bg-pureWhite' : ''">
-        <img
-          v-if="visual"
-          :src="visual.src"
-          :alt="visual.alt"
-          loading="lazy"
-          decoding="async"
-          draggable="false"
-          class="w-full"
-          :class="visual.kind === 'poster' ? 'aspect-[4/5] object-cover object-top' : 'h-auto'"
-        >
-        <div v-else class="flex aspect-[16/10] items-end justify-between p-6 desktop:aspect-[4/5] desktop:p-8" aria-hidden="true">
-          <span class="fc-outline font-display text-[clamp(96px,14vw,200px)] font-extrabold leading-[0.8] tracking-[-0.06em]">{{ item.index }}</span>
-          <LayoutBrandMark :height="12" class="mb-2 opacity-60" />
-        </div>
-      </div>
-      <ul v-if="extras.length" data-cp-anim class="mt-3 grid grid-cols-2 gap-3">
-        <li
-          v-for="(v, i) in extras"
-          :key="v.src"
-          class="overflow-hidden rounded-[14px] bg-pureWhite ring-1 ring-[color:rgba(255,255,255,0.1)]"
-          :class="extras.length % 2 === 1 && i === extras.length - 1 ? 'col-span-2' : ''"
-        >
-          <img :src="v.src" :alt="v.alt" loading="lazy" decoding="async" draggable="false" class="h-auto w-full">
+  <ol class="border-b border-[color:rgba(255,255,255,0.14)]">
+    <li
+      v-for="(ch, n) in chapters"
+      :key="ch.key"
+      data-cp-anim
+      class="grid gap-5 border-t border-[color:rgba(255,255,255,0.14)] py-9 desktop:grid-cols-[170px_minmax(0,1fr)] desktop:gap-8 desktop:py-11"
+    >
+      <h4 class="m-center flex items-baseline gap-3 desktop:block">
+        <span class="font-mono text-[11px] tracking-[0.18em] text-[color:rgba(255,255,255,0.4)]">{{ String(n + 1).padStart(2, '0') }}</span>
+        <span class="font-mono text-[11px] uppercase tracking-[0.2em] text-pastiYellow-500 desktop:mt-2 desktop:block">{{ ch.label }}</span>
+      </h4>
+
+      <!-- Challenge -->
+      <ol v-if="ch.key === 'challenge'" class="space-y-5">
+        <li v-for="(t, i) in item.challenge" :key="i" class="grid grid-cols-[36px_1fr] font-display text-[length:clamp(18px,1.6vw,22px)] font-semibold leading-[1.35] tracking-[-0.01em] text-pureWhite">
+          <span class="pt-1 font-mono text-[11px] font-normal text-pastiYellow-500">{{ String(i + 1).padStart(2, '0') }}</span>{{ t }}
+        </li>
+      </ol>
+
+      <!-- What we built / requested -->
+      <ul v-else-if="ch.key === 'second'" class="grid gap-x-8 gap-y-4 tablet:grid-cols-2">
+        <li v-for="(t, i) in secondItems" :key="i" class="grid grid-cols-[22px_1fr] text-[16px] leading-relaxed text-[color:rgba(255,255,255,0.85)]">
+          <svg viewBox="0 0 16 16" class="mt-[5px] h-3.5 w-3.5 text-pastiYellow-500" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3 8.5l3 3 7-7" /></svg>{{ t }}
         </li>
       </ul>
-    </div>
 
-    <!-- Copy -->
-    <div class="min-w-0">
-      <p v-if="item.businessContext" data-cp-anim class="max-w-[58ch] text-token-body leading-relaxed text-[color:rgba(255,255,255,0.78)]">
-        {{ item.businessContext }}
-      </p>
-
-      <div v-if="item.challenge?.length || second" class="mt-8 grid gap-8 border-t border-[color:rgba(255,255,255,0.14)] pt-8" :class="item.challenge?.length && second ? 'tablet:grid-cols-2 desktop:grid-cols-1 wide:grid-cols-2' : ''">
-        <div v-if="item.challenge?.length" data-cp-anim>
-          <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">Challenge</h4>
-          <ol class="mt-4 space-y-3">
-            <li v-for="(c, i) in item.challenge" :key="i" class="grid grid-cols-[28px_1fr] text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.85)]">
-              <span class="pt-[3px] font-mono text-[10px] text-[color:rgba(255,255,255,0.4)]">{{ String(i + 1).padStart(2, '0') }}</span>{{ c }}
-            </li>
-          </ol>
-        </div>
-        <div v-if="second" data-cp-anim>
-          <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">{{ second.label }}</h4>
-          <ul class="mt-4 space-y-3">
-            <li v-for="(s, i) in second.items" :key="i" class="grid grid-cols-[28px_1fr] text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.85)]">
-              <span aria-hidden="true" class="mt-[9px] h-px w-3 bg-[color:rgba(255,255,255,0.4)]" />{{ s }}
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div v-if="item.outcome?.length || metrics.length" data-cp-anim class="mt-8 rounded-[18px] bg-pastiYellow-500 p-6 text-slateNavy">
-        <h4 class="font-mono text-[10px] uppercase tracking-[0.2em]">Outcome</h4>
-        <dl v-if="metrics.length" class="mt-4 flex flex-wrap gap-x-10 gap-y-4">
-          <div v-for="m in metrics" :key="m.label" class="flex flex-col-reverse">
-            <dt class="text-[13px] font-semibold">{{ m.label }}</dt>
-            <dd class="font-display text-[40px] font-extrabold leading-none tracking-[-0.04em]">{{ m.value }}</dd>
+      <!-- Outcome -->
+      <div v-else-if="ch.key === 'outcome'">
+        <dl v-if="metrics.length" class="grid gap-6 tablet:grid-cols-2">
+          <div v-for="m in metrics" :key="m.label" class="flex flex-col-reverse border-l-2 border-pastiYellow-500 pl-5">
+            <dt class="mt-2 max-w-[22ch] text-[15px] font-semibold leading-snug text-[color:rgba(255,255,255,0.8)]">{{ m.label }}</dt>
+            <dd class="font-display text-[length:clamp(64px,7vw,104px)] font-extrabold leading-[0.85] tracking-[-0.05em] text-pastiYellow-500">{{ m.value }}</dd>
           </div>
         </dl>
-        <ul v-if="item.outcome?.length" class="mt-4 space-y-2.5">
-          <li v-for="(o, i) in item.outcome" :key="i" class="grid grid-cols-[20px_1fr] text-[15px] font-semibold leading-snug">
-            <span aria-hidden="true" class="mt-[7px] h-1.5 w-1.5 rounded-full bg-slateNavy" />{{ o }}
+        <ul v-if="item.outcome?.length" class="space-y-3" :class="metrics.length ? 'mt-8' : ''">
+          <li v-for="(o, i) in item.outcome" :key="i" class="grid grid-cols-[22px_1fr] text-[17px] font-semibold leading-snug text-pureWhite">
+            <span aria-hidden="true" class="mt-[9px] h-2 w-2 rounded-full bg-pastiYellow-500" />{{ o }}
           </li>
         </ul>
       </div>
 
-      <div v-if="item.insight" data-cp-anim class="mt-8 border-l-2 border-pastiYellow-500 pl-5">
-        <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">Insight</h4>
-        <p class="mt-3 max-w-[58ch] text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.8)]">{{ item.insight }}</p>
-      </div>
+      <!-- Insight -->
+      <blockquote v-else-if="ch.key === 'insight'" class="relative font-display text-[length:clamp(20px,2vw,28px)] font-bold leading-[1.3] tracking-[-0.02em] text-pureWhite">
+        <span aria-hidden="true" class="mr-1 text-pastiYellow-500">“</span>{{ item.insight }}<span aria-hidden="true" class="text-pastiYellow-500">”</span>
+      </blockquote>
 
-      <div v-if="item.timeline" data-cp-anim class="mt-8 border-t border-[color:rgba(255,255,255,0.14)] pt-8">
-        <div class="flex items-baseline justify-between gap-4">
-          <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">Delivery timeline</h4>
-          <span class="font-display text-[15px] font-bold text-pureWhite">{{ item.timeline.total }}</span>
-        </div>
-        <ol class="mt-4 flex gap-1" :aria-label="`Delivery timeline, ${item.timeline.total} in total`">
-          <li
-            v-for="(s, i) in item.timeline.steps"
-            :key="s.label"
-            class="min-w-0"
-            :style="{ flexGrow: s.weeks, flexBasis: 0 }"
-          >
-            <span aria-hidden="true" class="block h-2 rounded-full" :class="i === 2 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(255,255,255,0.28)]'" />
-            <span class="mt-2 block font-mono text-[10px] text-[color:rgba(255,255,255,0.5)]">{{ s.weeks }} wk</span>
+      <!-- Timeline -->
+      <div v-else-if="ch.key === 'timeline' && item.timeline">
+        <p class="font-display text-[length:clamp(36px,4vw,56px)] font-extrabold leading-none tracking-[-0.04em] text-pureWhite">{{ item.timeline.total }}</p>
+        <ol class="mt-6 flex gap-1.5" :aria-label="`Delivery timeline, ${item.timeline.total} in total`">
+          <li v-for="(s, i) in item.timeline.steps" :key="s.label" class="min-w-0" :style="{ flexGrow: s.weeks, flexBasis: 0 }">
+            <span aria-hidden="true" class="block h-3 rounded-full" :class="i === 2 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(255,255,255,0.25)]'" />
+            <span class="mt-2 block font-mono text-[10px] text-[color:rgba(255,255,255,0.5)]">{{ s.weeks }}w</span>
           </li>
         </ol>
-        <ul class="mt-4 grid grid-cols-2 gap-x-6 gap-y-1.5 text-[13px] text-[color:rgba(255,255,255,0.75)]">
-          <li v-for="s in item.timeline.steps" :key="s.label">{{ s.label }} <span class="text-[color:rgba(255,255,255,0.45)]">· {{ s.weeks }} wk</span></li>
+        <ul class="mt-5 grid gap-x-6 gap-y-2 tablet:grid-cols-2">
+          <li v-for="(s, i) in item.timeline.steps" :key="s.label" class="flex items-center gap-2.5 text-[14px] text-[color:rgba(255,255,255,0.8)]">
+            <span aria-hidden="true" class="h-2 w-2 shrink-0 rounded-full" :class="i === 2 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(255,255,255,0.35)]'" />{{ s.label }} <span class="text-[color:rgba(255,255,255,0.45)]">· {{ s.weeks }} wk</span>
+          </li>
         </ul>
         <span class="sr-only">{{ weeks }} weeks in total.</span>
       </div>
 
-      <div v-if="item.technologyStack?.length" data-cp-anim class="mt-8">
-        <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">Technology stack</h4>
-        <ul class="mt-4 flex flex-wrap gap-2">
-          <li v-for="t in item.technologyStack" :key="t" class="rounded-full px-3.5 py-1.5 text-[13px] font-semibold text-pureWhite ring-1 ring-[color:rgba(255,255,255,0.2)]">{{ t }}</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</template>
+      <!-- Stack -->
+      <ul v-else-if="ch.key === 'stack'" class="m-center-row flex flex-wrap gap-2">
+        <li v-for="t in item.technologyStack" :key="t" class="rounded-full px-4 py-2 text-[14px] font-semibold text-pureWhite ring-1 ring-[color:rgba(255,255,255,0.22)]">{{ t }}</li>
+      </ul>
 
-<style scoped>
-.fc-outline {
-  color: transparent;
-  /* pastiYellow-500 (#FBBA00, placeholder scale) at 75% */
-  -webkit-text-stroke: 1.5px rgba(251, 186, 0, 0.75);
-}
-</style>
+      <!-- Gallery -->
+      <ul v-else-if="ch.key === 'gallery'" class="grid gap-3" :class="gallery.length > 1 ? 'tablet:grid-cols-2' : ''">
+        <li v-for="v in gallery" :key="v.src" class="overflow-hidden rounded-[16px] bg-pureWhite ring-1 ring-[color:rgba(255,255,255,0.12)]">
+          <img :src="v.src" :alt="v.alt" loading="lazy" decoding="async" draggable="false" class="h-auto w-full">
+        </li>
+      </ul>
+    </li>
+  </ol>
+</template>

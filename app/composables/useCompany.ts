@@ -61,17 +61,21 @@ export function useCompany() {
   ]
   const pickMilestones = (...years: string[]) => years.map((y) => milestones.find((m) => m.year === y)!)
 
-  // CEO Foreword (p.6) — photo cropped from p.5 (owner: "pake yang ada dulu").
+  // Leadership voice on /about (owner 2026-10-08: replaces the CEO
+  // foreword). COMPRO 2025 "Operational Perspective", text verbatim — only
+  // the missing dash in the first sentence added. Photo cropped from the
+  // COMPRO portrait page (below the page's footer line).
   const founder = {
-    name: 'M. Juandi',
-    role: 'Founder & CEO',
-    photo: '/images/people/m-juandi.webp',
-    quote: 'Businesses need more than just code, or more than just campaigns — they need both technology and creativity working seamlessly together to accelerate growth.',
+    name: 'Amelia N. Fauziah',
+    role: 'Co-Founder & COO',
+    photo: '/images/people/amelia-n-fauziah.webp',
+    eyebrow: 'Operational perspective',
+    meta: 'COO perspective',
+    quote: 'Operational excellence for us is the bridge between bold ideas and real business impact.',
     foreword: [
-      'Since 2020, PASTI has grown from a small technology and creative studio into a trusted partner for more than fifty clients across industries such as finance, FMCG, lifestyle, and public sector.',
-      'Our journey started with a simple belief: businesses need more than just code, or more than just campaigns, they need both technology and creativity working seamlessly together to accelerate growth.',
-      'Today, we deliver not only technology systems, but also bold brand strategies and growth frameworks that help our partners stay competitive in an increasingly digital-first world.',
-      'As we move forward, PASTI will continue to invest in innovation, talent, and cutting-edge solutions, ensuring that every project we deliver contributes to long-term impact and measurable business results.'
+      'At PASTI, execution is not just about delivering a project — it is about ensuring that every detail aligns with the client’s vision, objectives, and long-term success.',
+      'As the Operational Director, my role is to transform strategies into measurable outcomes by ensuring seamless collaboration across technology, creative, and growth teams. We emphasize agility, scalability, and precision in all our projects, supported by SLA-driven processes and transparent performance tracking.',
+      'Operational excellence for us is the bridge between bold ideas and real business impact. With more than 70 projects successfully executed across industries, PASTI has proven that reliable systems, disciplined execution, and collaborative teams deliver results that last.'
     ]
   }
 

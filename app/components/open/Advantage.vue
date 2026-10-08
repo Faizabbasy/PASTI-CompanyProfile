@@ -89,12 +89,12 @@ const cell = (v: string | true | null) => (v === true ? 'Ya' : v === null ? 'Tid
             </dl>
           </li>
         </ul>
-        <p class="mt-5 text-[14px] font-medium text-slateNavy">{{ advantage.compareNote }}</p>
+        <p class="m-center mt-5 text-[14px] font-medium text-slateNavy">{{ advantage.compareNote }}</p>
       </div>
 
       <!-- The difference -->
       <div class="mt-24 desktop:mt-32">
-        <p class="max-w-[60rem] op-display text-[length:clamp(30px,4.2vw,62px)] text-slateNavy">
+        <p class="m-center max-w-[60rem] op-display text-[length:clamp(30px,4.2vw,62px)] text-slateNavy">
           {{ advantage.difference[0] }} <span class="text-[color:rgba(3,60,89,0.42)]">{{ advantage.difference[1] }}</span>
         </p>
         <div class="mt-12 grid gap-4 desktop:grid-cols-12">
@@ -120,7 +120,7 @@ const cell = (v: string | true | null) => (v === true ? 'Ya' : v === null ? 'Tid
             </ol>
           </div>
         </div>
-        <p class="mt-8 font-display text-[20px] font-extrabold text-slateNavy">{{ advantage.differenceLine[0] }} <span class="text-[color:rgba(3,60,89,0.42)]">{{ advantage.differenceLine[1] }}</span></p>
+        <p class="m-center mt-8 font-display text-[20px] font-extrabold text-slateNavy">{{ advantage.differenceLine[0] }} <span class="text-[color:rgba(3,60,89,0.42)]">{{ advantage.differenceLine[1] }}</span></p>
       </div>
     </BaseContainer>
   </section>

@@ -40,7 +40,7 @@ const panels = visibility.items.map((label: string, i: number) => {
           <ul class="mt-6 border-t border-[color:rgba(3,60,89,0.12)]">
             <li v-for="v in visibility.items" :key="v" class="flex items-center gap-3 border-b border-[color:rgba(3,60,89,0.12)] py-3 text-[15px] font-semibold text-slateNavy"><span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ v }}</li>
           </ul>
-          <p class="mt-6 font-display text-[18px] font-extrabold text-slateNavy">{{ visibility.line[0] }} <span class="text-[color:rgba(3,60,89,0.42)]">{{ visibility.line[1] }}</span></p>
+          <p class="m-center mt-6 font-display text-[18px] font-extrabold text-slateNavy">{{ visibility.line[0] }} <span class="text-[color:rgba(3,60,89,0.42)]">{{ visibility.line[1] }}</span></p>
         </div>
 
         <div ref="dashRef" class="desktop:col-span-8" :class="{ 'is-in': dashIn }" aria-hidden="true">
@@ -91,7 +91,7 @@ const panels = visibility.items.map((label: string, i: number) => {
         <div aria-hidden="true" class="op-rules--dark pointer-events-none absolute inset-0 -z-10" />
         <div class="grid gap-8 desktop:grid-cols-12 desktop:items-end">
           <OpenHeading class="desktop:col-span-7" :lines="integration.title" surface="dark" size="md" />
-          <p class="text-[16px] text-[color:rgba(255,255,255,0.7)] desktop:col-span-4 desktop:col-start-9">{{ integration.intro }}</p>
+          <p class="m-center text-[16px] text-[color:rgba(255,255,255,0.7)] desktop:col-span-4 desktop:col-start-9">{{ integration.intro }}</p>
         </div>
 
         <div class="mt-12 grid items-center gap-6 desktop:grid-cols-[1fr_200px_1fr] desktop:gap-0">
@@ -148,20 +148,20 @@ const panels = visibility.items.map((label: string, i: number) => {
           </ul>
         </div>
 
-        <div class="mt-12 flex flex-col gap-4 border-t border-[color:rgba(255,255,255,0.14)] pt-8 desktop:flex-row desktop:items-center desktop:gap-8">
+        <div class="m-center m-center-col mt-12 flex flex-col gap-4 border-t border-[color:rgba(255,255,255,0.14)] pt-8 desktop:flex-row desktop:items-center desktop:gap-8">
           <p class="text-[15px] text-[color:rgba(255,255,255,0.65)]">{{ integration.approachesIntro }}:</p>
-          <ul class="flex flex-wrap gap-2">
+          <ul class="m-center-row flex flex-wrap gap-2">
             <li v-for="a in integration.approaches" :key="a" class="rounded-full bg-pastiYellow-500 px-4 py-2 font-display text-[15px] font-extrabold text-slateNavy">{{ a }}</li>
           </ul>
         </div>
-        <p class="mt-6 max-w-[52rem] text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.72)]">{{ integration.line }}</p>
+        <p class="m-center mt-6 max-w-[52rem] text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.72)]">{{ integration.line }}</p>
       </div>
 
       <!-- 3 · Security -->
       <div class="mt-24 grid gap-12 desktop:mt-32 desktop:grid-cols-12 desktop:gap-10">
         <div class="desktop:col-span-4">
           <OpenHeading :lines="security.title" size="md" :lede="security.intro" />
-          <p class="mt-10 font-display text-[length:clamp(22px,2.2vw,30px)] font-extrabold leading-[1.15] tracking-[-0.02em] text-slateNavy">{{ security.quote[0] }}<br><span class="text-[color:rgba(3,60,89,0.42)]">{{ security.quote[1] }}</span></p>
+          <p class="m-center mt-10 font-display text-[length:clamp(22px,2.2vw,30px)] font-extrabold leading-[1.15] tracking-[-0.02em] text-slateNavy">{{ security.quote[0] }}<br><span class="text-[color:rgba(3,60,89,0.42)]">{{ security.quote[1] }}</span></p>
         </div>
         <ul class="grid border-t border-[color:rgba(3,60,89,0.12)] tablet:grid-cols-2 tablet:gap-x-10 desktop:col-span-8">
           <li v-for="s in security.items" :key="s.label" class="flex gap-4 border-b border-[color:rgba(3,60,89,0.12)] py-5">

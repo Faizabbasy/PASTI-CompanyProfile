@@ -12,6 +12,10 @@ const { eyebrow, heading, introBody, visuals } = useCreative()
 const { link: whatsappLink } = useWhatsapp()
 
 const words = heading.replace(/\.$/, '').split(' ')
+// Balanced two-line break (owner 2026-10-08): the last two words start line
+// two — "Creative that gets / business results." — instead of a long first
+// line and a lone outlined word.
+const breakAt = words.length - 2
 const stageRef = ref<HTMLElement | null>(null)
 const poolRef = ref<HTMLElement | null>(null)
 
@@ -142,7 +146,7 @@ useGsapContext(() => {
           <div data-ch-fade><BaseHeroMarker surface="yellow" :label="`${eyebrow} studio`" meta="Move to paint" /></div>
 
           <h1 class="hero-title pointer-events-none mt-6 desktop:mt-[3svh]">
-            <template v-for="(w, i) in words" :key="i"><span class="ch-mask"><span data-ch-word class="inline-block will-change-transform" :class="i === words.length - 1 ? 'ch-outline' : ''">{{ w }}</span><span v-if="i === words.length - 1">.</span></span>{{ ' ' }}</template>
+            <template v-for="(w, i) in words" :key="i"><br v-if="i === breakAt"><span class="ch-mask"><span data-ch-word class="inline-block will-change-transform" :class="i === words.length - 1 ? 'ch-outline' : ''">{{ w }}</span><span v-if="i === words.length - 1">.</span></span>{{ ' ' }}</template>
           </h1>
 
           <p data-ch-fade class="hero-lede hero-lede--strong m-center mt-6 desktop:mt-[3svh]">{{ introBody }}</p>

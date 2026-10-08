@@ -154,6 +154,14 @@ const stepOn = (panel: number) => current.value === -1 || panel === current.valu
 
 <style scoped>
 /* Reduced motion (desktop): no pin — let the stacked panels set the height. */
+/* Below desktop the swipe rail is the only version — keep the desktop stage
+   hidden even when the global reduced-motion rule forces [data-motion-canvas]
+   to display (it showed both versions, stacked, on phones). */
+@media (max-width: 1023.98px) {
+  .uc-stage {
+    display: none !important;
+  }
+}
 [data-reduced-motion='true'] .uc-stage {
   height: auto;
   padding: 7rem 0;

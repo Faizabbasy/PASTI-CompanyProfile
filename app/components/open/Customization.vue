@@ -22,7 +22,7 @@ const knob = (i: number) => 22 + ((i * 37) % 64)
 
       <div class="mt-14 grid gap-8 desktop:grid-cols-12 desktop:items-end">
         <OpenHeading class="desktop:col-span-7" :lines="customization.title" size="xl" />
-        <p class="text-[16px] font-medium text-[color:rgba(3,60,89,0.75)] desktop:col-span-4 desktop:col-start-9">{{ customization.intro }}</p>
+        <p class="m-center text-[16px] font-medium text-[color:rgba(3,60,89,0.75)] desktop:col-span-4 desktop:col-start-9">{{ customization.intro }}</p>
       </div>
 
       <ul ref="panelRef" class="mt-12 grid overflow-hidden rounded-[24px] border border-[color:rgba(3,60,89,0.12)] bg-pureWhite tablet:grid-cols-2 desktop:grid-cols-3" :class="{ 'is-in': panelIn }">
@@ -38,7 +38,7 @@ const knob = (i: number) => 22 + ((i * 37) % 64)
         </li>
       </ul>
 
-      <p class="mt-14 max-w-[64rem] op-display text-[length:clamp(26px,3.4vw,50px)] text-slateNavy">
+      <p class="m-center mt-14 max-w-[64rem] op-display text-[length:clamp(26px,3.4vw,50px)] text-slateNavy">
         {{ customization.line[0] }} <span class="text-[color:rgba(3,60,89,0.42)]">{{ customization.line[1] }}</span>
       </p>
 

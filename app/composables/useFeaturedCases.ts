@@ -296,23 +296,18 @@ export function useActiveCase() {
   const active = useState<string>('work-active-case', () => 'powerhours')
 
   // Make `id` the active case and scroll to it (Lenis when running, native
-  // otherwise). Desktop: the case section (tabs + panel). Below desktop: that
-  // case's accordion header, after the accordion has re-laid out (the
-  // previously open case collapses above it).
+  // otherwise). Desktop: the case section (reel + dossier). Below desktop:
+  // the dossier, since the swipe rail above already shows the chosen card.
   const openCase = (id: string) => {
     active.value = id
     const desktop = window.matchMedia(breakpointQuery.desktopUp).matches
     const reduce = window.matchMedia(reducedMotionQuery.reduce).matches
-    const go = () => {
-      const el = document.getElementById(desktop ? 'work-cases' : `case-acc-head-${id}`)
-      if (!el) return
-      const offset = desktop ? -40 : -90
-      const lenis = getLenisInstance()
-      if (lenis) lenis.scrollTo(el, { offset, duration: 1.4 })
-      else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + offset, behavior: reduce ? 'auto' : 'smooth' })
-    }
-    if (desktop || reduce) go()
-    else setTimeout(go, 560)
+    const el = document.getElementById(desktop ? 'work-cases' : 'case-dossier')
+    if (!el) return
+    const offset = desktop ? -40 : -90
+    const lenis = getLenisInstance()
+    if (lenis) lenis.scrollTo(el, { offset, duration: 1.4 })
+    else window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY + offset, behavior: reduce ? 'auto' : 'smooth' })
   }
 
   return { active, openCase }

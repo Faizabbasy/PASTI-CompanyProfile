@@ -19,6 +19,10 @@ export interface CreativeService {
    * exist — deliberately not a project poster, so no project is implied to
    * be that service. */
   art: CreativeArt
+  /** Real capability visual supplied by the owner (2026-10-08). Has the
+   * title + PASTI logo baked in, so it is shown whole at its own ratio (no
+   * crop, no parallax). When absent, the interim `art` illustration is used. */
+  image?: { src: string; w: number; h: number }
 }
 
 export interface CreativeVisual {
@@ -58,7 +62,8 @@ export function useCreative() {
       keywords: ['Creativity', 'Strategy', 'Execution'],
       related: [{ label: 'Pertamina — Energi Untuk Negeri', to: '/work#work-05' }],
       source: 'COMPRO 2025 p.36',
-      art: 'communication'
+      art: 'communication',
+      image: { src: '/images/creative/creative-communication.webp', w: 1448, h: 1086 }
     },
     {
       index: '02',
@@ -70,7 +75,8 @@ export function useCreative() {
         { label: 'Pertamina — Energi Untuk Negeri', to: '/work#work-05' }
       ],
       source: 'COMPRO 2025 p.37',
-      art: 'campaign'
+      art: 'campaign',
+      image: { src: '/images/creative/integrated-campaign-strategy.webp', w: 1448, h: 1086 }
     },
     {
       index: '03',
@@ -79,7 +85,8 @@ export function useCreative() {
       keywords: ['Social strategy', 'Daily content', 'Trend-based', 'Optimization'],
       related: [],
       source: 'COMPRO 2025 p.38',
-      art: 'social'
+      art: 'social',
+      image: { src: '/images/creative/social-media-playbooks.webp', w: 1448, h: 1086 }
     },
     {
       index: '04',
@@ -88,7 +95,8 @@ export function useCreative() {
       keywords: ['TikTok', 'Instagram Reels', 'YouTube Shorts', 'Strong hooks'],
       related: [],
       source: 'COMPRO 2025 p.39',
-      art: 'video'
+      art: 'video',
+      image: { src: '/images/creative/vertical-video-development.webp', w: 1024, h: 572 }
     },
     {
       index: '05',
@@ -97,7 +105,8 @@ export function useCreative() {
       keywords: ['Commercial videos', 'Photography', 'Motion graphics', 'Post-production'],
       related: [],
       source: 'COMPRO 2025 p.40',
-      art: 'production'
+      art: 'production',
+      image: { src: '/images/creative/production-house-services.webp', w: 1678, h: 937 }
     },
     {
       index: '06',
@@ -111,7 +120,8 @@ export function useCreative() {
         { label: 'HDI Healthy Lifestyle', to: '/work#case-hdi' }
       ],
       source: 'COMPRO 2025 p.41',
-      art: 'brand'
+      art: 'brand',
+      image: { src: '/images/creative/brand-identity-ui-ux.webp', w: 1678, h: 937 }
     }
   ]
 

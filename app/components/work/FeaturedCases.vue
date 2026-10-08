@@ -6,19 +6,23 @@ if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-// FEATURED CASE STUDIES (owner decision 2026-10-07, Work Step 3) — replaces
-// the legacy "From brief to result" case files. Deeper proof than the
-// Selected Work index above it: challenge → what was built → outcome, from
-// COMPRO 2025 (useFeaturedCases, public cases only).
+// FEATURED CASE STUDIES — "case reel + dossier" (owner 2026-10-08: make it
+// stand apart from the site's other tab/list sections).
 //
-// Desktop (>= 1024px): split layout — a sticky tablist on the left, the
-// active case's panel on the right. One case at a time; arrow keys / Home /
-// End move between tabs. On change the panel's visual unmasks upward and its
-// blocks settle in (power3/4.out). No autoplay, no carousel, no modal.
-// Below desktop: a stacked accordion, one case open at a time.
-// Both layouts are in the DOM and swapped with CSS (SSR-safe); the hidden
-// one is display:none, so it is out of the a11y tree and loads no images.
-// Reduced motion: no transitions, everything static and readable.
+// 1. Reel: the four cases as tall image strips (ARIA tabs). The active strip
+//    opens wide and shows its lead visual in full — posters full-bleed,
+//    dashboards / UI as a floating sheet on navy; the others fold into
+//    narrow strips with a vertical title. Widths ease via flex-grow (CSS).
+//    Below desktop the same buttons become a horizontal swipe rail of cards.
+// 2. Dossier: the active case as a report — a sticky "file cover" on the
+//    left (outlined index, title, client · year, context, prev / next) and
+//    numbered chapters on the right (WorkFeaturedCasePanel). Inactive
+//    dossiers are display:none (in the DOM for SEO, no images loaded).
+//
+// On case change the cover's numeral and title rise from a mask and the
+// chapters settle in (power3/4.out). No autoplay. Reduced motion: static.
+// Deep links (#case-<id>) and the Project Index badges go through
+// useActiveCase().openCase.
 const { publicCases } = useFeaturedCases()
 const { active, openCase } = useActiveCase()
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -26,68 +30,49 @@ const pad = (n: number) => String(n).padStart(2, '0')
 const sectionRef = ref<HTMLElement | null>(null)
 const headingRef = ref<HTMLElement | null>(null)
 const tabRefs = ref<HTMLElement[]>([])
-const accHeadRefs = ref<HTMLElement[]>([])
 
-// Mobile accordion: mirrors the active case, but may also be fully closed.
-const openAcc = ref<string | null>(active.value)
-watch(active, (id) => (openAcc.value = id))
+const activeIndex = computed(() => Math.max(0, publicCases.findIndex((c) => c.id === active.value)))
+const lead = (c: (typeof publicCases)[number]) => approvedVisuals(c)[0] ?? null
 
 const reduce = () => import.meta.client && window.matchMedia(reducedMotionQuery.reduce).matches
-const refreshTriggers = () => setTimeout(() => ScrollTrigger.refresh(), 560)
+const refreshTriggers = () => setTimeout(() => ScrollTrigger.refresh(), 760)
 
 useMaskedReveal(headingRef, { by: 'word' })
 
-// Tabs — automatic activation, roving focus.
-const selectTab = (i: number) => {
+const select = (i: number, focus = false) => {
   const n = publicCases.length
   const next = (i + n) % n
   active.value = publicCases[next]!.id
-  tabRefs.value[next]?.focus()
+  if (focus) tabRefs.value[next]?.focus()
+  // Phone rail only: centre the chosen card by scrolling the rail itself
+  // (scrollIntoView would also shift the overflow-hidden section sideways).
+  const card = tabRefs.value[next]
+  const rail = card?.parentElement
+  if (card && rail && rail.scrollWidth > rail.clientWidth + 1) {
+    rail.scrollTo({ left: card.offsetLeft - (rail.clientWidth - card.clientWidth) / 2, behavior: reduce() ? 'auto' : 'smooth' })
+  }
 }
 const onTabKey = (e: KeyboardEvent, i: number) => {
-  const map: Record<string, number> = { ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: publicCases.length - 1 }
+  const map: Record<string, number> = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: publicCases.length - 1 }
   if (!(e.key in map)) return
   e.preventDefault()
-  selectTab(map[e.key]!)
+  select(map[e.key]!, true)
 }
+const step = (dir: 1 | -1) => select(activeIndex.value + dir)
 
-// Desktop panel change: visual unmasks, blocks settle — restrained.
+// Case change: the cover rises, chapters settle.
 watch(active, async (id) => {
   await nextTick()
+  refreshTriggers()
   if (reduce()) return
   const panel = document.getElementById(`case-panel-${id}`)
-  if (!panel || !panel.offsetParent) return
-  const visual = panel.querySelector('[data-cp-visual]')
+  if (!panel) return
+  const rise = panel.querySelectorAll('[data-fd-rise]')
   const blocks = panel.querySelectorAll('[data-cp-anim]')
-  gsap.fromTo(visual, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: motionTier.cinematicMin, ease: approvedEase.gsapPrimary, overwrite: true })
-  gsap.fromTo(blocks, { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: motionTier.standardMax, ease: approvedEase.gsapStandard, stagger: 0.05, overwrite: true })
-  refreshTriggers()
+  gsap.fromTo(rise, { yPercent: 105 }, { yPercent: 0, duration: motionTier.cinematicMin, ease: approvedEase.gsapPrimary, stagger: 0.06, overwrite: true })
+  gsap.fromTo(blocks, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: motionTier.standardMax, ease: approvedEase.gsapStandard, stagger: 0.06, delay: 0.1, overwrite: true })
 })
 
-// Accordion toggle: one open; bring the opened header back into view.
-const toggleAcc = (id: string, i: number) => {
-  if (openAcc.value === id) {
-    openAcc.value = null
-    refreshTriggers()
-    return
-  }
-  openAcc.value = id
-  active.value = id
-  setTimeout(() => {
-    const head = accHeadRefs.value[i]
-    if (!head) return
-    const top = head.getBoundingClientRect().top
-    if (top >= 0 && top < window.innerHeight * 0.4) return
-    const lenis = getLenisInstance()
-    if (lenis) lenis.scrollTo(head, { offset: -90, duration: 0.9 })
-    else window.scrollTo({ top: window.scrollY + top - 90, behavior: reduce() ? 'auto' : 'smooth' })
-  }, 540)
-  refreshTriggers()
-}
-
-// Deep link (#case-<id>): activate at once, but scroll only once the page is
-// scrollable — app.vue resets to the top on load and the first-visit
-// BrandIntro locks scrolling (Lenis stopped + html overflow hidden) for ~3s.
 let cancelDeepLink: (() => void) | undefined
 onMounted(() => {
   const id = location.hash.replace(/^#case-/, '')
@@ -97,14 +82,22 @@ onMounted(() => {
 })
 onBeforeUnmount(() => cancelDeepLink?.())
 
+// Entrance: the reel unmasks upward, strip by strip.
 useGsapContext(() => {
   const section = sectionRef.value
   if (!section) return
-  const rows = section.querySelectorAll<HTMLElement>('[data-fc-row]')
+  const strips = section.querySelectorAll<HTMLElement>('[data-fc-strip]')
   const mm = gsap.matchMedia()
   mm.add(reducedMotionQuery.noPreference, () => {
-    gsap.set(rows, { autoAlpha: 0, x: -32 })
-    const tl = gsap.to(rows, { autoAlpha: 1, x: 0, duration: motionTier.cinematicMin, ease: approvedEase.gsapPrimary, stagger: 0.08, scrollTrigger: { trigger: section, start: 'top 70%', once: true } })
+    gsap.set(strips, { clipPath: 'inset(100% 0% 0% 0% round 22px)' })
+    const tl = gsap.to(strips, {
+      clipPath: 'inset(0% 0% 0% 0% round 22px)',
+      duration: motionTier.cinematicMax * 0.75,
+      ease: approvedEase.gsapCinematic,
+      stagger: 0.08,
+      scrollTrigger: { trigger: section.querySelector('[data-fc-reel]'), start: 'top 80%', once: true },
+      onComplete: () => gsap.set(strips, { clearProps: 'clipPath' })
+    })
     return () => tl.kill()
   })
 })
@@ -113,124 +106,179 @@ useGsapContext(() => {
 <template>
   <section id="work-cases" ref="sectionRef" data-header-theme="dark" class="relative overflow-hidden bg-slateNavy py-24 text-pureWhite tablet:py-32">
     <BaseGridLines tone="dark" />
-    <!-- Hash targets for #case-<id> links (the router's scrollBehavior
-         looks them up); FeaturedCases handles the actual scroll. -->
+    <div aria-hidden="true" class="pointer-events-none absolute -right-[20%] top-[8%] h-[60vw] max-h-[760px] w-[60vw] max-w-[760px] rounded-full opacity-60" style="background: radial-gradient(closest-side, rgba(251, 186, 0, 0.14), transparent)" />
+    <!-- Hash targets for #case-<id> links (router scrollBehavior). -->
     <span v-for="c in publicCases" :id="`case-${c.id}`" :key="c.id" aria-hidden="true" class="pointer-events-none absolute left-0 top-0" />
+
     <BaseContainer class="relative z-10">
       <BaseSectionMark surface="dark" label="Case studies" :meta="`${pad(publicCases.length)} featured`" />
-      <div class="m-center mt-12 max-w-[30ch] desktop:mt-16 desktop:max-w-none">
-        <h2 ref="headingRef" class="font-display text-[length:clamp(40px,6vw,96px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-pureWhite">
+
+      <div class="mt-12 grid gap-6 desktop:mt-16 desktop:grid-cols-12 desktop:items-end desktop:gap-10">
+        <h2 ref="headingRef" class="m-center font-display text-[length:clamp(40px,6vw,96px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-pureWhite desktop:col-span-8">
           Featured <span class="text-pastiYellow-500">case studies.</span>
         </h2>
-        <p class="mt-6 max-w-[44ch] text-token-body-large text-[color:rgba(255,255,255,0.68)] m-center">
-          Real challenges. Practical solutions. Meaningful outcomes.
-        </p>
+        <div class="m-center desktop:col-span-4 desktop:pb-3">
+          <p class="text-token-body-large text-[color:rgba(255,255,255,0.7)]">Real challenges. Practical solutions. Meaningful outcomes.</p>
+          <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">
+            <span class="hidden desktop:inline">Select a case</span><span class="desktop:hidden">Swipe &amp; tap a case</span>
+          </p>
+        </div>
       </div>
+    </BaseContainer>
 
-      <!-- DESKTOP: tablist + active panel -->
-      <div class="mt-16 hidden desktop:grid desktop:grid-cols-12 desktop:gap-10">
-        <div class="col-span-4">
-          <div class="sticky top-28">
-            <div role="tablist" aria-label="Featured case studies" aria-orientation="vertical" class="border-b border-[color:rgba(255,255,255,0.14)]">
-              <button
-                v-for="(c, i) in publicCases"
-                :id="`case-tab-${c.id}`"
-                :key="c.id"
-                :ref="(el) => { if (el) tabRefs[i] = el as HTMLElement }"
-                data-fc-row
-                type="button"
-                role="tab"
-                :aria-selected="active === c.id"
-                :aria-controls="`case-panel-${c.id}`"
-                :tabindex="active === c.id ? 0 : -1"
-                class="fc-tab group relative flex w-full items-start gap-5 border-t border-[color:rgba(255,255,255,0.14)] py-6 pl-5 text-left transition-colors duration-300 focus-visible:outline-none"
-                @click="active = c.id"
-                @keydown="onTabKey($event, i)"
+    <!-- ===== REEL ===== -->
+    <div class="relative z-10 mt-12 desktop:mt-16" data-fc-reel>
+      <div class="container-page desktop:px-[max(4vw,calc((100vw-1440px)/2+4vw))]">
+        <div
+          role="tablist"
+          aria-label="Featured case studies"
+          class="snap-rail -mx-gutter flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-px-gutter px-gutter pb-2 desktop:mx-0 desktop:h-[min(64svh,600px)] desktop:min-h-[460px] desktop:snap-none desktop:overflow-visible desktop:px-0 desktop:pb-0"
+        >
+          <button
+            v-for="(c, i) in publicCases"
+            :id="`case-tab-${c.id}`"
+            :key="c.id"
+            :ref="(el) => { if (el) tabRefs[i] = el as HTMLElement }"
+            data-fc-strip
+            type="button"
+            role="tab"
+            :aria-selected="active === c.id"
+            :aria-controls="`case-panel-${c.id}`"
+            :tabindex="active === c.id ? 0 : -1"
+            class="fc-strip group relative aspect-[4/5] w-[74vw] max-w-[330px] shrink-0 snap-center overflow-hidden rounded-[22px] text-left ring-1 transition-[flex-grow,box-shadow] duration-700 ease-editorial focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pastiYellow-500 desktop:aspect-auto desktop:w-auto desktop:min-w-0 desktop:max-w-none desktop:shrink"
+            :class="active === c.id ? 'is-active grow-[6] ring-pastiYellow-500' : 'grow ring-[color:rgba(255,255,255,0.12)] desktop:hover:grow-[1.5]'"
+            @click="select(i)"
+            @keydown="onTabKey($event, i)"
+          >
+            <!-- Visual -->
+            <template v-if="lead(c)">
+              <img
+                v-if="lead(c)!.kind === 'poster'"
+                :src="lead(c)!.src"
+                alt=""
+                loading="lazy"
+                decoding="async"
+                draggable="false"
+                class="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-[1200ms] ease-editorial"
+                :class="active === c.id ? 'scale-100' : 'scale-[1.08]'"
               >
-                <span aria-hidden="true" class="absolute bottom-0 left-0 top-0 w-[3px] origin-top bg-pastiYellow-500 transition-transform duration-500 ease-editorial" :class="active === c.id ? 'scale-y-100' : 'scale-y-0'" />
-                <span class="pt-1.5 font-mono text-[11px] transition-colors duration-300" :class="active === c.id ? 'text-pastiYellow-500' : 'text-[color:rgba(255,255,255,0.4)]'">{{ c.index }}</span>
-                <span class="min-w-0">
-                  <span class="block font-display text-[24px] font-extrabold leading-[1.1] tracking-[-0.03em] transition-colors duration-300" :class="active === c.id ? 'text-pureWhite' : 'text-[color:rgba(255,255,255,0.5)] group-hover:text-[color:rgba(255,255,255,0.8)]'">{{ c.title }}</span>
-                  <span class="mt-1.5 block font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.45)]">{{ c.category }}</span>
-                </span>
+              <div v-else class="absolute inset-0 bg-[linear-gradient(160deg,#0a4b6c_0%,#022f47_70%)]">
+                <div aria-hidden="true" class="absolute -bottom-[30%] -right-[20%] h-[80%] w-[80%] rounded-full" style="background: radial-gradient(closest-side, rgba(251, 186, 0, 0.28), transparent)" />
+                <img
+                  :src="lead(c)!.src"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  draggable="false"
+                  class="fc-sheet absolute left-[8%] top-[12%] w-[150%] max-w-none rounded-[12px] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.7)] ring-1 ring-[color:rgba(255,255,255,0.2)] transition-transform duration-[1200ms] ease-editorial desktop:left-[9%] desktop:top-[14%] desktop:w-[min(860px,150%)]"
+                >
+              </div>
+            </template>
+            <div v-else class="absolute inset-0 bg-[color:rgba(255,255,255,0.06)]" />
+
+            <!-- Shade: heavy when folded, a bottom gradient when open -->
+            <span aria-hidden="true" class="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,36,54,0)_40%,rgba(2,36,54,0.75)_68%,rgba(2,36,54,0.97)_100%)]" />
+            <span aria-hidden="true" class="absolute inset-0 bg-[color:rgba(2,36,54,0.62)] transition-opacity duration-700" :class="active === c.id ? 'opacity-0' : 'opacity-0 desktop:opacity-100'" />
+
+            <!-- Index -->
+            <span class="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-[color:rgba(2,36,54,0.72)] px-3 py-1.5 font-mono text-[11px] tracking-[0.14em] ring-1 ring-[color:rgba(255,255,255,0.14)]">
+              <span class="h-1.5 w-1.5 rounded-full" :class="active === c.id ? 'bg-pastiYellow-500' : 'bg-[color:rgba(255,255,255,0.4)]'" />{{ c.index }}
+            </span>
+
+            <!-- Folded (desktop): vertical title -->
+            <span
+              aria-hidden="true"
+              class="fc-vtitle absolute bottom-6 left-1/2 hidden -translate-x-1/2 whitespace-nowrap font-display text-[22px] font-extrabold tracking-[-0.02em] text-pureWhite transition-opacity duration-500 desktop:block"
+              :class="active === c.id ? 'opacity-0' : 'opacity-100 delay-200'"
+            >{{ c.title }}</span>
+
+            <!-- Open: caption -->
+            <span
+              class="absolute inset-x-5 bottom-5 block transition-[opacity,transform] duration-500 desktop:inset-x-8 desktop:bottom-8"
+              :class="active === c.id ? 'translate-y-0 opacity-100 delay-300' : 'desktop:translate-y-4 desktop:opacity-0'"
+            >
+              <span class="block font-mono text-[10px] uppercase tracking-[0.18em] text-pastiYellow-500">{{ c.category }}</span>
+              <span class="mt-2 block font-display text-[length:clamp(22px,2.6vw,40px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-pureWhite">{{ c.title }}</span>
+              <span v-if="c.client || c.year" class="mt-2 block text-[13px] text-[color:rgba(255,255,255,0.7)]">{{ [c.client, c.year].filter(Boolean).join(' · ') }}</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== DOSSIER ===== -->
+    <BaseContainer class="relative z-10">
+      <div id="case-dossier" class="mt-14 desktop:mt-24">
+        <div
+          v-for="(c, i) in publicCases"
+          v-show="active === c.id"
+          :id="`case-panel-${c.id}`"
+          :key="c.id"
+          role="tabpanel"
+          :aria-labelledby="`case-tab-${c.id}`"
+          tabindex="0"
+          class="grid gap-12 focus-visible:outline-none desktop:grid-cols-12 desktop:gap-10"
+        >
+          <!-- File cover -->
+          <aside class="m-center desktop:sticky desktop:top-28 desktop:col-span-4 desktop:self-start">
+            <div class="overflow-hidden">
+              <span data-fd-rise class="fc-outline block font-display text-[length:clamp(120px,16vw,220px)] font-extrabold leading-[0.82] tracking-[-0.06em]">{{ c.index }}</span>
+            </div>
+            <div class="mt-6 overflow-hidden pb-1">
+              <h3 data-fd-rise class="font-display text-[length:clamp(30px,3vw,46px)] font-extrabold leading-[1.02] tracking-[-0.04em] text-pureWhite">{{ c.title }}</h3>
+            </div>
+            <p class="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-pastiYellow-500">{{ c.category }}</p>
+            <dl v-if="c.client || c.year" class="m-center-row mt-6 flex flex-wrap gap-x-8 gap-y-3 border-t border-[color:rgba(255,255,255,0.14)] pt-5">
+              <div v-if="c.client">
+                <dt class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">Client</dt>
+                <dd class="mt-1 text-[15px] font-semibold text-pureWhite">{{ c.client }}</dd>
+              </div>
+              <div v-if="c.year">
+                <dt class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">Year</dt>
+                <dd class="mt-1 text-[15px] font-semibold text-pureWhite">{{ c.year }}</dd>
+              </div>
+            </dl>
+            <p v-if="c.businessContext" class="mt-6 text-[17px] leading-relaxed text-[color:rgba(255,255,255,0.8)]">{{ c.businessContext }}</p>
+
+            <div class="m-center-row mt-8 flex items-center gap-3">
+              <button type="button" class="grid h-12 w-12 place-items-center rounded-full ring-1 ring-[color:rgba(255,255,255,0.25)] transition-colors duration-300 hover:bg-pureWhite hover:text-slateNavy focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :aria-label="`Previous case: ${publicCases[(i - 1 + publicCases.length) % publicCases.length]!.title}`" @click="step(-1)">
+                <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 8H3M7 4L3 8l4 4" /></svg>
+              </button>
+              <span class="font-mono text-[12px] tracking-[0.18em] text-[color:rgba(255,255,255,0.5)]"><span class="text-pureWhite">{{ c.index }}</span> / {{ pad(publicCases.length) }}</span>
+              <button type="button" class="group grid h-12 w-12 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy transition-transform duration-300 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pureWhite" :aria-label="`Next case: ${publicCases[(i + 1) % publicCases.length]!.title}`" @click="step(1)">
+                <svg viewBox="0 0 16 16" class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
               </button>
             </div>
-            <p class="mt-6 font-mono text-[11px] tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">
-              <span class="text-pureWhite">{{ pad(publicCases.findIndex((c) => c.id === active) + 1) }}</span> / {{ pad(publicCases.length) }}
-            </p>
-          </div>
-        </div>
+          </aside>
 
-        <!-- All panels share one grid cell, so the stage keeps the tallest
-             case's height and switching never jumps the page. Inactive
-             panels are visibility:hidden (out of the a11y tree, unfocusable). -->
-        <div class="col-span-8 grid">
-          <div
-            v-for="c in publicCases"
-            :id="`case-panel-${c.id}`"
-            :key="c.id"
-            role="tabpanel"
-            :aria-labelledby="`case-tab-${c.id}`"
-            :tabindex="active === c.id ? 0 : -1"
-            class="self-start rounded-[24px] [grid-area:1/1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pastiYellow-500"
-            :class="active === c.id ? '' : 'invisible'"
-          >
-            <div class="mb-8 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-              <h3 class="font-display text-[clamp(32px,3.2vw,52px)] font-extrabold leading-[1.02] tracking-[-0.04em] text-pureWhite">{{ c.title }}</h3>
-              <span v-if="c.client || c.year" class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)]">{{ [c.client, c.year].filter(Boolean).join(' · ') }}</span>
-            </div>
+          <!-- Chapters -->
+          <div class="min-w-0 desktop:col-span-8">
             <WorkFeaturedCasePanel :item="c" />
           </div>
         </div>
       </div>
-
-      <!-- BELOW DESKTOP: accordion -->
-      <ol class="mt-12 border-b border-[color:rgba(255,255,255,0.14)] desktop:hidden">
-        <li v-for="(c, i) in publicCases" :key="c.id" data-fc-row class="border-t border-[color:rgba(255,255,255,0.14)]">
-          <h3 class="text-pureWhite">
-            <button
-              :id="`case-acc-head-${c.id}`"
-              :ref="(el) => { if (el) accHeadRefs[i] = el as HTMLElement }"
-              type="button"
-              class="flex w-full items-center gap-4 py-6 text-left focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-pastiYellow-500"
-              :aria-expanded="openAcc === c.id"
-              :aria-controls="`case-acc-${c.id}`"
-              @click="toggleAcc(c.id, i)"
-            >
-              <span class="font-mono text-[11px]" :class="openAcc === c.id ? 'text-pastiYellow-500' : 'text-[color:rgba(255,255,255,0.45)]'">{{ c.index }}</span>
-              <span class="min-w-0 flex-1">
-                <span class="block font-display text-[clamp(22px,6vw,32px)] font-extrabold leading-[1.08] tracking-[-0.03em]">{{ c.title }}</span>
-                <span class="mt-1 block font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.5)]">{{ c.category }}</span>
-              </span>
-              <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full transition-[transform,background-color,color] duration-300" :class="openAcc === c.id ? 'rotate-45 bg-pastiYellow-500 text-slateNavy' : 'bg-[color:rgba(255,255,255,0.1)] text-pureWhite'">
-                <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v12M2 8h12" /></svg>
-              </span>
-            </button>
-          </h3>
-          <div
-            :id="`case-acc-${c.id}`"
-            role="region"
-            :aria-labelledby="`case-acc-head-${c.id}`"
-            class="grid transition-[grid-template-rows] duration-500 ease-editorial motion-reduce:transition-none"
-            :class="openAcc === c.id ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
-            :inert="openAcc !== c.id"
-          >
-            <div class="min-w-0 overflow-hidden">
-              <div class="pb-10">
-                <p v-if="c.client || c.year" class="mb-5 font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)]">{{ [c.client, c.year].filter(Boolean).join(' · ') }}</p>
-                <WorkFeaturedCasePanel :item="c" />
-              </div>
-            </div>
-          </div>
-        </li>
-      </ol>
     </BaseContainer>
   </section>
 </template>
 
 <style scoped>
-.fc-tab:focus-visible {
-  outline: 2px solid #fbba00; /* pastiYellow-500 */
-  outline-offset: -2px;
+.fc-outline {
+  color: transparent;
+  -webkit-text-stroke: 1.5px rgba(251, 186, 0, 0.8); /* pastiYellow-500 */
+}
+.fc-vtitle {
+  writing-mode: vertical-rl;
+  transform: translateX(-50%) rotate(180deg);
+}
+/* Dashboards drift a little when their strip opens. */
+.fc-strip .fc-sheet {
+  transform: translate3d(6%, 4%, 0) rotate(-3deg);
+}
+.fc-strip.is-active .fc-sheet {
+  transform: translate3d(0, 0, 0) rotate(-2deg);
+}
+[data-reduced-motion='true'] .fc-strip,
+[data-reduced-motion='true'] .fc-strip * {
+  transition: none !important;
 }
 </style>

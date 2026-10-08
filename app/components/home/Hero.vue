@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import gsap from 'gsap'
+// Explicit import (not auto-import): the knot must resolve even on a dev
+// server started before this file existed.
+import HomeHeroKnot from './HeroKnot.vue'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 if (import.meta.client) {
@@ -90,7 +93,6 @@ const ctaRowRef = ref<HTMLElement | null>(null)
 const ctaPrimaryRef = ref<HTMLElement | null>(null)
 const ctaSecondaryRef = ref<HTMLElement | null>(null)
 const ringRef = ref<HTMLElement | null>(null)
-const knotTiltRef = ref<HTMLElement | null>(null)
 const chipsRef = ref<HTMLElement | null>(null)
 const galleryRef = ref<HTMLElement | null>(null)
 const cardRefs = ref<HTMLElement[]>([])
@@ -271,28 +273,6 @@ useGsapContext(() => {
   // gallery layer is display:none (see <style>) and nothing here runs. ---
   const mm = gsap.matchMedia()
 
-  // Knot pointer tilt (desktop, fine pointer): a few degrees toward the
-  // cursor — what the live 3D knot used to do, as two eased transforms.
-  mm.add(`${reducedMotionQuery.noPreference} and ${breakpointQuery.desktopUp} and (pointer: fine)`, () => {
-    const knot = knotTiltRef.value
-    if (!knot) return
-    const ry = gsap.quickTo(knot, 'rotationY', { duration: 1.2, ease: approvedEase.gsapStandard })
-    const rx = gsap.quickTo(knot, 'rotationX', { duration: 1.2, ease: approvedEase.gsapStandard })
-    const tx = gsap.quickTo(knot, 'xPercent', { duration: 1.2, ease: approvedEase.gsapStandard })
-    const onMove = (e: PointerEvent) => {
-      const nx = (e.clientX / window.innerWidth) * 2 - 1
-      const ny = (e.clientY / window.innerHeight) * 2 - 1
-      ry(nx * 12)
-      rx(-ny * 9)
-      tx(nx * 2)
-    }
-    gsap.set(knot.parentElement, { perspective: 1200 })
-    window.addEventListener('pointermove', onMove, { passive: true })
-    return () => {
-      window.removeEventListener('pointermove', onMove)
-      gsap.set(knot, { clearProps: 'transform' })
-    }
-  })
   mm.add({ isDesktop: `${reducedMotionQuery.noPreference} and ${breakpointQuery.desktopUp}` }, (context) => {
     const { isDesktop } = context.conditions as { isDesktop: boolean }
     const stage = stageRef.value
@@ -417,6 +397,9 @@ useGsapContext(() => {
       if (eB > 0.55 && nearest !== activeIndex) {
         setCaption(nearest, nearest >= activeIndex ? 1 : -1)
       }
+      // Knot has faded out by the end of B — HeroKnot skips frames while
+      // this flag is set, so the GPU isn't drawing an invisible knot.
+      if (ringRef.value) ringRef.value.dataset.paused = String(state.b > 0.85)
       const engaged = state.b > 0.02
       if (engaged !== holds.scroll) {
         holds.scroll = engaged
@@ -691,7 +674,7 @@ useGsapContext(() => {
         </div>
       </BaseContainer>
 
-      <!-- Glass knot (pre-rendered image) with its tilted orbit and the
+      <!-- Glass knot (live WebGL, HomeHeroKnot) with its tilted orbit and the
            "Ideas → Real Solutions" tag. In flow under the copy on mobile;
            right of centre, behind the headline's tail, on desktop. -->
       <div
@@ -715,26 +698,10 @@ useGsapContext(() => {
             </circle>
           </g>
         </svg>
-        <!-- The knot: its pre-rendered image (public/images/hero-knot.webp,
-             captured from the original three.js glass scene) on every
-             device, painted from the server HTML with the text.
-             Performance pass 2026-10-06: the live WebGL knot cost ~700KB of
-             three.js plus a ~0.9s main-thread freeze compiling its
-             transmission shader on desktop, and a double render pass every
-             frame. Now: a slow CSS float (main.css) + a few degrees of
-             pointer tilt on desktop (two GPU transforms). -->
-        <div ref="knotTiltRef" class="absolute inset-0" style="transform-style: preserve-3d">
-          <img
-            src="/images/hero-knot.webp"
-            alt=""
-            width="960"
-            height="960"
-            fetchpriority="high"
-            decoding="async"
-            draggable="false"
-            class="hero-knot-img absolute inset-0 h-full w-full select-none object-contain"
-          >
-        </div>
+        <!-- The knot: live (2,3) torus knot in raw WebGL (HomeHeroKnot) over
+             its server-painted still, which stays as the first paint and
+             the fallback. Owner 2026-10-08: bring back the turning knot. -->
+        <HomeHeroKnot />
         <span class="absolute right-[2%] top-[9%] inline-flex rotate-[-7deg] items-center gap-2 rounded-full border border-[color:rgba(3,60,89,0.08)] bg-[color:rgba(255,255,255,0.86)] px-3.5 py-1.5 font-display text-[11px] font-bold text-slateNavy shadow-[0_14px_30px_-16px_rgba(3,60,89,0.45)] backdrop-blur-sm desktop:right-[-4%] desktop:top-[4%] desktop:text-[12px]">
           {{ ringTag.from }}
           <svg viewBox="0 0 16 16" class="h-3 w-3 text-pastiYellow-600" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8h11M9 4l4 4-4 4" /></svg>

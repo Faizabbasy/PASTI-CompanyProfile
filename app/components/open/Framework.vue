@@ -25,8 +25,8 @@ const layersIn = useOpenInView(layersRef, 0.3)
       <div class="mt-14 grid items-start gap-14 desktop:grid-cols-12 desktop:gap-10">
         <div class="desktop:col-span-5">
           <OpenHeading :lines="framework.title" surface="dark" size="lg" :lede="framework.intro" />
-          <p class="mt-5 max-w-[30rem] text-[16px] leading-[1.65] text-[color:rgba(255,255,255,0.72)]">{{ framework.after }}</p>
-          <p class="mt-10 border-l-[3px] border-pastiYellow-500 pl-5 font-display text-[length:clamp(24px,2.4vw,34px)] font-extrabold leading-[1.1] tracking-[-0.025em]">{{ framework.notBlank }}</p>
+          <p class="m-center mt-5 max-w-[30rem] text-[16px] leading-[1.65] text-[color:rgba(255,255,255,0.72)]">{{ framework.after }}</p>
+          <p class="m-center mx-auto w-fit border-t-[3px] border-pastiYellow-500 pt-4 desktop:mx-0 desktop:w-auto desktop:border-l-[3px] desktop:border-t-0 desktop:pt-0 desktop:pl-5 mt-10 font-display text-[length:clamp(24px,2.4vw,34px)] font-extrabold leading-[1.1] tracking-[-0.025em]">{{ framework.notBlank }}</p>
         </div>
 
         <!-- Foundation board -->
@@ -57,7 +57,7 @@ const layersIn = useOpenInView(layersRef, 0.3)
 
       <!-- Framework → business → system -->
       <div ref="layersRef" class="mt-20 desktop:mt-28" :class="{ 'is-in': layersIn }">
-        <div class="flex flex-col gap-3 desktop:flex-row desktop:items-end desktop:justify-between">
+        <div class="m-center flex flex-col gap-3 desktop:flex-row desktop:items-end desktop:justify-between">
           <p class="font-display text-[length:clamp(22px,2.2vw,30px)] font-extrabold tracking-[-0.02em]">From framework to your system.</p>
           <p class="font-display text-[16px] font-bold text-[color:rgba(255,255,255,0.6)]">{{ framework.tagline.join(' ') }}</p>
         </div>

@@ -99,8 +99,10 @@ useGsapContext(() => {
         <!-- Visual cards -->
         <div class="flex flex-col gap-16 desktop:col-span-7 desktop:gap-28">
           <article v-for="(s, i) in services" :key="s.index" :ref="(el) => { if (el) cardRefs[i] = el as HTMLElement }" class="group/cs">
-            <div data-cs-frame class="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-slateNavy tablet:aspect-[4/3] desktop:rounded-[28px]">
-              <div data-cs-img class="absolute inset-0 desktop:-top-[8%] desktop:h-[116%]">
+            <div data-cs-frame class="relative overflow-hidden rounded-[24px] bg-slateNavy desktop:rounded-[28px]" :class="s.image ? '' : 'aspect-[4/5] tablet:aspect-[4/3]'" :style="s.image ? { aspectRatio: `${s.image.w} / ${s.image.h}` } : undefined">
+              <!-- Owner visual: shown whole (title + logo are baked in). -->
+              <img v-if="s.image" :src="s.image.src" :alt="`${s.title} — PASTI`" :width="s.image.w" :height="s.image.h" loading="lazy" decoding="async" draggable="false" class="absolute inset-0 h-full w-full object-cover">
+              <div v-else data-cs-img class="absolute inset-0 desktop:-top-[8%] desktop:h-[116%]">
                 <CreativeCapArt :art="s.art" :label="s.title" />
               </div>
               <span class="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
@@ -109,14 +111,14 @@ useGsapContext(() => {
                 <span class="font-mono text-[10px] tracking-[0.14em] text-pureWhite">{{ s.index }}</span>
               </span>
             </div>
-            <div class="mt-5 grid gap-3 tablet:grid-cols-[1fr_1.2fr] tablet:gap-8">
+            <div class="m-center mt-5 grid gap-3 tablet:grid-cols-[1fr_1.2fr] tablet:gap-8">
               <h3 class="font-display text-[length:clamp(26px,2.6vw,38px)] font-extrabold leading-[1.05] tracking-[-0.03em] text-slateNavy">{{ s.title }}</h3>
               <div>
                 <p class="text-token-body text-[color:rgba(3,60,89,0.72)]">{{ s.body }}</p>
-                <ul class="mt-4 flex flex-wrap gap-1.5" :aria-label="`${s.title} — key areas`">
+                <ul class="m-center-row mt-4 flex flex-wrap gap-1.5" :aria-label="`${s.title} — key areas`">
                   <li v-for="k in s.keywords" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)]">{{ k }}</li>
                 </ul>
-                <div v-if="s.related.length" class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
+                <div v-if="s.related.length" class="m-center-row mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
                   <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">Related work</span>
                   <NuxtLink v-for="w in s.related" :key="w.label" :to="w.to ?? '#'" class="inline-flex min-h-11 items-center text-[14px] font-semibold text-slateNavy underline decoration-pastiYellow-500 decoration-2 underline-offset-4 hover:decoration-slateNavy">{{ w.label }} <span aria-hidden="true" class="ml-1">↗</span></NuxtLink>
                 </div>

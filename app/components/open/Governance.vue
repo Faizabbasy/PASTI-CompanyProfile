@@ -71,11 +71,11 @@ const log = [
       <!-- 1 · Governance inside the process -->
       <div class="mt-14 grid gap-10 desktop:grid-cols-12 desktop:items-end">
         <OpenHeading class="desktop:col-span-8" :lines="governance.title" size="lg" />
-        <p class="max-w-[26rem] text-[16px] leading-[1.65] text-[color:rgba(3,60,89,0.78)] desktop:col-span-4">{{ governance.body }}</p>
+        <p class="m-center max-w-[26rem] text-[16px] leading-[1.65] text-[color:rgba(3,60,89,0.78)] desktop:col-span-4">{{ governance.body }}</p>
       </div>
 
       <div ref="laneRef" class="mt-14" :class="{ 'is-in': laneIn }">
-        <p class="font-display text-[15px] font-bold text-slateNavy">Governance embedded in every step</p>
+        <p class="m-center font-display text-[15px] font-bold text-slateNavy">Governance embedded in every step</p>
         <ol class="relative mt-6 grid gap-5 tablet:grid-cols-5 tablet:gap-3">
           <span aria-hidden="true" class="op-draw absolute left-3 right-3 top-[15px] hidden h-[2px] bg-pastiYellow-500 tablet:block" />
           <span aria-hidden="true" class="op-drawy absolute bottom-3 left-[15px] top-3 w-[2px] bg-pastiYellow-500 tablet:hidden" />
@@ -89,7 +89,7 @@ const log = [
             </span>
           </li>
         </ol>
-        <p class="mt-6 text-[14.5px] font-medium text-slateNavy">{{ governance.embeddedLine }}</p>
+        <p class="m-center mt-6 text-[14.5px] font-medium text-slateNavy">{{ governance.embeddedLine }}</p>
       </div>
 
       <ul class="mt-12 grid grid-cols-2 border-l border-t border-[color:rgba(3,60,89,0.12)] desktop:grid-cols-4">
@@ -103,7 +103,7 @@ const log = [
       <div class="mt-24 grid gap-12 desktop:mt-32 desktop:grid-cols-12 desktop:gap-10">
         <div class="desktop:col-span-5">
           <OpenHeading :lines="governance.approvalTitle" size="md" :lede="governance.approvalBody" />
-          <div class="mt-8 rounded-[20px] bg-[color:rgba(251,186,0,0.14)] p-6">
+          <div class="m-center mt-8 rounded-[20px] bg-[color:rgba(251,186,0,0.14)] p-6">
             <p class="text-[14px] text-[color:rgba(3,60,89,0.75)]">{{ governance.approvalQuestionIntro }}</p>
             <p class="mt-1 font-display text-[24px] font-extrabold tracking-[-0.02em] text-slateNavy">{{ governance.approvalQuestion }}</p>
             <p class="mt-4 text-[14px] text-[color:rgba(3,60,89,0.75)]">Sistem akan menunjukkan:</p>
@@ -155,10 +155,10 @@ const log = [
       <div class="mt-24 grid gap-12 desktop:mt-32 desktop:grid-cols-12 desktop:gap-10">
         <div class="desktop:col-span-5">
           <OpenHeading :lines="governance.auditTitle" size="md" :lede="governance.auditIntro" />
-          <ul class="mt-6 flex flex-wrap gap-2">
+          <ul class="m-center-row mt-6 flex flex-wrap gap-2">
             <li v-for="f in governance.auditFields" :key="f" class="rounded-full border border-slateNavy px-3.5 py-1.5 text-[13.5px] font-bold text-slateNavy">{{ f }}</li>
           </ul>
-          <p class="mt-10 font-display text-[length:clamp(22px,2.2vw,30px)] font-extrabold leading-[1.15] tracking-[-0.02em] text-slateNavy">{{ governance.auditQuote[0] }}<br><span class="text-[color:rgba(3,60,89,0.42)]">{{ governance.auditQuote[1] }}</span></p>
+          <p class="m-center mt-10 font-display text-[length:clamp(22px,2.2vw,30px)] font-extrabold leading-[1.15] tracking-[-0.02em] text-slateNavy">{{ governance.auditQuote[0] }}<br><span class="text-[color:rgba(3,60,89,0.42)]">{{ governance.auditQuote[1] }}</span></p>
         </div>
 
         <div ref="logRef" class="desktop:col-span-7" :class="{ 'is-in': logIn }">
@@ -190,7 +190,7 @@ const log = [
               </tbody>
             </table>
           </div>
-          <p class="mt-4 text-[14px] font-medium text-slateNavy">{{ governance.auditLine }}</p>
+          <p class="m-center mt-4 text-[14px] font-medium text-slateNavy">{{ governance.auditLine }}</p>
         </div>
       </div>
     </BaseContainer>

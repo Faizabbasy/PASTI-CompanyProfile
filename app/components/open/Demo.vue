@@ -70,7 +70,7 @@ const input = 'mt-2 block h-12 w-full rounded-[12px] border bg-pureWhite px-4 te
       <div class="mt-14 grid gap-14 desktop:grid-cols-12 desktop:gap-10">
         <div class="desktop:col-span-5">
           <OpenHeading :lines="cta.title" surface="dark" size="md" :lede="cta.body" />
-          <p class="mt-8 flex items-center gap-3 font-display text-[19px] font-extrabold">
+          <p class="m-center m-center-row mt-8 flex items-center gap-3 font-display text-[19px] font-extrabold">
             <span class="grid h-8 w-8 place-items-center rounded-full border-2 border-pastiYellow-500 text-pastiYellow-500">
               <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
             </span>
@@ -81,7 +81,7 @@ const input = 'mt-2 block h-12 w-full rounded-[12px] border bg-pureWhite px-4 te
               <OpenMark :size="16" />{{ p }}
             </li>
           </ul>
-          <a :href="link" target="_blank" rel="noopener noreferrer" class="group mt-8 inline-flex min-h-11 items-center gap-2 font-display text-[16px] font-bold text-pureWhite underline decoration-pastiYellow-500 decoration-2 underline-offset-[6px]">
+          <a :href="link" target="_blank" rel="noopener noreferrer" class="group m-center mt-8 flex w-fit min-h-11 items-center gap-2 font-display text-[16px] font-bold text-pureWhite underline decoration-pastiYellow-500 decoration-2 underline-offset-[6px]">
             Talk to PASTI
             <svg viewBox="0 0 16 16" class="h-4 w-4 transition-transform duration-300 ease-editorial group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
           </a>

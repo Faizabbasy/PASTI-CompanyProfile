@@ -6,10 +6,10 @@ if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
 }
 
-// LEADERSHIP — CEO Foreword, M. Juandi, Founder & CEO (COMPRO 2025 pp.5–6;
-// "over the past five years" → "since 2020", owner 2026-10-07). Portrait is
-// the COMPRO photo (owner: use what exists for now). The pull-quote is the
-// foreword's own second paragraph. Shareholder content is excluded entirely.
+// LEADERSHIP — Operational Perspective, Amelia N. Fauziah, Co-Founder & COO
+// (COMPRO 2025; owner 2026-10-08 replaced the CEO foreword with this page).
+// Portrait is the COMPRO photo. The pull-quote is a sentence from her own
+// text. Copy lives in useCompany().founder.
 const { company } = useAbout()
 const f = company.founder
 const sectionRef = ref<HTMLElement | null>(null)
@@ -33,7 +33,7 @@ useGsapContext(() => {
 <template>
   <section ref="sectionRef" class="relative overflow-hidden bg-pureWhite py-24 tablet:py-32">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Leadership" meta="CEO foreword" />
+      <BaseSectionMark surface="light" label="Leadership" :meta="f.meta" />
       <div class="mt-14 grid items-start gap-12 desktop:mt-20 desktop:grid-cols-12 desktop:gap-14">
         <figure class="mx-auto w-full max-w-[420px] desktop:col-span-5 desktop:mx-0 desktop:max-w-none">
           <div data-fd-frame class="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-surfaceNeutral">
@@ -47,15 +47,15 @@ useGsapContext(() => {
           <figcaption class="sr-only">{{ f.name }}, {{ f.role }}</figcaption>
         </figure>
 
-        <div class="desktop:col-span-7">
-          <p data-fd-item class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
-            <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />A word from our founder
+        <div class="m-center desktop:col-span-7">
+          <p data-fd-item class="m-center-row inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
+            <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ f.eyebrow }}
           </p>
           <blockquote data-fd-item class="mt-6 font-display text-[clamp(26px,2.8vw,42px)] font-bold leading-[1.12] tracking-[-0.03em] text-slateNavy">
             <span aria-hidden="true" class="text-pastiYellow-500">“</span>{{ f.quote }}<span aria-hidden="true" class="text-pastiYellow-500">”</span>
           </blockquote>
           <div class="mt-10 space-y-5 border-t border-[color:rgba(3,60,89,0.14)] pt-8">
-            <p v-for="(para, i) in f.foreword" :key="i" data-fd-item class="max-w-[62ch] text-[16px] leading-relaxed text-[color:rgba(3,60,89,0.76)]">{{ para }}</p>
+            <p v-for="(para, i) in f.foreword" :key="i" data-fd-item class="m-center max-w-[62ch] text-[16px] leading-relaxed text-[color:rgba(3,60,89,0.76)]">{{ para }}</p>
           </div>
           <div data-fd-item class="mt-8">
             <p class="font-display text-[20px] font-extrabold tracking-[-0.02em] text-slateNavy">{{ f.name }}</p>

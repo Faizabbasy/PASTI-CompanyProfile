@@ -29,7 +29,7 @@ const sizeClass = computed(
 </script>
 
 <template>
-  <div ref="rootRef" :class="{ 'is-in': inView }">
+  <div ref="rootRef" class="m-center" :class="{ 'is-in': inView }">
     <component :is="as" class="op-display" :class="[sizeClass, dark ? 'text-pureWhite' : 'text-slateNavy']">
       <span
         v-for="(l, i) in lines"
@@ -40,7 +40,7 @@ const sizeClass = computed(
     </component>
     <p
       v-if="lede"
-      class="op-fade mt-6 max-w-[34rem] text-[16px] leading-[1.65] tablet:text-[17px]"
+      class="op-fade m-center mt-6 max-w-[34rem] text-[16px] leading-[1.65] tablet:text-[17px]"
       :class="dark ? 'text-[color:rgba(255,255,255,0.74)]' : 'text-[color:rgba(3,60,89,0.78)]'"
       :style="{ '--d': `${lines.length * 90 + 120}ms` }"
     >{{ lede }}</p>

@@ -51,7 +51,7 @@ useGsapContext(() => {
           </div>
         </div>
         <div class="min-w-0 desktop:col-span-7">
-          <div data-cwk-item>
+          <div data-cwk-item class="m-center">
             <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-cobalt">{{ f.category }}</p>
             <h3 class="mt-2 font-display text-[clamp(28px,3vw,44px)] font-extrabold leading-[1.05] tracking-[-0.035em] text-slateNavy">{{ f.title }}</h3>
           </div>
@@ -105,7 +105,7 @@ useGsapContext(() => {
             <img :src="work.campaign.image" :alt="work.campaign.title" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover:scale-[1.04]">
           </div>
           <div class="flex flex-col justify-between gap-6 p-6 tablet:p-8">
-            <div>
+            <div class="m-center">
               <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-cobalt">{{ work.campaign.category }}</p>
               <h3 class="mt-2 font-display text-[28px] font-extrabold leading-[1.08] tracking-[-0.03em] text-slateNavy">{{ work.campaign.title }}</h3>
               <p class="mt-3 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.75)]">{{ work.campaign.description }}</p>

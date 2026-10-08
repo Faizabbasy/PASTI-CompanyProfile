@@ -103,7 +103,7 @@ useGsapContext(() => {
           <div class="desktop:col-span-5">
             <OpenTag :n="5" label="One procurement ecosystem" />
             <OpenHeading class="mt-10" :lines="ecosystem.title" size="md" :lede="ecosystem.body" />
-            <p class="mt-5 max-w-[30rem] border-l-[3px] border-pastiYellow-500 pl-4 text-[15px] font-medium leading-relaxed text-slateNavy">{{ ecosystem.note }}</p>
+            <p class="m-center mx-auto w-fit border-t-[3px] border-pastiYellow-500 pt-4 desktop:mx-0 desktop:w-auto desktop:border-l-[3px] desktop:border-t-0 desktop:pt-0 desktop:pl-4 mt-5 max-w-[30rem] text-[15px] font-medium leading-relaxed text-slateNavy">{{ ecosystem.note }}</p>
 
             <!-- Desktop: progress readout -->
             <div class="mt-10 hidden items-center gap-4 desktop:flex" aria-hidden="true">

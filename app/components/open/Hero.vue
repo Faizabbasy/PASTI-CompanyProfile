@@ -22,14 +22,14 @@ const go = computed(() => mounted.value && pageReady.value)
 
     <BaseContainer class="relative">
       <div class="grid items-center gap-12 desktop:grid-cols-12 desktop:gap-10">
-        <div class="desktop:col-span-6">
-          <p class="op-fade flex items-center gap-2.5 font-display text-[14px] font-bold text-slateNavy" style="--d: 100ms">
+        <div class="m-center desktop:col-span-6">
+          <p class="op-fade m-center-row flex items-center gap-2.5 font-display text-[14px] font-bold text-slateNavy" style="--d: 100ms">
             <span class="h-2 w-2 rounded-full bg-pastiYellow-500" />{{ hero.origin }}
           </p>
 
           <h1 class="mt-7">
             <span class="sr-only">{{ hero.name }} — {{ hero.expansion }}</span>
-            <span aria-hidden="true" class="flex items-center text-[length:clamp(84px,24vw,128px)] leading-[0.8] desktop:text-[length:clamp(120px,min(12vw,22svh),200px)]">
+            <span aria-hidden="true" class="m-center-row flex items-center text-[length:clamp(84px,24vw,128px)] leading-[0.8] desktop:text-[length:clamp(120px,min(12vw,22svh),200px)]">
               <svg viewBox="0 0 100 100" class="op-hero-o mr-[0.02em] h-[0.86em] w-[0.86em] shrink-0" fill="none">
                 <circle cx="50" cy="50" r="38" stroke="#FBBA00" stroke-width="18" class="op-hero-ring" pathLength="100" transform="rotate(-90 50 50)" />
                 <path d="M33 51l12 12 23-25" stroke="#033C59" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" class="op-hero-check" pathLength="100" />
@@ -39,10 +39,10 @@ const go = computed(() => mounted.value && pageReady.value)
             <span aria-hidden="true" class="op-line mt-5"><span class="font-display text-[length:clamp(19px,4.6vw,26px)] font-extrabold tracking-[-0.02em] text-slateNavy desktop:text-[length:clamp(22px,1.9vw,30px)]" style="--d: 380ms">{{ hero.expansion }}</span></span>
           </h1>
 
-          <p class="op-fade mt-7 max-w-[30rem] font-display text-[length:clamp(20px,2vw,26px)] font-semibold leading-[1.25] tracking-[-0.015em] text-slateNavy" style="--d: 520ms">
+          <p class="op-fade m-center mt-7 max-w-[30rem] font-display text-[length:clamp(20px,2vw,26px)] font-semibold leading-[1.25] tracking-[-0.015em] text-slateNavy" style="--d: 520ms">
             {{ hero.statement }}
           </p>
-          <p class="op-fade mt-4 max-w-[31rem] text-[16px] leading-[1.65] text-[color:rgba(3,60,89,0.78)]" style="--d: 600ms">{{ hero.body }}</p>
+          <p class="op-fade m-center mt-4 max-w-[31rem] text-[16px] leading-[1.65] text-[color:rgba(3,60,89,0.78)]" style="--d: 600ms">{{ hero.body }}</p>
 
           <div class="op-fade mt-9" style="--d: 700ms">
             <BaseHeroCtas
@@ -61,7 +61,7 @@ const go = computed(() => mounted.value && pageReady.value)
 
       <!-- What OPEN connects (slide 4) -->
       <div class="mt-14 border-t border-[color:rgba(3,60,89,0.12)] pt-7 desktop:mt-16">
-        <p class="op-fade text-[15px] font-medium text-[color:rgba(3,60,89,0.72)]" style="--d: 800ms">{{ hero.connectsIntro }}</p>
+        <p class="op-fade m-center text-[15px] font-medium text-[color:rgba(3,60,89,0.72)]" style="--d: 800ms">{{ hero.connectsIntro }}</p>
         <ol class="relative mt-5 grid grid-cols-2 gap-x-4 gap-y-4 tablet:grid-cols-4 desktop:grid-cols-7 desktop:gap-0">
           <span aria-hidden="true" class="op-draw absolute left-0 right-0 top-[9px] hidden h-[2px] bg-pastiYellow-500 desktop:block" style="--d: 900ms" />
           <li v-for="(c, i) in hero.connects" :key="c" class="relative flex items-center gap-3 desktop:flex-col desktop:items-start desktop:gap-4">

@@ -30,7 +30,7 @@ const sheets = problem.pressures.map((p, i) => ({
       <div class="mt-14 grid items-center gap-16 desktop:grid-cols-12 desktop:gap-10">
         <div class="desktop:col-span-6">
           <OpenHeading :lines="problem.title" size="lg" />
-          <p class="mt-6 max-w-[28rem] text-[16px] leading-[1.65] text-[color:rgba(3,60,89,0.78)] tablet:text-[17px]">{{ problem.intro }}</p>
+          <p class="m-center mt-6 max-w-[28rem] text-[16px] leading-[1.65] text-[color:rgba(3,60,89,0.78)] tablet:text-[17px]">{{ problem.intro }}</p>
           <!-- The pile is decorative; this is its readable form. -->
           <ul class="sr-only">
             <li v-for="p in problem.pressures" :key="p" class="font-display text-[18px] font-extrabold tracking-[-0.02em] text-slateNavy">{{ p }}</li>
@@ -71,7 +71,7 @@ const sheets = problem.pressures.map((p, i) => ({
       </div>
 
       <!-- Verdict -->
-      <p class="mt-20 max-w-[60rem] op-display text-[length:clamp(30px,4.4vw,64px)] text-slateNavy desktop:mt-24">
+      <p class="m-center mt-20 max-w-[60rem] op-display text-[length:clamp(30px,4.4vw,64px)] text-slateNavy desktop:mt-24">
         {{ problem.verdict[0] }} <span class="text-[color:rgba(3,60,89,0.42)]">{{ problem.verdict[1] }}</span>
       </p>
 
@@ -80,7 +80,7 @@ const sheets = problem.pressures.map((p, i) => ({
         <div aria-hidden="true" class="op-rules--dark pointer-events-none absolute inset-0 -z-10" />
         <div class="grid gap-8 desktop:grid-cols-12 desktop:items-end">
           <OpenHeading class="desktop:col-span-7" :lines="problem.realTitle" surface="dark" size="md" />
-          <p class="text-[16px] text-[color:rgba(255,255,255,0.7)] desktop:col-span-4 desktop:col-start-9">{{ problem.realIntro }}</p>
+          <p class="m-center text-[16px] text-[color:rgba(255,255,255,0.7)] desktop:col-span-4 desktop:col-start-9">{{ problem.realIntro }}</p>
         </div>
 
         <dl class="mt-12 grid grid-cols-1 border-t border-[color:rgba(255,255,255,0.14)] tablet:grid-cols-5">
@@ -94,7 +94,7 @@ const sheets = problem.pressures.map((p, i) => ({
           </div>
         </dl>
 
-        <p class="mt-10 flex flex-wrap items-baseline gap-x-3 gap-y-2 font-display text-[length:clamp(19px,2vw,26px)] font-bold tracking-[-0.015em]">
+        <p class="m-center m-center-row mt-10 flex flex-wrap items-baseline gap-x-3 gap-y-2 font-display text-[length:clamp(19px,2vw,26px)] font-bold tracking-[-0.015em]">
           <span class="text-[color:rgba(255,255,255,0.65)]">{{ problem.needsIntro }}</span>
           <template v-for="(n, i) in problem.needs" :key="n">
             <span v-if="i" aria-hidden="true" class="text-pastiYellow-500">+</span>

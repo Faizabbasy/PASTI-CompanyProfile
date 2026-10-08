@@ -18,7 +18,7 @@ const tracksIn = useOpenInView(tracksRef, 0.35)
       <div class="mt-14 grid gap-14 desktop:grid-cols-12 desktop:gap-10">
         <OpenHeading class="desktop:col-span-6" :lines="notSaas.title" size="xl" />
         <div class="desktop:col-span-5 desktop:col-start-8">
-          <p class="text-[16px] font-medium text-[color:rgba(3,60,89,0.75)]">{{ notSaas.differsIntro }}</p>
+          <p class="m-center text-[16px] font-medium text-[color:rgba(3,60,89,0.75)]">{{ notSaas.differsIntro }}</p>
           <ul class="mt-4 border-t border-[color:rgba(3,60,89,0.14)]">
             <li v-for="d in notSaas.differs" :key="d" class="flex items-baseline justify-between gap-4 border-b border-[color:rgba(3,60,89,0.14)] py-3.5">
               <span class="font-display text-[18px] font-bold tracking-[-0.015em] text-slateNavy">{{ d }}</span>
