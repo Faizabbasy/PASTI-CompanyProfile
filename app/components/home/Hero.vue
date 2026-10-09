@@ -299,8 +299,9 @@ useGsapContext(() => {
       const captionTop = caption ? caption.offsetTop : vh * 0.8
       const gap = clamp(28, 56, vh * 0.05)
       const band = Math.max(160, captionTop - titleBottom - gap * 2)
-      H = Math.min(band, vw * 0.56 * 0.625)
-      W = H / 0.625
+      // 16:9 — the ratio of the owner's landscape project visuals (2026-10-09).
+      H = Math.min(band, vw * 0.56 * 0.5625)
+      W = H / 0.5625
       centerFinal = titleBottom + gap + band / 2
       cards.forEach((c) => {
         c.style.width = `${W}px`
@@ -763,25 +764,17 @@ useGsapContext(() => {
             data-card-inner
             class="relative h-full w-full overflow-hidden rounded-card border border-[color:rgba(3,60,89,0.14)] bg-pureWhite shadow-[0_50px_100px_-45px_rgba(3,60,89,0.55)]"
           >
-            <!-- Portrait (4:5) posters in a landscape (16:10) card, shown WHOLE
-                 (owner request 2026-10-06: nothing cropped): the poster sits
-                 centred at full card height; the side bands are the same
-                 poster, pre-blurred offline into a ~1KB backdrop
-                 (public/images/selected-work/backdrop/) — no runtime filter,
-                 so the scrubbed gallery stays cheap. -->
+            <!-- Owner's landscape (16:9) project visual, shown whole in a
+                 16:9 card (2026-10-09; replaces the portrait poster +
+                 blurred side bands). -->
             <img
-              :src="project.image.replace('/selected-work/', '/selected-work/backdrop/')"
-              alt=""
-              aria-hidden="true"
-              class="absolute inset-0 h-full w-full scale-110 object-cover"
-              draggable="false"
-            >
-            <span aria-hidden="true" class="absolute inset-0 bg-[color:rgba(3,60,89,0.08)]" />
-            <img
-              :src="project.image"
+              :src="project.landscape"
               :alt="project.title"
+              width="1024"
+              height="572"
               :loading="i < 3 ? 'eager' : 'lazy'"
-              class="relative mx-auto h-full w-auto object-contain shadow-[0_0_60px_-10px_rgba(3,36,54,0.55)]"
+              decoding="async"
+              class="absolute inset-0 h-full w-full object-cover"
               draggable="false"
             >
             <span class="pointer-events-none absolute right-3 top-3 inline-flex items-center gap-2 rounded-full bg-[color:rgba(3,60,89,0.88)] px-2.5 py-1">

@@ -40,6 +40,9 @@ export interface SelectedWorkProject {
   category: string
   description: string
   image: string
+  /** Landscape 16:9 version (owner, 2026-10-09) — the homepage hero
+   * gallery card. `image` stays the portrait poster used elsewhere. */
+  landscape: string
   status: ProjectStatus
   /** Rhythm Vocabulary assignment (04-homepage-spec.md §3) — content-driven,
    * not arbitrary-by-index. Placeholder entries default to 'standard' per
@@ -56,6 +59,7 @@ export function useSelectedWork() {
       category: 'Omnichannel E-Commerce',
       description: 'An interactive web and mobile shopping experience connecting inspiration, products and people — from shop-by-room browsing to a seamless checkout journey. Flow, UI/UX and development by PASTI.',
       image: '/images/selected-work/ikea-indonesia.webp',
+      landscape: '/images/selected-work/landscape/ikea-indonesia.webp',
       status: 'existing-unverified',
       // Opener gets its own pacing per spec (04-homepage-spec.md §3).
       treatment: 'slower-showcase'
@@ -66,6 +70,7 @@ export function useSelectedWork() {
       category: 'Enterprise Platform',
       description: 'An integrated dashboard and mobile app digitalizing operations across Jasa Marga Group — real-time traffic, toll transactions, maintenance and incidents in one place. Flow, UI/UX and development by PASTI.',
       image: '/images/selected-work/jm-click.webp',
+      landscape: '/images/selected-work/landscape/jm-click.webp',
       status: 'existing-unverified',
       treatment: 'standard'
     },
@@ -75,6 +80,7 @@ export function useSelectedWork() {
       category: 'Fitness & Wellness App',
       description: 'A fitness companion with video workouts from certified coaches, personalized training schedules, progress tracking and community leaderboards — built in Flutter for iOS and Android.',
       image: '/images/selected-work/powerhours.webp',
+      landscape: '/images/selected-work/landscape/powerhours.webp',
       status: 'existing-unverified',
       // Pattern break roughly mid-sequence — media-dominant widens the visual proof.
       treatment: 'media-dominant'
@@ -85,6 +91,7 @@ export function useSelectedWork() {
       category: 'Employee Wellness Platform',
       description: 'An employee wellness app for PT Harmoni Dinamik Indonesia that makes healthy habits engaging — activity tracking, self-assessments, challenges and personalized daily reminders.',
       image: '/images/selected-work/hdi-healthy-lifestyle.webp',
+      landscape: '/images/selected-work/landscape/hdi-healthy-lifestyle.webp',
       status: 'existing-unverified',
       treatment: 'standard'
     },
@@ -94,6 +101,7 @@ export function useSelectedWork() {
       category: 'Corporate Campaign',
       description: 'The “Energi Untuk Negeri” campaign — a digital presence connecting Pertamina with communities across Indonesia through stories of energy, innovation and sustainability.',
       image: '/images/selected-work/pertamina.webp',
+      landscape: '/images/selected-work/landscape/pertamina.webp',
       status: 'existing-unverified',
       treatment: 'accelerated'
     },
@@ -103,6 +111,7 @@ export function useSelectedWork() {
       category: 'Mobile Banking',
       description: 'A digital banking experience for CIMB Niaga’s OCTO Mobile — seamless transactions, smarter money management and better everyday banking.',
       image: '/images/selected-work/octo-mobile.webp',
+      landscape: '/images/selected-work/landscape/octo-mobile.webp',
       status: 'existing-unverified',
       // Closer gets its own pacing per spec, distinct from mid-sequence Standard.
       treatment: 'closing'

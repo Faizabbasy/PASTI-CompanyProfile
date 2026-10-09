@@ -96,7 +96,7 @@ export function useCreative() {
       related: [],
       source: 'COMPRO 2025 p.39',
       art: 'video',
-      image: { src: '/images/creative/vertical-video-development.webp', w: 1024, h: 572 }
+      image: { src: '/images/creative/vertical-video-development.webp', w: 1448, h: 1086 }
     },
     {
       index: '05',
@@ -106,7 +106,7 @@ export function useCreative() {
       related: [],
       source: 'COMPRO 2025 p.40',
       art: 'production',
-      image: { src: '/images/creative/production-house-services.webp', w: 1678, h: 937 }
+      image: { src: '/images/creative/production-house-services.webp', w: 1448, h: 1086 }
     },
     {
       index: '06',
