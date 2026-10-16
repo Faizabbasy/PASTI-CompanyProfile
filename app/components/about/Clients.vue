@@ -39,7 +39,7 @@ useGsapContext(() => {
 <template>
   <section ref="sectionRef" class="relative overflow-hidden bg-pureWhite py-24 tablet:py-32">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Clients" :meta="`${clients.length} organizations`" />
+      <BaseSectionMark surface="light" label="Clients" :meta="`${clients.length}+ organizations`" />
       <div class="mt-14 grid items-end gap-8 desktop:mt-20 desktop:grid-cols-12">
         <div class="m-center desktop:col-span-7">
           <h2 class="hero-title">Our beloved client<span class="text-pastiYellow-500">.</span></h2>

@@ -7,14 +7,7 @@
 // Global header/footer come from app.vue (sections 01 and 14).
 const { seo } = useOpen()
 
-useSeoMeta({
-  title: seo.title,
-  description: seo.description,
-  ogTitle: seo.title,
-  ogDescription: seo.description,
-  ogImage: '/images/platforms/open.webp',
-  twitterCard: 'summary_large_image'
-})
+usePageSeo({ ...seo, image: '/images/og/open.jpg' })
 </script>
 
 <template>

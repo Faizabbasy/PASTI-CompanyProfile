@@ -6,14 +6,7 @@
 // product sub-nav is ShiftlySubNav.
 const { seo } = useShiftly()
 
-useSeoMeta({
-  title: seo.title,
-  description: seo.description,
-  ogTitle: seo.title,
-  ogDescription: seo.description,
-  ogImage: '/images/shiftly/dashboard.webp',
-  twitterCard: 'summary_large_image'
-})
+usePageSeo({ ...seo, image: '/images/og/shiftly.jpg' })
 </script>
 
 <template>

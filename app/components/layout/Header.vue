@@ -239,10 +239,13 @@ useGsapContext(() => {
           <LayoutLogo :inverted="darkMode" />
         </div>
 
-        <!-- 9 items since the platform labels returned (2026-10-06): the gap
-             steps down below `wide` so the bar fits from 1024px. -->
-        <nav ref="navRef" class="header-nav ml-auto hidden items-center gap-5 pl-6 lg:flex xl:gap-7 wide:gap-10">
-          <LayoutNavLink v-for="item in navItems" :key="item.to" :item="item" :dark="darkMode" />
+        <!-- Grouped bar (2026-10-16): Services / Platforms open a panel
+             (LayoutNavGroup); the rest are plain links. -->
+        <nav ref="navRef" aria-label="Main" class="header-nav ml-auto hidden items-center gap-6 pl-6 lg:flex xl:gap-8 wide:gap-11">
+          <template v-for="item in navItems" :key="item.to">
+            <LayoutNavGroup v-if="item.children" :item="item" :dark="darkMode" />
+            <LayoutNavLink v-else :item="item" :dark="darkMode" />
+          </template>
         </nav>
 
         <div ref="ctaRef" class="ml-6 hidden shrink-0 lg:block wide:ml-10">

@@ -6,6 +6,8 @@
 // work (OCTO strategy, Pertamina, BSI testimonial, UI/UX) → Why PASTI. The
 // global footer carries the CTA. Copy: useCreative.
 const { why } = useCreative()
+
+usePageSeo(pageSeo.creative)
 </script>
 
 <template>

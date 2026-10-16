@@ -6,14 +6,7 @@
 const { seo } = useEcorporate()
 
 // SEO — editable content (useEcorporate().seo).
-useSeoMeta({
-  title: seo.title,
-  description: seo.description,
-  ogTitle: seo.title,
-  ogDescription: seo.description,
-  ogImage: '/images/platforms/e-corporate.webp',
-  twitterCard: 'summary_large_image'
-})
+usePageSeo({ ...seo, image: '/images/og/e-corporate.jpg' })
 </script>
 
 <template>

@@ -162,7 +162,7 @@ export function useCreative() {
     }),
     testimonial: (() => {
       const t = useTestimonials().testimonials.find((x) => x.name === 'Yodi Izharivan')!
-      return { name: t.name, role: t.role, quote: t.quote }
+      return { name: t.name, role: t.role, quote: t.quote, photo: t.photo }
     })()
   }
 

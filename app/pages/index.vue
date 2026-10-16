@@ -20,6 +20,8 @@
 // sequence at all. `FinalCta.vue` itself is NOT deleted — it's still
 // actively used by creative.vue/insights.vue/technology.vue/work.vue —
 // only this homepage usage is removed.
+
+usePageSeo(pageSeo.home)
 </script>
 
 <template>

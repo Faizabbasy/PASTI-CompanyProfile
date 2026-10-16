@@ -93,6 +93,9 @@ const ctaRowRef = ref<HTMLElement | null>(null)
 const ctaPrimaryRef = ref<HTMLElement | null>(null)
 const ctaSecondaryRef = ref<HTMLElement | null>(null)
 const ringRef = ref<HTMLElement | null>(null)
+// Entrance-only layer inside the ring: the scroll timeline owns ringRef's
+// opacity/scale, the entrance owns this one, so they never fight.
+const ringInnerRef = ref<HTMLElement | null>(null)
 const chipsRef = ref<HTMLElement | null>(null)
 const galleryRef = ref<HTMLElement | null>(null)
 const cardRefs = ref<HTMLElement[]>([])
@@ -251,17 +254,20 @@ useGsapContext(() => {
         const floats = chipsRef.value ? Array.from(chipsRef.value.querySelectorAll<HTMLElement>('[data-float]')) : []
         gsap.set(words, { yPercent: 120 })
         gsap.set([firstBody, ctaRowRef.value].filter(Boolean), { opacity: 0, y: 14 })
-        gsap.set(chipsRef.value, { opacity: 0 })
+        // Bug fix 2026-10-16: the entrance must never tween a property the
+        // scrubbed gallery timeline also tweens (chipsRef / ringRef opacity).
+        // Scrolling before the entrance finished let the entrance keep
+        // forcing them visible over the gallery cards. The entrance now
+        // animates only the floats and the ring's inner layer.
         gsap.set(floats, { opacity: 0, x: 24 })
-        gsap.set(ringRef.value, { opacity: 0, scale: 0.9 })
+        gsap.set(ringInnerRef.value, { opacity: 0, scale: 0.9 })
 
         const tl = gsap.timeline({ defaults: { ease: approvedEase.gsapStandard } })
-        tl.to(ringRef.value, { opacity: 1, scale: 1, duration: motionTier.cinematicMax, ease: approvedEase.gsapCinematic }, 0)
+        tl.to(ringInnerRef.value, { opacity: 1, scale: 1, duration: motionTier.cinematicMax, ease: approvedEase.gsapCinematic }, 0)
         tl.to(words, { yPercent: 0, duration: motionTier.cinematicMin, stagger: motionStagger.loose }, 0.1)
         tl.to(firstBody ?? {}, { opacity: 1, y: 0, duration: motionTier.standardMax }, '-=0.5')
         tl.to(ctaRowRef.value, { opacity: 1, y: 0, duration: motionTier.standardMax }, '-=0.4')
-        tl.to(chipsRef.value, { opacity: 1, duration: motionTier.standardMax }, '-=0.3')
-        tl.to(floats, { opacity: 1, x: 0, duration: motionTier.cinematicMin, stagger: 0.08, ease: approvedEase.gsapCinematic }, '<')
+        tl.to(floats, { opacity: 1, x: 0, duration: motionTier.cinematicMin, stagger: 0.08, ease: approvedEase.gsapCinematic }, '-=0.3')
         tl.call(() => slideshow.start())
         return () => tl.kill()
       })
@@ -680,9 +686,11 @@ useGsapContext(() => {
            right of centre, behind the headline's tail, on desktop. -->
       <div
         ref="ringRef"
+        data-knot-ring
         aria-hidden="true"
         class="pointer-events-none relative z-0 mx-auto -mt-4 mb-16 aspect-square w-[min(92vw,480px)] desktop:absolute desktop:left-[57%] desktop:top-[40%] desktop:m-0 desktop:h-[min(46vw,70svh,700px)] desktop:w-[min(46vw,70svh,700px)] desktop:-translate-x-1/2 desktop:-translate-y-1/2"
       >
+        <div ref="ringInnerRef" class="absolute inset-0">
         <svg class="absolute -inset-[12%] h-[124%] w-[124%] overflow-visible" viewBox="0 0 200 200" fill="none">
           <defs>
             <linearGradient id="hero-orbit" x1="0" y1="0" x2="1" y2="1">
@@ -708,6 +716,7 @@ useGsapContext(() => {
           <svg viewBox="0 0 16 16" class="h-3 w-3 text-pastiYellow-600" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
           <span class="font-semibold text-[color:rgba(3,60,89,0.8)]">{{ ringTag.to }}</span>
         </span>
+        </div>
       </div>
 
       <!-- Desktop hero furniture: partner card + service list and side note

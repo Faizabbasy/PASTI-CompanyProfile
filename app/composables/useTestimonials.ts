@@ -19,11 +19,9 @@ export type TestimonialTier = 'featured' | 'medium' | 'compact'
  *
  * - `existing-unverified`: real content already supplied by the client and
  *   present in the codebase, but the §11 verification task has NOT been
- *   completed/recorded — this is the correct status for all 4 quotes
- *   below until that task actually happens.
- * - `verified`: the §11 task has been completed and recorded (by whom/
- *   when should be tracked wherever that verification record lives —
- *   not invented here).
+ *   completed/recorded.
+ * - `verified`: the §11 task has been completed and recorded — the four
+ *   quotes below, by owner confirmation on 2026-10-16.
  * - `placeholder`: an explicit empty slot, no real content, Lorem-ipsum
  *   copy per the frozen global copy rule.
  */
@@ -35,77 +33,61 @@ export interface Testimonial {
   name: string
   role: string
   quote: string
+  /** Round client portrait under /public. Optional: cards fall back to the
+   * initials monogram when it's missing. */
+  photo?: string
 }
 
 /**
- * Client testimonials — quotes previously supplied by the client and already
- * present in the codebase (not sourced from the content mapping doc, which
- * has no testimonial field). These are treated as `existing-unverified`, NOT
- * `verified` — their prior presence in the codebase or having been client-
- * supplied at some earlier point is not itself the §11 verification task,
- * and no such task has actually been performed here. The frozen spec's
- * 6-card baseline (1 Featured + 3 Medium + 2 Compact, §17.7 CLOSED) is
- * supported architecturally from the start; the 4 existing-unverified
- * quotes populate Featured + the 3 Medium slots, and the 2 Compact slots
- * remain explicit `placeholder`s until new client-approved quotes exist or
- * an owner sign-off accepts shipping with unresolved status
- * (08-implementation-plan.md §17.1/§17.7). Before final production sign-
- * off, every `existing-unverified` slot must actually complete §11's
- * verification task (or be replaced/marked placeholder) — do not flip this
- * to `verified` without that task actually happening.
+ * Client testimonials (owner-confirmed as real, 2026-10-16 — the same four
+ * quotes the client shows on its current site, so status is `verified`).
  *
- * No avatar by default (spec-locked) — `rating` was dropped entirely: the
- * frozen spec has no field for a star/numeric rating, and inventing one
- * (or continuing to render the previous "X.X/5" numeral) would be adding
- * unapproved content, not preserving existing structure.
+ * Owner decisions 2026-10-16:
+ * - "Pasti People" inside the quotes → "PASTI" (current brand name, COMPRO
+ *   p.2); every other word is the client's own.
+ * - No star rating (all five-star, adds no information).
+ * - Portraits: INTERIM ~75px crops from a screenshot of the current site,
+ *   upscaled to 160px — only shown small (attribution rows). Replace the
+ *   files in /public/images/testimonials/ with the originals when supplied.
+ * - The two Lorem placeholder slots were removed.
  */
 export function useTestimonials() {
   const testimonials: Testimonial[] = [
     {
       tier: 'featured',
-      status: 'existing-unverified',
+      status: 'verified',
       name: 'Rizki Aprianto',
       role: 'Head of Sales Perdana',
+      photo: '/images/testimonials/rizki-aprianto.webp',
       quote:
-        "Throughout our engagement and collaboration with Pasti People, I've consistently been impressed by their exceptional level of precision and attention to detail. This is particularly evident and highly valuable in their development of complex custom system cycles, where their accuracy has been absolutely crucial to the success of our projects."
+        "Throughout our engagement and collaboration with PASTI, I've consistently been impressed by their exceptional level of precision and attention to detail. This is particularly evident and highly valuable in their development of complex custom system cycles, where their accuracy has been absolutely crucial to the success of our projects."
     },
     {
       tier: 'medium',
-      status: 'existing-unverified',
+      status: 'verified',
       name: 'Yodi Izharivan',
       role: 'Senior Research Fellow at Bank BSI',
+      photo: '/images/testimonials/yodi-izharivan.webp',
       quote:
-        'Collaborating with Pasti People on the UI/UX development for BSI Insight was an outstanding experience. From the initial brief to final delivery, their team demonstrated a deep understanding of our needs, responded quickly to feedback, and provided smart, solution-driven inputs throughout the process.'
+        'Collaborating with PASTI on the UI/UX development for BSI Insight was an outstanding experience. From the initial brief to final delivery, their team demonstrated a deep understanding of our needs, responded quickly to feedback, and provided smart, solution-driven inputs throughout the process.'
     },
     {
       tier: 'medium',
-      status: 'existing-unverified',
+      status: 'verified',
       name: 'Banu Wimbadi',
       role: 'Founder Perdana Consulting',
+      photo: '/images/testimonials/banu-wimbadi.webp',
       quote:
-        "Collaborating with Pasti People on our system development projects has proven to be highly valuable. Their ability to deliver practical, real-world solutions—paired with user-friendly systems that are easily understood even by non-technical clients—has resulted in a high level of client satisfaction. Pasti People demonstrates both technical expertise and a deep understanding of user needs"
+        "Collaborating with PASTI on our system development projects has proven to be highly valuable. Their ability to deliver practical, real-world solutions—paired with user-friendly systems that are easily understood even by non-technical clients—has resulted in a high level of client satisfaction. PASTI demonstrates both technical expertise and a deep understanding of user needs"
     },
     {
       tier: 'medium',
-      status: 'existing-unverified',
+      status: 'verified',
       name: 'Calvin Kim',
       role: 'CMO of Dingo Korea',
+      photo: '/images/testimonials/calvin-kim.webp',
       quote:
-        'The systems developed by Pasti People are not only technically sound but also easy to implement and adopt. Their structured approach and clear communication make the entire process smooth and efficient for all stakeholders involved'
-    },
-    {
-      tier: 'compact',
-      status: 'placeholder',
-      name: 'Pending client approval',
-      role: 'Placeholder — content not yet sourced',
-      quote: 'Lorem ipsum dolor sit amet — testimonial pending client sourcing and verification.'
-    },
-    {
-      tier: 'compact',
-      status: 'placeholder',
-      name: 'Pending client approval',
-      role: 'Placeholder — content not yet sourced',
-      quote: 'Lorem ipsum dolor sit amet — testimonial pending client sourcing and verification.'
+        'The systems developed by PASTI are not only technically sound but also easy to implement and adopt. Their structured approach and clear communication make the entire process smooth and efficient for all stakeholders involved'
     }
   ]
 

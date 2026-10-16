@@ -11,6 +11,15 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
+  // Production origin for canonical URLs, share-card images and the sitemap
+  // (useSeo.ts, server/routes). Website per COMPRO 2025 (useCompany); a
+  // preview deploy can override it with NUXT_PUBLIC_SITE_URL.
+  runtimeConfig: {
+    public: {
+      siteUrl: 'https://www.pastipeople.id'
+    }
+  },
+
   // Bundle GSAP's ESM build into the server output instead of letting Node
   // load its CommonJS `main` (dist/gsap.js) — keeps `import gsap from 'gsap'`
   // resolving to the real gsap instance during SSR on Vercel.
@@ -21,6 +30,13 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'en' },
+      // Site-wide share defaults; each page sets its own title, description,
+      // card and canonical through usePageSeo() (useSeo.ts).
+      meta: [
+        { property: 'og:site_name', content: 'PASTI' },
+        { property: 'og:type', content: 'website' },
+        { name: 'theme-color', content: '#033C59' }
+      ],
       link: [
         { rel: 'icon', type: 'image/png', href: '/favicon.png' },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -45,6 +61,14 @@ export default defineNuxtConfig({
           manifest[key]!.preload = false
         }
       }
+    }
+  },
+
+  // Static output (`nuxt generate`) still emits the server-rendered sitemap
+  // and robots files.
+  nitro: {
+    prerender: {
+      routes: ['/sitemap.xml', '/robots.txt']
     }
   },
 

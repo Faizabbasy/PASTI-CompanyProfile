@@ -6,6 +6,8 @@
 // linking into /work) → Why PASTI (vision, standards, milestones). The global
 // footer carries the CTA. Copy: useTechnology, usePlatforms, useFeaturedCases.
 const { why } = useTechnology()
+
+usePageSeo(pageSeo.technology)
 </script>
 
 <template>

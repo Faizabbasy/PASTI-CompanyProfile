@@ -3,6 +3,8 @@
 // masthead → table of contents with expanding previews + topic filter →
 // full-screen reader sheet → Final CTA. Copy: useInsights (transcribed from
 // each poster).
+
+usePageSeo(pageSeo.insights)
 </script>
 
 <template>

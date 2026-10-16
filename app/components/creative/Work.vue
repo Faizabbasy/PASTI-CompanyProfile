@@ -121,9 +121,20 @@ useGsapContext(() => {
             <span aria-hidden="true" class="block font-display text-[72px] font-extrabold leading-[0.6] text-pastiYellow-500">“</span>
             <blockquote class="mt-4 text-[17px] leading-relaxed text-[color:rgba(255,255,255,0.88)]">{{ work.testimonial.quote }}</blockquote>
           </div>
-          <figcaption class="mt-8 border-t border-[color:rgba(255,255,255,0.14)] pt-5">
-            <p class="font-display text-[17px] font-bold">{{ work.testimonial.name }}</p>
-            <p class="mt-1 text-[13px] text-[color:rgba(255,255,255,0.6)]">{{ work.testimonial.role }}</p>
+          <figcaption class="mt-8 flex items-center gap-4 border-t border-[color:rgba(255,255,255,0.14)] pt-5">
+            <img
+              v-if="work.testimonial.photo"
+              :src="work.testimonial.photo"
+              alt=""
+              width="160"
+              height="160"
+              loading="lazy"
+              class="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-pastiYellow-500 ring-offset-2 ring-offset-slateNavy"
+            >
+            <span>
+              <span class="block font-display text-[17px] font-bold">{{ work.testimonial.name }}</span>
+              <span class="mt-1 block text-[13px] text-[color:rgba(255,255,255,0.6)]">{{ work.testimonial.role }}</span>
+            </span>
           </figcaption>
         </figure>
       </div>

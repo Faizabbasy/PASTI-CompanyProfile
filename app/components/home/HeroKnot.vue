@@ -288,8 +288,10 @@ function init() {
     scrollTimer = setTimeout(() => (scrolling = false), 180)
   }
   if (light) window.addEventListener('scroll', onScroll, { passive: true })
+  // Hero sets data-paused on the ring wrapper once the knot has faded out.
+  const ring = host.closest<HTMLElement>('[data-knot-ring]')
   const tick = (_: number, deltaMs: number) => {
-    if (host.parentElement?.dataset.paused === 'true' || scrolling) return
+    if (ring?.dataset.paused === 'true' || scrolling) return
     acc += Math.min(deltaMs, 100) / 1000
     if (acc < frameStep) return
     const dt = Math.min(acc, 0.1)

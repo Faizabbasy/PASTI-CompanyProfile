@@ -5,6 +5,8 @@
 // standards) → Journey (milestones) → CEO foreword → How we work (brand-guide
 // pillars) → Technology × Creative proof → client logos. Footer carries the
 // CTA. Copy: useAbout + useCompany. Shareholder pages are excluded.
+
+usePageSeo(pageSeo.about)
 </script>
 
 <template>

@@ -19,10 +19,12 @@ if (import.meta.client) {
 // the active card comes to the front, and the full quote on the left follows
 // it. Arrows / card clicks scroll to that voice rather than paging.
 //
-// Brand guardrails (00-brand-guide.md): no portraits — none exist and stock
-// faces are banned (§09, spec "no avatar baseline") — so each card carries a
-// typographic monogram of the client's initials instead. Card excerpts are
-// the opening of the client's own quote, never rewritten copy.
+// Brand guardrails (00-brand-guide.md): stock faces are banned (§09). Real
+// client portraits (owner-supplied 2026-10-16, interim low-res crops until
+// the originals arrive) sit in each ring card's disc — muted until the card
+// is active — beside the active quote's attribution and on the mobile cards;
+// a voice without a photo falls back to an initials monogram. Card excerpts
+// are the opening of the client's own quote, never rewritten copy.
 // Owner-directed: PASTI Yellow marks the voice in focus (active disc, index,
 // rule, orbit arc, heading stroke) — always a state marker, never a fill.
 // Placeholder testimonials (Lorem ipsum) are excluded until real ones exist.
@@ -292,6 +294,15 @@ useGsapContext(() => {
               </blockquote>
               <figcaption ref="attributionRef" class="mt-6 flex items-center gap-4">
                 <span aria-hidden="true" class="h-px w-8 bg-cobalt" />
+                <img
+                  v-if="current.photo"
+                  :key="current.photo"
+                  :src="current.photo"
+                  alt=""
+                  width="160"
+                  height="160"
+                  class="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-pastiYellow-500 ring-offset-2 ring-offset-[#f6f9fb]"
+                >
                 <span>
                   <span class="block font-display text-token-body font-semibold text-slateNavy">{{ current.name }}</span>
                   <span class="block text-body-sm text-[color:rgba(3,60,89,0.65)]">{{ current.role }}</span>
@@ -352,12 +363,22 @@ useGsapContext(() => {
               <LayoutBrandMark surface="light" :height="11" class="opacity-70" />
             </div>
 
-            <!-- Monogram: typographic stand-in for a portrait (none exist). -->
+            <!-- Portrait in the disc (the disc becomes its ring); initials
+                 monogram when no photo exists. -->
             <div class="relative mx-auto mt-4 aspect-square w-[40%]">
               <span aria-hidden="true" class="voice-card__disc absolute inset-0 rounded-full" />
               <span aria-hidden="true" class="absolute -inset-2 rounded-full border border-dashed border-[color:rgba(3,60,89,0.168)]" />
               <span aria-hidden="true" class="voice-card__halo absolute -inset-3.5 rounded-full border-2 border-transparent" />
-              <span class="relative flex h-full w-full items-center justify-center font-display text-[clamp(28px,2.6vw,44px)] font-bold tracking-[-0.03em] text-slateNavy voice-card__initials">{{ initials(v.name) }}</span>
+              <img
+                v-if="v.photo"
+                :src="v.photo"
+                alt=""
+                width="160"
+                height="160"
+                loading="lazy"
+                class="voice-card__photo absolute inset-[4px] h-[calc(100%-8px)] w-[calc(100%-8px)] rounded-full object-cover"
+              >
+              <span v-else class="relative flex h-full w-full items-center justify-center font-display text-[clamp(28px,2.6vw,44px)] font-bold tracking-[-0.03em] text-slateNavy voice-card__initials">{{ initials(v.name) }}</span>
             </div>
 
             <p class="mt-6 line-clamp-3 font-display text-[length:clamp(14px,1.08vw,17px)] font-medium leading-[1.4] text-slateNavy">“{{ excerpt(v.quote) }}”</p>
@@ -406,7 +427,16 @@ useGsapContext(() => {
           <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-cobalt">{{ String(i + 1).padStart(2, '0') }}</span>
           <LayoutBrandMark surface="light" :height="11" class="opacity-70" />
         </div>
-        <div class="mt-5 flex h-16 w-16 items-center justify-center rounded-full bg-pastiYellow-500 font-display text-xl font-bold text-slateNavy">{{ initials(v.name) }}</div>
+        <img
+          v-if="v.photo"
+          :src="v.photo"
+          alt=""
+          width="160"
+          height="160"
+          loading="lazy"
+          class="mt-5 h-16 w-16 rounded-full object-cover ring-2 ring-pastiYellow-500 ring-offset-2 ring-offset-white"
+        >
+        <div v-else class="mt-5 flex h-16 w-16 items-center justify-center rounded-full bg-pastiYellow-500 font-display text-xl font-bold text-slateNavy">{{ initials(v.name) }}</div>
         <p class="mt-5 text-body-md leading-[1.6] text-[color:rgba(3,60,89,0.95)]">“{{ v.quote }}”</p>
         <div class="mt-auto pt-6">
           <span aria-hidden="true" class="block h-px w-8 bg-pastiYellow-500" />
@@ -465,5 +495,15 @@ useGsapContext(() => {
 }
 .voice-card__initials {
   transition: color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Portraits stay muted on the ring and come to full colour in focus. */
+.voice-card__photo {
+  filter: grayscale(0.6);
+  opacity: 0.85;
+  transition: filter 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.voice-card[data-active='true'] .voice-card__photo {
+  filter: none;
+  opacity: 1;
 }
 </style>

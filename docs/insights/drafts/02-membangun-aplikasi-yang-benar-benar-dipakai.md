@@ -1,0 +1,105 @@
+# DRAFT — menunggu review owner
+
+| Field | Isi |
+|---|---|
+| Judul | Membangun Aplikasi yang Benar-Benar Dipakai: Catatan dari PowerHours dan HDI Healthy Lifestyle |
+| Slug | `/insights/membangun-aplikasi-yang-benar-benar-dipakai` |
+| Poster / cover | `07 Digital Product & UX` (`/images/insights/digital-product-ux.webp`) |
+| Kategori | Product · Creative |
+| Penulis | **[ISI: nama + jabatan]** |
+| Tanggal terbit | **[ISI]** |
+| Ringkasan (SEO, ±155 karakter) | Aplikasi gagal bukan karena kurang fitur, tapi karena tidak dipakai. Catatan desain dan teknis dari dua aplikasi wellness yang dibangun PASTI. |
+| Perkiraan baca | ±5 menit |
+
+**Catatan untuk reviewer**
+- Data **PowerHours** (tantangan, solusi, timeline ±3,5 bulan, tech stack) diambil dari COMPRO 2025 p.21–22. COMPRO tidak mencantumkan hasil atau angka, jadi draft ini **tidak menyebut hasil apa pun**.
+- Data **HDI Healthy Lifestyle** (konteks, tantangan, kebutuhan klien) diambil dari COMPRO 2025 p.22–24. COMPRO tidak mencantumkan solusi detail maupun hasil, jadi draft hanya membahas tantangan dan kebutuhan.
+- Bagian "Prinsip" dan "Sebelum mulai membangun" adalah **sudut pandang PASTI yang baru ditulis**. Isinya opini, bukan klaim. Mohon dicek.
+- Penyebutan MVP diambil dari deskripsi layanan Mobile App Development & MVP (COMPRO p.33).
+
+---
+
+## Membangun Aplikasi yang Benar-Benar Dipakai
+
+**Banyak aplikasi gagal bukan karena fiturnya kurang, tapi karena tidak dipakai. Diunduh, dibuka sekali atau dua kali, lalu dilupakan.**
+
+Karena itu, pertanyaan terpenting saat membangun produk digital bukan "fitur apa lagi yang bisa ditambahkan?", melainkan *"apa yang membuat orang mau kembali membukanya besok?"*
+
+Dua aplikasi yang dibangun PASTI di bidang kesehatan dan kebugaran memberi gambaran yang jelas tentang pertanyaan ini.
+
+### Dua aplikasi, dua jenis pengguna
+
+**PowerHours** adalah aplikasi kebugaran yang membantu orang konsisten berolahraga, mengakses sesi latihan profesional, dan memantau progres secara real-time. Penggunanya mulai dari individu, komunitas, sampai program *corporate wellness*.
+
+**HDI Healthy Lifestyle** dibangun untuk PT Harmoni Dinamik Indonesia, penyedia tenaga kerja industri yang sangat memperhatikan kesejahteraan karyawannya. Tujuannya mendorong kebiasaan hidup sehat lewat alat bantu digital yang dirancang khusus untuk tenaga kerjanya.
+
+Yang satu untuk masyarakat umum, yang satu untuk karyawan industri. Tantangan keduanya ternyata sangat mirip.
+
+### Tantangan 1: Pengguna datang dengan kemampuan yang berbeda-beda
+
+PowerHours harus punya UI/UX yang **menarik tapi tetap ringan untuk semua level pengguna**, dari pemula sampai yang sudah rutin berlatih. HDI menghadapi tantangan yang lebih spesifik: **mendorong pemakaian harian di kalangan karyawan yang bukan *digital native***.
+
+Di sini terlihat bahwa desain bukan soal tampilan. Setiap layar tambahan, setiap istilah teknis, dan setiap langkah yang membingungkan adalah alasan bagi pengguna untuk berhenti. Untuk PowerHours, jawabannya adalah antarmuka yang berpusat pada pengguna, dengan elemen visual yang memotivasi.
+
+### Tantangan 2: Aplikasi dipakai di kondisi nyata, bukan di kantor developer
+
+Konten utama PowerHours adalah video latihan, dan penggunanya tidak selalu punya koneksi internet yang cepat. Jadi salah satu tantangannya adalah **mengoptimalkan video agar tetap lancar diputar di internet berkecepatan rendah**.
+
+Solusinya teknis tapi penting: **CDN dan kompresi video**, dengan *streaming* HLS lewat Firebase CDN, supaya video tetap lancar diputar. Pengguna tidak pernah melihat bagian ini. Tapi kalau video tersendat, mereka langsung merasakannya dan berhenti.
+
+### Tantangan 3: Kebiasaan dibangun setiap hari, bukan sekali
+
+Kedua aplikasi ini sebenarnya tentang kebiasaan. Untuk HDI, kebutuhan klien mencakup:
+
+- konten edukasi kesehatan fisik dan mental,
+- *self-assessment* kesehatan berkala untuk karyawan,
+- pelacakan aktivitas (minum air, meditasi, olahraga, dan lainnya),
+- rekomendasi yang dipersonalisasi dan pengingat kesehatan harian.
+
+Ada dua tantangan menarik di sini. Yang pertama, **edukasi kesehatan harus disampaikan dengan cara yang menarik dan tidak terlalu formal**. Yang kedua, sistem *self-assessment* harus **sederhana tapi tetap bermakna**.
+
+PowerHours menjawab tantangan kebiasaan dengan **pelacakan progres bawaan, pengingat pintar, dan gamifikasi lewat *leaderboard***. Di belakangnya ada sistem jadwal latihan yang modular, dengan template latihan yang bisa disesuaikan.
+
+### Dari ide ke aplikasi: seperti apa prosesnya
+
+PowerHours dibangun dalam **sekitar 3,5 bulan**:
+
+| Tahap | Durasi |
+|---|---|
+| Discovery & Planning | 1 minggu |
+| UI/UX Design | 2 minggu |
+| Development & QA | 8 minggu |
+| Deployment & Support | 3 minggu |
+
+Teknologinya: **Flutter** untuk Android dan iOS sekaligus, **Node.js + Firebase** di sisi backend, **Firestore + Cloud Storage** untuk data, **HLS lewat Firebase CDN** untuk video, dan **Firebase Cloud Messaging** untuk notifikasi.
+
+Untuk ide yang masih perlu diuji, PASTI juga merancang **Minimum Viable Product (MVP)**: versi paling ramping yang cukup untuk memvalidasi ide bisnis dengan cepat sebelum investasi yang lebih besar.
+
+### Prinsip yang kami pegang
+
+**1. Rancang untuk pengguna yang paling tidak terbiasa.**
+Kalau karyawan yang jarang memakai aplikasi bisa memakainya dengan nyaman, semua orang juga bisa.
+
+**2. Uji di kondisi nyata.**
+Koneksi lambat, ponsel lama, dan waktu yang sempit adalah keadaan normal bagi banyak pengguna, bukan pengecualian.
+
+**3. Kebiasaan lebih penting dari fitur.**
+Pengingat, progres yang terlihat, dan sedikit unsur permainan sering lebih menentukan daripada fitur besar yang jarang dibuka.
+
+**4. Bicara dengan bahasa pengguna.**
+Konten yang terlalu formal membuat orang menjauh. Nada yang tepat adalah bagian dari desain.
+
+### Sebelum mulai membangun, tanyakan ini
+
+- Siapa pengguna yang paling sulit dijangkau, dan apakah desainnya dibuat untuk mereka?
+- Di kondisi seperti apa aplikasi ini akan dipakai: koneksi, perangkat, dan waktu?
+- Apa satu alasan pengguna membuka aplikasi ini setiap hari?
+- Fitur mana yang benar-benar perlu ada di versi pertama, dan mana yang bisa menunggu?
+
+### Penutup
+
+Aplikasi yang baik tidak dinilai dari jumlah fiturnya saat diluncurkan, tapi dari berapa banyak orang yang masih memakainya beberapa bulan kemudian.
+
+Sedang merencanakan aplikasi atau MVP? **[Ceritakan idenya ke PASTI → /contact]**
+
+*Lihat proyeknya: [PowerHours](/work#case-powerhours) · [HDI Healthy Lifestyle](/work#case-hdi)*

@@ -206,7 +206,11 @@ useGsapContext(() => {
           </h2>
         </div>
         <div class="m-stack flex items-end gap-5 desktop:col-span-4 desktop:justify-end">
-          <span ref="countRef" class="font-display text-[clamp(64px,7vw,112px)] font-extrabold leading-[0.8] tracking-[-0.05em] text-slateNavy">{{ String(clients.length).padStart(2, '0') }}</span>
+          <!-- "+" (owner 2026-10-16: "28+") sits outside countRef so the
+               count-up never overwrites it. -->
+          <span class="font-display text-[clamp(64px,7vw,112px)] font-extrabold leading-[0.8] tracking-[-0.05em] text-slateNavy" :aria-label="`${clients.length}+`">
+            <span ref="countRef" aria-hidden="true">{{ String(clients.length).padStart(2, '0') }}</span><span aria-hidden="true" class="text-pastiYellow-500">+</span>
+          </span>
           <div class="pb-1 desktop:max-w-[22ch]">
             <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">Clients</p>
             <p class="mt-1.5 text-[14px] leading-snug text-[color:rgba(3,60,89,0.72)]">{{ lede }}</p>
