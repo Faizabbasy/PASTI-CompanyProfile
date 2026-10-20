@@ -15,7 +15,11 @@ export interface NavItem {
    * accordion in the mobile menu. `to` is then only a key — the group has
    * no page of its own. */
   children?: NavChild[]
+  /** Small caps title above the dropdown list, e.g. "Our Frameworks". */
+  heading?: string
 }
+
+export type NavIconName = 'technology' | 'creative' | 'open' | 'shiftly' | 'ecorp' | 'fast' | 'dora' | 'matrix'
 
 export interface NavChild {
   label: string
@@ -23,6 +27,10 @@ export interface NavChild {
   /** One existing line about the page (its hero headline or product tagline). */
   description: string
   isPlatform?: boolean
+  /** Built but not public yet — filtered out of the bar and mobile menu. */
+  hidden?: boolean
+  /** Line icon on the dropdown tile (LayoutNavIcon). */
+  icon: NavIconName
 }
 
 /**
@@ -42,20 +50,30 @@ export function useNavigation() {
     {
       label: 'Services',
       to: '#services',
+      heading: 'Our Services',
       children: [
-        { label: 'Technology', to: '/technology', description: 'Technology built to move business forward.' },
-        { label: 'Creative', to: '/creative', description: 'Creative that gets business results.' }
+        { label: 'Technology', to: '/technology', description: 'Technology built to move business forward.', icon: 'technology' },
+        { label: 'Creative', to: '/creative', description: 'Creative that gets business results.', icon: 'creative' }
       ]
     },
     {
-      label: 'Platforms',
-      to: '#platforms',
+      // Bar label renamed "Frameworks" (owner 2026-10-19); the homepage /
+      // footer / technology sections still say "Platforms".
+      label: 'Frameworks',
+      to: '#frameworks',
       isPlatform: true,
+      heading: 'Our Frameworks',
+      // Descriptions follow the owner's dropdown reference (2026-10-19).
       children: [
-        { label: 'OPEN', to: '/open', description: 'Customizable Procurement Ecosystem', isPlatform: true },
-        { label: 'SHIFTLY', to: '/shiftly', description: 'Modern HRIS & Workforce Platform', isPlatform: true },
-        { label: 'e-CORPORATE', to: '/e-corporate', description: 'Enterprise Digital Platform', isPlatform: true }
-      ]
+        { label: 'OPEN', to: '/open', description: 'Customizable Procurement Framework', isPlatform: true, icon: 'open' },
+        { label: 'SHIFTLY', to: '/shiftly', description: 'Customizable Human Capital Framework', isPlatform: true, icon: 'shiftly' },
+        { label: 'e-CORPORATE', to: '/e-corporate', description: 'Customizable Enterprise Management Framework', isPlatform: true, icon: 'ecorp' },
+        // FAST and DORA published by the owner on 2026-10-19.
+        { label: 'FAST', to: '/fast', description: 'Flexible Production Planning & Scheduling Framework', isPlatform: true, icon: 'fast' },
+        { label: 'DORA', to: '/dora', description: 'Document Recognition & Analysis', isPlatform: true, icon: 'dora' },
+        // MATRIX published at launch (owner 2026-10-19, docs/matrix/00).
+        { label: 'MATRIX', to: '/matrix', description: 'Integrated Inventory & Material Management', isPlatform: true, icon: 'matrix' }
+      ].filter((c) => !c.hidden)
     },
     { label: 'Work', to: '/work' },
     { label: 'About', to: '/about' },

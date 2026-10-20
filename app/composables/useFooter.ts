@@ -40,7 +40,10 @@ export function useFooter() {
   const platformLinks: FooterLink[] = [
     { label: 'OPEN', to: '/open' },
     { label: 'SHIFTLY', to: '/shiftly' },
-    { label: 'e-CORPORATE', to: '/e-corporate' }
+    { label: 'e-CORPORATE', to: '/e-corporate' },
+    { label: 'FAST', to: '/fast' },
+    { label: 'DORA', to: '/dora' },
+    { label: 'MATRIX', to: '/matrix' }
   ]
 
   // Service links: labels are the real service titles (useServices); each

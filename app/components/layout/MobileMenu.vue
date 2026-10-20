@@ -13,7 +13,7 @@ const { isOpen: open, close } = useMobileMenu()
 const route = useRoute()
 const listRef = ref<HTMLElement | null>(null)
 
-// Groups (Services / Platforms, 2026-10-16) are accordions; the group that
+// Groups (Services / Frameworks, 2026-10-16) are accordions; the group that
 // holds the current page starts expanded each time the menu opens.
 const expanded = ref<string[]>([])
 const isExpanded = (label: string) => expanded.value.includes(label)
@@ -109,23 +109,31 @@ onBeforeUnmount(() => {
                   :class="isExpanded(item.label) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
                   :inert="!isExpanded(item.label) || undefined"
                 >
-                  <ul class="min-h-0 overflow-hidden">
-                    <li v-for="c in item.children" :key="c.to" class="pb-2 last:pb-4">
-                      <NuxtLink
-                        :to="c.to"
-                        :aria-current="route.path === c.to ? 'page' : undefined"
-                        class="flex min-h-[56px] items-start gap-3 rounded-[14px] px-3 py-3 transition-colors duration-300 active:bg-[color:rgba(3,60,89,0.06)]"
-                        :class="{ 'bg-[color:rgba(3,60,89,0.05)]': route.path === c.to }"
-                        @click="close()"
-                      >
-                        <span aria-hidden="true" class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full" :class="route.path === c.to || c.isPlatform ? 'bg-pastiYellow-500' : 'bg-[color:rgba(3,60,89,0.25)]'" />
-                        <span>
-                          <span class="block font-display text-[19px] font-bold tracking-[-0.01em] text-slateNavy">{{ c.label }}</span>
-                          <span class="mt-0.5 block text-[14px] leading-snug text-[color:rgba(3,60,89,0.65)]">{{ c.description }}</span>
-                        </span>
-                      </NuxtLink>
-                    </li>
-                  </ul>
+                  <div class="min-h-0 overflow-hidden">
+                    <p v-if="item.heading" class="px-1 pb-2 pt-1 font-display text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">{{ item.heading }}</p>
+                    <ul class="pb-3">
+                      <li v-for="c in item.children" :key="c.to">
+                        <NuxtLink
+                          :to="c.to"
+                          :aria-current="route.path === c.to ? 'page' : undefined"
+                          class="grid min-h-[64px] grid-cols-[2.75rem_1fr_auto] items-center gap-x-3.5 rounded-[14px] px-1 py-2 transition-colors duration-300 active:bg-[color:rgba(3,60,89,0.06)]"
+                          :class="{ 'bg-[color:rgba(3,60,89,0.05)]': route.path === c.to }"
+                          @click="close()"
+                        >
+                          <span aria-hidden="true" class="grid h-11 w-11 place-items-center rounded-[11px]" :class="route.path === c.to ? 'bg-pastiYellow-500 text-slateNavy' : 'bg-slateNavy text-pureWhite'">
+                            <LayoutNavIcon :name="c.icon" class="h-5 w-5" />
+                          </span>
+                          <span class="min-w-0">
+                            <span class="block font-display text-[17px] font-bold tracking-[-0.01em] text-slateNavy">{{ c.label }}</span>
+                            <span class="mt-0.5 block text-[13.5px] leading-snug text-[color:rgba(3,60,89,0.62)]">{{ c.description }}</span>
+                          </span>
+                          <span aria-hidden="true" class="grid h-9 w-9 place-items-center rounded-full border border-[color:rgba(3,60,89,0.14)] text-slateNavy">
+                            <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+                          </span>
+                        </NuxtLink>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </template>
               <component
@@ -161,7 +169,9 @@ onBeforeUnmount(() => {
 .m-nav-collapse {
   transition: grid-template-rows 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
-:global(html[data-reduced-motion='true']) .m-nav-collapse {
+/* Plain selector, not :global(html…) — scoped CSS drops whatever follows
+   :global(), which moved this rule onto <html> itself. */
+html[data-reduced-motion='true'] .m-nav-collapse {
   transition: none;
 }
 </style>

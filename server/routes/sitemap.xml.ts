@@ -1,6 +1,6 @@
 // /sitemap.xml — every public page, on the production origin
 // (runtimeConfig.public.siteUrl). Add new routes here when a page ships.
-const routes = ['/', '/about', '/work', '/creative', '/technology', '/insights', '/contact', '/open', '/e-corporate', '/shiftly']
+const routes = ['/', '/about', '/work', '/creative', '/technology', '/insights', '/contact', '/open', '/e-corporate', '/shiftly', '/fast', '/dora', '/matrix']
 
 export default defineEventHandler((event) => {
   const base = useRuntimeConfig(event).public.siteUrl.replace(/\/+$/, '')

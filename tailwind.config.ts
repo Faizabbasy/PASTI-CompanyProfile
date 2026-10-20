@@ -124,6 +124,13 @@ export default <Partial<Config>>{
         // former Cobalt/Cyan accents now alias the brand blue / PASTI Yellow.
         cobalt: '#033C59',
         cyan: '#FBBA00',
+        // DORA product signal (owner 2026-10-19, docs/dora/00). Scoped to
+        // /dora: DEFAULT on dark surfaces only (markers, scan line, status),
+        // `deep` for non-text strokes on white paper. Never text on white.
+        doraCyan: {
+          DEFAULT: '#1FD6EE',
+          deep: '#0A7F93'
+        },
         // Yellow: exact production HEX is PENDING_MASTER_LOGO_SAMPLE per
         // tokens.json — do not guess the official brand value. This is the
         // same placeholder scale already in the codebase, kept only so

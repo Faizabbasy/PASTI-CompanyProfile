@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { NavItem } from '~/composables/useNavigation'
 
-// Desktop nav group (2026-10-16): "Services" / "Platforms" as a trigger that
-// matches LayoutNavLink, opening a small panel of child pages. Opens on hover
+// Desktop nav group (2026-10-16): "Services" / "Frameworks" as a trigger that
+// matches LayoutNavLink, opening a panel of child pages (icon tile, name,
+// description, arrow — owner reference 2026-10-19). Opens on hover
 // (with a short grace period so the pointer can travel into the panel), on
 // click, and from the keyboard; Escape, focus leaving the group, a route
 // change or opening the other group closes it. One group open at a time
@@ -89,18 +90,21 @@ onBeforeUnmount(() => clearTimeout(closeTimer))
       enter-from-class="nav-panel-hidden"
       leave-to-class="nav-panel-hidden"
     >
-      <!-- pt-3 is the hover bridge between trigger and card. -->
-      <div v-show="isOpen" :id="`${id}-panel`" class="absolute left-1/2 top-full z-50 w-[22rem] -translate-x-1/2 pt-3">
-        <div class="overflow-hidden rounded-[20px] border border-[color:rgba(3,60,89,0.1)] bg-pureWhite p-2 shadow-[0_30px_60px_-30px_rgba(3,60,89,0.45)]">
-          <div class="flex items-center justify-between px-3 pb-2 pt-2">
-            <span class="font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">{{ item.label }}</span>
+      <!-- pt-3 is the hover bridge between trigger and card. Layout follows
+           the owner's dropdown reference (2026-10-19): small-caps heading,
+           then rows of navy icon tile · name + description · arrow disc. -->
+      <div v-show="isOpen" :id="`${id}-panel`" class="absolute left-1/2 top-full z-50 w-[33rem] -translate-x-1/2 pt-3">
+        <div class="overflow-hidden rounded-[22px] border border-[color:rgba(3,60,89,0.1)] bg-pureWhite p-2.5 shadow-[0_30px_60px_-30px_rgba(3,60,89,0.45)]">
+          <div class="flex items-center justify-between px-3 pb-1.5 pt-2.5">
+            <span class="font-display text-[11.5px] font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">{{ item.heading ?? item.label }}</span>
             <LayoutBrandMark surface="light" :height="10" class="opacity-70" />
           </div>
           <ul>
             <li v-for="c in item.children" :key="c.to">
               <NuxtLink
                 :to="c.to"
-                class="nav-panel-row group/row grid grid-cols-[0.75rem_1fr_auto] items-center gap-x-3 rounded-[14px] px-3 py-3 transition-colors duration-300 ease-editorial hover:bg-[color:rgba(3,60,89,0.045)] focus-visible:bg-[color:rgba(3,60,89,0.045)] focus-visible:outline-none"
+                class="nav-panel-row group/row grid grid-cols-[3rem_1fr_auto] items-center gap-x-4 rounded-[16px] px-3 py-2.5 transition-colors duration-300 ease-editorial hover:bg-[color:rgba(3,60,89,0.045)] focus-visible:bg-[color:rgba(3,60,89,0.045)] focus-visible:outline-none"
+                :class="{ 'bg-[color:rgba(3,60,89,0.045)]': route.path === c.to }"
                 :aria-current="route.path === c.to ? 'page' : undefined"
                 @click="close"
                 @mouseenter="setState('link')"
@@ -108,15 +112,17 @@ onBeforeUnmount(() => clearTimeout(closeTimer))
               >
                 <span
                   aria-hidden="true"
-                  class="h-1.5 w-1.5 rounded-full transition-colors duration-300"
-                  :class="route.path === c.to || c.isPlatform ? 'bg-pastiYellow-500' : 'bg-[color:rgba(3,60,89,0.25)] group-hover/row:bg-pastiYellow-500'"
-                />
-                <span class="min-w-0">
-                  <span class="block font-display text-[15px] font-bold tracking-[-0.01em] text-slateNavy">{{ c.label }}</span>
-                  <span class="mt-0.5 block text-[13px] leading-snug text-[color:rgba(3,60,89,0.65)]">{{ c.description }}</span>
+                  class="grid h-12 w-12 place-items-center rounded-[12px] transition-colors duration-300 ease-editorial"
+                  :class="route.path === c.to ? 'bg-pastiYellow-500 text-slateNavy' : 'bg-slateNavy text-pureWhite group-hover/row:bg-pastiYellow-500 group-hover/row:text-slateNavy'"
+                >
+                  <LayoutNavIcon :name="c.icon" class="h-[22px] w-[22px]" />
                 </span>
-                <span aria-hidden="true" class="grid h-8 w-8 place-items-center rounded-full border border-[color:rgba(3,60,89,0.14)] text-slateNavy transition-[background-color,border-color,transform] duration-500 ease-editorial group-hover/row:-rotate-45 group-hover/row:border-pastiYellow-500 group-hover/row:bg-pastiYellow-500">
-                  <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+                <span class="min-w-0">
+                  <span class="block font-display text-[16px] font-bold tracking-[-0.01em] text-slateNavy">{{ c.label }}</span>
+                  <span class="mt-0.5 block text-[13.5px] leading-snug text-[color:rgba(3,60,89,0.62)]">{{ c.description }}</span>
+                </span>
+                <span aria-hidden="true" class="grid h-10 w-10 place-items-center rounded-full border border-[color:rgba(3,60,89,0.14)] text-slateNavy transition-[background-color,border-color,transform] duration-500 ease-editorial group-hover/row:-rotate-45 group-hover/row:border-pastiYellow-500 group-hover/row:bg-pastiYellow-500">
+                  <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
                 </span>
               </NuxtLink>
             </li>
@@ -137,7 +143,9 @@ onBeforeUnmount(() => clearTimeout(closeTimer))
   opacity: 0;
   transform: translate(-50%, -6px);
 }
-:global(html[data-reduced-motion='true']) .nav-panel-hidden {
+/* Plain selector, not :global(html…) — scoped CSS drops whatever follows
+   :global(), which moved this rule onto <html> itself. */
+html[data-reduced-motion='true'] .nav-panel-hidden {
   transform: translate(-50%, 0);
 }
 </style>
