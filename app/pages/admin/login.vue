@@ -80,7 +80,8 @@ const countdown = computed(() => {
         <span class="rounded bg-navy-50 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-navy-600">CMS</span>
       </div>
 
-      <form class="rounded-lg border border-navy-100 bg-white p-6 shadow-sm" novalidate @submit.prevent="onSubmit">
+      <!-- method="post": a submit before hydration must never put the password in the URL -->
+      <form class="rounded-lg border border-navy-100 bg-white p-6 shadow-sm" method="post" novalidate @submit.prevent="onSubmit">
         <h1 class="text-xl font-bold">Sign in</h1>
         <p class="mt-1 text-sm text-navy-500">Internal access only.</p>
 

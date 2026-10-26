@@ -133,7 +133,7 @@ const fieldRows = [
 
           <fieldset class="grid gap-4">
             <legend class="text-sm font-semibold">Contact-page labels</legend>
-            <p class="-mt-2 text-xs text-navy-500">Wording around the shared values above. Each row links to WhatsApp, email or Google Maps — the destinations come from the shared data.</p>
+            <p class="text-xs text-navy-500">Wording around the shared values above. Each row links to WhatsApp, email or Google Maps — the destinations come from the shared data.</p>
             <div v-for="row in channelRows" :key="row.key" class="grid gap-3 rounded-md border border-navy-100 p-3 tablet:grid-cols-2">
               <AdminFormField :id="fieldId(`channels.${row.key}.label`)" v-model="form.channels[row.key].label" :label="`${row.name} · label`" :maxlength="LIM.channelLabel" required :error="err(`channels.${row.key}.label`)" />
               <AdminFormField :id="fieldId(`channels.${row.key}.action`)" v-model="form.channels[row.key].action" :label="`${row.name} · link text`" :maxlength="LIM.channelAction" required :error="err(`channels.${row.key}.action`)" />
@@ -148,7 +148,7 @@ const fieldRows = [
 
           <fieldset class="grid gap-3">
             <legend class="text-sm font-semibold">Field labels</legend>
-            <p class="-mt-1 text-xs text-navy-500">
+            <p class="text-xs text-navy-500">
               Labels and optional placeholders for the existing fields. Field order, input types, which fields are required and
               the validation messages are fixed in code (front end and hand-off stay consistent).
             </p>
@@ -169,7 +169,7 @@ const fieldRows = [
 
           <fieldset class="grid gap-4">
             <legend class="text-sm font-semibold">After submit</legend>
-            <p class="-mt-2 text-xs text-navy-500">The code decides which state shows: success when WhatsApp opened with the brief, failure when the browser blocked it.</p>
+            <p class="text-xs text-navy-500">The code decides which state shows: success when WhatsApp opened with the brief, failure when the browser blocked it.</p>
             <AdminFormField :id="fieldId('form.successTitle')" v-model="form.form.successTitle" label="Success title" :maxlength="LIM.stateTitle" required :error="err('form.successTitle')" />
             <AdminFormField :id="fieldId('form.successMessage')" v-model="form.form.successMessage" label="Success message" multiline :rows="2" :maxlength="LIM.stateMessage" required :error="err('form.successMessage')" />
             <AdminFormField :id="fieldId('form.errorTitle')" v-model="form.form.errorTitle" label="Failure title" :maxlength="LIM.stateTitle" required :error="err('form.errorTitle')" />

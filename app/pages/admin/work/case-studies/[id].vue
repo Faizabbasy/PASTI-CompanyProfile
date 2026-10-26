@@ -192,7 +192,7 @@ const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin
         <div v-show="activeTab === 'delivery'" id="panel-delivery" role="tabpanel" aria-labelledby="tab-delivery" class="grid gap-5">
           <fieldset class="grid gap-3">
             <legend class="text-sm font-medium">Delivery timeline (optional)</legend>
-            <p class="-mt-1 text-xs text-navy-500">A project fact, not a performance claim. Leave empty if the source gives no timeline — never estimate.</p>
+            <p class="text-xs text-navy-500">A project fact, not a performance claim. Leave empty if the source gives no timeline — never estimate.</p>
             <AdminFormField :id="fieldId('timeline.total')" v-model="form.timeline.total" label="Total" :maxlength="LIM.timelineTotal" placeholder="e.g. ~3.5 months" :error="err('timeline.total')" />
             <p v-if="err('timeline.steps')" class="text-xs font-medium text-red-700" role="alert">{{ err('timeline.steps') }}</p>
             <div v-for="(s, k) in form.timeline.steps" :key="k" class="grid gap-3 rounded-md border border-navy-100 p-3 tablet:grid-cols-[1fr_120px_auto]">

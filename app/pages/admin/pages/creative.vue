@@ -123,7 +123,7 @@ const company = useCompany()
           </div>
           <fieldset class="grid gap-4">
             <legend class="text-sm font-medium">Headline — two lines</legend>
-            <p class="-mt-2 text-xs text-navy-500">Each word animates in. The last word of line 2 is outlined and the period is added by the design.</p>
+            <p class="text-xs text-navy-500">Each word animates in. The last word of line 2 is outlined and the period is added by the design.</p>
             <AdminFormField :id="fieldId('hero.headlineLine1')" v-model="form.hero.headlineLine1" label="Line 1" :maxlength="LIM.headlineLine" required :error="err('hero.headlineLine1')" />
             <AdminFormField :id="fieldId('hero.headlineLine2')" v-model="form.hero.headlineLine2" label="Line 2 (last word outlined)" :maxlength="LIM.headlineLine" required :error="err('hero.headlineLine2')" />
           </fieldset>

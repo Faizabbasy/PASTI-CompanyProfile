@@ -44,7 +44,7 @@ function moveCategory(i: number, d: number) {
       </div>
       <fieldset class="grid gap-3">
         <legend class="text-sm font-medium">Display headline</legend>
-        <p class="-mt-2 text-xs text-navy-500">The accent part renders in yellow after the main text.</p>
+        <p class="text-xs text-navy-500">The accent part renders in yellow after the main text.</p>
         <div class="grid gap-4 tablet:grid-cols-2">
           <AdminFormField :id="fieldId('headline.text')" v-model="form.headline.text" label="Headline" :maxlength="LIM.headline" required :error="err('headline.text')" />
           <AdminFormField :id="fieldId('headline.accent')" v-model="form.headline.accent" label="Accent (optional)" :maxlength="LIM.accent" :error="err('headline.accent')" />

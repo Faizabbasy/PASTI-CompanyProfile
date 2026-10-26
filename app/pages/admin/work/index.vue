@@ -108,7 +108,7 @@ const unpublishedSelected = computed(() => {
           <AdminFormField :id="fieldId('hero.eyebrow')" v-model="form.hero.eyebrow" label="Eyebrow" :maxlength="LIM.heroEyebrow" required hint="Hero marker label; the project / case-study counts next to it are automatic." :error="err('hero.eyebrow')" />
           <fieldset class="grid gap-4">
             <legend class="text-sm font-medium">Headline — two lines</legend>
-            <p class="-mt-2 text-xs text-navy-500">Each line is one animated line of the display headline. The yellow period after line 2 is added by the design.</p>
+            <p class="text-xs text-navy-500">Each line is one animated line of the display headline. The yellow period after line 2 is added by the design.</p>
             <div class="grid gap-4 tablet:grid-cols-2">
               <AdminFormField :id="fieldId('hero.headlineLine1')" v-model="form.hero.headlineLine1" label="Line 1" :maxlength="LIM.headlineLine" required :error="err('hero.headlineLine1')" />
               <AdminFormField :id="fieldId('hero.headlineLine2')" v-model="form.hero.headlineLine2" label="Line 2" :maxlength="LIM.headlineLine" required :error="err('hero.headlineLine2')" />
