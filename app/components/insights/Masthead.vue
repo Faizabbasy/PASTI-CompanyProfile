@@ -8,12 +8,10 @@ import gsap from 'gsap'
 // poster to poster and pans with the pointer, so the masthead itself is a
 // window onto the issue. A navy outline keeps it legible at all times.
 // Reduced motion: one static fill.
-const { articles } = useInsights()
+const { hero, contents: { articles, topics } } = useInsightsPage()
 const count = articles.length
-const topics = Array.from(new Set(articles.map((a) => a.page?.topic).filter(Boolean)))
 const pad = (n: number) => String(n).padStart(2, '0')
 
-const { link: whatsappLink } = useWhatsapp()
 const toContents = () => {
   const el = document.getElementById('insights-contents')
   if (!el) return
@@ -60,29 +58,29 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10 w-full">
       <div class="grid items-center gap-14 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-7">
-          <div data-im-fade><BaseHeroMarker label="The PASTI Journal" :meta="`${pad(count)} articles · ${pad(topics.length)} topics`" /></div>
+          <div data-im-fade><BaseHeroMarker :label="hero.eyebrow" :meta="`${pad(count)} articles · ${pad(topics.length)} topics`" /></div>
 
-          <h1 class="hero-title hero-title--word im-mask relative mt-6 select-none desktop:mt-[3svh]" aria-label="Insights">
+          <h1 class="hero-title hero-title--word im-mask relative mt-6 select-none desktop:mt-[3svh]" :aria-label="hero.headline">
             <span data-im-word class="relative inline-block" aria-hidden="true">
-              <span class="im-outline block">Insights<span class="text-pastiYellow-500">.</span></span>
+              <span class="im-outline block">{{ hero.headline }}<span class="text-pastiYellow-500">.</span></span>
               <span
                 v-for="(a, i) in articles"
                 :key="a.index"
                 class="im-fill absolute inset-0 block transition-opacity duration-1000 ease-editorial"
                 :class="i === shown ? 'opacity-100' : 'opacity-0'"
                 :style="{ backgroundImage: `linear-gradient(rgba(3,60,89,0.42),rgba(3,60,89,0.42)), url(${a.image})`, backgroundPosition: `0 0, ${55 + pan.x * 0.4}% ${pan.y}%` }"
-              >Insights</span>
+              >{{ hero.headline }}</span>
             </span>
           </h1>
 
           <p data-im-fade class="hero-lede m-center mt-6 desktop:mt-[3svh]">
-            Perspectives on technology, creative, and business — from the work we do with our clients every day.
+            {{ hero.lede }}
           </p>
 
           <div data-im-fade class="mt-8 desktop:mt-[4svh]">
             <BaseHeroCtas
-              :primary="{ label: 'Read the issue' }"
-              :secondary="{ label: 'Tell us about it', href: whatsappLink }"
+              :primary="{ label: hero.primaryCtaLabel }"
+              :secondary="{ label: hero.secondaryCta.label, href: hero.secondaryCta.href }"
               @primary="toContents"
             />
           </div>
@@ -95,7 +93,7 @@ useGsapContext(() => {
               v-for="(a, i) in articles"
               :key="a.index"
               :src="a.image"
-              :alt="i === shown ? a.title : ''"
+              :alt="i === shown ? a.alt : ''"
               draggable="false"
               loading="lazy"
               class="absolute inset-0 h-full w-full rounded-[22px] object-cover object-left shadow-[0_40px_80px_-36px_rgba(3,60,89,0.6)] ring-[5px] ring-pureWhite transition-[opacity,transform] duration-1000 ease-editorial"

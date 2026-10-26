@@ -13,7 +13,10 @@ if (import.meta.client) {
 // sideways with the scroll (each poster drifting inside its frame for depth),
 // with a scrubbed progress line. Touch / tablet / reduced motion: the very
 // same track is a native swipe rail (scroll-snap + BaseSnapControls).
-const { cases: projects } = useTechnology()
+// Content: useTechnologyPage() (legacy code or published CMS, normalized).
+// The eyebrow/title interpolations carry the same spaces the former literal
+// copy rendered, so legacy markup stays byte-identical.
+const { sectionLabel, eyebrow, title, cards: projects } = useTechnologyPage().work
 const { setState } = useCustomCursor()
 
 const stageRef = ref<HTMLElement | null>(null)
@@ -84,17 +87,17 @@ const pad = (n: number) => String(n).padStart(2, '0')
       <BaseGridLines tone="light" />
 
       <BaseContainer class="relative z-10">
-        <BaseSectionMark surface="light" label="Case studies" :meta="`${pad(projects.length)} projects`" />
+        <BaseSectionMark surface="light" :label="sectionLabel" :meta="`${pad(projects.length)} projects`" />
         <div class="m-center-row mt-10 flex items-end justify-between gap-8 desktop:mt-8">
           <div class="m-center">
             <div class="overflow-hidden">
               <p data-tw-head class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
-                <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Proof of delivery
+                <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ `${eyebrow} ` }}
               </p>
             </div>
             <div class="mt-3 overflow-hidden pb-1">
               <h2 data-tw-head class="hero-title">
-                Technology case studies<span class="text-pastiYellow-500">.</span>
+                {{ ` ${title}` }}<span class="text-pastiYellow-500">.</span>
               </h2>
             </div>
           </div>

@@ -12,12 +12,12 @@ if (import.meta.client) {
 // house, only a creative agency, or only a consultancy" — brand guide §01).
 // The rings lean toward the pointer on desktop. Proof numbers (owner-verified,
 // shared with the homepage) count up beside it.
-const { positioning, stats, coreEmotion } = useAbout()
+const { positioning, stats, coreEmotion } = useAboutPage().venn
 
 const sectionRef = ref<HTMLElement | null>(null)
 const svgRef = ref<SVGSVGElement | null>(null)
 const statEls = stats.map(() => ref<HTMLElement | null>(null))
-stats.forEach((s, i) => useCountUp(statEls[i]!, { value: s.value, duration: 2 }))
+stats.forEach((s, i) => useCountUp(statEls[i]!, { value: s.value, duration: 2, format: (n) => n.toFixed(s.decimals) }))
 
 // viewBox 0 0 600 400; ring radius 150; apart cx 170/430 → together 245/355.
 const R = 150
@@ -117,7 +117,7 @@ useGsapContext(() => {
           </p>
 
           <dl class="mt-10 grid grid-cols-2 gap-6 border-t border-[color:rgba(255,255,255,0.14)] pt-8">
-            <div v-for="(s, i) in stats" :key="s.label" class="m-center-col flex flex-col-reverse">
+            <div v-for="(s, i) in stats" :key="s.key" class="m-center-col flex flex-col-reverse">
               <dt class="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">{{ s.label }}</dt>
               <dd class="m-center-row flex items-start font-display text-[clamp(48px,5vw,80px)] font-extrabold leading-none tracking-[-0.05em] text-pureWhite">
                 <span :ref="(el) => { statEls[i]!.value = el as HTMLElement | null }">{{ s.value }}</span><span class="text-[0.5em] text-pastiYellow-500">{{ s.suffix }}</span>

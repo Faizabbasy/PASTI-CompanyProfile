@@ -10,16 +10,19 @@ if (import.meta.client) {
 // opens the row (grid-rows) onto its thumbnail + description and slides the
 // title; topic tabs filter the list; clicking a row opens the Reader.
 // Touch: rows are tap-to-read, the first row shows its preview.
-const { articles } = useInsights()
-const topics = ['All', ...Array.from(new Set(articles.map((a) => a.page?.topic).filter(Boolean) as string[]))]
+const { contents } = useInsightsPage()
+const articles = contents.articles
+const topics = ['All', ...contents.topics]
+// CMS articles may sit in several topics; legacy ones have exactly one.
+const inTopic = (a: (typeof articles)[number], t: string) => (a.page?.topics ?? [a.page?.topic]).includes(t)
 const topic = ref('All')
 const hovered = ref<number | null>(null)
 const reading = ref<number | null>(null)
 const listRef = ref<HTMLElement | null>(null)
 const { setState } = useCustomCursor()
 
-const visible = computed(() => articles.map((a, i) => ({ a, i })).filter(({ a }) => topic.value === 'All' || a.page?.topic === topic.value))
-const countFor = (t: string) => (t === 'All' ? articles.length : articles.filter((a) => a.page?.topic === t).length)
+const visible = computed(() => articles.map((a, i) => ({ a, i })).filter(({ a }) => topic.value === 'All' || inTopic(a, topic.value)))
+const countFor = (t: string) => (t === 'All' ? articles.length : articles.filter((a) => inTopic(a, t)).length)
 
 const setTopic = (t: string) => {
   topic.value = t
@@ -49,8 +52,8 @@ useGsapContext(() => {
     <BaseContainer>
       <div class="flex flex-col gap-6 desktop:flex-row desktop:items-end desktop:justify-between">
         <div>
-          <BaseSectionMark surface="light" label="Contents" :meta="`${String(articles.length).padStart(2, '0')} articles`" class="desktop:w-[34rem]" />
-          <h2 class="m-center mt-8 font-display text-[length:clamp(36px,4.6vw,72px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-slateNavy">In this issue<span class="text-pastiYellow-500">.</span></h2>
+          <BaseSectionMark surface="light" :label="contents.sectionLabel" :meta="`${String(articles.length).padStart(2, '0')} articles`" class="desktop:w-[34rem]" />
+          <h2 class="m-center mt-8 font-display text-[length:clamp(36px,4.6vw,72px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-slateNavy">{{ contents.title }}<span class="text-pastiYellow-500">.</span></h2>
         </div>
         <div class="snap-rail -mx-gutter flex gap-2 overflow-x-auto px-gutter desktop:mx-0 desktop:px-0" role="tablist" aria-label="Filter by topic">
           <button

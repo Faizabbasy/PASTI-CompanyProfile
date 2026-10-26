@@ -14,7 +14,7 @@ if (import.meta.client) {
 // COMPRO rebuild 2026-10-07: copy = COMPRO sentences; cards show an interim
 // drawn illustration (CreativeCapArt) instead of project posters, plus the
 // sentence's key terms and "Related work" where COMPRO has a matching case.
-const { servicesEyebrow, servicesHeading, services } = useCreative()
+const { sectionLabel, eyebrow: servicesEyebrow, title: servicesHeading, items: services } = useCreativePage().services
 const active = ref(0)
 const sectionRef = ref<HTMLElement | null>(null)
 const cardRefs = ref<HTMLElement[]>([])
@@ -59,7 +59,7 @@ useGsapContext(() => {
 <template>
   <section id="creative-services" ref="sectionRef" class="surface-light relative py-24 tablet:py-32" style="--lift-x: 10%; --lift-y: 10%">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Services" :meta="`${pad(services.length)} disciplines`" />
+      <BaseSectionMark surface="light" :label="sectionLabel" :meta="`${pad(services.length)} disciplines`" />
 
       <div class="mt-14 grid gap-12 desktop:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <!-- Sticky index -->
@@ -78,7 +78,7 @@ useGsapContext(() => {
             </div>
 
             <ol class="mt-8 hidden desktop:block">
-              <li v-for="(s, i) in services" :key="s.index">
+              <li v-for="(s, i) in services" :key="s.key">
                 <button
                   type="button"
                   class="group flex w-full items-center gap-4 border-t border-[color:rgba(3,60,89,0.12)] py-3.5 text-left"
@@ -98,10 +98,10 @@ useGsapContext(() => {
 
         <!-- Visual cards -->
         <div class="flex flex-col gap-16 desktop:col-span-7 desktop:gap-28">
-          <article v-for="(s, i) in services" :key="s.index" :ref="(el) => { if (el) cardRefs[i] = el as HTMLElement }" class="group/cs">
+          <article v-for="(s, i) in services" :key="s.key" :ref="(el) => { if (el) cardRefs[i] = el as HTMLElement }" class="group/cs">
             <div data-cs-frame class="relative overflow-hidden rounded-[24px] bg-slateNavy desktop:rounded-[28px]" :class="s.image ? '' : 'aspect-[4/5] tablet:aspect-[4/3]'" :style="s.image ? { aspectRatio: `${s.image.w} / ${s.image.h}` } : undefined">
               <!-- Owner visual: shown whole (title + logo are baked in). -->
-              <img v-if="s.image" :src="s.image.src" :alt="`${s.title} — PASTI`" :width="s.image.w" :height="s.image.h" loading="lazy" decoding="async" draggable="false" class="absolute inset-0 h-full w-full object-cover">
+              <img v-if="s.image" :src="s.image.src" :alt="s.imageAlt || `${s.title} — PASTI`" :width="s.image.w" :height="s.image.h" loading="lazy" decoding="async" draggable="false" class="absolute inset-0 h-full w-full object-cover">
               <div v-else data-cs-img class="absolute inset-0 desktop:-top-[8%] desktop:h-[116%]">
                 <CreativeCapArt :art="s.art" :label="s.title" />
               </div>

@@ -7,21 +7,36 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "cms:migrate-about": "node --env-file-if-exists=.env scripts/cms-migrate-about.mjs",
+    "cms:migrate-technology": "node --env-file-if-exists=.env scripts/cms-migrate-technology.mjs",
+    "cms:migrate-creative": "node --env-file-if-exists=.env scripts/cms-migrate-creative.mjs",
+    "cms:migrate-work": "node --env-file-if-exists=.env scripts/cms-migrate-work.mjs",
+    "cms:migrate-insights": "node --env-file-if-exists=.env scripts/cms-migrate-insights.mjs",
+    "cms:migrate-contact": "node --env-file-if-exists=.env scripts/cms-migrate-contact.mjs",
+    "cms:migrate-testimonials": "node --env-file-if-exists=.env scripts/cms-migrate-testimonials.mjs",
+    "cms:db-migrate": "node --env-file-if-exists=.env scripts/cms-db-migrate.mjs",
+    "cms:db-import": "node --env-file-if-exists=.env scripts/cms-db-import.mjs"
   },
   "dependencies": {
     "@types/three": "^0.185.4",
     "gsap": "^3.12.7",
     "lenis": "^1.1.18",
     "nuxt": "^4.5.2",
+    "pg": "^8.13.1",
     "three": "^0.185.1",
     "vue": "^3.5.41",
-    "vue-router": "^5.2.0"
+    "vue-router": "^5.2.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.14.0",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.11.10",
+    "jiti": "^2.7.0",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.9.3",
+    "unstorage": "^1.17.5",
     "vue-tsc": "^3.3.11"
   }
 }

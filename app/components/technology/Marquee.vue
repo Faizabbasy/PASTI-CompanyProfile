@@ -6,8 +6,7 @@ import gsap from 'gsap'
 // scroll velocity (Lenis) accelerates it and flips its direction with the
 // scroll, then it eases back — the page "feels" the scroll. Static rows
 // under reduced motion.
-const { services } = useTechnology()
-const names = services.map((s) => s.title)
+const names = useTechnologyPage().capabilities.items.map((s) => s.title)
 
 const rowRefs = ref<HTMLElement[]>([])
 

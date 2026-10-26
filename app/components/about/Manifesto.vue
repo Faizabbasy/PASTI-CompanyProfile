@@ -11,9 +11,10 @@ if (import.meta.client) {
 // Yellow accent), then the rest of the story beside the company facts
 // (COMPRO p.2), then the five-step method from the brand guide §01 as a
 // timeline whose rail fills and whose nodes light up in sequence.
-const { introHeading, introBody, method, storyMore, company } = useAbout()
+const { story } = useAboutPage()
+const { introHeading, introBody, method, more: storyMore, facts } = story
 
-const accent = new Set(['technology', 'creativity', 'unified', 'scalable', 'measurable'])
+const accent = new Set(story.accentWords)
 const words = introBody.split(' ')
 
 const sectionRef = ref<HTMLElement | null>(null)
@@ -79,7 +80,7 @@ useGsapContext(() => {
           <p v-for="(para, i) in storyMore" :key="i" class="text-token-body-large leading-relaxed text-[color:rgba(3,60,89,0.78)]">{{ para }}</p>
         </div>
         <dl class="grid grid-cols-1 gap-x-6 gap-y-5 tablet:grid-cols-2 desktop:col-span-3 desktop:grid-cols-1">
-          <div v-for="f in company.facts" :key="f.label" class="border-t border-[color:rgba(3,60,89,0.14)] pt-3">
+          <div v-for="f in facts" :key="f.label" class="border-t border-[color:rgba(3,60,89,0.14)] pt-3">
             <dt class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)]">{{ f.label }}</dt>
             <dd class="mt-1 font-display text-[15px] font-semibold leading-snug text-slateNavy">{{ f.value }}</dd>
           </div>

@@ -17,6 +17,10 @@ export interface PageSeo {
   description: string
   /** Share card path under /public, e.g. '/images/og/home.jpg'. */
   image: string
+  /** Absolute canonical URL override (CMS SEO); default = this route on siteUrl. */
+  canonical?: string
+  /** CMS SEO: ask search engines not to index the page. */
+  noIndex?: boolean
 }
 
 export const pageSeo = {
@@ -73,8 +77,10 @@ export function useSiteUrl(path = '/') {
 /** Title, description, share card and canonical URL for the current page. */
 export function usePageSeo(seo: PageSeo) {
   const route = useRoute()
-  const url = useSiteUrl(route.path)
+  const url = seo.canonical || useSiteUrl(route.path)
   const image = useSiteUrl(seo.image)
+
+  if (seo.noIndex) useHead({ meta: [{ name: 'robots', content: 'noindex' }] })
 
   useHead({ link: [{ rel: 'canonical', href: url }] })
   useSeoMeta({

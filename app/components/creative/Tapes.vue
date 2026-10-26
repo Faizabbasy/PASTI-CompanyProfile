@@ -4,8 +4,7 @@ import gsap from 'gsap'
 // Two crossing "tape" marquees (navy + white) carrying the service names —
 // the studio's loud transition out of the yellow hero. They run in opposite
 // directions and speed up with scroll velocity. Static under reduced motion.
-const { services } = useCreative()
-const names = services.map((s) => s.title)
+const names = useCreativePage().services.items.map((s) => s.title)
 const rowRefs = ref<HTMLElement[]>([])
 
 useGsapContext(() => {

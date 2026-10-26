@@ -23,8 +23,11 @@ if (import.meta.client) {
 // chapters settle in (power3/4.out). No autoplay. Reduced motion: static.
 // Deep links (#case-<id>) and the Project Index badges go through
 // useActiveCase().openCase.
-const { publicCases } = useFeaturedCases()
+const { cases } = useWorkPage()
+const publicCases = cases.items
 const { active, openCase } = useActiveCase()
+// The default active case ('powerhours') may not be in a CMS selection.
+if (!publicCases.some((c) => c.id === active.value) && publicCases[0]) active.value = publicCases[0].id
 const pad = (n: number) => String(n).padStart(2, '0')
 
 const sectionRef = ref<HTMLElement | null>(null)
@@ -32,7 +35,7 @@ const headingRef = ref<HTMLElement | null>(null)
 const tabRefs = ref<HTMLElement[]>([])
 
 const activeIndex = computed(() => Math.max(0, publicCases.findIndex((c) => c.id === active.value)))
-const lead = (c: (typeof publicCases)[number]) => approvedVisuals(c)[0] ?? null
+const lead = (c: (typeof publicCases)[number]) => c.visuals[0] ?? null
 
 const reduce = () => import.meta.client && window.matchMedia(reducedMotionQuery.reduce).matches
 const refreshTriggers = () => setTimeout(() => ScrollTrigger.refresh(), 760)
@@ -111,14 +114,14 @@ useGsapContext(() => {
     <span v-for="c in publicCases" :id="`case-${c.id}`" :key="c.id" aria-hidden="true" class="pointer-events-none absolute left-0 top-0" />
 
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="Case studies" :meta="`${pad(publicCases.length)} featured`" />
+      <BaseSectionMark surface="dark" :label="cases.sectionLabel" :meta="`${pad(publicCases.length)} featured`" />
 
       <div class="mt-12 grid gap-6 desktop:mt-16 desktop:grid-cols-12 desktop:items-end desktop:gap-10">
         <h2 ref="headingRef" class="m-center font-display text-[length:clamp(40px,6vw,96px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-pureWhite desktop:col-span-8">
-          Featured <span class="text-pastiYellow-500">case studies.</span>
+          {{ cases.titleLead }} <span class="text-pastiYellow-500">{{ cases.titleAccent }}</span>
         </h2>
         <div class="m-center desktop:col-span-4 desktop:pb-3">
-          <p class="text-token-body-large text-[color:rgba(255,255,255,0.7)]">Real challenges. Practical solutions. Meaningful outcomes.</p>
+          <p class="text-token-body-large text-[color:rgba(255,255,255,0.7)]">{{ cases.supportingCopy }}</p>
           <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">
             <span class="hidden desktop:inline">Select a case</span><span class="desktop:hidden">Swipe &amp; tap a case</span>
           </p>

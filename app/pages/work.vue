@@ -2,9 +2,11 @@
 // /work — portfolio (owner redesign, 2026-10-01). Interactive poster deck
 // hero → filterable project index (Grid ↔ List with GSAP Flip) → Featured
 // Case Studies (2026-10-07, replaced the legacy brief/result case files).
-// Data: useWorkPortfolio + useFeaturedCases.
+// Data: useWorkPage() — legacy code content (useWorkPortfolio +
+// useFeaturedCases) or, when the server flag is on, the published Work CMS.
 
-usePageSeo(pageSeo.work)
+const content = await resolveWorkPageContent()
+usePageSeo(content.value.seo)
 </script>
 
 <template>

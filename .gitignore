@@ -24,7 +24,6 @@ logs
 !.env.example
 
 .vercel
-.env*
 
 # Git worktrees (per-plan isolated workspaces)
 .worktrees

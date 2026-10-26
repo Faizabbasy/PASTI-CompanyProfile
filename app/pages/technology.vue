@@ -5,9 +5,14 @@
 // PASTI's own platforms → Technology case studies (pinned rail / swipe rail,
 // linking into /work) → Why PASTI (vision, standards, milestones). The global
 // footer carries the CTA. Copy: useTechnology, usePlatforms, useFeaturedCases.
+// Why PASTI (company data) and Platforms stay code-managed.
 const { why } = useTechnology()
 
-usePageSeo(pageSeo.technology)
+// Content source is resolved once here (legacy code by default; the
+// published CMS snapshot only when the server-side flag allows it) and read
+// by the Technology sections through useTechnologyPage().
+const content = await resolveTechnologyPageContent()
+usePageSeo(content.value.seo)
 </script>
 
 <template>

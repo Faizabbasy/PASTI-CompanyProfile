@@ -10,7 +10,13 @@ if (import.meta.client && 'scrollRestoration' in window.history) {
   window.scrollTo(0, 0)
 }
 
-useLenis()
+// Admin CMS (/admin/**) renders without any of the public site's chrome,
+// smooth scroll or route curtains. It is only ever entered by a full page
+// load (nothing public links to it) and leaves via external navigation.
+const route = useRoute()
+const isAdmin = computed(() => isAdminPath(route.path))
+
+if (!isAdmin.value) useLenis()
 
 // Page-ready signal for Hero/Header's entrance animations (see
 // usePageReady.ts) — replaces the former Intro-overlay-driven
@@ -80,6 +86,7 @@ const { playCover, playReveal } = useRouteCurtain()
 router.beforeEach(async (to, from) => {
   const isFirstNavigation = from.matched.length === 0
   if (isFirstNavigation || to.path === from.path) return true
+  if (isAdminPath(to.path) || isAdminPath(from.path)) return true
 
   const { playLeave } = useLeaveTransition()
   await Promise.all([playLeave(), playCover()])
@@ -116,7 +123,13 @@ async function onPageAfterEnter() {
 </script>
 
 <template>
-  <div>
+  <div v-if="isAdmin">
+    <NuxtRouteAnnouncer />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </div>
+  <div v-else>
     <NuxtRouteAnnouncer />
     <LayoutAmbientLight />
     <LayoutGrainOverlay />

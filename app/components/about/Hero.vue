@@ -12,15 +12,14 @@ if (import.meta.client) {
 // straightens every letter and aligns the whole field into the precision
 // grid, while "certainty." gets its PASTI Yellow marker. The pointer orders
 // the field locally at any time. Reduced motion: everything already ordered.
-const { eyebrow, promise, essence, positioning, companyName } = useAbout()
+// Content via useAboutPage() (legacy code or published CMS, Step 3). The
+// headline segments stay code-owned: the letter scatter and the two-word
+// marker tail are built around this exact phrase.
+const { hero } = useAboutPage()
+const { eyebrow, promise, essence, positioning, companyName } = hero
 
 // "We turn complexity into certainty." → lead / scrambled word / tail.
-const lead = 'We turn'
-const chaosWord = 'complexity'
-const tail = 'into certainty'
-void promise
-
-const { link: whatsappLink } = useWhatsapp()
+const { lead, animatedWord: chaosWord, tail } = hero
 const toManifesto = () => {
   const el = document.getElementById('about-manifesto')
   if (!el) return
@@ -117,8 +116,8 @@ useGsapContext(() => {
         </h1>
         <div data-ah-fade class="pointer-events-auto mt-8 desktop:mt-[4.5svh]">
           <BaseHeroCtas
-            :primary="{ label: 'Work with us', href: whatsappLink }"
-            :secondary="{ label: 'How PASTI works', down: true }"
+            :primary="hero.primaryCta"
+            :secondary="{ label: hero.secondaryCtaLabel, down: true }"
             @secondary="toManifesto"
           />
         </div>

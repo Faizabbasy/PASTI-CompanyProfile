@@ -15,21 +15,21 @@ if (import.meta.client) {
 // "Case study" badge and a stretched link that scrolls to and opens that
 // case; the others are plain, non-interactive cards — no "View" cursor or
 // arrow promising a detail page that doesn't exist (2026-10-07).
-const { projects, groups } = useWorkPortfolio()
+const { index: { sectionLabel, projects, groups } } = useWorkPage()
 const filter = ref('All')
 const view = ref<'grid' | 'list'>('grid')
 const listRef = ref<HTMLElement | null>(null)
 const { setState } = useCustomCursor()
 const { openCase } = useActiveCase()
 
-// Deep link #work-<index> (e.g. from /technology): scroll the project card
-// into view once the page is scrollable.
+// Deep link #work-<anchor> (e.g. #work-06 from /technology): scroll the
+// project card into view once the page is scrollable.
 let cancelDeepLink: (() => void) | undefined
 onMounted(() => {
-  const m = location.hash.match(/^#work-(\d+)$/)
-  if (!m) return
+  const m = location.hash.match(/^#(work-[a-z0-9-]+)$/)
+  if (!m || m[1] === 'work-index' || m[1] === 'work-cases') return
   cancelDeepLink = whenScrollable(() => {
-    const el = document.getElementById(`work-${m[1]}`)
+    const el = document.getElementById(m[1]!)
     if (!el) return
     const lenis = getLenisInstance()
     const reduce = window.matchMedia(reducedMotionQuery.reduce).matches
@@ -93,7 +93,7 @@ useGsapContext(() => {
 <template>
   <section id="work-index" class="relative bg-pureWhite py-24 tablet:py-32">
     <BaseContainer>
-      <BaseSectionMark surface="light" label="Index" meta="Filter · Grid / List" />
+      <BaseSectionMark surface="light" :label="sectionLabel" meta="Filter · Grid / List" />
 
       <!-- Controls -->
       <div class="mt-12 flex flex-col gap-6 desktop:flex-row desktop:items-center desktop:justify-between">
@@ -133,8 +133,8 @@ useGsapContext(() => {
       <ul ref="listRef" class="mt-12" :class="view === 'grid' ? 'grid gap-x-6 gap-y-14 tablet:grid-cols-2 desktop:grid-cols-3' : 'flex flex-col'">
         <li
           v-for="p in visible"
-          :id="`work-${p.index}`"
-          :key="p.index"
+          :id="p.anchor"
+          :key="p.key"
           data-wi-card
           :data-flip-id="`card-${p.index}`"
           class="group/wi relative"
@@ -149,7 +149,7 @@ useGsapContext(() => {
             class="relative overflow-hidden bg-surfaceNeutral"
             :class="view === 'grid' ? 'aspect-[4/5] rounded-[22px] shadow-[0_40px_70px_-45px_rgba(3,60,89,0.6)]' : 'aspect-[4/5] rounded-[12px] tablet:aspect-[16/10]'"
           >
-            <img :src="p.image" :alt="p.title" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover/wi:scale-[1.04]">
+            <img :src="p.image" :alt="p.alt" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover/wi:scale-[1.04]">
             <span v-if="view === 'grid'" class="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-[color:rgba(3,60,89,0.9)] px-3 py-1.5">
               <LayoutBrandMark :height="9" />
               <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.25)]" />

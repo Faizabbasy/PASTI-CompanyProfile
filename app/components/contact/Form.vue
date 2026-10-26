@@ -6,7 +6,12 @@
 // stops the window, an error state with a direct link.
 // "What do you need?" is a set of toggle chips (thumb-sized, multi-select)
 // built from the real service and platform names (useContact).
+// Wording (title, labels, placeholders, success / failure copy) comes from
+// useContactPage (legacy code or published CMS); everything that decides
+// behaviour — field ids, input types, required state, validation rules and
+// messages, the WhatsApp hand-off — stays here in code.
 const { needs, phone } = useContact()
+const { form: copy } = useContactPage()
 
 type Field = 'name' | 'company' | 'email' | 'phone' | 'message'
 const form = reactive<Record<Field, string>>({ name: '', company: '', email: '', phone: '', message: '' })
@@ -16,11 +21,11 @@ const status = ref<'idle' | 'success' | 'error'>('idle')
 const fallbackUrl = ref('')
 const formRef = ref<HTMLFormElement | null>(null)
 
-const fields: { key: Exclude<Field, 'message'>; label: string; type: string; autocomplete: string; required: boolean }[] = [
-  { key: 'name', label: 'Name', type: 'text', autocomplete: 'name', required: true },
-  { key: 'company', label: 'Company', type: 'text', autocomplete: 'organization', required: true },
-  { key: 'email', label: 'Work email', type: 'email', autocomplete: 'email', required: true },
-  { key: 'phone', label: 'Phone / WhatsApp', type: 'tel', autocomplete: 'tel', required: false }
+const fields: { key: Exclude<Field, 'message'>; type: string; autocomplete: string; required: boolean }[] = [
+  { key: 'name', type: 'text', autocomplete: 'name', required: true },
+  { key: 'company', type: 'text', autocomplete: 'organization', required: true },
+  { key: 'email', type: 'email', autocomplete: 'email', required: true },
+  { key: 'phone', type: 'tel', autocomplete: 'tel', required: false }
 ]
 
 const toggle = (n: string) => {
@@ -72,8 +77,8 @@ const input =
   <div class="relative rounded-[28px] border border-[color:rgba(3,60,89,0.1)] bg-pureWhite p-6 text-slateNavy shadow-[0_40px_80px_-50px_rgba(3,60,89,0.55)] tablet:p-9">
     <div class="flex items-start justify-between gap-4">
       <div>
-        <p id="ct-form-title" class="font-display text-[24px] font-extrabold tracking-[-0.02em]">Tell us about it<span class="text-pastiYellow-500">.</span></p>
-        <p class="mt-1 text-[14px] text-[color:rgba(3,60,89,0.65)]">Fields marked * are required. Your brief opens in WhatsApp, ready to send.</p>
+        <p id="ct-form-title" class="font-display text-[24px] font-extrabold tracking-[-0.02em]">{{ copy.title }}<span class="text-pastiYellow-500">.</span></p>
+        <p class="mt-1 text-[14px] text-[color:rgba(3,60,89,0.65)]">{{ copy.description }}</p>
       </div>
       <LayoutBrandMark surface="light" :height="12" class="mt-2 shrink-0 opacity-80" />
     </div>
@@ -86,11 +91,11 @@ const input =
           <span v-else aria-hidden="true" class="font-display text-[18px] font-bold text-[#C2412D]">!</span>
         </span>
         <p class="font-display text-[20px] font-bold tracking-[-0.01em]">
-          {{ status === 'success' ? 'Your brief is ready in WhatsApp.' : 'WhatsApp didn’t open.' }}
+          {{ status === 'success' ? copy.success.title : copy.error.title }}
         </p>
       </div>
       <p class="mt-3 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.75)]">
-        {{ status === 'success' ? 'Press send in WhatsApp to reach the PASTI team.' : 'Your browser may have blocked the new window. Use the button below to open it.' }}
+        {{ status === 'success' ? copy.success.message : copy.error.message }}
       </p>
       <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
         <a :href="fallbackUrl" target="_blank" rel="noopener noreferrer" class="inline-flex h-12 items-center gap-2 rounded-full bg-slateNavy px-6 font-display text-[15px] font-bold text-pureWhite transition-transform duration-200 active:scale-[0.98]">
@@ -104,12 +109,13 @@ const input =
     <form v-else ref="formRef" novalidate class="mt-7" aria-labelledby="ct-form-title" @submit.prevent="submit">
       <div class="grid gap-x-5 gap-y-5 tablet:grid-cols-2">
         <div v-for="f in fields" :key="f.key">
-          <label :for="`ct-${f.key}`" class="text-[13.5px] font-bold">{{ f.label }}<span v-if="f.required" aria-hidden="true" class="text-[#B25E00]"> *</span></label>
+          <label :for="`ct-${f.key}`" class="text-[13.5px] font-bold">{{ copy.fields[f.key].label }}<span v-if="f.required" aria-hidden="true" class="text-[#B25E00]"> *</span></label>
           <input
             :id="`ct-${f.key}`"
             v-model="form[f.key]"
             :type="f.type"
             :autocomplete="f.autocomplete"
+            :placeholder="copy.fields[f.key].placeholder || undefined"
             :required="f.required"
             :aria-invalid="!!errors[f.key]"
             :aria-describedby="errors[f.key] ? `ct-${f.key}-err` : undefined"
@@ -121,7 +127,7 @@ const input =
       </div>
 
       <fieldset class="mt-6">
-        <legend class="text-[13.5px] font-bold">What do you need? <span class="font-medium text-[color:rgba(3,60,89,0.6)]">Pick any</span></legend>
+        <legend class="text-[13.5px] font-bold">{{ copy.needsLegend }} <span v-if="copy.needsHint" class="font-medium text-[color:rgba(3,60,89,0.6)]">{{ copy.needsHint }}</span></legend>
         <div class="mt-3 flex flex-wrap gap-2">
           <button
             v-for="n in needs"
@@ -138,18 +144,19 @@ const input =
       </fieldset>
 
       <div class="mt-6">
-        <label for="ct-message" class="text-[13.5px] font-bold">Message</label>
+        <label for="ct-message" class="text-[13.5px] font-bold">{{ copy.fields.message.label }}</label>
         <textarea
           id="ct-message"
           v-model="form.message"
           rows="4"
+          :placeholder="copy.fields.message.placeholder || undefined"
           class="mt-2 block w-full resize-none rounded-[12px] border border-[color:rgba(3,60,89,0.18)] px-4 py-3 text-[16px] font-medium text-slateNavy outline-none transition-[border-color,box-shadow] duration-200 focus:border-slateNavy focus:shadow-[0_0_0_4px_rgba(251,186,0,0.35)]"
         />
       </div>
 
       <div class="mt-8 flex flex-col tablet:flex-row">
         <button type="submit" class="group inline-flex h-14 items-center justify-center gap-3 rounded-full bg-slateNavy pl-7 pr-2 font-display text-[16px] font-bold text-pureWhite transition-transform duration-200 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pastiYellow-500">
-          Send via WhatsApp
+          {{ copy.submitLabel }}
           <span class="grid h-10 w-10 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy transition-transform duration-500 ease-editorial group-hover:-rotate-45">
             <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
           </span>

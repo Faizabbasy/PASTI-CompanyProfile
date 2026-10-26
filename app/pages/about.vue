@@ -7,6 +7,11 @@
 // CTA. Copy: useAbout + useCompany. Shareholder pages are excluded.
 
 usePageSeo(pageSeo.about)
+
+// Content source is resolved once here (legacy code by default; the
+// published CMS snapshot only when the server-side flag allows it) and read
+// by every section through useAboutPage(). See useAboutPage.ts.
+await resolveAboutPageContent()
 </script>
 
 <template>

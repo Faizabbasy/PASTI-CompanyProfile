@@ -12,7 +12,10 @@ if (import.meta.client) {
 //    COMPRO pp.18–19 (translated; the simulated results are NOT shown);
 // 2) the Pertamina campaign + the BSI UI/UX testimonial;
 // 3) UI/UX work from the technology projects, linking into /work.
-const { work } = useCreative()
+// Content: useCreativePage() (legacy code or published CMS, normalized).
+// The eyebrow interpolation keeps the trailing space the former literal
+// copy rendered, so legacy markup stays byte-identical.
+const { work } = useCreativePage()
 const f = work.feature
 const sectionRef = ref<HTMLElement | null>(null)
 const { setState } = useCustomCursor()
@@ -34,12 +37,12 @@ useGsapContext(() => {
   <section id="creative-work" ref="sectionRef" class="surface-light relative overflow-hidden py-24 tablet:py-32">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Selected work" meta="Creative" />
+      <BaseSectionMark surface="light" :label="work.sectionLabel" :meta="work.sectionMeta" />
       <div class="m-center mt-14 desktop:mt-20">
         <p data-cwk-item class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
-          <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Proof of craft
+          <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ `${work.eyebrow} ` }}
         </p>
-        <h2 data-cwk-item class="hero-title mt-4">Selected creative work<span class="text-pastiYellow-500">.</span></h2>
+        <h2 data-cwk-item class="hero-title mt-4">{{ work.title }}<span class="text-pastiYellow-500">.</span></h2>
       </div>
 
       <!-- Featured: OCTO performance-marketing strategy -->
@@ -73,7 +76,7 @@ useGsapContext(() => {
           <div data-cwk-item class="mt-8">
             <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">Acquisition funnel</h4>
             <ol class="mt-4 grid gap-2 tablet:grid-cols-4">
-              <li v-for="(s, i) in f.funnel" :key="s.stage" class="relative rounded-[14px] p-4 ring-1 ring-[color:rgba(3,60,89,0.14)]" :class="i === f.funnel.length - 1 ? 'bg-pastiYellow-500 ring-pastiYellow-500' : 'bg-pureWhite'">
+              <li v-for="(s, i) in f.funnel" :key="i" class="relative rounded-[14px] p-4 ring-1 ring-[color:rgba(3,60,89,0.14)]" :class="i === f.funnel.length - 1 ? 'bg-pastiYellow-500 ring-pastiYellow-500' : 'bg-pureWhite'">
                 <span class="font-mono text-[10px] text-[color:rgba(3,60,89,0.5)]">{{ String(i + 1).padStart(2, '0') }}</span>
                 <p class="mt-1 font-display text-[17px] font-bold text-slateNavy">{{ s.stage }}</p>
                 <p class="mt-1.5 text-[13px] leading-snug text-[color:rgba(3,60,89,0.75)]">{{ s.text }}</p>
@@ -142,11 +145,11 @@ useGsapContext(() => {
       <!-- UI/UX & digital experience -->
       <div class="mt-20 desktop:mt-28">
         <div data-cwk-item class="m-center-row flex items-end justify-between gap-6 border-b border-[color:rgba(3,60,89,0.14)] pb-5">
-          <h3 class="font-display text-[clamp(22px,2.2vw,32px)] font-bold tracking-[-0.02em] text-slateNavy">UI/UX &amp; digital experience</h3>
-          <p class="hidden font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.5)] tablet:block">Brand Identity &amp; UI/UX Design</p>
+          <h3 class="font-display text-[clamp(22px,2.2vw,32px)] font-bold tracking-[-0.02em] text-slateNavy">{{ work.uiux.title }}</h3>
+          <p class="hidden font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.5)] tablet:block">{{ work.uiux.label }}</p>
         </div>
         <ul class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 desktop:grid-cols-4 desktop:gap-6">
-          <li v-for="u in work.uiux" :key="u.title" data-cwk-item>
+          <li v-for="u in work.uiux.items" :key="u.title" data-cwk-item>
             <NuxtLink
               :to="u.to"
               class="group block rounded-[18px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slateNavy"

@@ -5,9 +5,12 @@
 // illustrations, related work) → draggable studio wall → selected creative
 // work (OCTO strategy, Pertamina, BSI testimonial, UI/UX) → Why PASTI. The
 // global footer carries the CTA. Copy: useCreative.
-const { why } = useCreative()
-
-usePageSeo(pageSeo.creative)
+//
+// Content source is resolved once here (legacy code by default; the
+// published CMS snapshot only when the server-side flag allows it) and read
+// by the Creative sections through useCreativePage().
+const content = await resolveCreativePageContent()
+usePageSeo(content.value.seo)
 </script>
 
 <template>
@@ -16,5 +19,5 @@ usePageSeo(pageSeo.creative)
   <CreativeServices />
   <CreativeWall />
   <CreativeWork />
-  <BaseWhyPasti :why="why" />
+  <BaseWhyPasti :why="content.why" />
 </template>

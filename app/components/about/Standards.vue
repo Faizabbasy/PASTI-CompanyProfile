@@ -9,7 +9,7 @@ if (import.meta.client) {
 // WHAT WE STAND FOR — the four COMPRO 2025 "Standards We Live By" (p.28).
 // These are PASTI's public values; the brand-guide pillars further down are
 // framed as working principles ("How we work") so the two don't compete.
-const { company } = useAbout()
+const { standards } = useAboutPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
 
@@ -30,7 +30,7 @@ useGsapContext(() => {
   <section ref="sectionRef" class="surface-light relative overflow-hidden py-24 tablet:py-32" style="--lift-x: 85%; --lift-y: 20%">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Standards" :meta="`${pad(company.standards.length)} we live by`" />
+      <BaseSectionMark surface="light" label="Standards" :meta="`${pad(standards.length)} we live by`" />
       <div class="m-center mt-14 desktop:mt-20">
         <p class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
           <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Our values
@@ -40,8 +40,8 @@ useGsapContext(() => {
 
       <ol class="mt-12 grid gap-4 tablet:grid-cols-2 desktop:mt-16 desktop:gap-5">
         <li
-          v-for="(s, i) in company.standards"
-          :key="s.name"
+          v-for="(s, i) in standards"
+          :key="s.key"
           data-st-card
           class="group relative overflow-hidden rounded-[24px] bg-pureWhite p-7 ring-1 ring-[color:rgba(3,60,89,0.1)] transition-[transform,box-shadow] duration-500 ease-editorial hover:-translate-y-1 hover:shadow-[0_30px_60px_-36px_rgba(3,60,89,0.45)] tablet:p-9"
         >

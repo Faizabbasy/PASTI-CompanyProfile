@@ -1,0 +1,107 @@
+import {
+  ArticleContentSchema,
+  CategoryContentSchema,
+  InsightsContentSchema,
+  type ArticleContent,
+  type CategoryContent,
+  type InsightsContent
+} from '#shared/utils/insightsSchema'
+import { keyed, unkeyed, zodFieldErrors, type Keyed } from './useSingletonEditor'
+
+// Form state for the Insights CMS editors (/admin/insights, articles,
+// categories). Editor logic: useSingletonEditor (record endpoints answer the
+// same { state, revision } shape as a singleton page).
+
+// ---- Landing -----------------------------------------------------------------
+
+type ArticlePick = InsightsContent['contents']['items'][number]
+type FilterPick = InsightsContent['filters']['items'][number]
+export type InsightsForm = Omit<InsightsContent, 'contents' | 'filters'> & {
+  contents: Omit<InsightsContent['contents'], 'items'> & { items: Keyed<ArticlePick>[] }
+  filters: { items: Keyed<FilterPick>[] }
+}
+
+export const INSIGHTS_TABS = [
+  { key: 'hero', label: 'Hero', sections: ['hero'] },
+  { key: 'contents', label: 'Issue / Listing', sections: ['contents'] },
+  { key: 'filters', label: 'Topic filters', sections: ['filters'] },
+  { key: 'seo', label: 'SEO', sections: ['seo'] },
+  { key: 'code', label: 'Code-managed', sections: [] }
+] as const
+
+export function toInsightsForm(c: InsightsContent): InsightsForm {
+  const copy = JSON.parse(JSON.stringify(c)) as InsightsContent
+  return { ...copy, contents: { ...copy.contents, items: keyed(copy.contents.items) }, filters: { items: keyed(copy.filters.items) } }
+}
+export function toInsightsPayload(f: InsightsForm) {
+  return { ...f, contents: { ...f.contents, items: unkeyed(f.contents.items) }, filters: { items: unkeyed(f.filters.items) } }
+}
+export const validateInsightsForm = (f: InsightsForm) => zodFieldErrors(InsightsContentSchema.safeParse(toInsightsPayload(f)))
+
+// ---- Article -----------------------------------------------------------------
+
+export type ArticleForm = ArticleContent
+
+export const ARTICLE_TABS = [
+  { key: 'basics', label: 'Basics', sections: ['title', 'slug', 'kicker', 'categoryIds', 'headline', 'tagline'] },
+  { key: 'content', label: 'Content', sections: ['excerpt', 'points', 'perspective'] },
+  { key: 'media', label: 'Media', sections: ['coverImage', 'coverImageAlt', 'coverFocus'] },
+  { key: 'body', label: 'Body (not shown yet)', sections: ['body', 'authorName', 'publishDate'] },
+  { key: 'relations', label: 'Usage', sections: [] }
+] as const
+
+export const emptyArticle = (): ArticleForm => ({
+  title: '',
+  slug: '',
+  kicker: '',
+  categoryIds: [],
+  headline: { text: '', accent: '' },
+  tagline: { text: '', accent: '' },
+  excerpt: '',
+  points: [],
+  coverImage: '',
+  coverImageAlt: '',
+  coverFocus: '70% 40%',
+  perspective: { sourceRef: '', links: [] },
+  authorName: '',
+  publishDate: '',
+  body: []
+})
+export const toArticleForm = (c: ArticleContent): ArticleForm => JSON.parse(JSON.stringify(c))
+export const toArticlePayload = (f: ArticleForm): ArticleContent => JSON.parse(JSON.stringify(f))
+export const validateArticleForm = (f: ArticleForm) => zodFieldErrors(ArticleContentSchema.safeParse(toArticlePayload(f)))
+
+// ---- Category ----------------------------------------------------------------
+
+export type CategoryForm = CategoryContent
+export const CATEGORY_TABS = [{ key: 'details', label: 'Details', sections: ['name', 'slug', 'description', 'active'] }] as const
+export const emptyCategory = (): CategoryForm => ({ name: '', slug: '', description: '', active: true })
+export const toCategoryForm = (c: CategoryContent): CategoryForm => ({ ...c })
+export const toCategoryPayload = (f: CategoryForm) => ({ ...f })
+export const validateCategoryForm = (f: CategoryForm) => zodFieldErrors(CategoryContentSchema.safeParse(toCategoryPayload(f)))
+
+export const PERSPECTIVE_LABELS: Record<string, string> = {
+  'technology:technology-development': 'Technology · Technology Development',
+  'technology:custom-built-ai-solutions': 'Technology · Custom Built AI Solutions',
+  'technology:enterprise-platforms': 'Technology · Enterprise Platforms',
+  'technology:mobile-app-development-mvp': 'Technology · Mobile App Development & MVP',
+  'technology:cybersecurity-compliance-architecture': 'Technology · Cybersecurity & Compliance Architecture',
+  'technology:system-maintenance-sla-support': 'Technology · System Maintenance & SLA Support',
+  'creative:creative-communication': 'Creative · Creative Communication',
+  'creative:integrated-campaign-strategy': 'Creative · Integrated Campaign Strategy',
+  'creative:social-media-playbooks-management': 'Creative · Social Media Playbooks & Management',
+  'creative:vertical-video-development': 'Creative · Vertical Video Development',
+  'creative:production-house-services': 'Creative · Production House Services',
+  'creative:brand-identity-ui-ux-design': 'Creative · Brand Identity & UI/UX Design',
+  'company:vision': 'Company · Vision',
+  'company:founder-quote': 'Company · Founder quote'
+}
+
+export const slugFrom = (s: string) =>
+  s
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+    .replace(/-+$/, '')

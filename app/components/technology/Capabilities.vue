@@ -15,7 +15,7 @@ if (import.meta.client) {
 // tilting with the pointer's horizontal speed and swapping images per row.
 // Touch / small screens: each row is a tappable accordion that opens onto its
 // image and description (first row open), 44px+ targets throughout.
-const { servicesEyebrow, servicesHeading, services } = useTechnology()
+const { eyebrow: servicesEyebrow, title: servicesHeading, items: services } = useTechnologyPage().capabilities
 
 const sectionRef = ref<HTMLElement | null>(null)
 const listRef = ref<HTMLElement | null>(null)
@@ -116,7 +116,7 @@ useGsapContext(() => {
       </div>
 
       <ul ref="listRef" class="mt-12 desktop:mt-16" @mouseleave="hovered = null">
-        <li v-for="(s, i) in services" :key="s.index" data-cap-row class="relative">
+        <li v-for="(s, i) in services" :key="s.key" data-cap-row class="relative">
           <span data-cap-rule aria-hidden="true" class="absolute inset-x-0 top-0 block h-px bg-[color:rgba(3,60,89,0.16)]" />
 
           <!-- Desktop row -->
@@ -173,7 +173,7 @@ useGsapContext(() => {
               <div class="overflow-hidden">
                 <div class="pb-8">
                   <div class="relative aspect-[4/5] overflow-hidden rounded-[18px] border border-[color:rgba(3,60,89,0.12)] bg-slateNavy tablet:aspect-[16/10]">
-                    <img :src="s.image" alt="" loading="lazy" class="h-full w-full object-cover object-top">
+                    <img :src="s.image" :alt="s.imageAlt" loading="lazy" class="h-full w-full object-cover object-top">
                     <span class="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
                       <LayoutBrandMark surface="dark" :height="9" />
                       <span class="font-mono text-[10px] tracking-[0.14em] text-pureWhite">{{ s.index }}</span>
@@ -214,7 +214,7 @@ useGsapContext(() => {
       >
         <img
           v-for="(s, i) in services"
-          :key="s.index"
+          :key="s.key"
           :src="s.image"
           alt=""
           loading="lazy"

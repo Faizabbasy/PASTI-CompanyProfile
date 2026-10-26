@@ -9,8 +9,7 @@ if (import.meta.client) {
 // JOURNEY — the five COMPRO 2025 milestones (p.26) as a timeline. Desktop: a
 // horizontal Signal rail that fills with the scroll and lights each year as
 // it passes. Below desktop: a vertical rail. Reduced motion: fully lit.
-const { company } = useAbout()
-const items = company.milestones
+const items = useAboutPage().milestones
 const sectionRef = ref<HTMLElement | null>(null)
 const lit = ref(-1)
 
@@ -54,7 +53,7 @@ useGsapContext(() => {
       <ol data-jr-list class="relative mt-14 grid desktop:mt-20 desktop:grid-cols-5 desktop:gap-6">
         <span aria-hidden="true" class="absolute bottom-6 left-[11px] top-3 w-px bg-[color:rgba(255,255,255,0.16)] desktop:bottom-auto desktop:left-0 desktop:right-0 desktop:top-[11px] desktop:h-px desktop:w-auto" />
         <span data-jr-rail aria-hidden="true" class="absolute bottom-6 left-[10px] top-3 w-[2px] origin-top bg-pastiYellow-500 desktop:bottom-auto desktop:left-0 desktop:right-0 desktop:top-[10px] desktop:h-[2px] desktop:w-auto desktop:origin-left" />
-        <li v-for="(m, i) in items" :key="m.year" class="relative flex gap-6 pb-12 desktop:block desktop:pb-0">
+        <li v-for="(m, i) in items" :key="m.key" class="relative flex gap-6 pb-12 desktop:block desktop:pb-0">
           <span
             aria-hidden="true"
             class="relative z-10 mt-0.5 block h-6 w-6 shrink-0 rounded-full border-2 transition-[background-color,border-color,transform] duration-500 ease-editorial"

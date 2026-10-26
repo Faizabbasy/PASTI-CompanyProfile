@@ -7,12 +7,13 @@ import gsap from 'gsap'
 // Signal lattice fills the stage; the approved heading sits left as three masked lines with "forward."
 // on the yellow marker; a glass console card types each real service name in
 // turn. Entrance plays on mount.
-const { eyebrow, heading, introBody, services } = useTechnology()
-const { link: whatsappLink } = useWhatsapp()
+// Content: useTechnologyPage() (legacy code or published CMS, normalized).
+const { hero, capabilities } = useTechnologyPage()
+const { eyebrow, lede } = hero
+const services = capabilities.items
 
-// "Technology built to move business forward." → three editorial lines.
-const words = heading.replace(/\.$/, '').split(' ')
-const lines = [words.slice(0, 2), words.slice(2, 5), words.slice(5)]
+// The headline's three editorial lines, each split into masked words.
+const lines = hero.headlineLines.map((l) => l.split(' '))
 
 const rootRef = ref<HTMLElement | null>(null)
 const typedRef = ref<HTMLElement | null>(null)
@@ -111,13 +112,13 @@ useGsapContext(() => {
             </span>
           </h1>
 
-          <p data-th-fade class="hero-lede hero-lede--dark m-center mt-6 desktop:mt-[3svh]">{{ introBody }}</p>
+          <p data-th-fade class="hero-lede hero-lede--dark m-center mt-6 desktop:mt-[3svh]">{{ lede }}</p>
 
           <div data-th-fade class="pointer-events-auto mt-8 desktop:mt-[4svh]">
             <BaseHeroCtas
               surface="dark"
-              :primary="{ label: 'Start a project', href: whatsappLink }"
-              :secondary="{ label: 'Explore capabilities', down: true }"
+              :primary="hero.primaryCta"
+              :secondary="{ label: hero.secondaryCtaLabel, down: true }"
               @secondary="scrollToCapabilities"
             />
           </div>

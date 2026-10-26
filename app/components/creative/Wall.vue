@@ -12,7 +12,11 @@ if (import.meta.client) {
 // the centre of the frame sit larger (lens), so the board reads as depth,
 // not a flat grid. Touch: horizontal drags move the wall, vertical swipes
 // still scroll the page (touch-action: pan-y). Reduced motion: static grid.
-const { visuals } = useCreative()
+// Content: useCreativePage() (legacy code or published CMS, normalized).
+// The title interpolation carries the same spaces the former literal copy
+// rendered, so legacy markup stays byte-identical.
+const wall = useCreativePage().wall
+const visuals = wall.visuals
 const COLS = 4
 const ROWS = 4 // 4 rows so the wrapped board always overfills the frame (no empty bands on phones)
 const tiles = Array.from({ length: COLS * ROWS }, (_, i) => ({ ...visuals[i % visuals.length]!, i }))
@@ -150,11 +154,11 @@ useGsapContext(() => {
 <template>
   <section data-header-theme="dark" class="relative overflow-hidden bg-slateNavy pt-24 text-pureWhite tablet:pt-32">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="Studio wall" :meta="`${String(visuals.length).padStart(2, '0')} visuals`" />
+      <BaseSectionMark surface="dark" :label="wall.sectionLabel" :meta="`${String(visuals.length).padStart(2, '0')} visuals`" />
       <div class="m-stack mt-12 flex flex-wrap items-end justify-between gap-6 desktop:mt-16">
         <div class="overflow-hidden pb-2">
           <h2 data-cw-head class="hero-title hero-title--dark">
-            Made in the <span class="text-pastiYellow-500">studio.</span>
+            {{ ` ${wall.titleLead} ` }}<span class="text-pastiYellow-500">{{ wall.titleAccent }}.</span>
           </h2>
         </div>
         <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">← Drag to explore →</p>

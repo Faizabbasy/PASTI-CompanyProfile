@@ -15,8 +15,76 @@ export default defineNuxtConfig({
   // (useSeo.ts, server/routes). Website per COMPRO 2025 (useCompany); a
   // preview deploy can override it with NUXT_PUBLIC_SITE_URL.
   runtimeConfig: {
+    // Admin CMS (Step 1). Server-only — never exposed to the client bundle.
+    // Every value is overridable via NUXT_CMS_* env vars (see .env.example).
+    cms: {
+      // CMS database (Postgres, e.g. Supabase transaction pooler URL). Set →
+      // every CMS read/write goes to the cms.kv table (server/utils/cms/
+      // storage.ts). Unset → local files in .data/cms, `nuxt dev` only:
+      // production refuses to run the CMS without it unless allowFsStorage.
+      // NUXT_CMS_DATABASE_URL / NUXT_CMS_DATABASE_CA (optional PEM root CA:
+      // set it to verify the server certificate) / NUXT_CMS_ALLOW_FS_STORAGE.
+      databaseUrl: '',
+      databaseCa: '',
+      allowFsStorage: false,
+      sessionSecret: '',
+      trustProxy: false,
+      allowSeed: false,
+      seedAdminPassword: '',
+      seedEditorPassword: '',
+      // Public /about reads the published CMS snapshot only when true
+      // (NUXT_CMS_ABOUT_PUBLIC_ENABLED). Server-only; default false.
+      aboutPublicEnabled: false,
+      // Company-proof numbers stay code-managed until real figures are
+      // approved, even with the flag above on
+      // (NUXT_CMS_ABOUT_PUBLIC_PROOF_ENABLED). Default false.
+      aboutPublicProofEnabled: false,
+      // Public /technology reads the published CMS snapshot only when true
+      // (NUXT_CMS_TECHNOLOGY_PUBLIC_ENABLED). Server-only; default false.
+      technologyPublicEnabled: false,
+      // Public /creative reads the published CMS snapshot only when true
+      // (NUXT_CMS_CREATIVE_PUBLIC_ENABLED). Server-only; default false.
+      creativePublicEnabled: false,
+      // Public /work reads the published Work CMS (page + projects + case
+      // studies) only when true (NUXT_CMS_WORK_PUBLIC_ENABLED). Server-only;
+      // default false.
+      workPublicEnabled: false,
+      // Public /insights reads the published Insights CMS (landing + articles
+      // + categories) only when true (NUXT_CMS_INSIGHTS_PUBLIC_ENABLED).
+      // Server-only; default false. The homepage never reads it.
+      insightsPublicEnabled: false,
+      // Public /contact reads the published Contact CMS snapshot (page
+      // wording only) only when true (NUXT_CMS_CONTACT_PUBLIC_ENABLED).
+      // Server-only; default false. Shared contact data and form behaviour
+      // stay in code either way.
+      contactPublicEnabled: false,
+      // GET /api/public/testimonials serves public-eligible shared
+      // testimonials only when true (NUXT_CMS_TESTIMONIALS_PUBLIC_ENABLED).
+      // Server-only; default false. No page reads it yet — Home and every
+      // other page keep their current testimonial source.
+      testimonialsPublicEnabled: false
+    },
     public: {
       siteUrl: 'https://www.pastipeople.id'
+    }
+  },
+
+  // Admin CMS surfaces are never cached, indexed or framed.
+  routeRules: {
+    '/admin/**': {
+      prerender: false,
+      headers: {
+        'cache-control': 'no-store',
+        'x-robots-tag': 'noindex, nofollow',
+        'x-frame-options': 'DENY',
+        'referrer-policy': 'same-origin'
+      }
+    },
+    '/api/admin/**': {
+      headers: {
+        'cache-control': 'no-store',
+        'x-robots-tag': 'noindex, nofollow'
+      }
     }
   },
 
@@ -69,6 +137,12 @@ export default defineNuxtConfig({
   nitro: {
     prerender: {
       routes: ['/sitemap.xml', '/robots.txt']
+    },
+    // Local-files CMS store, used only when NUXT_CMS_DATABASE_URL is unset
+    // (`nuxt dev`). With a database URL the CMS mounts its Postgres store at
+    // runtime instead (server/utils/cms/storage.ts).
+    storage: {
+      cmsfs: { driver: 'fs', base: './.data/cms' }
     }
   },
 

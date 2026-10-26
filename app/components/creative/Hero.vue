@@ -8,14 +8,15 @@ import gsap from 'gsap'
 // land with a slight tilt and fade out — the page reacts like a sketchbook.
 // The headline breaks into words that each lean away from the pointer.
 // Reduced motion: no trail; a static fan of three visuals instead.
-const { eyebrow, heading, introBody, visuals } = useCreative()
-const { link: whatsappLink } = useWhatsapp()
+// Content: useCreativePage() (legacy code or published CMS, normalized).
+const { hero, wall } = useCreativePage()
+const { eyebrow, lede: introBody } = hero
+const visuals = wall.visuals
 
-const words = heading.replace(/\.$/, '').split(' ')
-// Balanced two-line break (owner 2026-10-08): the last two words start line
-// two — "Creative that gets / business results." — instead of a long first
-// line and a lone outlined word.
-const breakAt = words.length - 2
+// Balanced two-line break (owner 2026-10-08): line two starts a new line —
+// "Creative that gets / business results." — and its last word is outlined.
+const words = [...hero.headlineLines[0].split(' '), ...hero.headlineLines[1].split(' ')]
+const breakAt = hero.headlineLines[0].split(' ').length
 const stageRef = ref<HTMLElement | null>(null)
 const poolRef = ref<HTMLElement | null>(null)
 
@@ -143,7 +144,7 @@ useGsapContext(() => {
     <BaseContainer class="relative z-20 flex flex-1 flex-col desktop:justify-center">
       <div class="grid items-center gap-14 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-7">
-          <div data-ch-fade><BaseHeroMarker surface="yellow" :label="`${eyebrow} studio`" meta="Move to paint" /></div>
+          <div data-ch-fade><BaseHeroMarker surface="yellow" :label="`${eyebrow} studio`" :meta="hero.markerMeta" /></div>
 
           <h1 class="hero-title pointer-events-none mt-6 desktop:mt-[3svh]">
             <template v-for="(w, i) in words" :key="i"><br v-if="i === breakAt"><span class="ch-mask"><span data-ch-word class="inline-block will-change-transform" :class="i === words.length - 1 ? 'ch-outline' : ''">{{ w }}</span><span v-if="i === words.length - 1">.</span></span>{{ ' ' }}</template>
@@ -154,8 +155,8 @@ useGsapContext(() => {
           <div data-ch-fade class="mt-8 desktop:mt-[4svh]">
             <BaseHeroCtas
               surface="yellow"
-              :primary="{ label: 'Brief us', href: whatsappLink }"
-              :secondary="{ label: 'What we make', down: true }"
+              :primary="hero.primaryCta"
+              :secondary="{ label: hero.secondaryCtaLabel, down: true }"
               @secondary="scrollToServices"
             />
           </div>

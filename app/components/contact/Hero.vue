@@ -6,18 +6,21 @@ import gsap from 'gsap'
 // system as /work: surface-light ground, BaseHeroMarker, .hero-title masked
 // word rise, .hero-lede, m-center on phones. Channels are numbered rows —
 // PASTI Yellow marks the hovered row (state marker, never a fill).
-// Copy and contact data: useContact (all existing, nothing new).
-const { hero, contact, socials, whatsappLink } = useContact()
+// Page wording: useContactPage (legacy code or published CMS). Shared
+// contact data (number, email, address, entity, socials): useContact — the
+// one shared source, never CMS-managed from here.
+const { hero, channels: copy } = useContactPage()
+const { contact, socials, whatsappLink } = useContact()
 const { setState } = useCustomCursor()
 
 const stageRef = ref<HTMLElement | null>(null)
-const headingWords = hero.heading.replace(/\.$/, '').split(' ')
+const headingWords = hero.headline.replace(/\.$/, '').split(/\s+/)
 
 const channels = computed(() =>
   [
-    { key: 'whatsapp', label: 'WhatsApp', value: contact.whatsappDisplay, href: whatsappLink, action: 'Chat now' },
-    contact.email && { key: 'email', label: 'Email', value: contact.email, href: `mailto:${contact.email}`, action: 'Write to us' },
-    contact.address && { key: 'office', label: 'Office', value: contact.address, href: contact.mapsUrl, action: 'Open in Google Maps' }
+    { key: 'whatsapp', label: copy.whatsapp.label, value: contact.whatsappDisplay, href: whatsappLink, action: copy.whatsapp.action },
+    contact.email && { key: 'email', label: copy.email.label, value: contact.email, href: `mailto:${contact.email}`, action: copy.email.action },
+    contact.address && { key: 'office', label: copy.office.label, value: contact.address, href: contact.mapsUrl, action: copy.office.action }
   ].filter((c): c is { key: string; label: string; value: string; href: string | null; action: string } => !!c)
 )
 
@@ -59,7 +62,7 @@ useGsapContext(() => {
       <div class="grid gap-14 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-5">
           <div data-ct-fade><BaseHeroMarker label="Contact" :meta="hero.eyebrow" /></div>
-          <h1 class="hero-title mt-6 desktop:mt-8" :aria-label="hero.heading">
+          <h1 class="hero-title mt-6 desktop:mt-8" :aria-label="hero.headline">
             <span aria-hidden="true">
               <span v-for="(w, i) in headingWords" :key="i" class="ct-mask mr-[0.22em] inline-block last:mr-0"><span data-ct-word class="inline-block">{{ w }}<span v-if="i === headingWords.length - 1" class="text-pastiYellow-500">.</span></span></span>
             </span>

@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import type { FeaturedCase } from '~/composables/useFeaturedCases'
+import type { WorkCaseView } from '#shared/utils/workPublic'
 
 // One Featured Case as a dossier of numbered chapters (right side of the
 // case dossier in FeaturedCases). A chapter renders only when the case has
-// source-backed data for it; only 'approved' metrics / visuals are shown.
+// data for it; `metrics` / `visuals` arrive already filtered to the
+// publicly approved ones (useWorkPage).
 // The lead visual lives in the reel strip above, so the Gallery chapter shows
 // the remaining approved visuals at their own ratio.
 // Rows marked [data-cp-anim] settle in on case change (FeaturedCases).
-const props = defineProps<{ item: FeaturedCase }>()
+const props = defineProps<{ item: WorkCaseView }>()
 
-const gallery = computed(() => approvedVisuals(props.item).slice(1))
-const metrics = computed(() => approvedMetrics(props.item))
+const gallery = computed(() => props.item.visuals.slice(1))
+const metrics = computed(() => props.item.metrics)
 const weeks = computed(() => props.item.timeline?.steps.reduce((n, s) => n + s.weeks, 0) ?? 0)
 
 type ChapterKey = 'challenge' | 'second' | 'outcome' | 'insight' | 'timeline' | 'stack' | 'gallery'

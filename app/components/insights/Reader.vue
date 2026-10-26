@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
-import type { InsightArticle } from '~/composables/useInsights'
+import type { InsightsArticleView } from '#shared/utils/insightsPublic'
 
 // READER — full-screen reading sheet for one article (no detail pages yet).
 // Editorial spread (owner revision 2026-10-16, "masih kureng"):
@@ -12,7 +12,7 @@ import type { InsightArticle } from '~/composables/useInsights'
 //   arrow rows. Everything is the article's existing copy (useInsights).
 // - Footer: a segment per article (current in Yellow) and a "Next" preview.
 // Prev / next, Esc to close, ← → keys, page scroll locked while open.
-const props = defineProps<{ articles: InsightArticle[]; index: number | null }>()
+const props = defineProps<{ articles: InsightsArticleView[]; index: number | null }>()
 const emit = defineEmits<{ close: []; go: [i: number] }>()
 
 const sheetRef = ref<HTMLElement | null>(null)
@@ -131,7 +131,7 @@ onBeforeUnmount(() => {
                 <img
                   data-rd-img
                   :src="article.image"
-                  :alt="article.title"
+                  :alt="article.alt"
                   class="h-full w-full"
                   :class="fullPoster ? 'object-contain' : 'object-cover'"
                   :style="{ objectPosition: fullPoster ? 'center' : `100% ${focusY}`, transformOrigin: `100% ${focusY}` }"

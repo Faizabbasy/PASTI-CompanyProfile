@@ -7,8 +7,7 @@ import gsap from 'gsap'
 // right = wider fan), the hovered card lifts out, and clicking a card jumps
 // to that project in the index. Touch: the deck rests half-open and each tap
 // jumps. Reduced motion: a static fan.
-const { projects } = useWorkPortfolio()
-const { publicCases } = useFeaturedCases()
+const { hero, index: { projects }, cases: { items: publicCases } } = useWorkPage()
 const pad = (n: number) => String(n).padStart(2, '0')
 
 const stageRef = ref<HTMLElement | null>(null)
@@ -16,7 +15,6 @@ const cardRefs = ref<HTMLElement[]>([])
 const hovered = ref<number | null>(null)
 const { setState } = useCustomCursor()
 
-const { link: whatsappLink } = useWhatsapp()
 const toIndex = () => {
   const el = document.getElementById('work-index')
   if (!el) return
@@ -26,7 +24,7 @@ const toIndex = () => {
 }
 
 const jump = (i: number) => {
-  const el = document.getElementById(`work-${projects[i]!.index}`)
+  const el = document.getElementById(projects[i]!.anchor)
   if (!el) return
   const lenis = getLenisInstance()
   if (lenis) lenis.scrollTo(el, { offset: -140, duration: 1.4 })
@@ -111,18 +109,18 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10 flex flex-1 flex-col desktop:justify-center">
       <div class="grid items-center gap-6 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-6">
-          <div data-wh-fade><BaseHeroMarker label="Work" :meta="`${pad(projects.length)} projects · ${pad(publicCases.length)} case studies`" /></div>
+          <div data-wh-fade><BaseHeroMarker :label="hero.eyebrow" :meta="`${pad(projects.length)} projects · ${pad(publicCases.length)} case studies`" /></div>
           <h1 class="hero-title mt-6 desktop:mt-[3svh]">
-            <span class="wh-mask block"><span data-wh-word class="inline-block">Selected</span></span>
-            <span class="wh-mask block"><span data-wh-word class="inline-block">work<span class="text-pastiYellow-500">.</span></span></span>
+            <span class="wh-mask block"><span data-wh-word class="inline-block">{{ hero.headlineLines[0] }}</span></span>
+            <span class="wh-mask block"><span data-wh-word class="inline-block">{{ hero.headlineLines[1] }}<span class="text-pastiYellow-500">.</span></span></span>
           </h1>
           <p data-wh-fade class="hero-lede m-center mt-6 desktop:mt-[3svh]">
-            A closer look at how we work with our clients — real projects, from the brief to the result that's running today.
+            {{ hero.lede }}
           </p>
           <div data-wh-fade class="mt-8 desktop:mt-[4svh]">
             <BaseHeroCtas
-              :primary="{ label: 'Browse projects' }"
-              :secondary="{ label: 'Tell us about it', href: whatsappLink }"
+              :primary="{ label: hero.primaryCtaLabel }"
+              :secondary="{ label: hero.secondaryCta.label, href: hero.secondaryCta.href }"
               @primary="toIndex"
             />
           </div>
@@ -133,7 +131,7 @@ useGsapContext(() => {
           <div class="absolute left-1/2 top-1/2 desktop:left-[46%] -translate-x-1/2 -translate-y-1/2">
             <button
               v-for="(p, i) in projects"
-              :key="p.index"
+              :key="p.key"
               :ref="(el) => { if (el) cardRefs[i] = el as HTMLElement }"
               type="button"
               :aria-label="`Go to ${p.title}`"
@@ -142,7 +140,7 @@ useGsapContext(() => {
               @mouseleave="setState('default')"
               @click="jump(i)"
             >
-              <img :src="p.image" :alt="p.title" draggable="false" class="aspect-[4/5] w-full object-cover object-top">
+              <img :src="p.image" :alt="p.alt" draggable="false" class="aspect-[4/5] w-full object-cover object-top">
               <span class="absolute right-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-full bg-[color:rgba(3,60,89,0.88)] px-2 py-1">
                 <LayoutBrandMark :height="8" />
                 <span class="font-mono text-[9px] text-pureWhite">{{ p.index }}</span>
