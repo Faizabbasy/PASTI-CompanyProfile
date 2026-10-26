@@ -1,3 +1,5 @@
+import { faqsSource } from './useSharedContentSource'
+
 export interface FaqItem {
   index: string
   question: string
@@ -12,8 +14,18 @@ export interface FaqItem {
  * the source doc itself (no ellipsis marker — e.g. question 2 ends at "...does
  * PASTI", answer 2 ends at "...system mainte"). The full, contextually correct
  * copy below was confirmed directly by the client rather than guessed.
+ *
+ * Shared Content CMS (FAQs): when NUXT_CMS_FAQS_PUBLIC_ENABLED is on and a
+ * version is published, the published questions replace the list below
+ * (numbered 01, 02 … in their CMS order).
  */
 export function useFaq() {
+  const cms = faqsSource.read()
+  return cms ? { items: cms as FaqItem[] } : codeFaq()
+}
+
+// The code list (also the source for scripts/cms-migrate-shared.mjs).
+export function codeFaq() {
   const items: FaqItem[] = [
     {
       index: '01',

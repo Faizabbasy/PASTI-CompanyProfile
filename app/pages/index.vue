@@ -25,6 +25,9 @@ usePageSeo(pageSeo.home)
 // Testimoni reads shared testimonials (CMS when live, else legacy). Home
 // itself stays code-managed — this is shared content, not a Home record.
 await resolveTestimonials()
+// Shared Content CMS: Trusted logos and FAQ (code content unless their
+// server flags are on and a version is published).
+await Promise.all([clientsSource.resolve(), faqsSource.resolve()])
 </script>
 
 <template>

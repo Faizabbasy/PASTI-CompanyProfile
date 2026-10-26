@@ -1,3 +1,5 @@
+import { ctasSource } from './useSharedContentSource'
+
 export interface FinalCtaContent {
   eyebrowLine: string
   headingLine: string
@@ -28,6 +30,13 @@ export interface FinalCtaContent {
  * (p.2 and p.42).
  */
 export function useFinalCta(): FinalCtaContent {
+  const code = codeFinalCta()
+  // Shared Content CMS (Global CTAs), when its flag is on and it's published.
+  const cms = ctasSource.read()
+  return cms ? { ...code, eyebrowLine: cms.eyebrow, headingLine: cms.headline, email: cms.email } : code
+}
+
+export function codeFinalCta(): FinalCtaContent {
   return {
     eyebrowLine: 'Have a challenge?',
     headingLine: "Let's build what matters",

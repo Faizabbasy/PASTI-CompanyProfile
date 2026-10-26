@@ -70,7 +70,6 @@ export function useAdminNav(): AdminNavGroup[] {
       ]
     },
     { label: 'Media', to: '/admin/media' },
-    { label: 'SEO', to: '/admin/seo' },
     { label: 'Users', to: '/admin/users', permission: 'users.manage' }
   ]
 }

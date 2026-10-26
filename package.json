@@ -24,7 +24,10 @@
     "cms:migrate-e-corporate": "node --env-file-if-exists=.env scripts/cms-migrate-product.mjs e-corporate",
     "cms:migrate-fast": "node --env-file-if-exists=.env scripts/cms-migrate-product.mjs fast",
     "cms:migrate-dora": "node --env-file-if-exists=.env scripts/cms-migrate-product.mjs dora",
-    "cms:migrate-matrix": "node --env-file-if-exists=.env scripts/cms-migrate-product.mjs matrix"
+    "cms:migrate-matrix": "node --env-file-if-exists=.env scripts/cms-migrate-product.mjs matrix",
+    "cms:migrate-clients": "node --env-file-if-exists=.env scripts/cms-migrate-shared.mjs clients",
+    "cms:migrate-faqs": "node --env-file-if-exists=.env scripts/cms-migrate-shared.mjs faqs",
+    "cms:migrate-ctas": "node --env-file-if-exists=.env scripts/cms-migrate-shared.mjs ctas"
   },
   "dependencies": {
     "@types/three": "^0.185.4",

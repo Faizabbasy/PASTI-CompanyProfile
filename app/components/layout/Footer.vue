@@ -155,7 +155,7 @@ useGsapContext(() => {
             <a
               v-if="contact.email"
               :href="`mailto:${contact.email}`"
-              class="rounded-[14px] border border-[color:rgba(255,255,255,0.2)] px-6 py-[18px] font-display text-[15px] font-bold text-pureWhite transition-colors duration-300 ease-editorial hover:border-pureWhite"
+              class="max-w-full break-all rounded-[14px] border border-[color:rgba(255,255,255,0.2)] px-6 py-[18px] font-display text-[15px] font-bold text-pureWhite transition-colors duration-300 ease-editorial hover:border-pureWhite"
               @mouseenter="setState('contact')"
               @mouseleave="setState('default')"
             >

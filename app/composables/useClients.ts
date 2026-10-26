@@ -1,3 +1,5 @@
+import { clientsSource } from './useSharedContentSource'
+
 export type ClientPublicationStatus = 'approved' | 'needs_approval'
 
 export interface Client {
@@ -25,11 +27,26 @@ export interface Client {
  * Compas and Raya still use the interim COMPRO crops — replace them under
  * the same filenames when originals arrive.
  *
+ * Shared Content CMS (Clients): when NUXT_CMS_CLIENTS_PUBLIC_ENABLED is on and
+ * a version is published, the published list (shown clients, in order)
+ * replaces the code list below; otherwise the code list is used.
+ *
  * "Compas" is not Kompas: its logo reads "Compas — Comprehensive Price and
  * Analytics". "Bank AL Habib" was listed as "Rusk Al Habib" from the COMPRO
  * crop; the original logo reads Bank AL Habib.
  */
 export function useClients() {
+  const cms = clientsSource.read()
+  if (cms) {
+    return {
+      clients: cms.map((c): Client => ({ ...c, source: 'Shared Content CMS', publication_status: 'approved', trusted: true }))
+    }
+  }
+  return codeClients()
+}
+
+// The code list (also the source for scripts/cms-migrate-shared.mjs).
+export function codeClients() {
   const entry = (name: string, file: string, ratio: number, source = 'Owner-supplied logo (2026-10-07)'): Client => ({
     name,
     logo: `/logos/clients/${file}.webp`,

@@ -12,6 +12,8 @@ usePageSeo(pageSeo.about)
 // published CMS snapshot only when the server-side flag allows it) and read
 // by every section through useAboutPage(). See useAboutPage.ts.
 await resolveAboutPageContent()
+// Client grid: Shared Content CMS (Clients) when live, else code.
+await clientsSource.resolve()
 </script>
 
 <template>

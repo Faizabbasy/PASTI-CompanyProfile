@@ -79,6 +79,13 @@ export default defineNuxtConfig({
       fastPublicEnabled: false,
       doraPublicEnabled: false,
       matrixPublicEnabled: false,
+      // Shared Content: GET /api/public/shared/<clients|faqs|ctas> serves the
+      // published copy only when true (NUXT_CMS_CLIENTS_PUBLIC_ENABLED,
+      // NUXT_CMS_FAQS_PUBLIC_ENABLED, NUXT_CMS_CTAS_PUBLIC_ENABLED).
+      // Server-only; default false = code content.
+      clientsPublicEnabled: false,
+      faqsPublicEnabled: false,
+      ctasPublicEnabled: false,
       // GET /api/public/testimonials serves public-eligible shared
       // testimonials only when true (NUXT_CMS_TESTIMONIALS_PUBLIC_ENABLED).
       // Server-only; default false. No page reads it yet — Home and every

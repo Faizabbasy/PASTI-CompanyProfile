@@ -1,3 +1,6 @@
+import type { SocialCmsKey } from '#shared/utils/sharedContentSchema'
+import { ctasSource } from './useSharedContentSource'
+
 export type SocialKey = 'linkedin' | 'instagram' | 'whatsapp' | 'tiktok' | 'youtube'
 
 export interface FooterSocial {
@@ -61,26 +64,34 @@ export function useFooter() {
   // copy). Fill them in here when the owner supplies them.
   // Address + email (2026-10-07) come from the COMPRO 2025 company profile
   // (p.2, p.42); maps link and hours are still unknown.
+  //
+  // Shared Content CMS (Global CTAs): when its flag is on and a version is
+  // published, its email, address, maps link, hours, positioning line and
+  // social links replace these (an empty CMS field = row hidden / icon
+  // dimmed). The WhatsApp number and the legal entity stay in code.
+  const cms = ctasSource.read()
+  const orNull = (v: string) => (v.trim() ? v.trim() : null)
   const { email } = useFinalCta()
   const contact = {
     whatsappDisplay: '+62 821-2549-2299',
     email,
-    address: 'Mutu Work – RS Fatmawati No. 39, Cilandak, South Jakarta 12430' as string | null,
-    mapsUrl: null as string | null,
-    hours: null as string | null,
+    address: (cms ? orNull(cms.address) : 'Mutu Work – RS Fatmawati No. 39, Cilandak, South Jakarta 12430') as string | null,
+    mapsUrl: (cms ? orNull(cms.mapsUrl) : null) as string | null,
+    hours: (cms ? orNull(cms.hours) : null) as string | null,
     entity: 'PT Hidup Pasti Bahagia',
-    positioning: 'Technology × Creative Execution Partner'
+    positioning: cms ? cms.positioning : 'Technology × Creative Execution Partner'
   }
 
   // Social profiles. Only WhatsApp has a real destination so far; the others
   // stay null until the owner provides the official URLs.
   const { link: whatsappLink } = useWhatsapp()
+  const social = (key: SocialCmsKey): string | null => (cms ? orNull(cms.socials[key]) : null)
   const socials: FooterSocial[] = [
-    { key: 'linkedin', label: 'LinkedIn', url: null },
-    { key: 'instagram', label: 'Instagram', url: null },
+    { key: 'linkedin', label: 'LinkedIn', url: social('linkedin') },
+    { key: 'instagram', label: 'Instagram', url: social('instagram') },
     { key: 'whatsapp', label: 'WhatsApp', url: whatsappLink },
-    { key: 'tiktok', label: 'TikTok', url: null },
-    { key: 'youtube', label: 'YouTube', url: null }
+    { key: 'tiktok', label: 'TikTok', url: social('tiktok') },
+    { key: 'youtube', label: 'YouTube', url: social('youtube') }
   ]
 
   return { navLinks, serviceLinks, platformLinks, contact, socials }

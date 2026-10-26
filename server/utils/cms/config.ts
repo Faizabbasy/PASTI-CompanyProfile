@@ -46,6 +46,9 @@ export function cmsPublicFlags(event?: H3Event) {
     fastPublicEnabled: String(cms.fastPublicEnabled) === 'true',
     doraPublicEnabled: String(cms.doraPublicEnabled) === 'true',
     matrixPublicEnabled: String(cms.matrixPublicEnabled) === 'true',
+    clientsPublicEnabled: String(cms.clientsPublicEnabled) === 'true',
+    faqsPublicEnabled: String(cms.faqsPublicEnabled) === 'true',
+    ctasPublicEnabled: String(cms.ctasPublicEnabled) === 'true',
     testimonialsPublicEnabled: String(cms.testimonialsPublicEnabled) === 'true'
   }
 }

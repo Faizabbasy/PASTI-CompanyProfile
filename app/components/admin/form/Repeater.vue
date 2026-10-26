@@ -10,7 +10,14 @@ const props = defineProps<{
   itemTitle: (item: T, index: number) => string
   addLabel: string
   error?: string
+  // 'id' = Indonesian button labels (Shared Content editors). Default English.
+  locale?: 'en' | 'id'
 }>()
+const L = computed(() =>
+  props.locale === 'id'
+    ? { active: 'Tampil', inactive: 'Disembunyikan', newItem: 'Baru', published: 'Sudah tayang', up: '↑ Naik', down: '↓ Turun', show: 'Tampilkan', remove: 'Hapus', empty: 'Belum ada item.', untitled: 'Tanpa judul' }
+    : { active: 'Active', inactive: 'Inactive', newItem: 'New', published: 'Published item', up: '↑ Up', down: '↓ Down', show: 'Active', remove: 'Remove', empty: 'No items yet.', untitled: 'Untitled' }
+)
 const emit = defineEmits<{ add: [] }>()
 
 function move(index: number, delta: number) {
@@ -31,7 +38,8 @@ const isPublished = (item: T) => !!item.id && props.publishedIds.includes(item.i
 </script>
 
 <template>
-  <fieldset>
+  <!-- min-w-0: a fieldset defaults to min-content width and would overflow phones. -->
+  <fieldset class="min-w-0">
     <legend class="sr-only">{{ legend }}</legend>
     <p v-if="error" class="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{{ error }}</p>
 
@@ -44,20 +52,20 @@ const isPublished = (item: T) => !!item.id && props.publishedIds.includes(item.i
       >
         <div class="flex flex-wrap items-center gap-2 border-b border-navy-100 px-4 py-2">
           <span class="text-xs font-semibold tabular-nums text-navy-500">#{{ i + 1 }}</span>
-          <span class="truncate text-sm font-semibold">{{ itemTitle(item, i) || 'Untitled' }}</span>
+          <span class="truncate text-sm font-semibold">{{ itemTitle(item, i) || L.untitled }}</span>
           <span
             class="rounded-full px-2 py-0.5 text-[11px] font-semibold"
             :class="item.active ? 'bg-emerald-50 text-emerald-800' : 'bg-gray-100 text-gray-600'"
-          >{{ item.active ? 'Active' : 'Inactive' }}</span>
-          <span v-if="!item.id" class="rounded-full bg-navy-50 px-2 py-0.5 text-[11px] font-semibold text-navy-600">New</span>
-          <span v-else-if="isPublished(item)" class="text-[11px] text-navy-500">Published item</span>
+          >{{ item.active ? L.active : L.inactive }}</span>
+          <span v-if="!item.id" class="rounded-full bg-navy-50 px-2 py-0.5 text-[11px] font-semibold text-navy-600">{{ L.newItem }}</span>
+          <span v-else-if="isPublished(item)" class="text-[11px] text-navy-500">{{ L.published }}</span>
 
           <div class="ml-auto flex items-center gap-1">
-            <button type="button" class="rounded px-2 py-1 text-xs hover:bg-navy-50 disabled:opacity-40" :disabled="i === 0" :aria-label="`Move item ${i + 1} up`" @click="move(i, -1)">↑ Up</button>
-            <button type="button" class="rounded px-2 py-1 text-xs hover:bg-navy-50 disabled:opacity-40" :disabled="i === items.length - 1" :aria-label="`Move item ${i + 1} down`" @click="move(i, 1)">↓ Down</button>
+            <button type="button" class="rounded px-2 py-1 text-xs hover:bg-navy-50 disabled:opacity-40" :disabled="i === 0" :aria-label="`Move item ${i + 1} up`" @click="move(i, -1)">{{ L.up }}</button>
+            <button type="button" class="rounded px-2 py-1 text-xs hover:bg-navy-50 disabled:opacity-40" :disabled="i === items.length - 1" :aria-label="`Move item ${i + 1} down`" @click="move(i, 1)">{{ L.down }}</button>
             <label class="ml-1 inline-flex cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-xs hover:bg-navy-50">
               <input v-model="item.active" type="checkbox" class="h-3.5 w-3.5">
-              Active
+              {{ L.show }}
             </label>
             <button
               v-if="!isPublished(item)"
@@ -65,7 +73,7 @@ const isPublished = (item: T) => !!item.id && props.publishedIds.includes(item.i
               class="rounded px-2 py-1 text-xs text-red-700 hover:bg-red-50"
               :aria-label="`Remove item ${i + 1}`"
               @click="remove(i)"
-            >Remove</button>
+            >{{ L.remove }}</button>
           </div>
         </div>
         <div class="grid gap-4 p-4" :class="{ 'opacity-75': !item.active }">
@@ -74,7 +82,7 @@ const isPublished = (item: T) => !!item.id && props.publishedIds.includes(item.i
       </li>
     </ol>
 
-    <p v-if="items.length === 0" class="rounded-lg border border-dashed border-navy-200 bg-white px-4 py-6 text-center text-sm text-navy-500">No items yet.</p>
+    <p v-if="items.length === 0" class="rounded-lg border border-dashed border-navy-200 bg-white px-4 py-6 text-center text-sm text-navy-500">{{ L.empty }}</p>
 
     <div class="mt-4 flex items-center gap-3">
       <button

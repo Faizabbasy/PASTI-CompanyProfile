@@ -120,6 +120,12 @@ async function onPageAfterEnter() {
   ScrollTrigger.refresh()
   await playReveal()
 }
+
+// Shared Content CMS (Global CTAs): the footer and /contact read the shared
+// contact facts on every page, so they are resolved once here (code content
+// unless NUXT_CMS_CTAS_PUBLIC_ENABLED is on and a version is published).
+// Kept last: nothing above may wait on it.
+if (!isAdmin.value) await ctasSource.resolve()
 </script>
 
 <template>
