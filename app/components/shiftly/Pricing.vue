@@ -3,7 +3,7 @@
 // the deck's figures live in useShiftly().commercial with publicationStatus
 // 'needs_approval' and are intentionally NOT rendered until the owner
 // approves them. Both plans lead to a pricing request instead.
-const { pricing } = useShiftly()
+const { pricing } = useShiftlyPage()
 const scrollTo = useShiftlyScroll()
 const { link: whatsappLink } = useWhatsapp()
 </script>

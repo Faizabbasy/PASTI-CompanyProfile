@@ -7,7 +7,7 @@ import gsap from 'gsap'
 // (clip-path scrubbed per line — one paint per line, no layout). The yellow
 // square at the end of a line marks it "reached".
 // Reduced motion: every line shown filled.
-const { outcomes } = useEcorporate()
+const { outcomes } = useEcorporatePage()
 
 const sectionRef = ref<HTMLElement | null>(null)
 useGsapContext(() => {

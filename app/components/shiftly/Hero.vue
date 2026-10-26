@@ -9,7 +9,7 @@ import gsap from 'gsap'
 // at the visitor's local time (updates once a minute — no per-frame work).
 // Entrance: copy rises, dashboard unmasks, phone slides in. Fine pointer on
 // desktop tilts the product a few degrees. Reduced motion: static.
-const { hero } = useShiftly()
+const { hero } = useShiftlyPage()
 const scrollTo = useShiftlyScroll()
 const stageRef = ref<HTMLElement | null>(null)
 const productRef = ref<HTMLElement | null>(null)

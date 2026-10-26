@@ -11,7 +11,7 @@ if (import.meta.client) {
 // skeleton content only) that re-skins to an example corporate identity —
 // logo, colours, domain — when a brand swatch is picked. The example brands
 // are neutral placeholders, not clients.
-const { branding } = useShiftly()
+const { branding } = useShiftlyPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const brands = [
   { id: 'shiftly', label: 'SHIFTLY', name: 'SHIFTLY', domain: 'shiftly.app', primary: '#033C59', accent: '#FBBA00', radius: '10px' },

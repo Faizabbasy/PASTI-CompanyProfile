@@ -70,6 +70,10 @@ export default defineNuxtConfig({
       // only when true (NUXT_CMS_OPEN_PUBLIC_ENABLED). Server-only; default
       // false. Structure, mock-ups and the demo form stay in code either way.
       openPublicEnabled: false,
+      // Same for SHIFTLY (NUXT_CMS_SHIFTLY_PUBLIC_ENABLED) and e-CORPORATE
+      // (NUXT_CMS_ECORPORATE_PUBLIC_ENABLED). Server-only; default false.
+      shiftlyPublicEnabled: false,
+      ecorporatePublicEnabled: false,
       // GET /api/public/testimonials serves public-eligible shared
       // testimonials only when true (NUXT_CMS_TESTIMONIALS_PUBLIC_ENABLED).
       // Server-only; default false. No page reads it yet — Home and every

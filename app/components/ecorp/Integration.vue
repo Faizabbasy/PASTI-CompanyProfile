@@ -5,7 +5,7 @@
 // supported integrations; no vendors, no protocols. Three ruled tiers with a
 // slow travelling signal on the links (CSS only, off under reduced motion).
 // Desktop: tiers left → right. Below desktop: top → bottom.
-const { integrationTargets, integrationNote, integrationBody } = useEcorporate()
+const { integrationTargets, integrationNote, integrationBody } = useEcorporatePage()
 </script>
 
 <template>

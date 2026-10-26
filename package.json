@@ -18,8 +18,10 @@
     "cms:db-migrate": "node --env-file-if-exists=.env scripts/cms-db-migrate.mjs",
     "cms:db-import": "node --env-file-if-exists=.env scripts/cms-db-import.mjs",
     "cms:user": "node --env-file-if-exists=.env scripts/cms-user.mjs",
-    "cms:migrate-open": "node --env-file-if-exists=.env scripts/cms-migrate-open.mjs",
-    "cms:media-setup": "node --env-file-if-exists=.env scripts/cms-media-setup.mjs"
+    "cms:migrate-open": "node --env-file-if-exists=.env scripts/cms-migrate-product.mjs open",
+    "cms:media-setup": "node --env-file-if-exists=.env scripts/cms-media-setup.mjs",
+    "cms:migrate-shiftly": "node --env-file-if-exists=.env scripts/cms-migrate-product.mjs shiftly",
+    "cms:migrate-e-corporate": "node --env-file-if-exists=.env scripts/cms-migrate-product.mjs e-corporate"
   },
   "dependencies": {
     "@types/three": "^0.185.4",

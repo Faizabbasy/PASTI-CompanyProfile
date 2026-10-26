@@ -41,6 +41,8 @@ export function cmsPublicFlags(event?: H3Event) {
     insightsPublicEnabled: String(cms.insightsPublicEnabled) === 'true',
     contactPublicEnabled: String(cms.contactPublicEnabled) === 'true',
     openPublicEnabled: String(cms.openPublicEnabled) === 'true',
+    shiftlyPublicEnabled: String(cms.shiftlyPublicEnabled) === 'true',
+    ecorporatePublicEnabled: String(cms.ecorporatePublicEnabled) === 'true',
     testimonialsPublicEnabled: String(cms.testimonialsPublicEnabled) === 'true'
   }
 }

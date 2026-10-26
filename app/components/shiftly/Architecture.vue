@@ -10,7 +10,7 @@ if (import.meta.client) {
 // protocols or certifications): SHIFTLY at the centre, four connected
 // domains around it, and the two deployment options from deck slide 8.
 // Desktop: a cross layout with drawn connectors. Below: a stacked list.
-const { architecture } = useShiftly()
+const { architecture } = useShiftlyPage()
 const sectionRef = ref<HTMLElement | null>(null)
 
 useGsapContext(() => {

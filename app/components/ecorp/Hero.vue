@@ -9,7 +9,7 @@ import gsap from 'gsap'
 // one statement. Desktop + fine pointer: the surface tilts a few degrees
 // toward the cursor (two quickTo transforms, no layout).
 // Lede = confirmed short positioning. Perf: no glow, no filters.
-const { short, heroLines, category } = useEcorporate()
+const { short, heroLines, category } = useEcorporatePage()
 const scrollTo = useEcorpScroll()
 
 type Focus = 'people' | 'processes' | 'information'

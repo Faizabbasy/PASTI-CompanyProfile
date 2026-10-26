@@ -11,7 +11,7 @@ if (import.meta.client) {
 // table; each is paired with the confirmed goal that answers it. On entry the
 // broken dashed links become one solid yellow connection, row by row, and
 // the answers light up. Reduced motion: connected from the start.
-const { problems, solutionHeadline, positioning } = useEcorporate()
+const { problems, solutionHeadline, positioning } = useEcorporatePage()
 const words = solutionHeadline.split(' ')
 const head = `${words.slice(0, 2).join(' ')} `
 const mark = words.slice(2).join(' ')

@@ -7,7 +7,7 @@
 // handlers) sets the active value; ticks jump to a block.
 // Below desktop: a recomposed list, each value with its phrase inline.
 // Reduced motion: same layout, word swaps without the slide.
-const { values } = useEcorporate()
+const { values } = useEcorporatePage()
 const scrollTo = useEcorpScroll()
 const active = ref(0)
 const currentTitle = computed(() => values[active.value]?.title ?? '')

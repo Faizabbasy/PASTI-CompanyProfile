@@ -8,7 +8,7 @@
 // WhatsApp — send it there", never "received by PASTI"; if the WhatsApp
 // window cannot be opened (e.g. a pop-up blocker), the error state offers a
 // direct link instead. Replace `temporarySubmit` with the real endpoint.
-const { demo, problems } = useEcorporate()
+const { demo, problems } = useEcorporatePage()
 const { link: whatsappLink, phone } = useWhatsapp()
 
 type Field = 'name' | 'company' | 'email' | 'phone' | 'role' | 'challenge' | 'message'

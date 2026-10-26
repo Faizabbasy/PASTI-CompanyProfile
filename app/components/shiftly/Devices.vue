@@ -12,7 +12,7 @@ if (import.meta.client) {
 // to the platform, and its description shows below. Below desktop the
 // diagram simplifies to a vertical list of devices into SHIFTLY.
 // Reduced motion: lines static, no pulse.
-const { devices } = useShiftly()
+const { devices } = useShiftlyPage()
 const active = ref(0)
 const sectionRef = ref<HTMLElement | null>(null)
 const pulseRefs = ref<SVGCircleElement[]>([])

@@ -11,7 +11,7 @@ if (import.meta.client) {
 // lights the capabilities that belong to it (grouping is ours, by topic —
 // the capability names and lines are the deck's). Below desktop the same
 // buttons sit above a filtered capability list. CSS transitions only.
-const { platform } = useShiftly()
+const { platform } = useShiftlyPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const icons = ['people', 'process', 'data', 'technology']
 // layer index → capability indexes

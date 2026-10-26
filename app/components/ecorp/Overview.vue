@@ -7,7 +7,7 @@
 // chain, and shows its description (temporary copy) in the panel.
 // Desktop: diagram + panel. Below desktop: the same tabs as a compact grid
 // with the panel underneath — no lines forced onto small screens.
-const { nodes, overviewLead, positioning } = useEcorporate()
+const { nodes, overviewLead, positioning } = useEcorporatePage()
 
 const active = ref(0)
 const top = nodes.slice(0, 3)

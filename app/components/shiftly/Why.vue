@@ -11,7 +11,7 @@ if (import.meta.client) {
 // "Your system. Your brand. Your rules." as the closing statement. Eight
 // differentiators as a numbered list. No superiority claims, and no bars or
 // scores that could read as a rating.
-const { why } = useShiftly()
+const { why } = useShiftlyPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
 

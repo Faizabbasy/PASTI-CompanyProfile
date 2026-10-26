@@ -9,7 +9,7 @@ import gsap from 'gsap'
 // adaptation dimensions (from "tailored to specific business requirements,
 // organizational workflows, and operational needs").
 // Desktop: horizontal chain. Below desktop: vertical chain.
-const { configHeadline, configChain, configAdapts, positioning } = useEcorporate()
+const { configHeadline, configChain, configAdapts, positioning } = useEcorporatePage()
 
 const sectionRef = ref<HTMLElement | null>(null)
 const reached = ref(-1)

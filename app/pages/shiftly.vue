@@ -4,9 +4,12 @@
 // useShiftly (source: SHIFTLY PRODUCT_2026_UPDATE deck); pricing is held
 // back there (needs approval). Global header/footer come from app.vue; the
 // product sub-nav is ShiftlySubNav.
-const { seo } = useShiftly()
-
-usePageSeo({ ...seo, image: '/images/og/shiftly.jpg' })
+//
+// Content source is resolved once here (code content by default; the
+// published CMS snapshot only when the server-side flag allows it) and read
+// by the SHIFTLY sections through useShiftlyPage().
+const content = await resolveShiftlyPageContent()
+usePageSeo(content.value.seo)
 </script>
 
 <template>

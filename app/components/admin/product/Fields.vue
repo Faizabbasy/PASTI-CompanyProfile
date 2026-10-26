@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import type { OpenFieldDesc } from '#shared/utils/openSchema'
+import type { FieldDesc } from '#shared/cms/productFields'
 
-// Renders an OPEN field map (shared/utils/openSchema.ts) as form fields,
+// Renders a product-page field map (shared/cms/productFields.ts) as form fields,
 // recursively. Lists have a fixed item count, so there is no add/remove:
 // every item is shown, edited in place. Ids follow fieldId(path), so the
 // editor's "jump to first error" lands on the right input.
-defineOptions({ name: 'AdminOpenFields' })
+defineOptions({ name: 'AdminProductFields' })
 
 const props = defineProps<{
-  fields: Record<string, OpenFieldDesc>
+  fields: Record<string, FieldDesc>
   model: Record<string, unknown>
   path: string
   err: (path: string) => string | undefined
@@ -18,8 +18,9 @@ const p = (k: string) => (props.path ? `${props.path}.${k}` : k)
 const arr = (k: string) => props.model[k] as unknown[]
 const obj = (v: unknown) => v as Record<string, unknown>
 const titleOf = (v: unknown, i: number) => {
+  if (typeof v === 'string') return `#${i + 1} · ${v}`
   const o = obj(v)
-  const name = [o.label, o.name, o.key].find((x) => typeof x === 'string' && x)
+  const name = [o.label, o.name, o.title, o.capability, o.problem, o.key].find((x) => typeof x === 'string' && x)
   return `#${i + 1}${name ? ` · ${name}` : ''}`
 }
 
@@ -40,6 +41,17 @@ function setCellKind(list: unknown[], i: number, kind: string) {
         :label="d.label"
         :maxlength="d.max"
         :multiline="d.multiline"
+        :hint="d.hint"
+        required
+        :error="err(p(k))"
+      />
+
+      <AdminFormImage
+        v-else-if="d.k === 'image'"
+        :id="fieldId(p(k))"
+        v-model="(model[k] as string)"
+        :label="d.label"
+        :aspect="d.aspect"
         :hint="d.hint"
         required
         :error="err(p(k))"
@@ -70,21 +82,21 @@ function setCellKind(list: unknown[], i: number, kind: string) {
         <div class="grid gap-3">
           <div v-for="(item, i) in arr(k)" :key="i" class="rounded-md border border-navy-100 bg-navy-50/40 p-3">
             <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-navy-500">{{ titleOf(item, i) }}</p>
-            <AdminOpenFields :fields="d.fields" :model="obj(item)" :path="`${p(k)}.${i}`" :err="err" />
+            <AdminProductFields :fields="d.fields" :model="obj(item)" :path="`${p(k)}.${i}`" :err="err" />
           </div>
         </div>
       </fieldset>
 
       <fieldset v-else-if="d.k === 'group'" class="rounded-lg border border-navy-100 bg-white p-4">
         <legend class="px-1 text-sm font-semibold">{{ d.label }}</legend>
-        <AdminOpenFields :fields="d.fields" :model="obj(model[k])" :path="p(k)" :err="err" />
+        <AdminProductFields :fields="d.fields" :model="obj(model[k])" :path="p(k)" :err="err" />
       </fieldset>
 
       <fieldset v-else-if="d.k === 'tuple'" class="grid gap-3 rounded-lg border border-navy-100 bg-white p-4">
         <legend class="px-1 text-sm font-semibold">{{ d.label }}</legend>
         <div v-for="(g, i) in d.items" :key="i" class="rounded-md border border-navy-100 bg-navy-50/40 p-3">
           <p class="mb-2 text-xs font-semibold uppercase tracking-wider text-navy-500">{{ g.label }}</p>
-          <AdminOpenFields :fields="g.fields" :model="obj(arr(k)[i])" :path="`${p(k)}.${i}`" :err="err" />
+          <AdminProductFields :fields="g.fields" :model="obj(arr(k)[i])" :path="`${p(k)}.${i}`" :err="err" />
         </div>
       </fieldset>
 

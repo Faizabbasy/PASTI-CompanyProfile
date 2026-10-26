@@ -4,7 +4,7 @@ import type { CompareValue } from '~/composables/useShiftly'
 // STANDARD SUBSCRIPTION vs ENTERPRISE EXPANSION (deck slide 8). A real
 // <table> on tablet+; stacked capability cards on phones. No prices here
 // (pending approval) — and nothing implies add-ons are in the subscription.
-const { compare, plans } = useShiftly()
+const { compare, plans } = useShiftlyPage()
 
 // Filter chips: everything / what the subscription includes / add-ons.
 const filters = [

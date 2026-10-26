@@ -12,16 +12,16 @@ export default defineEventHandler(async (event) => {
 
   if (!cmsPublicFlags(event).openPublicEnabled) return { status: 'disabled' as const }
 
-  let open: Awaited<ReturnType<typeof getPublishedOpen>>
+  let page: Awaited<ReturnType<typeof getPublishedOpen>>
   try {
-    open = await getPublishedOpen()
+    page = await getPublishedOpen()
   } catch (err) {
     console.error('[cms] public OPEN read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })
   }
-  if (!open) return { status: 'unpublished' as const }
-  if (open.dummy && !import.meta.dev) return { status: 'disabled' as const }
+  if (!page) return { status: 'unpublished' as const }
+  if (page.dummy && !import.meta.dev) return { status: 'disabled' as const }
 
-  const { dummy: _dummy, ...published } = open
+  const { dummy: _dummy, ...published } = page
   return { status: 'published' as const, ...published }
 })

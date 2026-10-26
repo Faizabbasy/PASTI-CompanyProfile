@@ -10,7 +10,7 @@ import gsap from 'gsap'
 // Below desktop: native swipe rail with the site's snap controls.
 // Reduced motion (desktop): the shared [data-motion-*] rules stack the
 // panels vertically — every scenario reachable without the pin.
-const { useCases, useCaseNote } = useEcorporate()
+const { useCases, useCaseNote } = useEcorporatePage()
 
 const railRef = ref<HTMLElement | null>(null)
 const { active: railActive, touched, go, next, prev } = useSnapRail(railRef)

@@ -4,7 +4,7 @@
 // travelling sideways. One CSS transform animation on a duplicated track
 // (no JS); paused on hover; static under reduced motion. Decorative — the
 // values themselves are presented properly in Key Value.
-const { values } = useEcorporate()
+const { values } = useEcorporatePage()
 </script>
 
 <template>

@@ -2,7 +2,7 @@
 // WHY PASTI — restrained: the brief's five points (descriptions TEMPORARY,
 // no credentials, counts or awards). Ruled numbered list beside the PASTI
 // signature and a link to /about.
-const { why } = useEcorporate()
+const { why } = useEcorporatePage()
 </script>
 
 <template>

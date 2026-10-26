@@ -8,7 +8,7 @@ import gsap from 'gsap'
 // Desktop: a soft yellow spotlight follows the cursor across the sheet (two
 // CSS variables written per pointer frame — one gradient repaint), and the
 // hovered cell floods navy from the bottom with its text turning white.
-const { capabilities, capabilityNote } = useEcorporate()
+const { capabilities, capabilityNote } = useEcorporatePage()
 
 const sectionRef = ref<HTMLElement | null>(null)
 const gridRef = ref<HTMLElement | null>(null)

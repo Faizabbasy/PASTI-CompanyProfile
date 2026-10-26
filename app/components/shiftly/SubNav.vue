@@ -6,7 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // desktop that appears after the hero, tracks the section in view and steps
 // aside at the demo form. Below desktop it is skipped (the WhatsApp FAB owns
 // that edge). Same pattern as EcorpSubNav.
-const { subnav: items } = useShiftly()
+const { subnav: items } = useShiftlyPage()
 const scrollTo = useShiftlyScroll()
 const visible = ref(false)
 const active = ref('')

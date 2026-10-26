@@ -7,7 +7,7 @@ import gsap from 'gsap'
 // (the employee side of the platform). Keyboard: ←/→ between groups,
 // ↑/↓ between modules. Below desktop the groups become an accordion with
 // every module listed. Reduced motion: no transitions.
-const { moduleGroups, modulesMore, hero } = useShiftly()
+const { moduleGroups, modulesMore, hero } = useShiftlyPage()
 const group = ref(0)
 const mod = ref(0)
 const panelRef = ref<HTMLElement | null>(null)

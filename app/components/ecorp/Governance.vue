@@ -5,7 +5,7 @@ import gsap from 'gsap'
 // on the brief's safe themes (no certifications, compliance or encryption
 // standards). Visual: an approval trail — each step with the role that owns
 // it — revealed row by row, i.e. accountability shown, not claimed.
-const { governanceThemes, trail } = useEcorporate()
+const { governanceThemes, trail } = useEcorporatePage()
 
 const sectionRef = ref<HTMLElement | null>(null)
 useGsapContext(() => {

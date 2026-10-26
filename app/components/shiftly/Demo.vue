@@ -7,7 +7,7 @@
 // site's existing WhatsApp contact. "Success" means "prepared in WhatsApp —
 // send it there", never "received by PASTI"; if the window can't open, the
 // error state offers a direct link. Replace with the real endpoint later.
-const { demo } = useShiftly()
+const { demo } = useShiftlyPage()
 const { link: whatsappLink, phone } = useWhatsapp()
 
 type Field = 'name' | 'company' | 'email' | 'phone' | 'role' | 'size' | 'challenge' | 'message'
