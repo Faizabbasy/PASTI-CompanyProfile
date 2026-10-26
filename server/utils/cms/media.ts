@@ -32,19 +32,59 @@ interface MediaStorageConfig {
   bucket: string
 }
 
+// Values pasted into a hosting dashboard often keep their quotes or a
+// trailing space/newline — tolerate both.
+const clean = (v: unknown) => String(v ?? '').trim().replace(/^(['"])(.*)\1$/s, '$2').trim()
+
 export function mediaStorageConfig(event?: H3Event): MediaStorageConfig | null {
   const cms = useRuntimeConfig(event).cms
-  const url = String(cms.supabaseUrl || '').trim().replace(/\/+$/, '')
-  const serviceKey = String(cms.supabaseServiceKey || '').trim()
-  const bucket = String(cms.mediaBucket || 'cms-media').trim()
+  const url = clean(cms.supabaseUrl).replace(/\/+$/, '')
+  const serviceKey = clean(cms.supabaseServiceKey)
+  const bucket = clean(cms.mediaBucket) || 'cms-media'
   if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) || !serviceKey || !/^[a-z0-9_-]+$/.test(bucket)) return null
   return { url, serviceKey, bucket }
 }
 
+// A public (anon / publishable) key can't write to Storage — catch it with a
+// clear message instead of a generic upload failure.
+function keyProblem(key: string): string | null {
+  if (key.startsWith('sb_publishable_')) return 'publishable'
+  if (key.startsWith('eyJ')) {
+    try {
+      const payload = JSON.parse(Buffer.from(key.split('.')[1] ?? '', 'base64url').toString('utf8')) as { role?: string }
+      if (payload.role && payload.role !== 'service_role') return payload.role
+    } catch {
+      return 'unreadable'
+    }
+  }
+  return null
+}
+
 export function requireMediaStorage(event: H3Event): MediaStorageConfig {
   const cfg = mediaStorageConfig(event)
-  if (!cfg) throw createError({ statusCode: 503, statusMessage: 'Media storage is not configured yet.' })
+  if (!cfg) throw createError({ statusCode: 503, statusMessage: 'Media storage belum diatur di server (NUXT_CMS_SUPABASE_URL / NUXT_CMS_SUPABASE_SERVICE_KEY).' })
+  const problem = keyProblem(cfg.serviceKey)
+  if (problem) {
+    console.error(`[cms] NUXT_CMS_SUPABASE_SERVICE_KEY is not a service key (${problem})`)
+    throw createError({ statusCode: 503, statusMessage: `Key Supabase di server salah: yang terpasang key "${problem}", bukan service_role. Ganti NUXT_CMS_SUPABASE_SERVICE_KEY dengan key service_role / secret.` })
+  }
   return cfg
+}
+
+// Turns a Storage error response into a message the editor can act on.
+function storageError(status: number, body: string, bucket: string): string {
+  let msg = body
+  try {
+    const j = JSON.parse(body) as { message?: string; error?: string; statusCode?: string }
+    msg = `${j.error ?? ''} ${j.message ?? ''} ${j.statusCode ?? ''}`
+  } catch {
+    // not JSON
+  }
+  if (status === 404 || /bucket not found/i.test(msg)) return `Bucket "${bucket}" tidak ditemukan di Supabase. Jalankan npm run cms:media-setup.`
+  if (status === 413 || /too large|maximum allowed size|exceeded/i.test(msg)) return 'Gambar melebihi batas ukuran bucket (5 MB). Pakai gambar yang lebih kecil.'
+  if (status === 415 || /mime|invalid_mime_type/i.test(msg)) return 'Jenis file ditolak oleh storage. Pakai JPG, PNG, WebP atau AVIF.'
+  if (status === 401 || status === 403 || /jwt|signature|unauthori[sz]ed|invalid api key|row-level security/i.test(msg)) return 'Supabase menolak key server. Cek nilai NUXT_CMS_SUPABASE_SERVICE_KEY (harus key service_role / secret, tanpa spasi atau tanda kutip), lalu redeploy.'
+  return `Upload ke storage gagal (kode ${status}). Coba lagi.`
 }
 
 // Legacy service_role keys are JWTs (Authorization + apikey); the newer
@@ -64,8 +104,9 @@ export async function uploadToStorage(cfg: MediaStorageConfig, key: string, byte
     body: bytes as unknown as BodyInit
   })
   if (!res.ok) {
-    console.error('[cms] media upload to storage failed:', res.status, (await res.text().catch(() => '')).slice(0, 300))
-    throw createError({ statusCode: 502, statusMessage: res.status === 404 ? `Storage bucket "${cfg.bucket}" was not found.` : 'Upload to storage failed. Try again.' })
+    const body = (await res.text().catch(() => '')).slice(0, 500)
+    console.error('[cms] media upload to storage failed:', res.status, body)
+    throw createError({ statusCode: 502, statusMessage: storageError(res.status, body, cfg.bucket) })
   }
 }
 
