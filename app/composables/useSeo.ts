@@ -70,6 +70,8 @@ export const pageSeo = {
 
 /** Absolute URL on the production origin (no trailing slash on the base). */
 export function useSiteUrl(path = '/') {
+  // Media-library images are already absolute (Supabase Storage).
+  if (/^https:\/\//.test(path)) return path
   const base = useRuntimeConfig().public.siteUrl.replace(/\/+$/, '')
   return base + (path.startsWith('/') ? path : `/${path}`)
 }

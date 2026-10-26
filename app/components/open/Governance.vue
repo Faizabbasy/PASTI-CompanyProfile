@@ -10,7 +10,7 @@
 //    reduced motion shows the completed state.
 // 3. Audit trail: a log built from that same request — roles, not people;
 //    no dates, no document numbers (illustration). Rows reveal in order.
-const { governance } = useOpen()
+const { governance } = useOpenPage()
 const flow = governance.approvalFlow
 
 const laneRef = ref<HTMLElement | null>(null)

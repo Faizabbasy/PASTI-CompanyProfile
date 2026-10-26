@@ -95,7 +95,7 @@ function addMissionPoint() {
             <AdminFormField :id="fieldId('hero.primaryCtaUrl')" v-model="form.hero.primaryCtaUrl" label="Primary CTA link" inputmode="url" :maxlength="500" hint="/path, #anchor, https://, mailto: or tel:" :error="err('hero.primaryCtaUrl')" />
             <AdminFormField :id="fieldId('hero.secondaryCtaLabel')" v-model="form.hero.secondaryCtaLabel" label="Secondary CTA label" :maxlength="LIM.ctaLabel" :error="err('hero.secondaryCtaLabel')" />
             <AdminFormField :id="fieldId('hero.secondaryCtaUrl')" v-model="form.hero.secondaryCtaUrl" label="Secondary CTA link" inputmode="url" :maxlength="500" hint="Public button scrolls to the story section (code-managed); only the label is used." :error="err('hero.secondaryCtaUrl')" />
-            <AdminFormField :id="fieldId('hero.heroMedia')" v-model="form.hero.heroMedia" label="Hero media" :maxlength="200" hint="Not shown on the public page yet (code-managed there)." :error="err('hero.heroMedia')" />
+            <AdminFormImage :id="fieldId('hero.heroMedia')" v-model="form.hero.heroMedia" label="Hero media" hint="Not shown on the public page yet (code-managed there)." :error="err('hero.heroMedia')" />
             <AdminFormField :id="fieldId('hero.heroMediaAlt')" v-model="form.hero.heroMediaAlt" label="Hero media alt text" :maxlength="160" :error="err('hero.heroMediaAlt')" />
           </div>
         </div>
@@ -121,7 +121,7 @@ function addMissionPoint() {
             </div>
           </fieldset>
           <div class="grid gap-5 tablet:grid-cols-2">
-            <AdminFormField :id="fieldId('story.supportingMedia')" v-model="form.story.supportingMedia" label="Supporting media" :maxlength="200" hint="Not shown on the public page yet (code-managed there)." :error="err('story.supportingMedia')" />
+            <AdminFormImage :id="fieldId('story.supportingMedia')" v-model="form.story.supportingMedia" label="Supporting media" hint="Not shown on the public page yet (code-managed there)." :error="err('story.supportingMedia')" />
             <AdminFormField :id="fieldId('story.supportingMediaAlt')" v-model="form.story.supportingMediaAlt" label="Supporting media alt text" :maxlength="160" :error="err('story.supportingMediaAlt')" />
           </div>
         </div>
@@ -176,7 +176,7 @@ function addMissionPoint() {
               </div>
               <AdminFormField :id="fieldId(`milestones.${index}.description`)" v-model="item.description" label="Description" multiline :maxlength="600" hint="Not shown on the public page yet (code-managed there)." :error="err(`milestones.${index}.description`)" />
               <div class="grid gap-4 tablet:grid-cols-2">
-                <AdminFormField :id="fieldId(`milestones.${index}.optionalMedia`)" v-model="item.optionalMedia" label="Media (optional)" :maxlength="200" hint="Not shown on the public page yet (code-managed there)." :error="err(`milestones.${index}.optionalMedia`)" />
+                <AdminFormImage :id="fieldId(`milestones.${index}.optionalMedia`)" v-model="item.optionalMedia" label="Media (optional)" hint="Not shown on the public page yet (code-managed there)." :error="err(`milestones.${index}.optionalMedia`)" />
                 <AdminFormField :id="fieldId(`milestones.${index}.optionalMediaAlt`)" v-model="item.optionalMediaAlt" label="Media alt text" :maxlength="160" :error="err(`milestones.${index}.optionalMediaAlt`)" />
               </div>
             </template>
@@ -209,7 +209,7 @@ function addMissionPoint() {
               </div>
               <AdminFormField :id="fieldId(`leadership.${index}.shortBio`)" v-model="item.shortBio" label="Short bio" multiline :maxlength="800" hint="Not shown on the public page yet (code-managed there)." :error="err(`leadership.${index}.shortBio`)" />
               <div class="grid gap-4 tablet:grid-cols-2">
-                <AdminFormField :id="fieldId(`leadership.${index}.portrait`)" v-model="item.portrait" label="Portrait" :maxlength="200" hint="Image path under /images/" :error="err(`leadership.${index}.portrait`)" />
+                <AdminFormImage :id="fieldId(`leadership.${index}.portrait`)" v-model="item.portrait" label="Portrait" :error="err(`leadership.${index}.portrait`)" />
                 <AdminFormField :id="fieldId(`leadership.${index}.portraitAlt`)" v-model="item.portraitAlt" label="Portrait alt text" :maxlength="160" :error="err(`leadership.${index}.portraitAlt`)" />
               </div>
             </template>
@@ -235,7 +235,7 @@ function addMissionPoint() {
           <p class="rounded-md border border-navy-100 bg-white px-3 py-2 text-xs text-navy-600">Public SEO tags are still code-managed; these fields are stored for a later step.</p>
           <AdminFormField :id="fieldId('seo.metaTitle')" v-model="form.seo.metaTitle" label="Meta title" :maxlength="70" required :error="err('seo.metaTitle')" />
           <AdminFormField :id="fieldId('seo.metaDescription')" v-model="form.seo.metaDescription" label="Meta description" multiline :rows="2" :maxlength="170" required :error="err('seo.metaDescription')" />
-          <AdminFormField :id="fieldId('seo.ogImage')" v-model="form.seo.ogImage" label="Share image" :maxlength="200" hint="Image path under /images/ (1200×630)" :error="err('seo.ogImage')" />
+          <AdminFormImage :id="fieldId('seo.ogImage')" v-model="form.seo.ogImage" label="Share image" aspect="1200/630" hint="1200×630 share card." :error="err('seo.ogImage')" />
           <AdminFormField :id="fieldId('seo.canonicalUrl')" v-model="form.seo.canonicalUrl" label="Canonical URL" inputmode="url" :maxlength="300" hint="https://www.pastipeople.id/… — no query or hash" :error="err('seo.canonicalUrl')" />
           <label class="inline-flex items-center gap-2 text-sm">
             <input v-model="form.seo.noIndex" type="checkbox" class="h-4 w-4">

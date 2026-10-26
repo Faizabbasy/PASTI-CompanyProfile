@@ -168,8 +168,8 @@ const company = useCompany()
                   <span class="ml-2 text-xs text-navy-500">{{ item.related.length }}/{{ LIM.related }}</span>
                 </div>
               </fieldset>
-              <div class="grid gap-4 tablet:grid-cols-[1fr_7rem_7rem]">
-                <AdminFormField :id="fieldId(`services.items.${index}.image`)" v-model="item.image" label="Image" :maxlength="200" required hint="Image path under /images/ — shown whole at its own ratio." :error="err(`services.items.${index}.image`)" />
+              <AdminFormImage :id="fieldId(`services.items.${index}.image`)" v-model="item.image" label="Image" required hint="Shown whole at its own ratio. Width and height fill in automatically." :error="err(`services.items.${index}.image`)" @dimensions="(s) => { item.imageWidth = s.width; item.imageHeight = s.height }" />
+              <div class="grid gap-4 tablet:grid-cols-[7rem_7rem]">
                 <div>
                   <label :for="fieldId(`services.items.${index}.imageWidth`)" class="text-sm font-medium">Width px</label>
                   <input :id="fieldId(`services.items.${index}.imageWidth`)" v-model.number="item.imageWidth" type="number" min="200" max="6000" class="mt-1 block w-full rounded-md border border-navy-200 bg-white px-3 py-2 text-sm">
@@ -197,7 +197,7 @@ const company = useCompany()
           <AdminFormRepeater legend="Studio wall visuals" :items="form.wall.visuals" :max="24" :published-ids="publishedIds" :item-title="(v) => v.label" add-label="Add visual" :error="err('wall.visuals')" @add="addVisual">
             <template #default="{ item, index }">
               <div class="grid gap-4 tablet:grid-cols-2">
-                <AdminFormField :id="fieldId(`wall.visuals.${index}.image`)" v-model="item.image" label="Image" :maxlength="200" required hint="Image path under /images/" :error="err(`wall.visuals.${index}.image`)" />
+                <AdminFormImage :id="fieldId(`wall.visuals.${index}.image`)" v-model="item.image" label="Image" required :error="err(`wall.visuals.${index}.image`)" />
                 <AdminFormField :id="fieldId(`wall.visuals.${index}.label`)" v-model="item.label" label="Caption (also alt text)" :maxlength="LIM.visualLabel" required :error="err(`wall.visuals.${index}.label`)" />
               </div>
             </template>
@@ -296,7 +296,7 @@ const company = useCompany()
         <div v-show="activeTab === 'seo'" id="panel-seo" role="tabpanel" aria-labelledby="tab-seo" class="grid gap-5">
           <AdminFormField :id="fieldId('seo.metaTitle')" v-model="form.seo.metaTitle" label="Meta title" :maxlength="70" required :error="err('seo.metaTitle')" />
           <AdminFormField :id="fieldId('seo.metaDescription')" v-model="form.seo.metaDescription" label="Meta description" multiline :rows="2" :maxlength="170" required :error="err('seo.metaDescription')" />
-          <AdminFormField :id="fieldId('seo.ogImage')" v-model="form.seo.ogImage" label="Share image" :maxlength="200" hint="Image path under /images/ (1200×630). Empty = current share card." :error="err('seo.ogImage')" />
+          <AdminFormImage :id="fieldId('seo.ogImage')" v-model="form.seo.ogImage" label="Share image" aspect="1200/630" hint="1200×630 share card. Empty = current share card." :error="err('seo.ogImage')" />
           <AdminFormField :id="fieldId('seo.canonicalUrl')" v-model="form.seo.canonicalUrl" label="Canonical URL" inputmode="url" :maxlength="300" hint="https://www.pastipeople.id/… — no query or hash. Empty = this page's URL." :error="err('seo.canonicalUrl')" />
           <label class="inline-flex items-center gap-2 text-sm">
             <input v-model="form.seo.noIndex" type="checkbox" class="h-4 w-4">

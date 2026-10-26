@@ -40,14 +40,17 @@ export const linkUrl = z
   .max(500, 'Max 500 characters.')
   .refine((v) => v === '' || isSafeLinkUrl(v), 'Use a /path, #anchor, https://, mailto: or tel: link.')
 
-// Media references point at files already in /public/images until the Media
-// library exists (later step). No traversal, no external hosts, images only.
+// Media references: a file already in /public/images, or an image uploaded
+// through the Media library (Supabase Storage public URL, key shape set by
+// server/utils/cms/media.ts). No traversal, no other hosts, images only.
 export const MEDIA_REF = /^\/images\/(?:[a-z0-9_-]+\/)*[a-z0-9_.-]+\.(?:webp|jpe?g|png|avif)$/i
+export const MEDIA_UPLOAD_REF = /^https:\/\/[a-z0-9-]+\.supabase\.co\/storage\/v1\/object\/public\/[a-z0-9_-]+\/uploads\/\d{4}\/\d{2}\/[a-z0-9-]+\.(?:webp|jpe?g|png|avif)$/
+export const isMediaRef = (v: string) => (MEDIA_REF.test(v) || MEDIA_UPLOAD_REF.test(v)) && !v.includes('..')
 export const mediaRef = z
   .string()
   .trim()
-  .max(200)
-  .refine((v) => v === '' || (MEDIA_REF.test(v) && !v.includes('..')), 'Use an image path under /images/ (webp, jpg, png, avif).')
+  .max(300)
+  .refine((v) => v === '' || isMediaRef(v), 'Pick an image from the Media library, or use a path under /images/ (webp, jpg, png, avif).')
 
 export const CANONICAL_HOSTS = ['pastipeople.id', 'www.pastipeople.id']
 export const canonicalUrl = z

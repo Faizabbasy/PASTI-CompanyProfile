@@ -4,7 +4,7 @@
 // so the difference is visible, not just listed: one envelope with both
 // technical and price; two envelopes where price stays locked until the
 // technical evaluation passes; two separate stages.
-const { procurement } = useOpen()
+const { procurement } = useOpenPage()
 const methods = procurement.methods
 const pickedIdx = ref(1)
 const picked = computed(() => methods[pickedIdx.value]!)

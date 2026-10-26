@@ -5,7 +5,7 @@
 // approach (Understand → … → Deploy) runs the full width on a yellow trace
 // that draws on entry, each step checked. The length difference is the
 // argument. Closing line set large: the system adapts to your business.
-const { notSaas } = useOpen()
+const { notSaas } = useOpenPage()
 const tracksRef = ref<HTMLElement | null>(null)
 const tracksIn = useOpenInView(tracksRef, 0.35)
 </script>

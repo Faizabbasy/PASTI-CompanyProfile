@@ -170,7 +170,7 @@ const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin
           <AdminFormRepeater legend="Gallery" :items="form.gallery" :max="LIM.gallery" :published-ids="publishedIds" :item-title="(g) => g.alt || g.src" add-label="Add image" :error="err('gallery')" @add="addImage">
             <template #default="{ item, index }">
               <div class="grid gap-4 tablet:grid-cols-[1fr_160px]">
-                <AdminFormField :id="fieldId(`gallery.${index}.src`)" v-model="item.src" label="Image" :maxlength="200" required hint="Path under /images/." :error="err(`gallery.${index}.src`)" />
+                <AdminFormImage :id="fieldId(`gallery.${index}.src`)" v-model="item.src" label="Image" required :error="err(`gallery.${index}.src`)" />
                 <div>
                   <label :for="fieldId(`gallery.${index}.kind`)" class="text-sm font-medium">Kind</label>
                   <select :id="fieldId(`gallery.${index}.kind`)" v-model="item.kind" class="mt-1 block w-full rounded-md border border-navy-200 bg-white px-3 py-2 text-sm">
@@ -183,7 +183,6 @@ const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin
               <AdminFormField :id="fieldId(`gallery.${index}.alt`)" v-model="item.alt" label="Alt text" :maxlength="LIM.alt" required :error="err(`gallery.${index}.alt`)" />
               <AdminFormField :id="fieldId(`gallery.${index}.sourceNote`)" v-model="item.sourceNote" label="Source note (internal, never public)" multiline :rows="2" :maxlength="LIM.sourceNote" :error="err(`gallery.${index}.sourceNote`)" />
               <AdminWorkClaimStatus :id="fieldId(`gallery.${index}.approvalStatus`)" v-model="item.approvalStatus" :can-approve="canApprove" :saved-status="savedImage(item.id)" :error="err(`gallery.${index}.approvalStatus`)" />
-              <img v-if="item.src && !err(`gallery.${index}.src`)" :src="item.src" alt="" class="max-h-40 w-auto rounded-md ring-1 ring-navy-100">
             </template>
           </AdminFormRepeater>
         </div>

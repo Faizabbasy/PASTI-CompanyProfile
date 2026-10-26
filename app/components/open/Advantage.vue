@@ -6,7 +6,7 @@
 // on phones; the "Ownership Potential" row is left out pending approval.
 // Last, the difference in one line and two flows: SaaS gives you a product,
 // OPEN gives you a foundation to build your system.
-const { advantage } = useOpen()
+const { advantage } = useOpenPage()
 const ringRef = ref<HTMLElement | null>(null)
 const ringIn = useOpenInView(ringRef, 0.25)
 

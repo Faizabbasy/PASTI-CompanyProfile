@@ -6,7 +6,7 @@
 // WhatsApp contact and says so — nothing pretends to be "sent".
 // Errors: inline, linked with aria-describedby; focus moves to the first
 // invalid field.
-const { cta } = useOpen()
+const { cta } = useOpenPage()
 const { interest } = useOpenDemo()
 const { phone, link } = useWhatsapp()
 

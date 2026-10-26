@@ -8,7 +8,7 @@
 //    target lights its path. No vendor logos. Then the three approaches.
 // 3. Security & access: the seven measures as a ruled list. No standards or
 //    certifications beyond the deck.
-const { visibility, integration, security } = useOpen()
+const { visibility, integration, security } = useOpenPage()
 
 const dashRef = ref<HTMLElement | null>(null)
 const dashIn = useOpenInView(dashRef, 0.25)

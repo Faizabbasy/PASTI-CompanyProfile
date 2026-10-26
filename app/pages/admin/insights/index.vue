@@ -163,7 +163,7 @@ const unpublishedSelected = computed(() => {
         <div v-show="activeTab === 'seo'" id="panel-seo" role="tabpanel" aria-labelledby="tab-seo" class="grid gap-5">
           <AdminFormField :id="fieldId('seo.metaTitle')" v-model="form.seo.metaTitle" label="Meta title" :maxlength="70" required :error="err('seo.metaTitle')" />
           <AdminFormField :id="fieldId('seo.metaDescription')" v-model="form.seo.metaDescription" label="Meta description" multiline :rows="2" :maxlength="170" required :error="err('seo.metaDescription')" />
-          <AdminFormField :id="fieldId('seo.ogImage')" v-model="form.seo.ogImage" label="Share image" :maxlength="200" hint="Image path under /images/ (1200×630). Empty = current share card." :error="err('seo.ogImage')" />
+          <AdminFormImage :id="fieldId('seo.ogImage')" v-model="form.seo.ogImage" label="Share image" aspect="1200/630" hint="1200×630 share card. Empty = current share card." :error="err('seo.ogImage')" />
           <AdminFormField :id="fieldId('seo.canonicalUrl')" v-model="form.seo.canonicalUrl" label="Canonical URL" inputmode="url" :maxlength="300" hint="https://www.pastipeople.id/… — no query or hash. Empty = this page's URL." :error="err('seo.canonicalUrl')" />
           <label class="inline-flex items-center gap-2 text-sm">
             <input v-model="form.seo.noIndex" type="checkbox" class="h-4 w-4">

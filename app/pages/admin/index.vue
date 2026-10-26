@@ -76,6 +76,7 @@ const statusClass: Record<string, string> = {
         <div class="rounded-lg border border-navy-100 bg-white">
           <h2 class="border-b border-navy-100 px-5 py-3 text-sm font-semibold">Recent media</h2>
           <ul class="divide-y divide-navy-100">
+            <li v-if="!data.recentMedia.length" class="px-5 py-3 text-sm text-navy-500">No uploads yet. <NuxtLink to="/admin/media" class="font-semibold underline">Open Media</NuxtLink></li>
             <li v-for="m in data.recentMedia" :key="m.id" class="px-5 py-3 text-sm">
               <p class="truncate font-medium">{{ m.filename }}</p>
               <p class="text-xs text-navy-500">{{ m.mime }} · {{ m.sizeKb }} KB · {{ fmt(m.uploadedAt) }}</p>

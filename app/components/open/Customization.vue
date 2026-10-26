@@ -7,7 +7,7 @@
 // implementation phases on one trace and the deck's foundation
 // implementation scope, worded as "can include" — not every engagement
 // includes every activity.
-const { customization } = useOpen()
+const { customization } = useOpenPage()
 const panelRef = ref<HTMLElement | null>(null)
 const panelIn = useOpenInView(panelRef, 0.2)
 const phasesRef = ref<HTMLElement | null>(null)

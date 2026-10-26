@@ -72,7 +72,7 @@ const label = (b: BodyBlock) => TYPES.find((t) => t.type === b.type)!.label
             <AdminFormStringList legend="Items" :path="`body.${i}.items`" :items="b.items" :max="LIM.listItems" :min="1" :maxlength="LIM.listItem" item-label="Item" add-label="Add item" :err="err" />
           </template>
           <template v-else-if="b.type === 'image'">
-            <AdminFormField :id="fieldId(`body.${i}.src`)" v-model="b.src" label="Image" :maxlength="200" required hint="Path under /images/." :error="err(`body.${i}.src`)" />
+            <AdminFormImage :id="fieldId(`body.${i}.src`)" v-model="b.src" label="Image" required :error="err(`body.${i}.src`)" />
             <AdminFormField :id="fieldId(`body.${i}.alt`)" v-model="b.alt" label="Alt text" :maxlength="LIM.alt" required :error="err(`body.${i}.alt`)" />
             <AdminFormField :id="fieldId(`body.${i}.caption`)" v-model="b.caption" label="Caption (optional)" :maxlength="LIM.caption" :error="err(`body.${i}.caption`)" />
           </template>

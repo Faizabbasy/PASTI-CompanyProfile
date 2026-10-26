@@ -5,9 +5,12 @@
 // OPEN is a customizable, ready-to-develop procurement framework — never
 // "OPEN = e-Procurement", never plug-and-play SaaS. Copy lives in useOpen.
 // Global header/footer come from app.vue (sections 01 and 14).
-const { seo } = useOpen()
-
-usePageSeo({ ...seo, image: '/images/og/open.jpg' })
+//
+// Content source is resolved once here (code content by default; the
+// published CMS snapshot only when the server-side flag allows it) and read
+// by the OPEN sections through useOpenPage().
+const content = await resolveOpenPageContent()
+usePageSeo(content.value.seo)
 </script>
 
 <template>

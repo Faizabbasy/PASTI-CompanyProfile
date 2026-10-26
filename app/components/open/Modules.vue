@@ -7,7 +7,7 @@
 // two catalog types and the record every purchase is controlled over.
 // Panels stay in the DOM (v-show) so all content is indexable. The
 // ecosystem dial and other CTAs can open a tab (useOpenDemo.openModule).
-const { modulesIntro, procurement, vendor, catalog } = useOpen()
+const { modulesIntro, procurement, vendor, catalog } = useOpenPage()
 const { activeModule, requestDemo, scrollTo } = useOpenDemo()
 const tabs = [procurement, vendor, catalog]
 const contractCat = catalog.types[0]!

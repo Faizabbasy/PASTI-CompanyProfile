@@ -6,7 +6,7 @@
 // While on screen the record advances one lifecycle step every ~2.6s (one
 // reactive index; CSS does the rest) and every step leaves a line in the
 // trace. Paused off-screen; static at the last step under reduced motion.
-const { hero } = useOpen()
+const { hero } = useOpenPage()
 const steps = hero.lifecycle
 const roles = ['Procurement Officer', 'Manager', 'Head of Division', 'Procurement Head']
 

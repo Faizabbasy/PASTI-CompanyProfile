@@ -13,7 +13,7 @@ if (import.meta.client) {
 // buttons too. The ordered list underneath is the real content (all eight
 // steps, always readable); the readout is a visual duplicate (aria-hidden).
 // Then the six capabilities and five principles from the deck.
-const { auction } = useOpen()
+const { auction } = useOpenPage()
 const { requestDemo } = useOpenDemo()
 const steps = auction.steps
 const active = ref(0)

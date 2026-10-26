@@ -1,4 +1,4 @@
-import { DUMMY_CONTENT, DUMMY_MEDIA } from '../../data/cmsDummy'
+import { DUMMY_CONTENT } from '../../data/cmsDummy'
 
 export default defineEventHandler(async (event) => {
   const { user } = await requirePermission(event, 'cms.view')
@@ -22,6 +22,7 @@ export default defineEventHandler(async (event) => {
       updatedAt,
       updatedBy
     })),
-    recentMedia: [...DUMMY_MEDIA].sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt)).slice(0, 4)
+    // Real Media library uploads (newest first).
+    recentMedia: (await listMedia()).slice(0, 4).map((m) => ({ id: m.id, filename: m.originalName, mime: m.mime, sizeKb: Math.round(m.size / 1024), uploadedAt: m.uploadedAt, uploadedBy: m.uploadedBy?.name ?? '' }))
   }
 })

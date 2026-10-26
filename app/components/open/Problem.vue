@@ -6,7 +6,7 @@
 // visibility doesn't." Part two (navy): the real problem as five questions
 // any procurement decision must answer — WHO / WHY / WHEN / WHAT / TRACE.
 // All motion is one class switch per part (CSS transitions).
-const { problem } = useOpen()
+const { problem } = useOpenPage()
 
 const pileRef = ref<HTMLElement | null>(null)
 const pileIn = useOpenInView(pileRef, 0.3)

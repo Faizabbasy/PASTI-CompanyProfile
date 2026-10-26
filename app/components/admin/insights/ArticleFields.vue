@@ -106,11 +106,10 @@ function moveCategory(i: number, d: number) {
 
     <template v-if="show('media')">
       <div class="grid gap-5 tablet:grid-cols-2">
-        <AdminFormField :id="fieldId('coverImage')" v-model="form.coverImage" label="Cover poster" :maxlength="200" required hint="Approved image under /images/ (4:5 poster)." :error="err('coverImage')" />
+        <AdminFormImage :id="fieldId('coverImage')" v-model="form.coverImage" label="Cover poster" required aspect="4/5" :focus="form.coverFocus" hint="Approved image (4:5 poster)." :error="err('coverImage')" />
         <AdminFormField :id="fieldId('coverImageAlt')" v-model="form.coverImageAlt" label="Cover alt text" :maxlength="LIM.alt" required :error="err('coverImageAlt')" />
       </div>
       <AdminFormField :id="fieldId('coverFocus')" v-model="form.coverFocus" label="Focal point" :maxlength="16" required hint="“x% y%” of the poster's visual — the reader cover crops to it (e.g. 74.5% 48%)." :error="err('coverFocus')" />
-      <img v-if="form.coverImage && !err('coverImage')" :src="form.coverImage" alt="" class="aspect-[4/5] w-40 rounded-lg object-cover ring-1 ring-navy-100" :style="{ objectPosition: form.coverFocus }">
     </template>
 
     <template v-if="show('body')">

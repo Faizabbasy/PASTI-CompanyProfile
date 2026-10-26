@@ -34,10 +34,9 @@ function suggestSlug() {
       <AdminFormField :id="fieldId('shortDescription')" v-model="form.shortDescription" label="Short description" multiline :maxlength="LIM.description" required hint="Shown on the index card (two lines in the grid, full in the list)." :error="err('shortDescription')" />
       <AdminFormField :id="fieldId('filterGroup')" v-model="form.filterGroup" label="Filter group" :maxlength="LIM.filterGroup" required hint="The index filter chip this project belongs to (e.g. Commerce, Wellness)." :error="err('filterGroup')" />
       <div class="grid gap-5 tablet:grid-cols-2">
-        <AdminFormField :id="fieldId('poster')" v-model="form.poster" label="Poster image" :maxlength="200" required hint="Approved public image under /images/ — shown 4:5 in the deck and index. No confidential screenshots." :error="err('poster')" />
+        <AdminFormImage :id="fieldId('poster')" v-model="form.poster" label="Poster image" required aspect="4/5" hint="Approved public image — shown 4:5 in the deck and index. No confidential screenshots." :error="err('poster')" />
         <AdminFormField :id="fieldId('posterAlt')" v-model="form.posterAlt" label="Poster alt text" :maxlength="LIM.alt" required :error="err('posterAlt')" />
       </div>
-      <img v-if="form.poster && !err('poster')" :src="form.poster" alt="" class="aspect-[4/5] w-40 rounded-lg object-cover object-top ring-1 ring-navy-100">
     </template>
   </div>
 </template>

@@ -89,6 +89,8 @@ export const testimonialsCollection = defineCollection<TestimonialContent>({
 // Checked where the public folder is on disk (dev, Node server); on hosts
 // that serve /public from a CDN only, the schema check alone applies.
 function publicFileMissing(path: string): boolean {
+  // Media-library uploads live in Supabase Storage, not under /public.
+  if (/^https:\/\//.test(path)) return false
   const dir = join(process.cwd(), 'public')
   if (!existsSync(dir)) return false
   return !existsSync(join(dir, ...path.split('/').filter(Boolean)))

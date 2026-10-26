@@ -27,6 +27,14 @@ export default defineNuxtConfig({
       databaseUrl: '',
       databaseCa: '',
       allowFsStorage: false,
+      // Media library uploads (Supabase Storage, public bucket). Unset →
+      // uploads answer 503; existing /images/ paths keep working.
+      // NUXT_CMS_SUPABASE_URL (https://<ref>.supabase.co) /
+      // NUXT_CMS_SUPABASE_SERVICE_KEY (service_role or secret key — server
+      // only, never sent to the browser) / NUXT_CMS_MEDIA_BUCKET.
+      supabaseUrl: '',
+      supabaseServiceKey: '',
+      mediaBucket: 'cms-media',
       sessionSecret: '',
       trustProxy: false,
       allowSeed: false,
@@ -58,6 +66,10 @@ export default defineNuxtConfig({
       // Server-only; default false. Shared contact data and form behaviour
       // stay in code either way.
       contactPublicEnabled: false,
+      // GET /api/public/pages/open serves the published OPEN product page
+      // only when true (NUXT_CMS_OPEN_PUBLIC_ENABLED). Server-only; default
+      // false. Structure, mock-ups and the demo form stay in code either way.
+      openPublicEnabled: false,
       // GET /api/public/testimonials serves public-eligible shared
       // testimonials only when true (NUXT_CMS_TESTIMONIALS_PUBLIC_ENABLED).
       // Server-only; default false. No page reads it yet — Home and every

@@ -6,7 +6,7 @@ import type { OpenItem } from '~/composables/useOpen'
 // entry (it already exists — "we don't start from a blank page"), then the
 // path from framework to system as three layers: OPEN Framework → Your
 // Business (adapted through six dimensions) → Your Procurement System.
-const { framework } = useOpen()
+const { framework } = useOpenPage()
 const layers = framework.layers as [OpenItem, OpenItem, OpenItem]
 const boardRef = ref<HTMLElement | null>(null)
 const boardIn = useOpenInView(boardRef, 0.3)

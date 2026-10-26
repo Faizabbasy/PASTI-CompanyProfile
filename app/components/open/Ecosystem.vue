@@ -15,7 +15,7 @@ if (import.meta.client) {
 // ecosystem. Nodes are buttons: they scroll the dial to that function.
 // Below desktop / reduced motion: no pin — the full ring (static, arc
 // closed) above the ten functions as a vertical list.
-const { ecosystem } = useOpen()
+const { ecosystem } = useOpenPage()
 const { openModule } = useOpenDemo()
 const nodes = ecosystem.nodes
 const n = nodes.length

@@ -6,7 +6,7 @@
 // seven words threaded on one trace line that draws once on load.
 // Entrance: CSS classes switched by the page-ready gate; the ring draws, the
 // letters rise. No idle motion here except the record (paused off-screen).
-const { hero } = useOpen()
+const { hero } = useOpenPage()
 const { requestDemo, scrollTo } = useOpenDemo()
 const { pageReady } = usePageReady()
 
@@ -46,8 +46,8 @@ const go = computed(() => mounted.value && pageReady.value)
 
           <div class="op-fade mt-9" style="--d: 700ms">
             <BaseHeroCtas
-              :primary="{ label: 'Request a Demo' }"
-              :secondary="{ label: 'Explore OPEN', down: true }"
+              :primary="{ label: hero.primaryCtaLabel }"
+              :secondary="{ label: hero.secondaryCtaLabel, down: true }"
               @primary="requestDemo()"
               @secondary="scrollTo('problem')"
             />

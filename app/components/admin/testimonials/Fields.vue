@@ -65,13 +65,7 @@ function toggleCategory(c: (typeof TESTIMONIAL_CATEGORIES)[number]) {
 
     <fieldset v-if="show('media')" class="grid gap-4">
       <legend v-if="!tab" class="text-base font-semibold">Media</legend>
-      <div class="flex items-start gap-4">
-        <img v-if="form.photo && !err('photo')" :src="form.photo" alt="" class="mt-6 h-14 w-14 shrink-0 rounded-full object-cover ring-1 ring-navy-200">
-        <span v-else aria-hidden="true" class="mt-6 grid h-14 w-14 shrink-0 place-items-center rounded-full bg-navy-50 text-xs font-semibold text-navy-500">{{ (form.personName || '?').split(/\s+/).map((w) => w[0]).slice(0, 2).join('') }}</span>
-        <div class="flex-1">
-          <AdminFormField :id="fieldId('photo')" v-model="form.photo" label="Photo (optional)" :maxlength="200" hint="Image path under /images/ (webp, jpg, png, avif), e.g. /images/testimonials/name.webp. Empty = the card's initials fallback." :error="err('photo')" />
-        </div>
-      </div>
+      <AdminFormImage :id="fieldId('photo')" v-model="form.photo" label="Photo (optional)" round hint="Square portrait. Empty = the card's initials fallback." :error="err('photo')" />
       <AdminFormField :id="fieldId('photoAlt')" v-model="form.photoAlt" label="Photo alt text (optional)" :maxlength="LIM.photoAlt" hint="Empty = decorative: the name is printed next to the photo." :error="err('photoAlt')" />
     </fieldset>
 
