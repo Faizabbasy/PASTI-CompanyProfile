@@ -9,6 +9,7 @@
 // Content source is resolved once here (legacy code by default; the
 // published CMS snapshot only when the server-side flag allows it) and read
 // by the Creative sections through useCreativePage().
+await resolveTestimonials()
 const content = await resolveCreativePageContent()
 usePageSeo(content.value.seo)
 </script>

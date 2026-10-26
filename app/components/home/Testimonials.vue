@@ -33,8 +33,8 @@ if (import.meta.client) {
 // native horizontal swipe row with the full quote on each card.
 const label = 'What clients say'
 
-const { testimonials } = useTestimonials()
-const voices = testimonials.filter((t) => t.status !== 'placeholder')
+// Shared Testimonials CMS when live, else legacy (resolved in pages/index.vue).
+const voices = useTestimonialsSource()
 const N = voices.length
 const total = String(N).padStart(2, '0')
 

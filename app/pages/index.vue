@@ -22,6 +22,9 @@
 // only this homepage usage is removed.
 
 usePageSeo(pageSeo.home)
+// Testimoni reads shared testimonials (CMS when live, else legacy). Home
+// itself stays code-managed — this is shared content, not a Home record.
+await resolveTestimonials()
 </script>
 
 <template>

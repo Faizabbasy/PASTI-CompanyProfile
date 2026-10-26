@@ -125,7 +125,8 @@ export function resolveCreativeProjectImage(ref: string): string | null {
 
 export function resolveCreativeTestimonialRef(ref: string) {
   if (!(CREATIVE_TESTIMONIAL_REFS as readonly string[]).includes(ref)) return null
-  const t = useTestimonials().testimonials.find((x) => x.status === 'verified' && `t:${slug(x.name)}` === ref)
+  // Shared Testimonials CMS when live, else legacy (useTestimonialsSource).
+  const t = useTestimonialsSource().find((x) => x.status === 'verified' && x.id === `tst-${ref.slice(2)}`)
   return t ? { name: t.name, role: t.role, quote: t.quote, photo: t.photo } : null
 }
 
