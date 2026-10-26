@@ -16,27 +16,25 @@ function suggestSlug() {
 <template>
   <div class="grid gap-5">
     <template v-if="show('identity')">
-      <AdminFormField :id="fieldId('name')" v-model="form.name" label="Project name" :maxlength="LIM.name" required :error="err('name')" @focusout="suggestSlug" />
+      <AdminFormField :id="fieldId('name')" v-model="form.name" label="Nama proyek" :maxlength="LIM.name" required :error="err('name')" @focusout="suggestSlug" />
       <div>
-        <AdminFormField :id="fieldId('slug')" v-model="form.slug" label="Slug" :maxlength="60" required hint="Lowercase letters, numbers and hyphens. Unique; used as the card's deep link for new projects (/work#work-<slug>)." :error="err('slug')" />
+        <AdminFormField :id="fieldId('slug')" v-model="form.slug" label="Alamat singkat (slug)" :maxlength="60" required hint="Huruf kecil, angka dan tanda hubung, mis. toko-online-abc. Harus unik; dipakai sebagai link langsung ke kartu proyek (/work#work-<slug>). Terisi otomatis dari nama." :error="err('slug')" />
         <p v-if="slugChanged" class="mt-1 rounded border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-900" role="alert">
-          The published slug is “{{ publishedSlug }}”. Changing it can break existing links once published.
+          Slug yang sudah tayang adalah “{{ publishedSlug }}”. Kalau diganti, link lama ke proyek ini bisa tidak berfungsi setelah di-publish.
         </p>
       </div>
       <div class="grid gap-5 tablet:grid-cols-2">
-        <AdminFormField :id="fieldId('clientDisplayName')" v-model="form.clientDisplayName" label="Client display name (optional)" :maxlength="LIM.client" hint="Temporary until Shared Clients exists. Only names the client has approved for public use." :error="err('clientDisplayName')" />
-        <AdminFormField :id="fieldId('year')" v-model="form.year" label="Year (optional)" :maxlength="4" hint="4 digits. Leave empty if unknown — never guess." :error="err('year')" />
+        <AdminFormField :id="fieldId('clientDisplayName')" v-model="form.clientDisplayName" label="Nama klien (opsional)" :maxlength="LIM.client" hint="Hanya nama yang sudah disetujui klien untuk ditampilkan." :error="err('clientDisplayName')" />
+        <AdminFormField :id="fieldId('year')" v-model="form.year" label="Tahun (opsional)" :maxlength="4" hint="4 angka. Kosongkan kalau tidak tahu — jangan menebak." :error="err('year')" />
       </div>
-      <AdminFormField :id="fieldId('category')" v-model="form.category" label="Category" :maxlength="LIM.category" required :error="err('category')" />
+      <AdminFormField :id="fieldId('category')" v-model="form.category" label="Kategori" :maxlength="LIM.category" required hint="Tampil kecil di kartu proyek, mis. E-commerce Platform." :error="err('category')" />
     </template>
 
     <template v-if="show('card')">
-      <AdminFormField :id="fieldId('shortDescription')" v-model="form.shortDescription" label="Short description" multiline :maxlength="LIM.description" required hint="Shown on the index card (two lines in the grid, full in the list)." :error="err('shortDescription')" />
-      <AdminFormField :id="fieldId('filterGroup')" v-model="form.filterGroup" label="Filter group" :maxlength="LIM.filterGroup" required hint="The index filter chip this project belongs to (e.g. Commerce, Wellness)." :error="err('filterGroup')" />
-      <div class="grid gap-5 tablet:grid-cols-2">
-        <AdminFormImage :id="fieldId('poster')" v-model="form.poster" label="Poster image" required aspect="4/5" hint="Approved public image — shown 4:5 in the deck and index. No confidential screenshots." :error="err('poster')" />
-        <AdminFormField :id="fieldId('posterAlt')" v-model="form.posterAlt" label="Poster alt text" :maxlength="LIM.alt" required :error="err('posterAlt')" />
-      </div>
+      <AdminFormField :id="fieldId('shortDescription')" v-model="form.shortDescription" label="Deskripsi singkat" multiline :maxlength="LIM.description" required hint="Tampil di kartu proyek (dua baris di tampilan Grid, lengkap di tampilan List)." :error="err('shortDescription')" />
+      <AdminFormField :id="fieldId('filterGroup')" v-model="form.filterGroup" label="Kelompok filter" :maxlength="LIM.filterGroup" required hint="Nama tombol filter tempat proyek ini muncul (mis. Commerce, Wellness). Pakai nama yang sama untuk proyek sejenis." :error="err('filterGroup')" />
+      <AdminFormImage :id="fieldId('poster')" v-model="form.poster" label="Gambar poster" required aspect="4/5" hint="Rasio 4:5 (tegak). Hanya gambar yang boleh dipublikasikan — jangan screenshot yang berisi data rahasia." :error="err('poster')" />
+      <AdminFormField :id="fieldId('posterAlt')" v-model="form.posterAlt" label="Deskripsi gambar untuk pembaca layar" :maxlength="LIM.alt" required hint="Satu kalimat yang menjelaskan isi gambar." :error="err('posterAlt')" />
     </template>
   </div>
 </template>

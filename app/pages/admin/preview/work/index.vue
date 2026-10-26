@@ -33,6 +33,8 @@ const preview = computed<WorkPageContent | null>(() => {
   const { counts: _c, ...content } = r
   return adaptWorkCms(legacy, { version: d.work.version, content })
 })
+const mainRef = ref<HTMLElement | null>(null)
+usePreviewJump(mainRef)
 // Selected records that are not published yet (they would be missing live).
 const notLive = computed(() => {
   const d = data.value
@@ -46,25 +48,25 @@ const notLive = computed(() => {
   <div class="min-h-screen bg-pureWhite">
     <div class="sticky top-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 tablet:px-8" role="note">
       <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-1">
-        <strong>Draft preview — not public</strong>
-        <span v-if="data">Work · draft v{{ data.work.version }} · saved {{ fmtCmsTime(data.work.updatedAt) }} · page status: {{ data.work.status }}</span>
-        <span v-if="notLive" class="text-xs">{{ notLive }} selected record(s) not published yet</span>
+        <strong>Preview draft — belum tampil di website</strong>
+        <span v-if="data">Work · draft v{{ data.work.version }} · disimpan {{ fmtCmsTime(data.work.updatedAt) }} · status: {{ data.work.status }}</span>
+        <span v-if="notLive" class="text-xs">{{ notLive }} proyek/studi kasus terpilih belum di-publish</span>
         <span v-if="resolved?.counts.claimsWithheld || resolved?.counts.mediaWithheld" class="text-xs">
-          Not shown (awaiting approval / hidden): {{ resolved.counts.claimsWithheld }} metric(s), {{ resolved.counts.mediaWithheld }} image(s)
+          Tidak ditampilkan (belum disetujui / disembunyikan): {{ resolved.counts.claimsWithheld }} angka, {{ resolved.counts.mediaWithheld }} gambar
         </span>
-        <span v-if="preview?.source === 'legacy'" class="text-xs font-semibold">Selections resolve to nothing — the public page would keep its code content.</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Reload draft</button>
+        <span v-if="preview?.source === 'legacy'" class="text-xs font-semibold">Tidak ada proyek yang bisa tampil — halaman publik akan tetap memakai konten bawaan.</span>
+        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
       </div>
     </div>
 
-    <p v-if="status === 'pending'" class="p-8 text-sm" role="status">Loading draft…</p>
+    <p v-if="status === 'pending'" class="p-8 text-sm" role="status">Memuat draft…</p>
     <div v-else-if="error" class="mx-auto max-w-xl p-8" role="alert">
-      <p class="font-semibold">Preview unavailable.</p>
-      <p class="mt-1 text-sm text-navy-600">{{ error.statusCode === 403 ? 'Your role cannot preview this page.' : 'The draft could not be loaded. Your session may have expired.' }}</p>
-      <a href="/admin/work" class="mt-3 inline-block text-sm font-semibold underline">Back to the editor</a>
+      <p class="font-semibold">Preview tidak tersedia.</p>
+      <p class="mt-1 text-sm text-navy-600">{{ error.statusCode === 403 ? 'Role kamu tidak bisa membuka preview ini.' : 'Draft gagal dimuat. Mungkin sesi login sudah habis.' }}</p>
+      <a href="/admin/work" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
     </div>
 
-    <main v-else-if="preview">
+    <main v-else-if="preview" ref="mainRef">
       <AdminWorkPreviewScope :key="`${data?.work.version}-${data?.work.revision}-${data?.work.updatedAt}`" :content="preview">
         <WorkHero />
         <WorkProjectIndex />

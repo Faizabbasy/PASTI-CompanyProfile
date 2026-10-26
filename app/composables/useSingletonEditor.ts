@@ -111,22 +111,22 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
     const code = er.statusCode
     if (code === 401) {
       sessionExpired.value = true
-      return 'Your session has expired. Your changes are still on this page — sign in again in a new tab, then retry.'
+      return 'Sesi login sudah habis. Perubahanmu masih ada di halaman ini — login lagi di tab baru, lalu coba lagi.'
     }
     if (code === 403) {
       const msg = er.data?.statusMessage || er.statusMessage || ''
-      return /csrf|cross-site/i.test(msg) ? 'Security check failed. Reload the page and try again.' : `You don't have permission to ${action}.`
+      return /csrf|cross-site/i.test(msg) ? 'Pemeriksaan keamanan gagal. Muat ulang halaman lalu coba lagi.' : `Role kamu tidak punya izin untuk ${action}.`
     }
-    if (code === 409) return er.data?.statusMessage || er.statusMessage || 'This page changed elsewhere. Reload to continue.'
+    if (code === 409) return er.data?.statusMessage || er.statusMessage || 'Konten ini baru diubah di tempat lain. Muat ulang halaman untuk melanjutkan.'
     if (code === 400 || code === 422) {
       const fields = er.data?.data?.fields ?? []
       const mapped: Record<string, string> = {}
       for (const f of fields) mapped[f.path.replace(/^content\./, '')] ??= f.message
       errors.value = mapped
       jumpToFirstError()
-      return `Could not ${action}: ${fields.length || 'some'} field${fields.length === 1 ? '' : 's'} need attention.`
+      return `Gagal ${action}: ${fields.length || 'beberapa'} kolom perlu diperbaiki.`
     }
-    return `Could not ${action}. Please try again.`
+    return `Gagal ${action}. Coba lagi.`
   }
 
   async function ensureSession() {
@@ -141,7 +141,7 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
     notice.value = null
     errors.value = opts.validate(form.value)
     if (Object.keys(errors.value).length) {
-      notice.value = { kind: 'error', text: `Fix ${Object.keys(errors.value).length} field(s) before saving.` }
+      notice.value = { kind: 'error', text: `Perbaiki ${Object.keys(errors.value).length} kolom yang ditandai merah dulu sebelum menyimpan.` }
       jumpToFirstError()
       return
     }
@@ -157,10 +157,10 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
       form.value = opts.toForm(res.state.draft.content)
       savedSnapshot.value = JSON.stringify(opts.toPayload(form.value))
       notice.value = res.changedSections?.length
-        ? { kind: 'success', text: `Draft saved (v${res.state.draft.version}). Public site unchanged until an admin publishes.` }
-        : { kind: 'success', text: 'No changes to save.' }
+        ? { kind: 'success', text: `Draft tersimpan (v${res.state.draft.version}). Website belum berubah sampai admin klik Publish.` }
+        : { kind: 'success', text: 'Tidak ada perubahan untuk disimpan.' }
     } catch (e) {
-      notice.value = { kind: 'error', text: describeError(e, 'save the draft') }
+      notice.value = { kind: 'error', text: describeError(e, 'menyimpan draft') }
     } finally {
       busy.value = null
     }
@@ -170,9 +170,9 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
     if (!server.value) return
     const n = opts.name
     const prompts = {
-      publish: `Publish draft v${server.value.state.draft.version}? It becomes the live ${n} version.`,
-      unpublish: server.value.state.status === 'archived' ? `Restore ${n} to draft? It stays hidden from the public.` : `Unpublish ${n}? The public will no longer receive it.`,
-      archive: `Archive ${n}? The public will no longer receive it.`
+      publish: `Publish draft v${server.value.state.draft.version}? Draft ini akan langsung tampil di website sebagai versi ${n} yang baru.`,
+      unpublish: server.value.state.status === 'archived' ? `Kembalikan ${n} menjadi draft? Tetap tidak tampil di website.` : `Unpublish ${n}? Website akan kembali memakai konten bawaan.`,
+      archive: `Arsipkan ${n}? Website akan kembali memakai konten bawaan.`
     }
     if (!window.confirm(prompts[kind])) return
     notice.value = null
@@ -186,13 +186,13 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
       })
       server.value = res
       const text = {
-        publish: `Published v${res.state.published?.version}.`,
-        unpublish: `${n} is now a draft and hidden from the public.`,
-        archive: `${n} archived and hidden from the public.`
+        publish: `Berhasil di-publish (v${res.state.published?.version}).`,
+        unpublish: `${n} sekarang berstatus draft dan tidak tampil di website.`,
+        archive: `${n} diarsipkan dan tidak tampil di website.`
       }[kind]
       notice.value = { kind: 'success', text }
     } catch (e) {
-      notice.value = { kind: 'error', text: describeError(e, kind) }
+      notice.value = { kind: 'error', text: describeError(e, { publish: 'publish', unpublish: 'unpublish', archive: 'mengarsipkan' }[kind]) }
     } finally {
       busy.value = null
     }
@@ -202,7 +202,7 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
 
   // ---- unsaved-changes protection ------------------------------------------
   onBeforeRouteLeave(() => {
-    if (dirty.value && !window.confirm('You have unsaved changes. Leave this page and discard them?')) return false
+    if (dirty.value && !window.confirm('Ada perubahan yang belum disimpan. Tinggalkan halaman ini dan buang perubahannya?')) return false
   })
   function beforeUnload(e: BeforeUnloadEvent) {
     if (!dirty.value) return

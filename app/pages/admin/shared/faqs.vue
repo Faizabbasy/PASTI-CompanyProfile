@@ -83,6 +83,8 @@ function addFaq() {
         :item-title="(q) => q.question"
         add-label="Tambah pertanyaan"
         :error="err('items')"
+        collapsible
+        :has-error="(i) => !!(err(`items.${i}.question`) || err(`items.${i}.answer`))"
         @add="addFaq"
       >
         <template #default="{ item, index }">

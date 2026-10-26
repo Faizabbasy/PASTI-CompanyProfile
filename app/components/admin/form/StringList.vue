@@ -47,9 +47,9 @@ function add() {
         <AdminFormField v-else :id="fieldId(`${path}.${k}`)" v-model="items[k]!" :label="`${itemLabel} ${k + 1}`" :maxlength="maxlength" required :error="err(`${path}.${k}`)" />
       </div>
       <div class="mt-6 flex gap-1 text-xs">
-        <button type="button" class="rounded px-2 py-1 hover:bg-navy-50 disabled:opacity-40" :disabled="k === 0" :aria-label="`Move ${itemLabel} ${k + 1} up`" @click="move(k, -1)">↑</button>
-        <button type="button" class="rounded px-2 py-1 hover:bg-navy-50 disabled:opacity-40" :disabled="k === items.length - 1" :aria-label="`Move ${itemLabel} ${k + 1} down`" @click="move(k, 1)">↓</button>
-        <button type="button" class="rounded px-2 py-1 text-red-700 hover:bg-red-50 disabled:opacity-40" :disabled="items.length <= min" :aria-label="`Remove ${itemLabel} ${k + 1}`" @click="items.splice(k, 1)">Remove</button>
+        <button type="button" class="rounded px-2 py-1 hover:bg-navy-50 disabled:opacity-40" :disabled="k === 0" :aria-label="`Naikkan ${itemLabel} ${k + 1}`" @click="move(k, -1)">↑</button>
+        <button type="button" class="rounded px-2 py-1 hover:bg-navy-50 disabled:opacity-40" :disabled="k === items.length - 1" :aria-label="`Turunkan ${itemLabel} ${k + 1}`" @click="move(k, 1)">↓</button>
+        <button type="button" class="rounded px-2 py-1 text-red-700 hover:bg-red-50 disabled:opacity-40" :disabled="items.length <= min" :aria-label="`Hapus ${itemLabel} ${k + 1}`" @click="items.splice(k, 1)">Hapus</button>
       </div>
     </div>
     <div>

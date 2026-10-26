@@ -84,7 +84,7 @@ function measure(item: ClientForm['items'][number]) {
     <template v-if="form && state">
       <div class="mb-4 rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">
         <p><strong>{{ shown }}</strong> klien tampil <span class="text-navy-500">(minimal {{ LIM.minActive }}, maksimal {{ LIM.maxActive }})</span>. Urutan di sini = urutan di website; logo dibagi bergantian ke dua baris.</p>
-        <p class="mt-1 text-xs text-navy-500">Logo terbaik: PNG/WebP berlatar transparan, tanpa ruang kosong di sekeliling logo. Klien yang sudah pernah tayang tidak bisa dihapus — sembunyikan saja (hilangkan centang “Tampilkan”).</p>
+        <p class="mt-1 text-xs text-navy-500">Klien yang sudah pernah tayang tidak bisa dihapus — sembunyikan saja (hilangkan centang “Tampilkan”).</p>
       </div>
 
       <AdminFormRepeater
@@ -96,20 +96,28 @@ function measure(item: ClientForm['items'][number]) {
         :item-title="(c) => c.name"
         add-label="Tambah klien"
         :error="err('items')"
+        collapsible
+        :has-error="(i) => !!(err(`items.${i}.name`) || err(`items.${i}.logo`) || err(`items.${i}.ratio`))"
         @add="addClient"
       >
+        <template #summary="{ item }">
+          <span class="flex h-8 w-20 shrink-0 items-center justify-center rounded border border-navy-100 bg-white p-1">
+            <img v-if="item.logo" :src="item.logo" alt="" class="max-h-full max-w-full object-contain">
+          </span>
+        </template>
         <template #default="{ item, index }">
-          <div class="grid gap-4 tablet:grid-cols-[minmax(0,1fr)_14rem]">
-            <AdminFormField :id="fieldId(`items.${index}.name`)" v-model="item.name" label="Nama klien" hint="Muncul di kursor saat logo disorot, dan dibaca pembaca layar. Harus beda dari klien lain." :maxlength="LIM.name" required :error="err(`items.${index}.name`)" />
-            <AdminFormImage
-              :id="fieldId(`items.${index}.logo`)"
-              v-model="item.logo"
-              label="Logo"
-              required
-              :error="err(`items.${index}.logo`) || err(`items.${index}.ratio`)"
-              @update:model-value="measure(item)"
-            />
-          </div>
+          <AdminFormField :id="fieldId(`items.${index}.name`)" v-model="item.name" label="Nama klien" hint="Muncul di kursor saat logo disorot, dan dibaca pembaca layar. Harus beda dari klien lain." :maxlength="LIM.name" required :error="err(`items.${index}.name`)" />
+          <AdminFormImage
+            :id="fieldId(`items.${index}.logo`)"
+            v-model="item.logo"
+            label="Logo"
+            aspect="5/2"
+            fit="contain"
+            required
+            hint="PNG/WebP berlatar transparan, tanpa ruang kosong di sekeliling logo. Ukurannya di website diatur otomatis."
+            :error="err(`items.${index}.logo`) || err(`items.${index}.ratio`)"
+            @update:model-value="measure(item)"
+          />
         </template>
       </AdminFormRepeater>
     </template>

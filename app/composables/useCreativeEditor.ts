@@ -15,14 +15,15 @@ export type CreativeForm = Omit<CreativeContent, 'services' | 'wall' | 'work'> &
   work: Omit<CreativeContent['work'], 'uiux'> & { uiux: Omit<CreativeContent['work']['uiux'], 'items'> & { items: Keyed<Uiux>[] } }
 }
 
+// Editor sections in page order (AdminEditorFrame). `no` = position on
+// /creative; `previewIndex` = the section's index in the admin preview.
 export const CREATIVE_TABS = [
-  { key: 'hero', label: 'Hero', sections: ['hero'] },
-  { key: 'services', label: 'Services', sections: ['services'] },
-  { key: 'wall', label: 'Studio Wall', sections: ['wall'] },
-  { key: 'work', label: 'Selected Work', sections: ['work'] },
-  { key: 'why', label: 'Why PASTI', sections: ['why'] },
-  { key: 'seo', label: 'SEO', sections: ['seo'] },
-  { key: 'code', label: 'Code-managed', sections: [] }
+  { key: 'hero', no: '01', label: 'Hero', where: 'Bagian paling atas berlatar kuning: label kecil, judul dua baris (kata terakhir bergaris tepi), paragraf, dua tombol, dan kipas tiga gambar karya. Saat kursor digerakkan muncul jejak gambar.', sections: ['hero'], previewIndex: 0 },
+  { key: 'services', no: '03', label: 'Layanan', where: 'Daftar layanan bernomor di kiri (menempel saat di-scroll di desktop) dengan kartu gambar besar di kanan; di HP kartunya bertumpuk. Pita berjalan di atasnya (bagian 02) memakai judul layanan ini.', sections: ['services'], previewIndex: 2 },
+  { key: 'wall', no: '04', label: 'Studio Wall', where: 'Papan gambar karya yang bisa digeser ke segala arah (drag), dengan judul yang bagian akhirnya berwarna kuning.', sections: ['wall'], previewIndex: 3 },
+  { key: 'work', no: '05', label: 'Karya pilihan', where: 'Studi kasus utama (tantangan, rencana, funnel 4 tahap, playbook), lalu kampanye + testimoni, lalu deretan proyek UI/UX.', sections: ['work'], previewIndex: 4 },
+  { key: 'why', no: '06', label: 'Kenapa PASTI', where: 'Pernyataan perusahaan (misi atau visi), standar PASTI, dan garis waktu perjalanan perusahaan.', sections: ['why'], previewIndex: 5 },
+  { key: 'seo', no: '', label: 'SEO', where: 'Judul & deskripsi yang muncul di Google dan saat link dibagikan. Tidak tampil di halaman.', sections: ['seo'] }
 ] as const
 
 export function toCreativeForm(c: CreativeContent): CreativeForm {

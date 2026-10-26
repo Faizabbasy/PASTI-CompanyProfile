@@ -28,7 +28,7 @@ watch(
     try {
       await load(true)
     } catch (e) {
-      error.value = cmsErrorMessage(e, 'Could not load the Media library.')
+      error.value = cmsErrorMessage(e, 'Media library gagal dimuat.')
     } finally {
       loading.value = false
       nextTick(() => dialogRef.value?.focus())
@@ -45,7 +45,7 @@ async function onFile(e: Event) {
   try {
     emit('select', await upload(file))
   } catch (err) {
-    error.value = err instanceof Error && !('statusCode' in err) ? err.message : cmsErrorMessage(err, 'Upload failed. Try again.')
+    error.value = err instanceof Error && !('statusCode' in err) ? err.message : cmsErrorMessage(err, 'Upload gagal. Coba lagi.')
   } finally {
     busy.value = false
   }
@@ -60,24 +60,24 @@ const kb = (n: number) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${
       <div ref="dialogRef" role="dialog" aria-modal="true" aria-labelledby="media-picker-title" tabindex="-1" class="flex max-h-[85vh] w-full max-w-4xl flex-col rounded-lg bg-white shadow-xl outline-none">
         <div class="flex flex-wrap items-center gap-3 border-b border-navy-100 px-5 py-3">
           <h2 id="media-picker-title" class="text-base font-bold">Media library</h2>
-          <input v-model="query" type="search" placeholder="Search by file name" aria-label="Search images" class="ml-auto w-48 rounded-md border border-navy-200 px-2 py-1 text-sm">
+          <input v-model="query" type="search" placeholder="Cari nama file" aria-label="Cari gambar" class="ml-auto w-48 rounded-md border border-navy-200 px-2 py-1 text-sm">
           <button
             type="button"
             class="rounded-md bg-slateNavy px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-50"
             :disabled="busy || !state.configured"
             @click="fileInput?.click()"
-          >{{ busy ? 'Uploading…' : 'Upload new' }}</button>
+          >{{ busy ? 'Mengunggah…' : 'Upload gambar baru' }}</button>
           <input ref="fileInput" type="file" :accept="MEDIA_ACCEPT" class="hidden" @change="onFile">
-          <button type="button" class="rounded-md border border-navy-200 px-3 py-1.5 text-sm" @click="emit('close')">Close</button>
+          <button type="button" class="rounded-md border border-navy-200 px-3 py-1.5 text-sm" @click="emit('close')">Tutup</button>
         </div>
 
         <div class="overflow-y-auto p-5">
           <p v-if="error" role="alert" class="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{{ error }}</p>
           <p v-if="!loading && !state.configured" class="mb-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            Uploads aren't set up on this server yet (Supabase Storage). Existing images can still be picked.
+            Upload belum disiapkan di server ini. Gambar yang sudah ada tetap bisa dipilih.
           </p>
-          <p v-if="loading" class="text-sm text-navy-500" role="status">Loading images…</p>
-          <p v-else-if="!items.length" class="text-sm text-navy-500">No images yet. Upload one to start.</p>
+          <p v-if="loading" class="text-sm text-navy-500" role="status">Memuat gambar…</p>
+          <p v-else-if="!items.length" class="text-sm text-navy-500">Belum ada gambar. Upload satu untuk mulai.</p>
           <ul v-else class="grid grid-cols-2 gap-3 tablet:grid-cols-4">
             <li v-for="m in items" :key="m.id">
               <button

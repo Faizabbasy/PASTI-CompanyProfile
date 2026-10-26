@@ -4,9 +4,9 @@ import type { AboutContent, PageStatus } from '#shared/utils/aboutSchema'
 // Authenticated draft preview (ADMIN + EDITOR). Lives under /admin, so the
 // session gate, no-store and noindex headers apply; data comes from
 // /api/admin/pages/about/preview — never from /api/public. Shows the saved
-// draft's content in reading order with active items only. The public
-// /about design is code-managed and not connected to the CMS yet, so this
-// is a content preview, not a pixel replica.
+// draft's content in page order with active items only — a content preview,
+// not a pixel replica. Sections are always rendered (even when empty) and
+// ordered like ABOUT_TABS.previewIndex, so ?s=<n> jumps to the right one.
 definePageMeta({ layout: false })
 useHead({
   title: 'Preview · About (draft) · PASTI CMS',
@@ -32,6 +32,8 @@ const hidden = computed(() => {
   if (!c.value) return 0
   return [c.value.mission.points, c.value.values, c.value.milestones, c.value.proof, c.value.leadership].reduce((n, l) => n + l.filter((i) => !i.active).length, 0)
 })
+const mainRef = ref<HTMLElement | null>(null)
+usePreviewJump(mainRef)
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }) + ' WIB'
 </script>
 
@@ -39,24 +41,24 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
   <div class="min-h-screen bg-paper text-slateNavy">
     <div class="sticky top-0 z-10 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 tablet:px-8" role="note">
       <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-1">
-        <strong>Draft preview — not public</strong>
-        <span v-if="data">About · draft v{{ data.version }} · saved {{ fmt(data.updatedAt) }} · page status: {{ data.status }}</span>
-        <span v-if="hidden" class="text-xs">{{ hidden }} inactive item(s) hidden</span>
-        <span class="text-xs">Content preview — final layout and motion are managed in code.</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Reload draft</button>
+        <strong>Preview draft — belum tampil di website</strong>
+        <span v-if="data">About · draft v{{ data.version }} · disimpan {{ fmt(data.updatedAt) }} · status: {{ data.status }}</span>
+        <span v-if="hidden" class="text-xs">{{ hidden }} item disembunyikan</span>
+        <span class="text-xs">Preview isi — desain dan animasi akhir diatur di kode.</span>
+        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
       </div>
     </div>
 
-    <p v-if="status === 'pending'" class="p-8 text-sm" role="status">Loading draft…</p>
+    <p v-if="status === 'pending'" class="p-8 text-sm" role="status">Memuat draft…</p>
     <div v-else-if="error" class="mx-auto max-w-xl p-8" role="alert">
-      <p class="font-semibold">Preview unavailable.</p>
+      <p class="font-semibold">Preview tidak tersedia.</p>
       <p class="mt-1 text-sm text-navy-600">
-        {{ error.statusCode === 403 ? 'Your role cannot preview this page.' : 'The draft could not be loaded. Your session may have expired.' }}
+        {{ error.statusCode === 403 ? 'Role kamu tidak bisa membuka preview ini.' : 'Draft gagal dimuat. Mungkin sesi login sudah habis.' }}
       </p>
-      <a href="/admin/pages/about" class="mt-3 inline-block text-sm font-semibold underline">Back to the editor</a>
+      <a href="/admin/pages/about" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
     </div>
 
-    <main v-else-if="c" class="mx-auto max-w-5xl px-4 pb-24 tablet:px-8">
+    <main v-else-if="c" ref="mainRef" class="mx-auto max-w-5xl px-4 pb-24 tablet:px-8">
       <!-- Hero -->
       <section class="grid gap-8 py-16 desktop:grid-cols-[1.3fr_1fr] desktop:items-center">
         <div>
@@ -99,9 +101,10 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
       </section>
 
       <!-- Values -->
-      <section v-if="active(c.values).length" class="py-14">
-        <h2 class="font-display text-2xl font-bold">Values</h2>
-        <ol class="mt-6 grid gap-4 tablet:grid-cols-2">
+      <section class="py-14">
+        <h2 class="font-display text-2xl font-bold">Standar PASTI</h2>
+        <p v-if="!active(c.values).length" class="mt-4 text-sm text-navy-500">Tidak ada yang tampil — website memakai standar bawaan.</p>
+        <ol v-else class="mt-6 grid gap-4 tablet:grid-cols-2">
           <li v-for="(v, i) in active(c.values)" :key="v.id" class="rounded-lg border border-navy-100 p-5">
             <p class="font-mono text-xs text-navy-500">{{ String(i + 1).padStart(2, '0') }}<template v-if="v.iconOrVisual !== 'none'"> · icon: {{ v.iconOrVisual }}</template></p>
             <h3 class="mt-1 text-lg font-semibold">{{ v.title }}</h3>
@@ -111,9 +114,10 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
       </section>
 
       <!-- Milestones -->
-      <section v-if="active(c.milestones).length" class="border-t border-navy-100 py-14">
-        <h2 class="font-display text-2xl font-bold">Milestones</h2>
-        <ol class="mt-6 space-y-5 border-l-2 border-navy-100 pl-6">
+      <section class="border-t border-navy-100 py-14">
+        <h2 class="font-display text-2xl font-bold">Perjalanan</h2>
+        <p v-if="!active(c.milestones).length" class="mt-4 text-sm text-navy-500">Tidak ada yang tampil — website memakai perjalanan bawaan.</p>
+        <ol v-else class="mt-6 space-y-5 border-l-2 border-navy-100 pl-6">
           <li v-for="m in active(c.milestones)" :key="m.id">
             <p class="font-mono text-xs uppercase tracking-wider text-navy-500">{{ m.yearOrPeriod }}</p>
             <h3 class="font-semibold">{{ m.title }}</h3>
@@ -123,24 +127,14 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
         </ol>
       </section>
 
-      <!-- Proof -->
-      <section v-if="active(c.proof).length" class="border-t border-navy-100 py-14">
-        <h2 class="font-display text-2xl font-bold">Company proof</h2>
-        <dl class="mt-6 grid gap-6 tablet:grid-cols-3">
-          <div v-for="p in active(c.proof)" :key="p.id" class="flex flex-col-reverse">
-            <dt class="text-sm font-semibold">{{ p.label }}<span v-if="p.supportingText" class="block text-xs font-normal text-navy-500">{{ p.supportingText }}</span></dt>
-            <dd class="font-display text-4xl font-bold">{{ p.value }}</dd>
-          </div>
-        </dl>
-      </section>
-
       <!-- Leadership -->
-      <section v-if="active(c.leadership).length" class="border-t border-navy-100 py-14">
-        <h2 class="font-display text-2xl font-bold">Leadership</h2>
-        <ul class="mt-6 grid gap-6 tablet:grid-cols-2">
+      <section class="border-t border-navy-100 py-14">
+        <h2 class="font-display text-2xl font-bold">Kepemimpinan</h2>
+        <p v-if="!active(c.leadership).length" class="mt-4 text-sm text-navy-500">Tidak ada yang tampil.</p>
+        <ul v-else class="mt-6 grid gap-6 tablet:grid-cols-2">
           <li v-for="p in active(c.leadership)" :key="p.id" class="flex gap-4">
             <img v-if="p.portrait" :src="p.portrait" :alt="p.portraitAlt" class="h-20 w-20 rounded-full object-cover">
-            <div v-else class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-navy-50 text-xs text-navy-500" aria-hidden="true">No photo</div>
+            <div v-else class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-navy-50 text-xs text-navy-500" aria-hidden="true">Tanpa foto</div>
             <div>
               <h3 class="font-semibold">{{ p.name }}</h3>
               <p class="text-sm text-navy-500">{{ p.role }}</p>
@@ -150,10 +144,23 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
         </ul>
       </section>
 
+      <!-- Proof -->
+      <section class="border-t border-navy-100 py-14">
+        <h2 class="font-display text-2xl font-bold">Angka bukti</h2>
+        <p v-if="!active(c.proof).length" class="mt-4 text-sm text-navy-500">Tidak ada yang tampil.</p>
+        <dl v-else class="mt-6 grid gap-6 tablet:grid-cols-3">
+          <div v-for="p in active(c.proof)" :key="p.id" class="flex flex-col-reverse">
+            <dt class="text-sm font-semibold">{{ p.label }}<span v-if="p.supportingText" class="block text-xs font-normal text-navy-500">{{ p.supportingText }}</span></dt>
+            <dd class="font-display text-4xl font-bold">{{ p.value }}</dd>
+          </div>
+        </dl>
+      </section>
+
       <!-- CTA -->
       <section class="rounded-2xl border border-navy-100 p-8 text-center tablet:p-12">
         <p v-if="c.cta.eyebrow" class="font-mono text-xs uppercase tracking-[0.2em] text-navy-500">{{ c.cta.eyebrow }}</p>
-        <h2 class="mt-2 font-display text-3xl font-bold">{{ c.cta.title }}</h2>
+        <h2 v-if="c.cta.title" class="mt-2 font-display text-3xl font-bold">{{ c.cta.title }}</h2>
+        <p v-else class="text-sm text-navy-500">Ajakan belum diisi — bagian ini memang belum tampil di website.</p>
         <p v-if="c.cta.supportingCopy" class="mx-auto mt-3 max-w-xl text-navy-600">{{ c.cta.supportingCopy }}</p>
         <div class="mt-6 flex flex-wrap justify-center gap-3 text-sm">
           <span v-if="c.cta.primaryCtaLabel" class="rounded-full bg-slateNavy px-5 py-2.5 font-semibold text-white">{{ c.cta.primaryCtaLabel }} <span class="font-normal opacity-70">→ {{ c.cta.primaryCtaUrl }}</span></span>
@@ -164,11 +171,12 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
       <!-- SEO -->
       <section class="mt-10 rounded-lg border border-dashed border-navy-200 p-5 text-sm">
         <h2 class="font-semibold">SEO (draft)</h2>
+        <p class="text-xs text-navy-500">Belum dipakai di website — SEO About masih dari kode.</p>
         <dl class="mt-2 grid gap-1 text-navy-600">
-          <div><dt class="inline font-medium">Title:</dt> <dd class="inline">{{ c.seo.metaTitle }}</dd></div>
-          <div><dt class="inline font-medium">Description:</dt> <dd class="inline">{{ c.seo.metaDescription }}</dd></div>
+          <div><dt class="inline font-medium">Judul:</dt> <dd class="inline">{{ c.seo.metaTitle }}</dd></div>
+          <div><dt class="inline font-medium">Deskripsi:</dt> <dd class="inline">{{ c.seo.metaDescription }}</dd></div>
           <div><dt class="inline font-medium">Canonical:</dt> <dd class="inline">{{ c.seo.canonicalUrl || '—' }}</dd></div>
-          <div><dt class="inline font-medium">Share image:</dt> <dd class="inline">{{ c.seo.ogImage || '—' }}</dd></div>
+          <div><dt class="inline font-medium">Gambar share:</dt> <dd class="inline">{{ c.seo.ogImage || '—' }}</dd></div>
           <div><dt class="inline font-medium">Indexing:</dt> <dd class="inline">{{ c.seo.noIndex ? 'noindex' : 'index' }}</dd></div>
         </dl>
       </section>

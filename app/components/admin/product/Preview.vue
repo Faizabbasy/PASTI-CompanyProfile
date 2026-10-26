@@ -22,7 +22,6 @@ interface PreviewResponse {
   content: AnyProductContent
 }
 
-const route = useRoute()
 const { cmsFetch } = useCmsSession()
 const { data, error, refresh, status } = await useAsyncData(`admin-${props.slug}-preview`, () =>
   cmsFetch<PreviewResponse>(`/api/admin/pages/${props.slug}/preview`)
@@ -36,17 +35,7 @@ const preview = computed(() => {
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }) + ' WIB'
 
 const mainRef = ref<HTMLElement | null>(null)
-onMounted(() => {
-  const n = Number(route.query.s)
-  if (!Number.isInteger(n) || n < 0) return
-  // Let the sections mount and lay out (pins, measured heights) first.
-  setTimeout(() => {
-    const el = mainRef.value?.children[n] as HTMLElement | undefined
-    if (!el) return
-    const top = el.getBoundingClientRect().top + window.scrollY - 48
-    window.scrollTo({ top, behavior: 'instant' as ScrollBehavior })
-  }, 600)
-})
+usePreviewJump(mainRef)
 </script>
 
 <template>

@@ -21,12 +21,12 @@ export type InsightsForm = Omit<InsightsContent, 'contents' | 'filters'> & {
   filters: { items: Keyed<FilterPick>[] }
 }
 
+// Editor sections in page order (AdminEditorFrame). `no` = position on
+// /insights; `previewIndex` = the section's index in the admin preview.
 export const INSIGHTS_TABS = [
-  { key: 'hero', label: 'Hero', sections: ['hero'] },
-  { key: 'contents', label: 'Issue / Listing', sections: ['contents'] },
-  { key: 'filters', label: 'Topic filters', sections: ['filters'] },
-  { key: 'seo', label: 'SEO', sections: ['seo'] },
-  { key: 'code', label: 'Code-managed', sections: [] }
+  { key: 'hero', no: '01', label: 'Hero', where: 'Bagian paling atas: label kecil (dengan jumlah artikel & topik otomatis), kata besar “Insights.” yang hurufnya diisi gambar sampul artikel, paragraf, dan dua tombol.', sections: ['hero'], previewIndex: 0 },
+  { key: 'contents', no: '02', label: 'Daftar artikel & topik', where: 'Daftar isi: tombol-tombol topik di atas (setelah “All”), lalu tiap artikel sebagai baris besar bernomor (01, 02 …). Disorot/diketuk → terbuka gambar & ringkasannya; diklik → artikel dibuka layar penuh.', sections: ['contents', 'filters'], previewIndex: 1 },
+  { key: 'seo', no: '', label: 'SEO', where: 'Judul & deskripsi yang muncul di Google dan saat link dibagikan. Tidak tampil di halaman.', sections: ['seo'] }
 ] as const
 
 export function toInsightsForm(c: InsightsContent): InsightsForm {
@@ -42,12 +42,14 @@ export const validateInsightsForm = (f: InsightsForm) => zodFieldErrors(Insights
 
 export type ArticleForm = ArticleContent
 
+// Article editor groups (AdminEditorFrame). `previewIndex` 0 = the article's
+// row in the preview (the only section the article preview renders).
 export const ARTICLE_TABS = [
-  { key: 'basics', label: 'Basics', sections: ['title', 'slug', 'kicker', 'categoryIds', 'headline', 'tagline'] },
-  { key: 'content', label: 'Content', sections: ['excerpt', 'points', 'perspective'] },
-  { key: 'media', label: 'Media', sections: ['coverImage', 'coverImageAlt', 'coverFocus'] },
-  { key: 'body', label: 'Body (not shown yet)', sections: ['body', 'authorName', 'publishDate'] },
-  { key: 'relations', label: 'Usage', sections: [] }
+  { key: 'basics', no: '01', label: 'Info dasar', where: 'Judul & topik artikel: tampil sebagai baris besar di daftar artikel /insights, di label pembaca layar penuh (“Now showing”, “Next”), dan dipakai filter topik.', sections: ['title', 'slug', 'kicker', 'categoryIds', 'headline', 'tagline'], previewIndex: 0 },
+  { key: 'content', no: '02', label: 'Ringkasan & poin', where: 'Ringkasan tampil saat baris artikel dibuka dan sebagai paragraf pembuka di pembaca layar penuh; poin-poin tampil di kotak “In this insight”.', sections: ['excerpt', 'points', 'perspective'], previewIndex: 0 },
+  { key: 'media', no: '03', label: 'Gambar sampul', where: 'Poster artikel: muncul di pratinjau baris, di sampul pembaca layar penuh, dan mengisi huruf “Insights.” di hero.', sections: ['coverImage', 'coverImageAlt', 'coverFocus'], previewIndex: 0 },
+  { key: 'body', no: '04', label: 'Isi lengkap (belum tampil)', where: 'Disiapkan untuk halaman artikel di masa depan (/insights/<slug>). Belum tampil di website.', sections: ['body', 'authorName', 'publishDate'] },
+  { key: 'relations', no: '', label: 'Pemakaian & hapus', where: 'Apakah artikel ini dipilih di halaman Insights, dan tombol hapus untuk draft yang belum pernah tayang.', sections: [] }
 ] as const
 
 export const emptyArticle = (): ArticleForm => ({
@@ -74,7 +76,16 @@ export const validateArticleForm = (f: ArticleForm) => zodFieldErrors(ArticleCon
 // ---- Category ----------------------------------------------------------------
 
 export type CategoryForm = CategoryContent
-export const CATEGORY_TABS = [{ key: 'details', label: 'Details', sections: ['name', 'slug', 'description', 'active'] }] as const
+export const CATEGORY_TABS = [
+  {
+    key: 'details',
+    no: '01',
+    label: 'Detail topik',
+    where: 'Nama topik tampil sebagai tombol filter di atas daftar artikel /insights (kalau topik dipilih di halaman Insights) dan di label topik tiap artikel.',
+    sections: ['name', 'slug', 'description', 'active'],
+    previewIndex: 1
+  }
+] as const
 export const emptyCategory = (): CategoryForm => ({ name: '', slug: '', description: '', active: true })
 export const toCategoryForm = (c: CategoryContent): CategoryForm => ({ ...c })
 export const toCategoryPayload = (f: CategoryForm) => ({ ...f })

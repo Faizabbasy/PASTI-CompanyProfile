@@ -11,11 +11,11 @@ export const HTML_TAG = /<\s*\/?\s*[a-z!?]/i
 export const CONTROL_CHARS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/
 
 export function text(max: number, opts: { required?: boolean } = {}) {
-  let s = z.string().trim().max(max, `Max ${max} characters.`)
-  if (opts.required) s = s.min(1, 'Required.')
+  let s = z.string().trim().max(max, `Maksimal ${max} karakter.`)
+  if (opts.required) s = s.min(1, 'Wajib diisi.')
   return s
-    .refine((v) => !HTML_TAG.test(v), 'HTML is not allowed — use plain text.')
-    .refine((v) => !CONTROL_CHARS.test(v), 'Contains invalid characters.')
+    .refine((v) => !HTML_TAG.test(v), 'Tidak boleh berisi kode HTML — tulis teks biasa saja.')
+    .refine((v) => !CONTROL_CHARS.test(v), 'Ada karakter yang tidak valid.')
 }
 
 // Links: site-relative paths, in-page anchors, https, mailto and tel only.
@@ -37,8 +37,8 @@ export function isSafeLinkUrl(v: string): boolean {
 export const linkUrl = z
   .string()
   .trim()
-  .max(500, 'Max 500 characters.')
-  .refine((v) => v === '' || isSafeLinkUrl(v), 'Use a /path, #anchor, https://, mailto: or tel: link.')
+  .max(500, 'Maksimal 500 karakter.')
+  .refine((v) => v === '' || isSafeLinkUrl(v), 'Pakai link yang valid: /halaman, #bagian, https://…, mailto: atau tel:.')
 
 // Media references: a file already in /public/images, or an image uploaded
 // through the Media library (Supabase Storage public URL, key shape set by
@@ -50,7 +50,7 @@ export const mediaRef = z
   .string()
   .trim()
   .max(300)
-  .refine((v) => v === '' || isMediaRef(v), 'Pick an image from the Media library, or use a path under /images/ (webp, jpg, png, avif).')
+  .refine((v) => v === '' || isMediaRef(v), 'Pilih gambar dari Media library (webp, jpg, png, avif).')
 
 export const CANONICAL_HOSTS = ['pastipeople.id', 'www.pastipeople.id']
 export const canonicalUrl = z
@@ -65,16 +65,16 @@ export const canonicalUrl = z
     } catch {
       return false
     }
-  }, 'Use an https://pastipeople.id/… URL without query or hash.')
+  }, 'Pakai alamat https://pastipeople.id/… tanpa tanda ? atau #.')
 
 // Client-supplied ids are only accepted if they already exist in the stored
 // draft (checked server-side); new items omit the id and get one assigned.
-export const itemId = z.string().regex(/^[a-z0-9_-]{1,64}$/i, 'Invalid id.').optional()
+export const itemId = z.string().regex(/^[a-z0-9_-]{1,64}$/i, 'ID tidak valid.').optional()
 export const sortOrder = z.number().int().min(0).max(9999)
 
 export function maxActive(limit: number, label: string) {
   return (list: { active: boolean }[], ctx: z.RefinementCtx) => {
-    if (list.filter((i) => i.active).length > limit) ctx.addIssue({ code: 'custom', message: `Max ${limit} active ${label} — the design holds ${limit}. Set extra items inactive.` })
+    if (list.filter((i) => i.active).length > limit) ctx.addIssue({ code: 'custom', message: `Maksimal ${limit} ${label} yang tampil — desainnya muat ${limit}. Sembunyikan sisanya.` })
   }
 }
 
@@ -82,14 +82,14 @@ export function ctaPair(labelKey: string, urlKey: string) {
   return (v: Record<string, unknown>, ctx: z.RefinementCtx) => {
     const label = v[labelKey] as string
     const url = v[urlKey] as string
-    if (label && !url) ctx.addIssue({ code: 'custom', path: [urlKey], message: 'Add a link for this button.' })
-    if (url && !label) ctx.addIssue({ code: 'custom', path: [labelKey], message: 'Add a label for this link.' })
+    if (label && !url) ctx.addIssue({ code: 'custom', path: [urlKey], message: 'Isi link untuk tombol ini.' })
+    if (url && !label) ctx.addIssue({ code: 'custom', path: [labelKey], message: 'Isi teks untuk link ini.' })
   }
 }
 
 export function mediaAlt(mediaKey: string, altKey: string) {
   return (v: Record<string, unknown>, ctx: z.RefinementCtx) => {
-    if (v[mediaKey] && !v[altKey]) ctx.addIssue({ code: 'custom', path: [altKey], message: 'Alt text is required when media is set.' })
+    if (v[mediaKey] && !v[altKey]) ctx.addIssue({ code: 'custom', path: [altKey], message: 'Deskripsi gambar wajib diisi kalau ada gambar.' })
   }
 }
 
@@ -141,13 +141,13 @@ export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 export const slug = z
   .string()
   .trim()
-  .min(1, 'Required.')
-  .max(60, 'Max 60 characters.')
-  .refine((v) => SLUG_PATTERN.test(v), 'Use lowercase letters, numbers and single hyphens (e.g. textile-dashboard).')
-  .refine((v) => !RESERVED_SLUGS.includes(v), 'This slug is reserved — pick another.')
+  .min(1, 'Wajib diisi.')
+  .max(60, 'Maksimal 60 karakter.')
+  .refine((v) => SLUG_PATTERN.test(v), 'Pakai huruf kecil, angka dan tanda hubung tunggal (contoh: textile-dashboard).')
+  .refine((v) => !RESERVED_SLUGS.includes(v), 'Alamat ini sudah dipakai sistem — pilih yang lain.')
 
 // A reference to another CMS record by its stored id.
-export const recordRef = z.string().regex(/^[a-z0-9][a-z0-9_-]{0,63}$/, 'Pick an existing record.')
+export const recordRef = z.string().regex(/^[a-z0-9][a-z0-9_-]{0,63}$/, 'Pilih data yang sudah ada.')
 
 // Public-claim approval (case-study metrics, client-sensitive media). Only
 // `confirmed` may ever render publicly; only an ADMIN can set it.

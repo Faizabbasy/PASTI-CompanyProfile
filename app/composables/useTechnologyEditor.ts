@@ -12,12 +12,13 @@ export type TechnologyForm = Omit<TechnologyContent, 'capabilities' | 'work'> & 
   work: Omit<TechnologyContent['work'], 'items'> & { items: Keyed<WorkItem>[] }
 }
 
+// Editor sections in page order (AdminEditorFrame). `no` = position on
+// /technology; `previewIndex` = the section's index in the admin preview.
 export const TECHNOLOGY_TABS = [
-  { key: 'hero', label: 'Hero', sections: ['hero'] },
-  { key: 'capabilities', label: 'Capabilities', sections: ['capabilities'] },
-  { key: 'work', label: 'Case Studies', sections: ['work'] },
-  { key: 'seo', label: 'SEO', sections: ['seo'] },
-  { key: 'code', label: 'Code-managed', sections: [] }
+  { key: 'hero', no: '01', label: 'Hero', where: 'Bagian paling atas berlatar biru tua: label kecil, judul tiga baris (baris ke-3 di atas penanda kuning), paragraf, dua tombol, dan kartu konsol yang mengetik nama layanan.', sections: ['hero'], previewIndex: 0 },
+  { key: 'capabilities', no: '03', label: 'Kemampuan', where: 'Daftar kemampuan bernomor (01, 02 …). Di desktop, baris yang disorot berubah biru tua dan gambar mengikuti kursor; di HP tiap baris bisa dibuka seperti akordeon. Pita teks berjalan di atasnya (bagian 02) memakai judul-judul kemampuan ini.', sections: ['capabilities'], previewIndex: 2 },
+  { key: 'work', no: '05', label: 'Studi kasus', where: 'Deretan kartu poster proyek yang bergeser ke samping saat di-scroll (di HP bisa digeser dengan jari).', sections: ['work'], previewIndex: 4 },
+  { key: 'seo', no: '', label: 'SEO', where: 'Judul & deskripsi yang muncul di Google dan saat link dibagikan. Tidak tampil di halaman.', sections: ['seo'] }
 ] as const
 
 export function toTechnologyForm(c: TechnologyContent): TechnologyForm {

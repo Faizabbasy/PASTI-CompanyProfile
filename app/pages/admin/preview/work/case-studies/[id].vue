@@ -43,19 +43,19 @@ const preview = computed<WorkPageContent | null>(() => {
   <div class="min-h-screen bg-slateNavy">
     <div class="sticky top-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 tablet:px-8" role="note">
       <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-1">
-        <strong>Draft preview — not public</strong>
-        <span v-if="data">Case study · draft v{{ data.record.version }} · saved {{ fmtCmsTime(data.record.updatedAt) }} · status: {{ data.record.status }}</span>
+        <strong>Preview draft — belum tampil di website</strong>
+        <span v-if="data">Studi kasus · draft v{{ data.record.version }} · disimpan {{ fmtCmsTime(data.record.updatedAt) }} · status: {{ data.record.status }}</span>
         <span v-if="resolved?.counts.claimsWithheld || resolved?.counts.mediaWithheld" class="text-xs">
-          Not shown (awaiting approval / hidden): {{ resolved.counts.claimsWithheld }} metric(s), {{ resolved.counts.mediaWithheld }} image(s)
+          Tidak ditampilkan (belum disetujui / disembunyikan): {{ resolved.counts.claimsWithheld }} angka, {{ resolved.counts.mediaWithheld }} gambar
         </span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Reload draft</button>
+        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
       </div>
     </div>
-    <p v-if="status === 'pending'" class="bg-paper p-8 text-sm" role="status">Loading draft…</p>
+    <p v-if="status === 'pending'" class="bg-paper p-8 text-sm" role="status">Memuat draft…</p>
     <div v-else-if="error || (data && !data.project)" class="mx-auto max-w-xl bg-paper p-8" role="alert">
-      <p class="font-semibold">Preview unavailable.</p>
-      <p class="mt-1 text-sm text-navy-600">{{ data && !data.project ? 'The linked project does not exist.' : error?.statusCode === 403 ? 'Your role cannot preview this record.' : 'The draft could not be loaded.' }}</p>
-      <a :href="`/admin/work/case-studies/${id}`" class="mt-3 inline-block text-sm font-semibold underline">Back to the editor</a>
+      <p class="font-semibold">Preview tidak tersedia.</p>
+      <p class="mt-1 text-sm text-navy-600">{{ data && !data.project ? 'Proyek yang ditautkan tidak ada.' : error?.statusCode === 403 ? 'Role kamu tidak bisa membuka preview ini.' : 'Draft gagal dimuat.' }}</p>
+      <a :href="`/admin/work/case-studies/${id}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
     </div>
     <main v-else-if="preview">
       <AdminWorkPreviewScope :key="`${data?.record.version}-${data?.record.updatedAt}`" :content="preview">

@@ -7,15 +7,17 @@ import { zodFieldErrors } from './useSingletonEditor'
 
 export type TestimonialForm = TestimonialContent
 
+// Record editor groups (AdminEditorFrame). `previewIndex` 0 = the Creative
+// testimonial card, the only section the testimonial preview renders.
 export const TESTIMONIAL_TABS = [
-  { key: 'quote', label: 'Quote', sections: ['quote'] },
-  { key: 'person', label: 'Person', sections: ['personName', 'roleTitle', 'companyDisplayName', 'clientId'] },
-  { key: 'media', label: 'Media', sections: ['photo', 'photoAlt'] },
-  { key: 'classification', label: 'Classification', sections: ['type', 'categoryIds', 'tags'] },
-  { key: 'publication', label: 'Publication', sections: ['active', 'sortOrder', 'sourceNote'] }
+  { key: 'quote', no: '01', label: 'Kutipan', where: 'Kalimat testimoni di kartu testimoni — bagian Testimoni di homepage dan kartu testimoni di halaman Creative (kalau halaman itu memilihnya).', sections: ['quote'], previewIndex: 0 },
+  { key: 'person', no: '02', label: 'Orang & perusahaan', where: 'Nama, jabatan dan perusahaan tampil di bawah kutipan di kartu testimoni.', sections: ['personName', 'roleTitle', 'companyDisplayName', 'clientId'], previewIndex: 0 },
+  { key: 'media', no: '03', label: 'Foto', where: 'Foto bulat di kartu testimoni. Tanpa foto, kartu memakai inisial nama.', sections: ['photo', 'photoAlt'], previewIndex: 0 },
+  { key: 'classification', no: '04', label: 'Jenis & kategori', where: 'Hanya untuk mengelompokkan dan mencari di admin — tidak tampil di website.', sections: ['type', 'categoryIds', 'tags'] },
+  { key: 'publication', no: '05', label: 'Tampil & urutan', where: 'Menentukan apakah testimoni boleh tampil dan urutan bawaannya. Catatan sumber hanya untuk admin.', sections: ['active', 'sortOrder', 'sourceNote'] }
 ] as const
 
-export const TESTIMONIAL_TYPE_LABELS = { client: 'Client', partner: 'Partner', user: 'User', internal: 'Internal' } as const
+export const TESTIMONIAL_TYPE_LABELS = { client: 'Klien', partner: 'Partner', user: 'Pengguna', internal: 'Internal' } as const
 export const TESTIMONIAL_CATEGORY_LABELS = { technology: 'Technology', creative: 'Creative' } as const
 
 export function emptyTestimonial(): TestimonialForm {

@@ -17,6 +17,8 @@ const props = withDefaults(
     // CSS object-position for the preview (article cover focus).
     focus?: string
     round?: boolean
+    // 'contain' = never crop (logos); default crops to `aspect` when set.
+    fit?: 'contain' | 'cover'
   }>(),
   {}
 )
@@ -54,7 +56,7 @@ async function send(file: File | undefined) {
   try {
     apply(await upload(file))
   } catch (err) {
-    uploadError.value = err instanceof Error && !('statusCode' in err) ? err.message : cmsErrorMessage(err, 'Upload failed. Try again.')
+    uploadError.value = err instanceof Error && !('statusCode' in err) ? err.message : cmsErrorMessage(err, 'Upload gagal. Coba lagi.')
   } finally {
     busy.value = false
   }
@@ -90,9 +92,9 @@ function onPreviewLoad(e: Event) {
   <div>
     <div class="flex items-baseline justify-between gap-3">
       <label :for="id" class="text-sm font-medium">
-        {{ label }}<span v-if="required" class="text-red-700" aria-hidden="true"> *</span><span v-if="required" class="sr-only"> (required)</span>
+        {{ label }}<span v-if="required" class="text-red-700" aria-hidden="true"> *</span><span v-if="required" class="sr-only"> (wajib)</span>
       </label>
-      <span v-if="model" class="text-[11px] text-navy-400">{{ isUpload ? 'Media library' : 'Site file' }}</span>
+      <span v-if="model" class="text-[11px] text-navy-400">{{ isUpload ? 'Dari Media library' : 'File bawaan situs' }}</span>
     </div>
 
     <div
@@ -113,15 +115,16 @@ function onPreviewLoad(e: Event) {
             :src="model"
             alt=""
             class="h-full w-full"
-            :class="aspect || round ? 'object-cover' : 'object-contain'"
+            :class="fit === 'contain' || !(aspect || round) ? 'object-contain' : 'object-cover'"
             :style="focus ? { objectPosition: focus } : undefined"
             @load="onPreviewLoad"
             @error="broken = true"
           >
-          <span v-else class="px-2 text-center text-[11px] text-navy-400">{{ model ? 'Preview unavailable' : 'No image' }}</span>
+          <span v-else class="px-2 text-center text-[11px] text-navy-400">{{ model ? 'Preview tidak tersedia' : 'Belum ada gambar' }}</span>
         </div>
 
-        <div class="grid min-w-0 flex-1 gap-2">
+        <!-- basis-56: drops below the preview instead of squeezing in narrow columns. -->
+        <div class="grid min-w-0 flex-1 basis-56 gap-2">
           <div class="flex flex-wrap gap-2">
             <button
               :id="id"
@@ -130,16 +133,16 @@ function onPreviewLoad(e: Event) {
               :disabled="busy || (state.loaded && !state.configured)"
               :aria-describedby="describedBy"
               @click="fileInput?.click()"
-            >{{ busy ? 'Uploading…' : model ? 'Upload new' : 'Upload image' }}</button>
-            <button type="button" class="rounded-md border border-navy-200 px-3 py-1.5 text-sm font-medium" :disabled="busy" @click="pickerOpen = true">Choose from Media</button>
-            <button v-if="model && !required" type="button" class="rounded-md px-2 py-1.5 text-sm text-red-700 hover:underline" :disabled="busy" @click="model = ''">Remove</button>
+            >{{ busy ? 'Mengunggah…' : model ? 'Ganti (upload baru)' : 'Upload gambar' }}</button>
+            <button type="button" class="rounded-md border border-navy-200 px-3 py-1.5 text-sm font-medium" :disabled="busy" @click="pickerOpen = true">Pilih dari Media</button>
+            <button v-if="model && !required" type="button" class="rounded-md px-2 py-1.5 text-sm text-red-700 hover:underline" :disabled="busy" @click="model = ''">Hapus</button>
           </div>
           <input :id="`${id}-file`" ref="fileInput" type="file" :accept="MEDIA_ACCEPT" class="hidden" tabindex="-1" aria-hidden="true" @change="onFile">
-          <p class="text-[11px] text-navy-400">JPG, PNG, WebP or AVIF. Drop a file here too. Large photos are resized automatically.</p>
-          <p v-if="state.loaded && !state.configured" class="text-[11px] text-amber-800">Uploads aren't set up on this server yet — choose an existing image or type a path.</p>
+          <p class="text-[11px] text-navy-400">JPG, PNG, WebP atau AVIF. Bisa juga tarik & lepas file ke kotak ini. Foto besar otomatis diperkecil.</p>
+          <p v-if="state.loaded && !state.configured" class="text-[11px] text-amber-800">Upload belum disiapkan di server ini — pilih gambar yang sudah ada.</p>
           <p v-if="model" class="truncate text-[11px] text-navy-500" :title="model">{{ model }}</p>
           <details class="text-xs">
-            <summary class="cursor-pointer text-navy-500">Advanced: type an image path</summary>
+            <summary class="cursor-pointer text-navy-500">Lanjutan: ketik alamat gambar</summary>
             <input
               :id="`${id}-path`"
               v-model="model"
@@ -147,7 +150,7 @@ function onPreviewLoad(e: Event) {
               inputmode="url"
               maxlength="300"
               autocomplete="off"
-              :aria-label="`${label} — image path`"
+              :aria-label="`${label} — alamat gambar`"
               placeholder="/images/folder/file.webp"
               class="mt-1 block w-full rounded-md border border-navy-200 px-2 py-1.5 text-sm"
               @input="sizePending = true"

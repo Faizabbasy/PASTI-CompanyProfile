@@ -41,7 +41,7 @@ export function useCollectionCreate() {
       }
       notice.value = {
         kind: 'error',
-        text: er.statusCode === 403 ? er.data?.statusMessage || "You don't have permission to do this." : er.statusCode === 400 ? 'Some fields need attention.' : 'Could not create the record. Please try again.'
+        text: er.statusCode === 403 ? er.data?.statusMessage || 'Role kamu tidak punya izin untuk ini.' : er.statusCode === 400 ? 'Ada kolom yang perlu diperbaiki.' : 'Gagal membuat data. Coba lagi.'
       }
     } finally {
       busy.value = false
@@ -60,7 +60,7 @@ export function useRecordDelete(endpoint: string, backTo: string, label: () => s
   const canDelete = (s: CollectionAdminStateLike | null) => !!s && can('content.delete') && s.status === 'draft' && !s.published && !s.revisions.length
 
   async function remove() {
-    if (!window.confirm(`Delete “${label()}” permanently? It was never published. This cannot be undone.`)) return
+    if (!window.confirm(`Hapus “${label()}” selamanya? Data ini belum pernah tayang. Tidak bisa dibatalkan.`)) return
     deleting.value = true
     deleteError.value = ''
     try {
@@ -68,7 +68,7 @@ export function useRecordDelete(endpoint: string, backTo: string, label: () => s
       await navigateTo(backTo)
     } catch (e) {
       const er = e as FetchError
-      deleteError.value = er.data?.statusMessage || er.statusMessage || 'Could not delete.'
+      deleteError.value = er.data?.statusMessage || er.statusMessage || 'Gagal menghapus.'
     } finally {
       deleting.value = false
     }

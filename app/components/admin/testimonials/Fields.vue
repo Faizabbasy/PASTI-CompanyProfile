@@ -27,59 +27,59 @@ function toggleCategory(c: (typeof TESTIMONIAL_CATEGORIES)[number]) {
 <template>
   <div class="grid gap-8">
     <fieldset v-if="show('quote')" class="grid gap-3">
-      <legend v-if="!tab" class="text-base font-semibold">Quote</legend>
+      <legend v-if="!tab" class="text-base font-semibold">Kutipan</legend>
       <AdminFormField
         :id="fieldId('quote')"
         v-model="form.quote"
-        label="Quote"
+        label="Kutipan"
         multiline
         :rows="6"
         :maxlength="LIM.quote"
         required
-        :hint="`The person's own words, ${LIM.quoteMin}–${LIM.quote} characters. Plain text — the cards add the quote marks.`"
+        :hint="`Kata-kata orang itu sendiri, ${LIM.quoteMin}–${LIM.quote} karakter. Teks biasa — tanda kutip ditambahkan otomatis oleh kartu.`"
         :error="err('quote')"
       />
     </fieldset>
 
     <fieldset v-if="show('person')" class="grid gap-4">
-      <legend v-if="!tab" class="text-base font-semibold">Person</legend>
-      <AdminFormField :id="fieldId('personName')" v-model="form.personName" label="Person name" :maxlength="LIM.personName" required :error="err('personName')" />
+      <legend v-if="!tab" class="text-base font-semibold">Orang & perusahaan</legend>
+      <AdminFormField :id="fieldId('personName')" v-model="form.personName" label="Nama orang" :maxlength="LIM.personName" required :error="err('personName')" />
       <div class="grid gap-4 tablet:grid-cols-2">
-        <AdminFormField :id="fieldId('roleTitle')" v-model="form.roleTitle" label="Job title" :maxlength="LIM.roleTitle" hint="As the person gave it. Leave empty if unknown — never guess." :error="err('roleTitle')" />
-        <AdminFormField :id="fieldId('companyDisplayName')" v-model="form.companyDisplayName" label="Company (display name)" :maxlength="LIM.company" hint="The company as it should read under the quote." :error="err('companyDisplayName')" />
+        <AdminFormField :id="fieldId('roleTitle')" v-model="form.roleTitle" label="Jabatan" :maxlength="LIM.roleTitle" hint="Sesuai yang diberikan orangnya. Kosongkan kalau tidak tahu — jangan menebak." :error="err('roleTitle')" />
+        <AdminFormField :id="fieldId('companyDisplayName')" v-model="form.companyDisplayName" label="Nama perusahaan" :maxlength="LIM.company" hint="Nama perusahaan seperti yang ingin dibaca di bawah kutipan." :error="err('companyDisplayName')" />
       </div>
       <p class="text-xs text-navy-500">
-        Attribution line: <strong class="text-navy-700">{{ roleLine || '—' }}</strong>
-        <template v-if="legacyRoleLine"> · current site shows “{{ legacyRoleLine }}”</template>
+        Baris di bawah kutipan: <strong class="text-navy-700">{{ roleLine || '—' }}</strong>
+        <template v-if="legacyRoleLine"> · website sekarang menampilkan “{{ legacyRoleLine }}”</template>
       </p>
       <div>
-        <label :for="fieldId('clientId')" class="text-sm font-medium">Linked client (optional)</label>
+        <label :for="fieldId('clientId')" class="text-sm font-medium">Terhubung ke klien (opsional)</label>
         <select :id="fieldId('clientId')" v-model="form.clientId" class="mt-1 block w-full rounded-md border border-navy-200 bg-white px-3 py-2 text-sm" :aria-invalid="!!err('clientId')" :aria-describedby="`${fieldId('clientId')}-hint`">
-          <option value="">Not linked</option>
+          <option value="">Tidak dihubungkan</option>
           <option v-for="c in clients" :key="c.id" :value="c.id">{{ c.name }}</option>
         </select>
-        <p :id="`${fieldId('clientId')}-hint`" class="mt-1 text-xs text-navy-500">From the shared client list (logos and client details live there, not here).</p>
+        <p :id="`${fieldId('clientId')}-hint`" class="mt-1 text-xs text-navy-500">Dari daftar klien bersama (logo dan detail klien diatur di sana, bukan di sini).</p>
         <p v-if="err('clientId')" class="mt-1 text-xs font-medium text-red-700" role="alert">{{ err('clientId') }}</p>
       </div>
     </fieldset>
 
     <fieldset v-if="show('media')" class="grid gap-4">
-      <legend v-if="!tab" class="text-base font-semibold">Media</legend>
-      <AdminFormImage :id="fieldId('photo')" v-model="form.photo" label="Photo (optional)" round hint="Square portrait. Empty = the card's initials fallback." :error="err('photo')" />
-      <AdminFormField :id="fieldId('photoAlt')" v-model="form.photoAlt" label="Photo alt text (optional)" :maxlength="LIM.photoAlt" hint="Empty = decorative: the name is printed next to the photo." :error="err('photoAlt')" />
+      <legend v-if="!tab" class="text-base font-semibold">Foto</legend>
+      <AdminFormImage :id="fieldId('photo')" v-model="form.photo" label="Foto (opsional)" round hint="Foto wajah persegi. Kosong = kartu menampilkan inisial nama." :error="err('photo')" />
+      <AdminFormField :id="fieldId('photoAlt')" v-model="form.photoAlt" label="Deskripsi foto untuk pembaca layar (opsional)" :maxlength="LIM.photoAlt" hint="Kosong = foto dianggap dekorasi (namanya sudah tertulis di sebelah foto)." :error="err('photoAlt')" />
     </fieldset>
 
     <fieldset v-if="show('classification')" class="grid gap-4">
-      <legend v-if="!tab" class="text-base font-semibold">Classification</legend>
+      <legend v-if="!tab" class="text-base font-semibold">Jenis & kategori</legend>
       <div>
-        <label :for="fieldId('type')" class="text-sm font-medium">Type<span class="text-red-700" aria-hidden="true"> *</span></label>
+        <label :for="fieldId('type')" class="text-sm font-medium">Jenis<span class="text-red-700" aria-hidden="true"> *</span></label>
         <select :id="fieldId('type')" v-model="form.type" class="mt-1 block w-full rounded-md border border-navy-200 bg-white px-3 py-2 text-sm" :aria-invalid="!!err('type')">
           <option v-for="t in TESTIMONIAL_TYPES" :key="t" :value="t">{{ TESTIMONIAL_TYPE_LABELS[t] }}</option>
         </select>
         <p v-if="err('type')" class="mt-1 text-xs font-medium text-red-700" role="alert">{{ err('type') }}</p>
       </div>
       <fieldset>
-        <legend class="text-sm font-medium">Categories (optional)</legend>
+        <legend class="text-sm font-medium">Kategori (opsional)</legend>
         <div class="mt-1 flex flex-wrap gap-4">
           <label v-for="c in TESTIMONIAL_CATEGORIES" :key="c" class="inline-flex items-center gap-2 text-sm">
             <input type="checkbox" class="h-4 w-4" :checked="form.categoryIds.includes(c)" @change="toggleCategory(c)">{{ TESTIMONIAL_CATEGORY_LABELS[c] }}
@@ -88,17 +88,17 @@ function toggleCategory(c: (typeof TESTIMONIAL_CATEGORIES)[number]) {
         <p v-if="err('categoryIds')" class="mt-1 text-xs font-medium text-red-700" role="alert">{{ err('categoryIds') }}</p>
       </fieldset>
       <fieldset>
-        <legend class="text-sm font-medium">Tags (optional)</legend>
+        <legend class="text-sm font-medium">Tag (opsional)</legend>
         <ul class="mt-1 flex flex-wrap gap-2">
           <li v-for="(t, i) in form.tags" :key="`${t}-${i}`" class="inline-flex items-center gap-1 rounded-full border border-navy-200 bg-white px-2.5 py-0.5 text-xs">
             {{ t }}
-            <button type="button" class="rounded px-1 text-navy-500 hover:bg-navy-50" :aria-label="`Remove tag ${t}`" @click="form.tags.splice(i, 1)">×</button>
+            <button type="button" class="rounded px-1 text-navy-500 hover:bg-navy-50" :aria-label="`Hapus tag ${t}`" @click="form.tags.splice(i, 1)">×</button>
           </li>
         </ul>
         <div class="mt-2 flex gap-2">
-          <label :for="fieldId('newTag')" class="sr-only">New tag</label>
-          <input :id="fieldId('newTag')" v-model="newTag" type="text" :maxlength="LIM.tag" class="w-48 rounded-md border border-navy-200 px-3 py-1.5 text-sm" placeholder="Add a tag" @keydown.enter.prevent="addTag">
-          <button type="button" class="rounded-md border border-navy-200 bg-white px-3 py-1.5 text-sm font-medium hover:bg-navy-50 disabled:opacity-50" :disabled="form.tags.length >= LIM.tags" @click="addTag">Add</button>
+          <label :for="fieldId('newTag')" class="sr-only">Tag baru</label>
+          <input :id="fieldId('newTag')" v-model="newTag" type="text" :maxlength="LIM.tag" class="w-48 rounded-md border border-navy-200 px-3 py-1.5 text-sm" placeholder="Tulis tag lalu Enter" @keydown.enter.prevent="addTag">
+          <button type="button" class="rounded-md border border-navy-200 bg-white px-3 py-1.5 text-sm font-medium hover:bg-navy-50 disabled:opacity-50" :disabled="form.tags.length >= LIM.tags" @click="addTag">Tambah</button>
           <span class="self-center text-xs text-navy-500">{{ form.tags.length }}/{{ LIM.tags }}</span>
         </div>
         <p v-if="err('tags')" class="mt-1 text-xs font-medium text-red-700" role="alert">{{ err('tags') }}</p>
@@ -106,18 +106,18 @@ function toggleCategory(c: (typeof TESTIMONIAL_CATEGORIES)[number]) {
     </fieldset>
 
     <fieldset v-if="show('publication')" class="grid gap-4">
-      <legend v-if="!tab" class="text-base font-semibold">Publication</legend>
+      <legend v-if="!tab" class="text-base font-semibold">Tampil & urutan</legend>
       <label class="inline-flex items-center gap-2 text-sm">
         <input v-model="form.active" type="checkbox" class="h-4 w-4">
-        Active — inactive testimonials are never shown publicly
+        Tampilkan — testimoni yang tidak dicentang tidak pernah tampil di website
       </label>
       <div class="max-w-[12rem]">
-        <label :for="fieldId('sortOrder')" class="text-sm font-medium">Default order</label>
+        <label :for="fieldId('sortOrder')" class="text-sm font-medium">Urutan bawaan</label>
         <input :id="fieldId('sortOrder')" v-model.number="form.sortOrder" type="number" min="0" max="9999" step="1" class="mt-1 block w-full rounded-md border border-navy-200 px-3 py-2 text-sm" :aria-invalid="!!err('sortOrder')" :aria-describedby="`${fieldId('sortOrder')}-hint`">
-        <p :id="`${fieldId('sortOrder')}-hint`" class="mt-1 text-xs text-navy-500">Lower first. Pages keep their own order.</p>
+        <p :id="`${fieldId('sortOrder')}-hint`" class="mt-1 text-xs text-navy-500">Angka kecil tampil lebih dulu. Halaman yang memilih testimoni tetap memakai urutannya sendiri.</p>
         <p v-if="err('sortOrder')" class="mt-1 text-xs font-medium text-red-700" role="alert">{{ err('sortOrder') }}</p>
       </div>
-      <AdminFormField :id="fieldId('sourceNote')" v-model="form.sourceNote" label="Internal source note (optional)" multiline :rows="2" :maxlength="LIM.sourceNote" hint="Admin-only, never public. Where the quote came from (e.g. current site, meeting approval). No documents or personal data." :error="err('sourceNote')" />
+      <AdminFormField :id="fieldId('sourceNote')" v-model="form.sourceNote" label="Catatan sumber (opsional, internal)" multiline :rows="2" :maxlength="LIM.sourceNote" hint="Hanya untuk admin, tidak pernah tampil. Dari mana kutipan ini (mis. website lama, persetujuan saat meeting). Jangan isi dokumen atau data pribadi." :error="err('sourceNote')" />
     </fieldset>
   </div>
 </template>
