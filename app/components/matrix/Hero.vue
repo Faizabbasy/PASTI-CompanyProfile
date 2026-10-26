@@ -12,7 +12,7 @@ import type { StockKey } from '~/composables/useMatrix'
 // line below. The bar keeps its height in every state (no layout shift).
 // Mobile: same bar, labels move under it. Reduced motion: final state.
 // Synthetic, illustrative data.
-const { hero, sample, intelligence } = useMatrix()
+const { hero, sample, intelligence } = useMatrixPage()
 const scrollTo = useFastScroll()
 const stageRef = ref<HTMLElement | null>(null)
 const step = ref(0)
@@ -174,7 +174,7 @@ const caption = computed(() => {
           </div>
         </div>
         <ul data-mx-fade class="m-center-row flex flex-wrap gap-2 desktop:col-span-5 desktop:justify-end">
-          <li v-for="f in hero.facts" :key="f" class="inline-flex items-center gap-2 rounded-[8px] bg-pureWhite px-3 py-2 font-display text-[12.5px] font-semibold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.12)]">
+          <li v-for="(f, i) in hero.facts" :key="i" class="inline-flex items-center gap-2 rounded-[8px] bg-pureWhite px-3 py-2 font-display text-[12.5px] font-semibold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.12)]">
             <span aria-hidden="true" class="h-2 w-2 rounded-[2px] bg-pastiYellow-500" />{{ f }}
           </li>
         </ul>

@@ -12,7 +12,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // round stations and a plain fill). Reduced motion: all lit, no pallet.
 if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
-const { execution } = useMatrix()
+const { execution } = useMatrixPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const lit = ref(-1)
 const picked = ref(0)
@@ -86,7 +86,7 @@ useGsapContext(() => {
         </div>
 
         <ol class="relative grid gap-7 desktop:grid-cols-8 desktop:gap-3">
-          <li v-for="(s, i) in execution.steps" :key="s.name" class="relative">
+          <li v-for="(s, i) in execution.steps" :key="i" class="relative">
             <button
               type="button"
               class="group flex w-full gap-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pastiYellow-500 desktop:block"
@@ -101,7 +101,7 @@ useGsapContext(() => {
               <span class="block desktop:mt-4">
                 <span class="block font-display text-[17px] font-bold leading-tight tracking-[-0.01em] desktop:text-[15px]" :class="picked === i ? 'text-pureWhite' : 'desktop:text-[color:rgba(255,255,255,0.75)]'">{{ s.name }}</span>
                 <span class="mt-2 flex flex-wrap gap-1.5 desktop:hidden">
-                  <span v-for="c in s.controls" :key="c" class="rounded-full bg-[color:rgba(255,255,255,0.07)] px-2.5 py-1 text-[12px] text-[color:rgba(255,255,255,0.8)]">{{ c }}</span>
+                  <span v-for="(c, ci) in s.controls" :key="ci" class="rounded-full bg-[color:rgba(255,255,255,0.07)] px-2.5 py-1 text-[12px] text-[color:rgba(255,255,255,0.8)]">{{ c }}</span>
                 </span>
               </span>
             </button>
@@ -114,10 +114,10 @@ useGsapContext(() => {
                picked one visible), so the card height never changes while
                the scroll fill moves — no layout shift below. -->
           <div class="col-span-11 grid">
-            <div v-for="(s, i) in execution.steps" :key="s.name" class="grid grid-cols-11 items-center gap-8 [grid-area:1/1]" :class="picked === i ? '' : 'invisible'" :aria-hidden="picked !== i">
+            <div v-for="(s, i) in execution.steps" :key="i" class="grid grid-cols-11 items-center gap-8 [grid-area:1/1]" :class="picked === i ? '' : 'invisible'" :aria-hidden="picked !== i">
               <p class="col-span-3 font-display text-[26px] font-bold tracking-[-0.02em]">{{ s.name }}</p>
               <ul class="col-span-8 flex flex-wrap gap-2">
-                <li v-for="c in s.controls" :key="c" class="inline-flex items-center gap-2 rounded-full bg-[color:rgba(0,0,0,0.2)] px-3.5 py-2 text-[14px] font-semibold">
+                <li v-for="(c, ci) in s.controls" :key="ci" class="inline-flex items-center gap-2 rounded-full bg-[color:rgba(0,0,0,0.2)] px-3.5 py-2 text-[14px] font-semibold">
                   <svg viewBox="0 0 12 12" class="h-3 w-3 text-pastiYellow-500" aria-hidden="true"><path d="M2.5 6.2 5 8.6l4.6-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>{{ c }}
                 </li>
               </ul>

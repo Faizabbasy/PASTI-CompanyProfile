@@ -5,7 +5,7 @@
 // synthetic letter: intake → text layer → document type → fields →
 // confidence. States that fields depend on the configured document type;
 // no universal-detection or accuracy claim. Reduced motion: no autoplay.
-const { extraction, sample } = useDora()
+const { extraction, sample } = useDoraPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const stageRef = ref<HTMLElement | null>(null)
 const picked = ref(0)
@@ -68,7 +68,7 @@ const textLayer = ['INSTANSI CONTOH', 'UNIT KERJA CONTOH', 'Nomor : 000.1/OO01/C
       <div class="mt-14 grid gap-8 desktop:grid-cols-12 desktop:gap-10">
         <!-- Capability list -->
         <ol class="grid gap-1.5 desktop:col-span-5">
-          <li v-for="(c, i) in extraction.caps" :key="c.name" data-fr>
+          <li v-for="(c, i) in extraction.caps" :key="i" data-fr>
             <button
               type="button"
               class="flex w-full items-start gap-4 rounded-[16px] px-4 py-4 text-left transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500"

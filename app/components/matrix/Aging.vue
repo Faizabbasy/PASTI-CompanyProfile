@@ -4,7 +4,7 @@
 // is protected by the criticality guard and cannot enter disposal review —
 // old or non-moving never means automatically disposable (§7). A
 // disposition-evidence card shows what every decision keeps.
-const { aging } = useMatrix()
+const { aging } = useMatrixPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const band = ref<number | null>(null)
 const rows = computed(() => (band.value === null ? aging.items : aging.items.filter((i) => i.band === band.value)))

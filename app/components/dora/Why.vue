@@ -3,7 +3,7 @@
 // one line each. No accuracy, AI, speed or "zero review" claims. Each cell
 // carries a cyan-deep corner tick (the field-marker Signal) — a non-text
 // stroke on white, never cyan text.
-const { why } = useDora()
+const { why } = useDoraPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
 useFastReveal(sectionRef)
@@ -18,7 +18,7 @@ useFastReveal(sectionRef)
         <!-- data-fr sits on the inner block, inside the cell padding: on a
              cell flush with the grid's clipped edge, the reveal's start
              state would fall outside the clip and never intersect. -->
-        <li v-for="(w, i) in why.items" :key="w.name" class="dw-cell relative bg-pureWhite p-4 tablet:p-6">
+        <li v-for="(w, i) in why.items" :key="i" class="dw-cell relative bg-pureWhite p-4 tablet:p-6">
           <div data-fr>
             <span class="font-mono text-[10.5px] tabular-nums text-[color:rgba(3,60,89,0.5)]">{{ pad(i + 1) }}</span>
             <h3 class="mt-2 font-display text-[15px] font-bold tablet:mt-3 tablet:text-[18px] leading-tight tracking-[-0.01em] text-slateNavy">{{ w.name }}</h3>

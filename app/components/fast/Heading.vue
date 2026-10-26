@@ -12,7 +12,7 @@ const props = withDefaults(
   defineProps<{ eyebrow: string; title: string; lede?: string; surface?: 'light' | 'dark'; as?: 'h1' | 'h2'; size?: 'lg' | 'md' }>(),
   { surface: 'light', as: 'h2', size: 'lg' }
 )
-const words = computed(() => props.title.replace(/\.$/, '').split(' '))
+const words = computed(() => props.title.trim().replace(/\.$/, '').split(/\s+/))
 const rootRef = ref<HTMLElement | null>(null)
 
 useGsapContext(() => {

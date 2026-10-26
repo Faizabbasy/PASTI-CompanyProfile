@@ -10,7 +10,7 @@ import type { VerifyStep } from '~/composables/useDora'
 // a person corrects it → verified. A cyan scan line crosses the headline
 // once (the Signal), a giant outline DORA sits behind as a watermark.
 // Reduced motion: the verified workspace, static.
-const { hero } = useDora()
+const { hero } = useDoraPage()
 const scrollTo = useFastScroll()
 const stageRef = ref<HTMLElement | null>(null)
 const step = ref<VerifyStep>(-1)
@@ -83,7 +83,7 @@ useGsapContext(() => {
             />
           </div>
           <ul data-dh-fade class="m-center-row mt-10 flex flex-wrap gap-2">
-            <li v-for="f in hero.facts" :key="f" class="inline-flex items-center gap-2 rounded-full border border-[color:rgba(255,255,255,0.16)] px-3 py-1.5 font-display text-[12px] font-semibold text-[color:rgba(255,255,255,0.85)]">
+            <li v-for="(f, i) in hero.facts" :key="i" class="inline-flex items-center gap-2 rounded-full border border-[color:rgba(255,255,255,0.16)] px-3 py-1.5 font-display text-[12px] font-semibold text-[color:rgba(255,255,255,0.85)]">
               <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-doraCyan" />{{ f }}
             </li>
           </ul>

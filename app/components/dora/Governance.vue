@@ -5,7 +5,7 @@
 // principles and the privacy-policy stance follow. Deliberately no audit-
 // trail, SSO/MFA or encryption claim (design recommendations / open
 // decisions in the source — docs/dora/00).
-const { governance } = useDora()
+const { governance } = useDoraPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const picked = ref(2)
 const role = computed(() => governance.roles[picked.value]!)
@@ -21,7 +21,7 @@ useFastReveal(sectionRef)
         <div class="desktop:col-span-5">
           <DoraHeading size="md" :eyebrow="governance.eyebrow" :title="governance.headline" :lede="governance.lede" />
           <ul class="mt-8 grid gap-2">
-            <li v-for="p in governance.principles" :key="p" data-fr class="flex items-start gap-3 rounded-[14px] bg-surfaceNeutral px-4 py-3 text-[14.5px] font-semibold leading-snug text-slateNavy">
+            <li v-for="(p, i) in governance.principles" :key="i" data-fr class="flex items-start gap-3 rounded-[14px] bg-surfaceNeutral px-4 py-3 text-[14.5px] font-semibold leading-snug text-slateNavy">
               <svg viewBox="0 0 16 16" class="mt-0.5 h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><rect x="3" y="7" width="10" height="7.5" rx="1.5" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></svg>
               {{ p }}
             </li>
@@ -31,7 +31,7 @@ useFastReveal(sectionRef)
         <div class="desktop:col-span-7">
           <div data-fr class="overflow-hidden rounded-[22px] ring-1 ring-[color:rgba(3,60,89,0.12)]">
             <ul class="grid grid-cols-1 border-b border-[color:rgba(3,60,89,0.1)] bg-surfaceNeutral tablet:grid-cols-5" aria-label="Roles">
-              <li v-for="(r, i) in governance.roles" :key="r.name" class="border-[color:rgba(3,60,89,0.08)] max-tablet:border-b tablet:border-r tablet:last:border-r-0">
+              <li v-for="(r, i) in governance.roles" :key="i" class="border-[color:rgba(3,60,89,0.08)] max-tablet:border-b tablet:border-r tablet:last:border-r-0">
                 <button
                   type="button"
                   class="relative flex h-full w-full items-center gap-3 px-4 py-3.5 text-left transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-pastiYellow-500 tablet:block tablet:px-3"

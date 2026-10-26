@@ -4,7 +4,7 @@
 // default): like FAST / DORA, submit hands the request to the site's
 // WhatsApp contact. "Success" means "prepared in WhatsApp", never "received
 // by PASTI"; if the window is blocked, the error state offers a link.
-const { why, demo } = useMatrix()
+const { why, demo } = useMatrixPage()
 const { phone } = useWhatsapp()
 const sectionRef = ref<HTMLElement | null>(null)
 useMatrixReveal(sectionRef)
@@ -77,7 +77,7 @@ const input = 'mt-2 block h-12 w-full rounded-[12px] border bg-pureWhite px-4 fo
       <div data-fr class="m-center">
         <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">Why MATRIX</p>
         <ul class="m-center-row mt-4 flex flex-wrap gap-2">
-          <li v-for="w in why" :key="w" class="inline-flex items-center gap-2 rounded-full bg-pureWhite px-3.5 py-2 font-display text-[13px] font-semibold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.1)]">
+          <li v-for="(w, i) in why" :key="i" class="inline-flex items-center gap-2 rounded-full bg-pureWhite px-3.5 py-2 font-display text-[13px] font-semibold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.1)]">
             <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ w }}
           </li>
         </ul>
@@ -140,7 +140,7 @@ const input = 'mt-2 block h-12 w-full rounded-[12px] border bg-pureWhite px-4 fo
                 <label for="md-challenge" class="text-[13.5px] font-bold">Inventory / material challenge</label>
                 <select id="md-challenge" v-model="form.challenge" :class="[input, 'border-[color:rgba(3,60,89,0.18)]']">
                   <option value="">Select…</option>
-                  <option v-for="o in demo.challenges" :key="o" :value="o">{{ o }}</option>
+                  <option v-for="(o, i) in demo.challenges" :key="i" :value="o">{{ o }}</option>
                 </select>
               </div>
             </div>

@@ -12,7 +12,7 @@ import type { GanttStep } from '~/composables/useFast'
 // a readable hour view with step buttons. Sample data only.
 if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
-const { board, gantt } = useFast()
+const { board, gantt } = useFastPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const step = ref<GanttStep>(0)
 const dir = ref<'fwd' | 'bwd'>('fwd')
@@ -68,7 +68,7 @@ useGsapContext(() => {
           <div class="desktop:col-span-4">
             <div><FastHeading size="md" :eyebrow="board.eyebrow" :title="board.headline" :lede="board.lede" /></div>
             <ol class="mt-8 grid gap-1.5">
-              <li v-for="(s, i) in board.steps" :key="s.name">
+              <li v-for="(s, i) in board.steps" :key="i">
                 <button
                   type="button"
                   class="group flex w-full items-start gap-3 rounded-[14px] px-3 py-3 text-left transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500"
@@ -143,7 +143,7 @@ useGsapContext(() => {
     <!-- Feature register -->
     <BaseContainer class="relative z-10 desktop:pb-28">
       <ul class="mt-16 grid grid-cols-1 gap-x-8 border-t border-[color:rgba(3,60,89,0.1)] tablet:grid-cols-2 desktop:mt-6 desktop:grid-cols-5">
-        <li v-for="(f, i) in board.features" :key="f" data-fr class="flex items-center gap-3 border-b border-[color:rgba(3,60,89,0.1)] py-4 font-display text-[14px] font-semibold text-slateNavy">
+        <li v-for="(f, i) in board.features" :key="i" data-fr class="flex items-center gap-3 border-b border-[color:rgba(3,60,89,0.1)] py-4 font-display text-[14px] font-semibold text-slateNavy">
           <span class="font-mono text-[10px] tabular-nums text-[color:rgba(3,60,89,0.4)]">{{ pad(i + 1) }}</span>{{ f }}
         </li>
       </ul>

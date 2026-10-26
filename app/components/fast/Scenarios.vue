@@ -5,7 +5,7 @@
 // (illustrative — no invented figures). The publish gate shows that drafts
 // and simulations never reach production until published. Objectives are
 // listed as scenario objectives, not "optimization".
-const { scenarios } = useFast()
+const { scenarios } = useFastPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const pick = ref(2)
 useFastReveal(sectionRef)
@@ -28,7 +28,7 @@ const shape = [
 
       <div class="mt-14 grid gap-6 desktop:grid-cols-12">
         <ul role="group" aria-label="Scenarios" class="grid content-start gap-2 desktop:col-span-4">
-          <li v-for="(s, i) in scenarios.list" :key="s.name" data-fr>
+          <li v-for="(s, i) in scenarios.list" :key="i" data-fr>
             <button
               type="button"
               :aria-pressed="pick === i"
@@ -79,7 +79,7 @@ const shape = [
       <div data-fr class="mt-12">
         <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)] max-desktop:text-center">Scenario objectives</p>
         <ul class="m-center-row mt-4 flex flex-wrap gap-2">
-          <li v-for="o in scenarios.objectives" :key="o" class="rounded-full px-3.5 py-2 font-display text-[13px] font-semibold ring-1 ring-[color:rgba(255,255,255,0.18)]">{{ o }}</li>
+          <li v-for="(o, i) in scenarios.objectives" :key="i" class="rounded-full px-3.5 py-2 font-display text-[13px] font-semibold ring-1 ring-[color:rgba(255,255,255,0.18)]">{{ o }}</li>
         </ul>
       </div>
     </BaseContainer>

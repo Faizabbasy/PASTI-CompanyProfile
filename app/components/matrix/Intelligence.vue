@@ -7,7 +7,7 @@ import type { StockKey } from '~/composables/useMatrix'
 // locations, serials, requirement, planning parameters or aging. The panel
 // keeps a fixed minimum height and layout containment, so switching never
 // shifts the page. Synthetic data; source §1, §3, §4.
-const { intelligence, sample } = useMatrix()
+const { intelligence, sample } = useMatrixPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const picked = ref<(typeof intelligence.states)[number]['id']>('net')
 const state = computed(() => intelligence.states.find((s) => s.id === picked.value)!)

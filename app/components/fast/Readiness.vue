@@ -4,7 +4,7 @@
 // available → Partially available → Expected on time → Material shortage)
 // while the section is on screen; visitors can pick a state themselves.
 // Reduced motion: no cycling, first state shown.
-const { readiness } = useFast()
+const { readiness } = useFastPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const active = ref(0)
 const auto = ref(true)
@@ -68,12 +68,12 @@ const pick = (i: number) => {
       </div>
 
       <div class="mt-12 grid gap-4 desktop:grid-cols-3">
-        <article v-for="(p, i) in readiness.pillars" :key="p.name" data-fr class="flex flex-col rounded-[24px] p-6 tablet:p-8" :class="i === 0 ? 'bg-slateNavy text-pureWhite' : 'bg-pureWhite text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.08)]'">
+        <article v-for="(p, i) in readiness.pillars" :key="i" data-fr class="flex flex-col rounded-[24px] p-6 tablet:p-8" :class="i === 0 ? 'bg-slateNavy text-pureWhite' : 'bg-pureWhite text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.08)]'">
           <span class="font-mono text-[11px] tabular-nums" :class="i === 0 ? 'text-pastiYellow-500' : 'text-[color:rgba(3,60,89,0.45)]'">0{{ i + 1 }}</span>
           <h3 class="mt-6 font-display text-[28px] font-extrabold tracking-[-0.03em]" :class="i === 0 ? 'text-pureWhite' : 'text-slateNavy'">{{ p.name }}<span class="text-pastiYellow-500">.</span></h3>
           <p class="mt-2 text-[14px] leading-relaxed" :class="i === 0 ? 'text-[color:rgba(255,255,255,0.72)]' : 'text-[color:rgba(3,60,89,0.7)]'">{{ p.body }}</p>
           <ul class="mt-6 grid gap-2 border-t pt-5" :class="i === 0 ? 'border-[color:rgba(255,255,255,0.14)]' : 'border-[color:rgba(3,60,89,0.1)]'">
-            <li v-for="it in p.items" :key="it" class="flex items-center gap-2.5 text-[14px] font-medium">
+            <li v-for="(it, ii) in p.items" :key="ii" class="flex items-center gap-2.5 text-[14px] font-medium">
               <span aria-hidden="true" class="h-px w-3 bg-pastiYellow-500" />{{ it }}
             </li>
           </ul>

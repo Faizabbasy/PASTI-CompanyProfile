@@ -5,7 +5,7 @@
 // roles, never people. Then the enterprise controls as a ruled list, the
 // report catalog (representative reports, no figures) and sample roles.
 // Merges the brief's Reporting section (owner D4). Source §5, §10, §11, §14.
-const { governance, sample } = useMatrix()
+const { governance, sample } = useMatrixPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const tab = ref<'ledger' | 'audit'>('ledger')
 const tabsRef = ref<HTMLButtonElement[]>([])
@@ -103,7 +103,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
         <div data-fr class="rounded-[22px] bg-slateNavy p-6 text-pureWhite desktop:col-span-7">
           <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">Enterprise control</p>
           <ul class="mt-4 grid gap-x-8 tablet:grid-cols-2">
-            <li v-for="(c, i) in governance.controls" :key="c.name" class="grid grid-cols-[1.75rem_1fr] gap-2 border-t border-[color:rgba(255,255,255,0.1)] py-3.5">
+            <li v-for="(c, i) in governance.controls" :key="i" class="grid grid-cols-[1.75rem_1fr] gap-2 border-t border-[color:rgba(255,255,255,0.1)] py-3.5">
               <span class="font-mono text-[10.5px] tabular-nums text-pastiYellow-400">{{ pad(i + 1) }}</span>
               <span>
                 <span class="block font-display text-[15px] font-bold">{{ c.name }}</span>
@@ -118,7 +118,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
         <div data-fr class="rounded-[22px] bg-pureWhite p-6 ring-1 ring-[color:rgba(3,60,89,0.1)] desktop:col-span-5">
           <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">Reporting & operational control</p>
           <ul class="mt-3 divide-y divide-[color:rgba(3,60,89,0.08)]">
-            <li v-for="r in governance.reports" :key="r" class="flex items-center justify-between gap-3 py-2.5">
+            <li v-for="(r, i) in governance.reports" :key="i" class="flex items-center justify-between gap-3 py-2.5">
               <span class="font-display text-[14.5px] font-semibold text-slateNavy">{{ r }}</span>
               <span class="shrink-0 font-mono text-[10px] uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.5)]">Preview · Export</span>
             </li>

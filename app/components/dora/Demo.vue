@@ -4,7 +4,7 @@
 // the site's WhatsApp contact. "Success" means "prepared in WhatsApp",
 // never "received by PASTI"; if the window is blocked, the error state
 // offers a direct link. The implementation path (§15) shows what follows.
-const { demo } = useDora()
+const { demo } = useDoraPage()
 const { phone } = useWhatsapp()
 const sectionRef = ref<HTMLElement | null>(null)
 useFastReveal(sectionRef)
@@ -90,7 +90,7 @@ const input = 'mt-2 block h-12 w-full rounded-[12px] border bg-pureWhite px-4 fo
           <div data-fr class="mt-10">
             <p class="m-center font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">What happens next</p>
             <ol class="mt-4 grid grid-cols-2 gap-2 tablet:grid-cols-3">
-              <li v-for="(s, i) in demo.next" :key="s" class="rounded-[12px] bg-pureWhite px-3 py-2.5 ring-1 ring-[color:rgba(3,60,89,0.08)]">
+              <li v-for="(s, i) in demo.next" :key="i" class="rounded-[12px] bg-pureWhite px-3 py-2.5 ring-1 ring-[color:rgba(3,60,89,0.08)]">
                 <span class="font-mono text-[10px] tabular-nums text-[color:rgba(3,60,89,0.5)]">{{ String(i + 1).padStart(2, '0') }}</span>
                 <span class="block font-display text-[13.5px] font-bold leading-tight text-slateNavy">{{ s }}</span>
               </li>

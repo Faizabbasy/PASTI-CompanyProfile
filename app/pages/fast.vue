@@ -3,9 +3,12 @@
 // Technology). Brief, audit and capability classification:
 // docs/fast/00-fast-landing-page-brief.md. Copy + sample data: useFast.
 // Public since 2026-10-19 (owner): navbar, footer and sitemap.
-const { seo } = useFast()
-
-usePageSeo({ ...seo, image: '/images/og/fast.jpg' })
+//
+// Content source is resolved once here (code content by default; the
+// published CMS snapshot only when the server-side flag allows it) and read
+// by the FAST sections through useFastPage().
+const content = await resolveFastPageContent()
+usePageSeo(content.value.seo)
 </script>
 
 <template>

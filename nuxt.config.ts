@@ -74,6 +74,11 @@ export default defineNuxtConfig({
       // (NUXT_CMS_ECORPORATE_PUBLIC_ENABLED). Server-only; default false.
       shiftlyPublicEnabled: false,
       ecorporatePublicEnabled: false,
+      // And FAST / DORA / MATRIX (NUXT_CMS_FAST_PUBLIC_ENABLED,
+      // NUXT_CMS_DORA_PUBLIC_ENABLED, NUXT_CMS_MATRIX_PUBLIC_ENABLED).
+      fastPublicEnabled: false,
+      doraPublicEnabled: false,
+      matrixPublicEnabled: false,
       // GET /api/public/testimonials serves public-eligible shared
       // testimonials only when true (NUXT_CMS_TESTIMONIALS_PUBLIC_ENABLED).
       // Server-only; default false. No page reads it yet — Home and every

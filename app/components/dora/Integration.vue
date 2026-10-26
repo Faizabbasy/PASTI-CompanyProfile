@@ -5,7 +5,7 @@
 // plug-and-play). A small cyan packet travels each line (transform-only
 // CSS, paused off-screen and under reduced motion). No vendor names.
 // Below: what is agreed before build (§10.1).
-const { integration } = useDora()
+const { integration } = useDoraPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const live = ref(false)
 useFastReveal(sectionRef)
@@ -34,7 +34,7 @@ const right = computed(() => integration.boundaries.filter((_, i) => i % 2 === 1
       <!-- Desktop: hub -->
       <div data-fr class="mt-16 hidden items-center gap-0 desktop:grid desktop:grid-cols-[1fr_auto_1fr]">
         <ul class="grid gap-4">
-          <li v-for="b in left" :key="b.name" class="flex items-center">
+          <li v-for="(b, i) in left" :key="i" class="flex items-center">
             <div class="w-full max-w-[300px] rounded-[16px] bg-[color:rgba(255,255,255,0.05)] p-4 ring-1 ring-[color:rgba(255,255,255,0.1)]">
               <p class="font-display text-[15px] font-bold">{{ b.name }}</p>
               <p class="mt-1 text-[13px] leading-snug text-[color:rgba(255,255,255,0.65)]">{{ b.body }}</p>
@@ -49,7 +49,7 @@ const right = computed(() => integration.boundaries.filter((_, i) => i % 2 === 1
           </div>
         </div>
         <ul class="grid gap-4">
-          <li v-for="b in right" :key="b.name" class="flex items-center">
+          <li v-for="(b, i) in right" :key="i" class="flex items-center">
             <span aria-hidden="true" class="di-link di-link--rev relative h-px flex-1"><span class="di-dot" /></span>
             <div class="ml-auto w-full max-w-[300px] rounded-[16px] bg-[color:rgba(255,255,255,0.05)] p-4 ring-1 ring-[color:rgba(255,255,255,0.1)]">
               <p class="font-display text-[15px] font-bold">{{ b.name }}</p>
@@ -65,7 +65,7 @@ const right = computed(() => integration.boundaries.filter((_, i) => i % 2 === 1
           <DoraMark surface="dark" :size="18" /><span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">Product core</span>
         </div>
         <ul class="ml-6 border-l border-dashed border-[color:rgba(31,214,238,0.5)] pl-5">
-          <li v-for="b in integration.boundaries" :key="b.name" data-fr class="relative pt-5">
+          <li v-for="(b, i) in integration.boundaries" :key="i" data-fr class="relative pt-5">
             <span aria-hidden="true" class="absolute -left-5 top-[38px] h-px w-4 border-t border-dashed border-[color:rgba(31,214,238,0.5)]" />
             <div class="rounded-[16px] bg-[color:rgba(255,255,255,0.05)] p-4 ring-1 ring-[color:rgba(255,255,255,0.1)]">
               <p class="font-display text-[15px] font-bold">{{ b.name }}</p>
@@ -83,7 +83,7 @@ const right = computed(() => integration.boundaries.filter((_, i) => i % 2 === 1
       <div class="mt-14 grid gap-6 border-t border-[color:rgba(255,255,255,0.12)] pt-10 desktop:grid-cols-12">
         <p data-fr class="m-center font-display text-[22px] font-bold tracking-[-0.02em] desktop:col-span-4">Agreed before build<span class="text-pastiYellow-500">.</span></p>
         <ul class="grid gap-x-8 tablet:grid-cols-2 desktop:col-span-8">
-          <li v-for="c in integration.contract" :key="c" data-fr class="flex items-start gap-3 border-b border-[color:rgba(255,255,255,0.1)] py-3.5 text-[14.5px] leading-snug text-[color:rgba(255,255,255,0.82)]">
+          <li v-for="(c, i) in integration.contract" :key="i" data-fr class="flex items-start gap-3 border-b border-[color:rgba(255,255,255,0.1)] py-3.5 text-[14.5px] leading-snug text-[color:rgba(255,255,255,0.82)]">
             <span aria-hidden="true" class="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-doraCyan" />{{ c }}
           </li>
         </ul>

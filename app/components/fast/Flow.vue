@@ -9,7 +9,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // Reduced motion: the whole line is drawn and every station lit.
 if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
-const { flow } = useFast()
+const { flow } = useFastPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const lit = ref(-1)
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -62,7 +62,7 @@ useGsapContext(() => {
         </div>
 
         <ol class="relative grid gap-7 desktop:grid-cols-9 desktop:gap-4">
-          <li v-for="(s, i) in flow.steps" :key="s.name" class="relative flex gap-4 desktop:block">
+          <li v-for="(s, i) in flow.steps" :key="i" class="relative flex gap-4 desktop:block">
             <span
               class="relative z-10 grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 font-mono text-[11px] font-semibold tabular-nums transition-[background-color,border-color,color] duration-500 ease-editorial"
               :class="i <= lit ? 'border-pastiYellow-500 bg-pastiYellow-500 text-slateNavy' : 'border-[color:rgba(255,255,255,0.25)] bg-slateNavy text-[color:rgba(255,255,255,0.65)]'"

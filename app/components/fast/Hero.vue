@@ -11,7 +11,7 @@ import type { GanttStep } from '~/composables/useFast'
 // outline FAST sits behind as a watermark, and on desktop with a fine
 // pointer the board tilts a few degrees toward the cursor (transform only).
 // Reduced motion: the resolved board, static, no sweep, no tilt.
-const { hero } = useFast()
+const { hero } = useFastPage()
 const scrollTo = useFastScroll()
 const stageRef = ref<HTMLElement | null>(null)
 const step = ref<GanttStep>(0)
@@ -110,7 +110,7 @@ const stepLabel = computed(() => ['Queue', 'Scheduled', 'Validated · 1 conflict
             />
           </div>
           <ul data-fh-fade class="m-center-row mt-10 flex flex-wrap gap-2">
-            <li v-for="f in hero.facts" :key="f" class="inline-flex items-center gap-2 rounded-full border border-[color:rgba(255,255,255,0.16)] px-3 py-1.5 font-display text-[12px] font-semibold text-[color:rgba(255,255,255,0.85)]">
+            <li v-for="(f, i) in hero.facts" :key="i" class="inline-flex items-center gap-2 rounded-full border border-[color:rgba(255,255,255,0.16)] px-3 py-1.5 font-display text-[12px] font-semibold text-[color:rgba(255,255,255,0.85)]">
               <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ f }}
             </li>
           </ul>

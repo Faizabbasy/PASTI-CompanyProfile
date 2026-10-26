@@ -4,7 +4,7 @@
 // source → integration & staging → FAST) with a dashed line that flows
 // left to right, the per-implementation note, then the enterprise
 // governance cards. No vendor names, no "real-time" or "direct" promises.
-const { integration } = useFast()
+const { integration } = useFastPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const live = ref(false)
 useFastReveal(sectionRef)
@@ -29,7 +29,7 @@ onBeforeUnmount(() => io?.disconnect())
       </div>
 
       <ol data-fr class="relative mt-14 grid gap-4 desktop:grid-cols-3 desktop:gap-10">
-        <li v-for="(c, i) in integration.chain" :key="c.name" class="relative">
+        <li v-for="(c, i) in integration.chain" :key="i" class="relative">
           <div class="h-full rounded-[22px] p-6" :class="i === 2 ? 'bg-pureWhite text-slateNavy' : 'bg-[color:rgba(255,255,255,0.06)] ring-1 ring-[color:rgba(255,255,255,0.14)]'">
             <div class="flex items-center justify-between">
               <span class="font-mono text-[11px] tabular-nums" :class="i === 2 ? 'text-[color:rgba(3,60,89,0.5)]' : 'text-[color:rgba(255,255,255,0.5)]'">0{{ i + 1 }}</span>
@@ -46,7 +46,7 @@ onBeforeUnmount(() => io?.disconnect())
       </p>
 
       <ul class="mt-16 grid gap-3 tablet:grid-cols-2 desktop:grid-cols-3">
-        <li v-for="e in integration.enterprise" :key="e.name" data-fr class="rounded-[18px] bg-[color:rgba(255,255,255,0.04)] p-5 ring-1 ring-[color:rgba(255,255,255,0.1)]">
+        <li v-for="(e, i) in integration.enterprise" :key="i" data-fr class="rounded-[18px] bg-[color:rgba(255,255,255,0.04)] p-5 ring-1 ring-[color:rgba(255,255,255,0.1)]">
           <span aria-hidden="true" class="block h-[3px] w-6 rounded-full bg-pastiYellow-500" />
           <p class="mt-4 font-display text-[16px] font-bold">{{ e.name }}</p>
           <p class="mt-1 text-[13.5px] leading-snug text-[color:rgba(255,255,255,0.68)]">{{ e.body }}</p>

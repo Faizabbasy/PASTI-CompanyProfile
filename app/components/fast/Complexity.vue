@@ -4,7 +4,7 @@
 // rules). A grid of condition tiles that closes on one navy tile: "one
 // feasible schedule". Hovering / focusing a tile lights it; no numbers,
 // no invented pain points.
-const { complexity } = useFast()
+const { complexity } = useFastPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
 const inView = ref(false)
@@ -40,7 +40,7 @@ onBeforeUnmount(() => io?.disconnect())
       <ol class="mt-14 grid grid-cols-2 border-l border-t border-[color:rgba(3,60,89,0.1)] tablet:grid-cols-4 desktop:grid-cols-7">
         <li
           v-for="(f, i) in complexity.factors"
-          :key="f.name"
+          :key="i"
           data-fr
           tabindex="0"
           class="fx-tile group relative flex min-h-[150px] flex-col justify-between border-b border-r border-[color:rgba(3,60,89,0.1)] p-4 outline-none transition-colors duration-300 hover:bg-surfaceNeutral focus-visible:bg-surfaceNeutral tablet:min-h-[170px]"

@@ -7,7 +7,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // (the WhatsApp FAB owns that edge). Not a second navbar.
 // Section offsets are cached (re-read on ScrollTrigger refresh, since the
 // Verification pin changes them); the scroll handler is rAF-throttled.
-const { subnav: items } = useDora()
+const { subnav: items } = useDoraPage()
 const scrollTo = useFastScroll()
 const visible = ref(false)
 const active = ref('')

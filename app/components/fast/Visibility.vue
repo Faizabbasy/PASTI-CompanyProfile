@@ -4,7 +4,7 @@
 // comparison, reports with CSV export). Each is a small reconstructed
 // view with abstract values — no figures. OTD / adherence / order-tracking
 // dashboards are specification-only in the source and are not shown.
-const { visibility, gantt } = useFast()
+const { visibility, gantt } = useFastPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const tab = ref(visibility.views[0]!.id)
 useFastReveal(sectionRef)

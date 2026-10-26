@@ -5,7 +5,7 @@
 // card: fields with required flag and validation rule, statuses, review
 // path, search and export fields. The core strip underneath never changes.
 // Tabs follow the WAI-ARIA tabs pattern (arrow keys move between them).
-const { model } = useDora()
+const { model } = useDoraPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const picked = ref(0)
 const type = computed(() => model.types[picked.value]!)

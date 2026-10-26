@@ -11,7 +11,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // pin; the same record with prev / next controls. Synthetic data (§5).
 if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
-const { m360, sample } = useMatrix()
+const { m360, sample } = useMatrixPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const step = ref(0)
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -77,7 +77,7 @@ const serialTone: Record<string, string> = {
           <div class="desktop:col-span-4">
             <MatrixHeading class="desktop:[@media(max-height:820px)]:[&_[data-mh-lede]]:hidden" surface="dark" size="md" :eyebrow="m360.eyebrow" :title="m360.headline" :lede="m360.lede" />
             <ol class="mt-8 hidden gap-1 desktop:grid">
-              <li v-for="(s, i) in m360.steps" :key="s.name">
+              <li v-for="(s, i) in m360.steps" :key="i">
                 <button
                   type="button"
                   class="flex w-full items-center gap-3 rounded-[14px] px-3 py-2 text-left transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500"
@@ -94,7 +94,7 @@ const serialTone: Record<string, string> = {
                  never changes (all texts stacked in one grid cell), so the
                  pinned stage does not shift between steps. -->
             <div class="mt-3 hidden px-3 text-[13.5px] leading-snug text-[color:rgba(255,255,255,0.7)] desktop:grid" aria-live="polite">
-              <p v-for="(s, i) in m360.steps" :key="s.name" class="[grid-area:1/1] transition-opacity duration-300" :class="step === i ? 'opacity-100' : 'invisible opacity-0'">{{ s.body }}</p>
+              <p v-for="(s, i) in m360.steps" :key="i" class="[grid-area:1/1] transition-opacity duration-300" :class="step === i ? 'opacity-100' : 'invisible opacity-0'">{{ s.body }}</p>
             </div>
           </div>
 

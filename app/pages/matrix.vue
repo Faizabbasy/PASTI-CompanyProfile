@@ -4,9 +4,12 @@
 // docs/matrix/00-matrix-landing-page-brief.md. Copy + synthetic sample
 // data: useMatrix. Public from launch (owner 2026-10-19): navbar
 // Frameworks, footer and sitemap.
-const { seo } = useMatrix()
-
-usePageSeo({ ...seo, image: '/images/og/matrix.jpg' })
+//
+// Content source is resolved once here (code content by default; the
+// published CMS snapshot only when the server-side flag allows it) and read
+// by the MATRIX sections through useMatrixPage().
+const content = await resolveMatrixPageContent()
+usePageSeo(content.value.seo)
 </script>
 
 <template>

@@ -6,7 +6,7 @@
 // plan or the hierarchy list — to see what it holds and the restriction
 // check. Below tablet the plan is not shrunk: the hierarchy list becomes
 // the navigation and the selected zone's card follows it.
-const { explorer } = useMatrix()
+const { explorer } = useMatrixPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const picked = ref('valve')
 const zone = computed(() => explorer.zones.find((z) => z.id === picked.value)!)

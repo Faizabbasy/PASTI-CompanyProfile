@@ -5,7 +5,7 @@
 // the section comes into view; visitors can then search, filter by status
 // and preview the same result set as CSV, Excel or JSON. Nothing is
 // downloaded; export limits and permission are implementation-specific.
-const { search } = useDora()
+const { search } = useDoraPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const boxRef = ref<HTMLElement | null>(null)
 useFastReveal(sectionRef)
@@ -77,7 +77,7 @@ onBeforeUnmount(() => {
       <div class="grid gap-8 desktop:grid-cols-12 desktop:items-end desktop:gap-10">
         <div class="desktop:col-span-7"><DoraHeading :eyebrow="search.eyebrow" :title="search.headline" :lede="search.lede" /></div>
         <ul data-fr="fade" class="m-center-row flex flex-wrap gap-2 desktop:col-span-5 desktop:justify-end" aria-label="Available search filters">
-          <li v-for="f in search.filters" :key="f" class="rounded-full bg-surfaceNeutral px-3 py-1.5 font-display text-[12.5px] font-semibold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.1)]">{{ f }}</li>
+          <li v-for="(f, i) in search.filters" :key="i" class="rounded-full bg-surfaceNeutral px-3 py-1.5 font-display text-[12.5px] font-semibold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.1)]">{{ f }}</li>
         </ul>
       </div>
 

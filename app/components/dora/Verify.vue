@@ -15,7 +15,7 @@ import type { DoraField, VerifyStep } from '~/composables/useDora'
 if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
 type Key = DoraField['key']
-const { verify } = useDora()
+const { verify } = useDoraPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const step = ref<VerifyStep>(0)
 const chosen = ref<Key | null>(null)
@@ -80,7 +80,7 @@ const captions = [
           <div class="desktop:col-span-4">
             <DoraHeading class="desktop:[@media(max-height:820px)]:[&_[data-dh-lede]]:hidden" surface="dark" size="md" :eyebrow="verify.eyebrow" :title="verify.headline" :lede="verify.lede" />
             <ol class="mt-8 hidden gap-1 desktop:grid">
-              <li v-for="(s, i) in verify.steps" :key="s.name">
+              <li v-for="(s, i) in verify.steps" :key="i">
                 <button
                   type="button"
                   class="group flex w-full items-start gap-3 rounded-[14px] px-3 py-2.5 text-left transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-doraCyan"

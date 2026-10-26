@@ -16,7 +16,7 @@ import type { DoraField, VerifyStep } from '~/composables/useDora'
 type Key = DoraField['key']
 const props = withDefaults(defineProps<{ step: VerifyStep; active?: Key | null; compact?: boolean }>(), { active: null, compact: false })
 const emit = defineEmits<{ select: [key: Key]; decide: [] }>()
-const { sample } = useDora()
+const { sample } = useDoraPage()
 
 const reviewKey = sample.fields.find((f) => f.review)?.key ?? null
 const edits = reactive<Partial<Record<Key, string>>>({})

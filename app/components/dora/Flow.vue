@@ -10,7 +10,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // step's detail visible. Reduced motion: the whole rail drawn, all lit.
 if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
-const { flow } = useDora()
+const { flow } = useDoraPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const lit = ref(-1)
 const picked = ref(0)
@@ -69,7 +69,7 @@ useGsapContext(() => {
         </div>
 
         <ol class="relative grid gap-7 desktop:grid-cols-10 desktop:gap-3">
-          <li v-for="(s, i) in flow.steps" :key="s.name" class="relative">
+          <li v-for="(s, i) in flow.steps" :key="i" class="relative">
             <button
               type="button"
               class="group flex w-full gap-4 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-doraCyan desktop:block"
@@ -100,7 +100,7 @@ useGsapContext(() => {
                one visible): the card never changes height while the scroll
                fill moves, so nothing below shifts. -->
           <div class="col-span-11 grid">
-            <div v-for="(s, i) in flow.steps" :key="s.name" class="grid grid-cols-11 items-center gap-8 [grid-area:1/1]" :class="picked === i ? '' : 'invisible'" :aria-hidden="picked !== i">
+            <div v-for="(s, i) in flow.steps" :key="i" class="grid grid-cols-11 items-center gap-8 [grid-area:1/1]" :class="picked === i ? '' : 'invisible'" :aria-hidden="picked !== i">
               <div class="col-span-5">
                 <p class="font-display text-[24px] font-bold tracking-[-0.02em]">{{ s.name }}</p>
                 <p class="mt-1.5 text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.72)]">{{ s.body }}</p>

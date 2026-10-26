@@ -3,7 +3,7 @@ import type { GanttOp, GanttStep } from '~/composables/useFast'
 
 // Reconstructed FAST Scheduling Board (no product screenshot is published —
 // docs/fast/00). Resources down, time across, neutral sample data from
-// useFast().gantt. One component, two uses:
+// useFastPage().gantt. One component, two uses:
 // - Hero (`compact`): the resolved plan, blocks drop into place once.
 // - Board: driven by `step` (0 queue · 1 schedule · 2 validate · 3 adjust),
 //   `dir` (forward / backward) and `view` (hour / day / week). At step 2
@@ -24,7 +24,7 @@ const props = withDefaults(
 )
 const emit = defineEmits<{ resolve: [] }>()
 
-const { gantt } = useFast()
+const { gantt } = useFastPage()
 const { setState } = useCustomCursor()
 const dark = computed(() => props.surface === 'dark')
 const rowIndex = (res: string) => gantt.resources.findIndex((r) => r.id === res)

@@ -7,7 +7,7 @@
 // can act as the reviewer — approve, or return with a reason — and the
 // card records the decision as evidence. Nothing is purchased; source §6
 // is explicit that replenishment remains under governance.
-const { availability, sample } = useMatrix()
+const { availability, sample } = useMatrixPage()
 const sectionRef = ref<HTMLElement | null>(null)
 useMatrixReveal(sectionRef)
 

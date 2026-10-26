@@ -3,7 +3,7 @@
 // problem framing (§1.1, §2.1). No quantified pain. Each sits under a
 // field-marker frame (the page Signal) that tightens on hover/focus, as if
 // the page were being proof-read. Reveal: useFastReveal clip.
-const { problem } = useDora()
+const { problem } = useDoraPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
 useFastReveal(sectionRef)
@@ -21,7 +21,7 @@ useFastReveal(sectionRef)
           </div>
         </div>
         <ol class="grid gap-x-8 tablet:grid-cols-2 desktop:col-span-7">
-          <li v-for="(p, i) in problem.items" :key="p.name" data-fr class="dp-item group grid grid-cols-[2.75rem_1fr] gap-x-4 border-t border-[color:rgba(3,60,89,0.12)] py-5 tablet:block tablet:py-7">
+          <li v-for="(p, i) in problem.items" :key="i" data-fr class="dp-item group grid grid-cols-[2.75rem_1fr] gap-x-4 border-t border-[color:rgba(3,60,89,0.12)] py-5 tablet:block tablet:py-7">
             <span class="dp-frame relative row-span-2 inline-grid h-9 w-11 place-items-center font-mono text-[11px] font-semibold tabular-nums text-slateNavy">
               <span aria-hidden="true" class="dp-corners absolute inset-0 text-doraCyan-deep transition-transform duration-500 ease-editorial group-hover:scale-90" />
               {{ pad(i + 1) }}

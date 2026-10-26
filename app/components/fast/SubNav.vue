@@ -8,7 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // Performance: section offsets are cached (re-read on ScrollTrigger refresh,
 // since the Board pin changes them) and the scroll handler is rAF-throttled
 // — no layout reads on the scroll path.
-const { subnav: items } = useFast()
+const { subnav: items } = useFastPage()
 const scrollTo = useFastScroll()
 const visible = ref(false)
 const active = ref('')

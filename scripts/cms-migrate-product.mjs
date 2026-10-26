@@ -2,6 +2,7 @@
 // Migrate the CURRENT public copy of a product page into its CMS record as an
 // unpublished draft.
 //   npm run cms:migrate-open | cms:migrate-shiftly | cms:migrate-e-corporate
+//           | cms:migrate-fast | cms:migrate-dora | cms:migrate-matrix
 //   (add -- --dry-run to only check, -- --force to replace an edited draft)
 //
 // - Source of truth: what the page renders today. The script runs the real
@@ -30,7 +31,10 @@ import { isDeepStrictEqual } from 'node:util'
 const PRODUCTS = {
   open: { name: 'OPEN', Name: 'Open', UP: 'OPEN', composable: 'useOpen', schema: 'openSchema', server: 'openPage', action: 'open' },
   shiftly: { name: 'SHIFTLY', Name: 'Shiftly', UP: 'SHIFTLY', composable: 'useShiftly', schema: 'shiftlySchema', server: 'shiftlyPage', action: 'shiftly' },
-  'e-corporate': { name: 'e-CORPORATE', Name: 'Ecorporate', UP: 'ECORPORATE', composable: 'useEcorporate', schema: 'ecorporateSchema', server: 'ecorporatePage', action: 'ecorporate' }
+  'e-corporate': { name: 'e-CORPORATE', Name: 'Ecorporate', UP: 'ECORPORATE', composable: 'useEcorporate', schema: 'ecorporateSchema', server: 'ecorporatePage', action: 'ecorporate' },
+  fast: { name: 'FAST', Name: 'Fast', UP: 'FAST', composable: 'useFast', schema: 'fastSchema', server: 'fastPage', action: 'fast' },
+  dora: { name: 'DORA', Name: 'Dora', UP: 'DORA', composable: 'useDora', schema: 'doraSchema', server: 'doraPage', action: 'dora' },
+  matrix: { name: 'MATRIX', Name: 'Matrix', UP: 'MATRIX', composable: 'useMatrix', schema: 'matrixSchema', server: 'matrixPage', action: 'matrix' }
 }
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')

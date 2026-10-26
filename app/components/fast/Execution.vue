@@ -4,7 +4,7 @@
 // span as an outline, synced progress as a fill, health badge per
 // operation (sample data). Right: the exception feed with severity filter.
 // No thresholds, no client values; progress is "synced", never "real-time".
-const { execution } = useFast()
+const { execution } = useFastPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const sev = ref<string | null>(null)
 useFastReveal(sectionRef)
@@ -92,7 +92,7 @@ const feed = computed(() => (sev.value ? execution.feed.filter((f) => f.sev === 
       <div data-fr class="mt-10">
         <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)] max-desktop:text-center">Exception categories</p>
         <ul class="m-center-row mt-3 flex flex-wrap gap-2">
-          <li v-for="c in execution.categories" :key="c" class="rounded-full bg-surfaceNeutral px-3.5 py-2 font-display text-[13px] font-semibold text-slateNavy">{{ c }}</li>
+          <li v-for="(c, i) in execution.categories" :key="i" class="rounded-full bg-surfaceNeutral px-3.5 py-2 font-display text-[13px] font-semibold text-slateNavy">{{ c }}</li>
         </ul>
       </div>
     </BaseContainer>

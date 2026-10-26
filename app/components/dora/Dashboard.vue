@@ -6,7 +6,7 @@
 // mask, no count-up. Reduced motion: drawn, static. Lite devices (phones,
 // html[data-lite]): no per-frame line drawing — the finished chart fades in
 // once (opacity is composited; stroke-dashoffset repaints every frame).
-const { dashboard } = useDora()
+const { dashboard } = useDoraPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const chartRef = ref<SVGSVGElement | null>(null)
 const drawn = ref(false)
@@ -43,7 +43,7 @@ const label = 'font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgb
       <div class="grid gap-8 desktop:grid-cols-12 desktop:items-end desktop:gap-10">
         <div class="desktop:col-span-7"><DoraHeading surface="dark" :eyebrow="dashboard.eyebrow" :title="dashboard.headline" :lede="dashboard.lede" /></div>
         <ul data-fr="fade" class="m-center-row hidden flex-wrap gap-2 tablet:flex desktop:col-span-5 desktop:justify-end">
-          <li v-for="w in dashboard.widgets" :key="w" class="inline-flex items-center gap-2 rounded-full border border-[color:rgba(255,255,255,0.16)] px-3 py-1.5 font-display text-[12px] font-semibold text-[color:rgba(255,255,255,0.85)]">
+          <li v-for="(w, i) in dashboard.widgets" :key="i" class="inline-flex items-center gap-2 rounded-full border border-[color:rgba(255,255,255,0.16)] px-3 py-1.5 font-display text-[12px] font-semibold text-[color:rgba(255,255,255,0.85)]">
             <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-doraCyan" />{{ w }}
           </li>
         </ul>

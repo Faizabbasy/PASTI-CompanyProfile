@@ -4,7 +4,7 @@
 // illustrative bar, on hand vs usable, that splits when it comes into view.
 // Right: seven plain statements from the source's challenge table (§2). No
 // quantified pain. Reveal: useMatrixReveal (fill-up).
-const { problem, sample } = useMatrix()
+const { problem, sample } = useMatrixPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const barRef = ref<HTMLElement | null>(null)
 const split = ref(false)
@@ -49,7 +49,7 @@ onBeforeUnmount(() => stop())
           </div>
         </div>
         <ol class="desktop:col-span-7">
-          <li v-for="(p, i) in problem.items" :key="p.name" data-fr class="grid grid-cols-[2.5rem_1fr] gap-x-4 border-t border-[color:rgba(3,60,89,0.12)] py-6 last:border-b tablet:grid-cols-[3rem_1fr_1.3fr] tablet:items-baseline tablet:gap-x-6">
+          <li v-for="(p, i) in problem.items" :key="i" data-fr class="grid grid-cols-[2.5rem_1fr] gap-x-4 border-t border-[color:rgba(3,60,89,0.12)] py-6 last:border-b tablet:grid-cols-[3rem_1fr_1.3fr] tablet:items-baseline tablet:gap-x-6">
             <span class="font-mono text-[11px] font-semibold tabular-nums text-[color:rgba(3,60,89,0.5)]">{{ pad(i + 1) }}</span>
             <h3 class="font-display text-[19px] font-bold leading-tight tracking-[-0.015em] text-slateNavy tablet:text-[20px]">{{ p.name }}</h3>
             <p class="col-start-2 mt-1.5 text-[14.5px] leading-relaxed text-[color:rgba(3,60,89,0.7)] tablet:col-start-3 tablet:mt-0 tablet:text-[15px]">{{ p.body }}</p>

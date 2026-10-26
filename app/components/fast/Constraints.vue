@@ -6,7 +6,7 @@
 // constraints — only those the source shows running (useFast filters out
 // the COMING SOON ones). Advanced logic is explained as concepts, without
 // client parameters.
-const { constraints } = useFast()
+const { constraints } = useFastPage()
 const sectionRef = ref<HTMLElement | null>(null)
 const hard = ref(true)
 const scope = ref(constraints.scopes[2]!)
@@ -61,7 +61,7 @@ useFastReveal(sectionRef)
         <div class="desktop:col-span-7">
           <p data-fr="fade" class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">Constraint catalogue · {{ constraints.catalog.length }} rules</p>
           <ul class="mt-4 grid gap-2 tablet:grid-cols-2">
-            <li v-for="c in constraints.catalog" :key="c.name" data-fr class="flex items-start gap-3 rounded-[14px] bg-surfaceNeutral px-4 py-3">
+            <li v-for="(c, i) in constraints.catalog" :key="i" data-fr class="flex items-start gap-3 rounded-[14px] bg-surfaceNeutral px-4 py-3">
               <span aria-hidden="true" class="mt-0.5 inline-flex h-5 w-9 shrink-0 items-center justify-end rounded-full bg-slateNavy p-0.5"><span class="h-4 w-4 rounded-full bg-pastiYellow-500" /></span>
               <span>
                 <span class="block font-display text-[14px] font-bold text-slateNavy">{{ c.name }}</span>
@@ -79,7 +79,7 @@ useFastReveal(sectionRef)
           <p class="mt-2 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.7)]">{{ constraints.advanced.body }}</p>
         </div>
         <ul class="grid gap-3 tablet:grid-cols-2 desktop:col-span-8">
-          <li v-for="a in constraints.advanced.items" :key="a.name" data-fr class="rounded-[18px] p-5 ring-1 ring-[color:rgba(3,60,89,0.1)]">
+          <li v-for="(a, i) in constraints.advanced.items" :key="i" data-fr class="rounded-[18px] p-5 ring-1 ring-[color:rgba(3,60,89,0.1)]">
             <span aria-hidden="true" class="flex items-center gap-1">
               <span class="h-[3px] w-6 rounded-full bg-slateNavy" /><span class="h-px w-3 bg-[color:rgba(3,60,89,0.3)]" /><span class="h-[3px] w-4 rounded-full bg-pastiYellow-500" />
             </span>
