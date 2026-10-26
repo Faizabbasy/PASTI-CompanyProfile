@@ -95,7 +95,6 @@ function siteLine(i: DashboardItem) {
         </div>
         <AdminStatCard label="Diarsipkan" :value="data.totals.archived" hint="Tidak tampil di website." />
       </div>
-      <p class="mt-2 text-xs text-navy-400">Data contoh (dummy) tidak dihitung.</p>
 
       <!-- Needs publishing -->
       <div v-if="data.pending.length" class="mt-8 rounded-lg border border-amber-300 bg-white">
