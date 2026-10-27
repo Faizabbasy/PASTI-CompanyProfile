@@ -2,7 +2,8 @@
 import gsap from 'gsap'
 import type { InsightsArticleView } from '#shared/utils/insightsPublic'
 
-// READER — full-screen reading sheet for one article (no detail pages yet).
+// READER — full-screen reading sheet for one article. Articles with a
+// written body (CMS) also link to their own page (/insights/:slug).
 // Editorial spread (owner revision 2026-10-16, "masih kureng"):
 // - Cover: the poster cropped to its visual focal point (`page.focus`), so
 //   the poster's own headline isn't repeated next to the real one. "View full
@@ -25,6 +26,7 @@ const n = computed(() => props.articles.length)
 const nextArticle = computed(() => (props.index === null ? null : props.articles[(props.index + 1) % n.value]!))
 const fullPoster = ref(false)
 const mark = useCmsMark()
+const articleLink = useInsightArticleLink()
 
 // Cover crop: every poster carries its own headline on the left half and its
 // visual on the right, so the cover zooms (origin right) until only the
@@ -196,6 +198,20 @@ onBeforeUnmount(() => {
                 </p>
 
                 <p v-bind="mark('excerpt', 'Ringkasan (paragraf pembuka)', `article:${article.slug}`)" data-rd-part class="relative mt-7 max-w-[38rem] border-l-2 border-pastiYellow-500 pl-5 text-[clamp(17px,1.35vw,21px)] leading-[1.55] text-[color:rgba(255,255,255,0.82)]">{{ article.page?.description }}</p>
+
+                <!-- Own page (CMS articles with a written body) -->
+                <NuxtLink
+                  v-if="article.hasBody && article.slug"
+                  data-rd-part
+                  :to="articleLink(article)"
+                  class="group relative mt-8 inline-flex min-h-[52px] items-center gap-4 rounded-full bg-pastiYellow-500 py-1.5 pl-6 pr-1.5 font-display text-[15px] font-bold text-slateNavy transition-transform duration-300 active:scale-[0.98]"
+                  @click="emit('close')"
+                >
+                  {{ t('Read the full article') }}
+                  <span aria-hidden="true" class="grid h-10 w-10 place-items-center rounded-full bg-slateNavy text-pureWhite transition-transform duration-500 ease-editorial group-hover:-rotate-45">
+                    <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
+                  </span>
+                </NuxtLink>
 
                 <!-- Topic grid -->
                 <div v-if="article.page?.points.length" data-rd-part class="relative mt-10">

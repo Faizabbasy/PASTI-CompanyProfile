@@ -49,8 +49,8 @@ export const ARTICLE_TABS = [
   { key: 'content', no: '02', label: 'Paragraf pembuka & poin', where: 'Paragraf bergaris kuning di bawah judul (juga teks pratinjau saat baris artikel disorot di daftar), lalu kotak bernomor “Dalam insight ini”.', sections: ['excerpt', 'points'], previewIndex: 0 },
   { key: 'media', no: '03', label: 'Gambar sampul', where: 'Poster di kiri pembaca artikel, di daftar artikel, dan di hero /insights (mengisi huruf “Insights.” dan tumpukan poster).', sections: ['coverImage', 'coverImageAlt', 'coverFocus'], previewIndex: 0 },
   { key: 'perspective', no: '04', label: 'Kutipan PASTI & link', where: 'Kutipan dengan tanda kutip kuning besar di bawah poin, lalu baris-baris link berpanah. Opsional.', sections: ['perspective'], previewIndex: 0 },
-  { key: 'body', no: '05', label: 'Isi lengkap (belum tampil)', where: 'Isi artikel yang panjang, penulis dan tanggal. Disiapkan untuk halaman artikel /insights/<slug> — belum tampil di website.', sections: ['body', 'authorName', 'publishDate'] },
-  { key: 'settings', no: '06', label: 'Judul pendek & alamat', where: 'Tidak tampil sebagai teks besar: judul pendek dipakai di “Berikutnya”, “Sedang tampil” di hero /insights dan judul tab browser; slug = alamat artikel.', sections: ['title', 'slug'], previewIndex: 0 },
+  { key: 'body', no: '05', label: 'Isi lengkap', where: 'Isi halaman artikel sendiri (/insights/<slug>): teks panjang, penulis dan tanggal. Begitu isinya ada, artikel punya halaman sendiri dan pembaca artikel menampilkan tombol kuning “Baca artikel lengkap”. Kosong = artikel hanya tampil di pembaca.', sections: ['body', 'authorName', 'publishDate'] },
+  { key: 'settings', no: '06', label: 'Judul pendek & alamat', where: 'Tidak tampil sebagai teks besar: judul pendek dipakai di “Berikutnya”, “Sedang tampil” di hero /insights dan judul tab browser / Google untuk halaman artikel; slug = alamat artikel (/insights/<slug>).', sections: ['title', 'slug'], previewIndex: 0 },
   { key: 'relations', no: '', label: 'Pemakaian & hapus', where: 'Apakah artikel ini dipilih di halaman Insights, dan tombol hapus untuk draft yang belum pernah tayang.', sections: [] }
 ] as const
 

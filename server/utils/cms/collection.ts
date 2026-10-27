@@ -468,7 +468,7 @@ function buildCollectionEngine<C extends object, I = C>(cfg: CollectionConfig<C>
     const recs = await readAll()
     return recs
       .filter((r) => r.status === 'published' && r.published)
-      .map((r) => ({ id: r.id, dummy: r.dummy === true, meta: r.meta, version: r.published!.version, content: r.published!.content }))
+      .map((r) => ({ id: r.id, dummy: r.dummy === true, meta: r.meta, version: r.published!.version, publishedAt: r.publishedAt ?? null, content: r.published!.content }))
   }
 
   return {

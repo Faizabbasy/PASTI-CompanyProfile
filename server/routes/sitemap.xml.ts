@@ -1,5 +1,6 @@
 // /sitemap.xml — every public page, on the production origin
-// (runtimeConfig.public.siteUrl). Add new routes here when a page ships.
+// (runtimeConfig.public.siteUrl). Add new routes here when a page ships;
+// article pages are listed from the Insights CMS.
 // <lastmod> is the page's real CMS publish date when it has one (never a
 // guessed date); pages without a CMS record simply omit it.
 const routes: { path: string; cms?: string }[] = [
@@ -45,6 +46,30 @@ export default defineEventHandler(async (event) => {
       return [`  <url><loc>${base}${r.path}</loc>${lm}${alts}</url>`, `  <url><loc>${base}${enPath(r.path)}</loc>${lm}${alts}</url>`].join('\n')
     })
   )
+
+  // Article pages (/insights/:slug): only where that language has a published
+  // page. A slug is shared by both languages, so alternates pair up when
+  // both exist. <lastmod> = that record's real publish date.
+  const live = cmsPublicFlags(event).insightsPublicEnabled
+  const articles = live ? await Promise.all((['id', 'en'] as const).map((l) => listPublishedArticlePages(l).catch(() => []))) : [[], []]
+  const [idArts, enArts] = articles as [{ slug: string; publishedAt: string | null }[], { slug: string; publishedAt: string | null }[]]
+  const slugs = [...new Set([...idArts, ...enArts].map((a) => a.slug))]
+  for (const slug of slugs) {
+    const id = idArts.find((a) => a.slug === slug)
+    const en = enArts.find((a) => a.slug === slug)
+    const idUrl = `${base}/insights/${slug}`
+    const enUrl = `${base}/en/insights/${slug}`
+    const alts = id && en
+      ? [
+          `<xhtml:link rel="alternate" hreflang="id" href="${idUrl}"/>`,
+          `<xhtml:link rel="alternate" hreflang="en" href="${enUrl}"/>`,
+          `<xhtml:link rel="alternate" hreflang="x-default" href="${idUrl}"/>`
+        ].join('')
+      : ''
+    const lm = (d: string | null) => (d ? `<lastmod>${d.slice(0, 10)}</lastmod>` : '')
+    if (id) rows.push(`  <url><loc>${idUrl}</loc>${lm(id.publishedAt)}${alts}</url>`)
+    if (en) rows.push(`  <url><loc>${enUrl}</loc>${lm(en.publishedAt)}${alts}</url>`)
+  }
 
   setHeader(event, 'content-type', 'application/xml; charset=utf-8')
   return `<?xml version="1.0" encoding="UTF-8"?>

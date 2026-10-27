@@ -45,7 +45,12 @@ const activated = ref(false)
 // treatment even after activation (never the light bordered bar) — a
 // transparent header re-appearing over light sections (Trusted, Insight) is
 // kept legible by the scrim below, not by a filled background.
-const heroIsDark = computed(() => stripLocale(route.path) === '/')
+// Article pages (/insights/:slug) open on a dark hero too, so they get the
+// same transparent bar that follows the section beneath it.
+const heroIsDark = computed(() => {
+  const p = stripLocale(route.path)
+  return p === '/' || /^\/insights\/[^/]+\/?$/.test(p)
+})
 
 // Owner revision (2026-09-30): the homepage is now light-dominant, so the
 // transparent homepage bar can't stay white-on-dark. Dark sections carry

@@ -79,6 +79,7 @@ export function toInsightsArticleViews(list: PublicInsightsContent['contents']['
     return {
       index: pad(i + 1),
       slug: a.slug,
+      hasBody: a.hasBody,
       title: a.title,
       alt: a.coverImageAlt,
       image: a.coverImage,

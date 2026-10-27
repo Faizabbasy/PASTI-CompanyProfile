@@ -38,6 +38,16 @@ const setTopic = (t: string) => {
   })
 }
 
+// /insights?read=<slug> opens that article in the Reader (links from article
+// pages to articles that have no page of their own).
+const route = useRoute()
+onMounted(() => {
+  const slug = route.query.read
+  if (typeof slug !== 'string') return
+  const i = articles.findIndex((a) => a.slug === slug)
+  if (i >= 0) reading.value = i
+})
+
 useGsapContext(() => {
   const list = listRef.value
   if (!list) return

@@ -11,7 +11,7 @@ import {
   type InsightsContent,
   type InsightsContentInput
 } from '#shared/utils/insightsSchema'
-import { resolveInsightsView } from '#shared/utils/insightsPublic'
+import { resolveArticlePage, resolveInsightsView } from '#shared/utils/insightsPublic'
 import { INSIGHTS_DUMMY_ARTICLES, INSIGHTS_DUMMY_CATEGORIES, INSIGHTS_DUMMY_CONTENT } from '../../data/insightsDummy'
 import { byCreated, collectionLangStates, defineCollection, readBothLangs, type CollectionRecord } from './collection'
 import { defineSingletonPage, type CmsLang } from './singletonPage'
@@ -255,12 +255,20 @@ export async function getInsightsPreviewData(lang: CmsLang) {
   }
 }
 
+// One article's draft, plus the landing draft's article picks and the other
+// article drafts, so the article-page preview shows its real "Next" / "More".
 export async function getArticlePreviewData(id: string, lang: CmsLang) {
   const r = await articlesCollection.forLocale(lang).read(id)
-  const cats = await categoriesCollection.forLocale(lang).readAll()
+  const [cats, all, landing] = await Promise.all([
+    categoriesCollection.forLocale(lang).readAll(),
+    articlesCollection.forLocale(lang).readAll(),
+    insightsPage.forLocale(lang).getDraftContent().catch(() => null)
+  ])
   return {
     record: { id: r.id, status: r.status, version: r.draft.version, updatedAt: r.draft.updatedAt, content: r.draft.content },
-    categories: cats.filter((c) => c.status !== 'archived').map((c) => ({ id: c.id, status: c.status, content: c.draft.content }))
+    categories: cats.filter((c) => c.status !== 'archived').map((c) => ({ id: c.id, status: c.status, content: c.draft.content })),
+    issue: landing?.content.contents.items ?? [],
+    articles: all.filter((a) => a.id !== r.id && a.status !== 'archived').map((a) => ({ id: a.id, content: a.draft.content }))
   }
 }
 
@@ -275,8 +283,8 @@ export async function getCategoryPreviewData(id: string, lang: CmsLang) {
 // ---------------------------------------------------------------------------
 
 // Published landing joined with PUBLISHED articles and PUBLISHED + active
-// categories only. No drafts, actors or workflow metadata; the body, author
-// and date are not public yet (no detail page). Never seeds.
+// categories only. No drafts, actors or workflow metadata; the list carries
+// summaries only (body, author and date live on the article page). Never seeds.
 export async function getPublishedInsights(lang: CmsLang = 'en') {
   const snap = await insightsPage.forLocale(lang).getPublishedSnapshot()
   if (!snap) return null
@@ -286,4 +294,36 @@ export async function getPublishedInsights(lang: CmsLang = 'en') {
   const usedIds = new Set([...snap.content.contents.items.map((i) => i.articleId), ...snap.content.filters.items.map((i) => i.categoryId)])
   const dummy = snap.dummy || [...articles, ...categories].some((r) => r.dummy && usedIds.has(r.id))
   return { dummy, version: snap.version, publishedAt: snap.publishedAt, content }
+}
+
+// One article page (/insights/:slug): the PUBLISHED article, only while it is
+// in the published issue and has a written body; null otherwise. Same
+// sources and dummy rule as the landing. Never seeds.
+export async function getPublishedArticle(lang: CmsLang, slug: string) {
+  const snap = await insightsPage.forLocale(lang).getPublishedSnapshot()
+  if (!snap) return null
+  const [articles, categories] = await Promise.all([articlesCollection.forLocale(lang).getPublishedAll(), categoriesCollection.forLocale(lang).getPublishedAll()])
+  const page = resolveArticlePage(
+    snap.content,
+    articles.map((r) => ({ id: r.id, content: r.content, publishedAt: r.publishedAt })),
+    categories.map((r) => ({ id: r.id, content: r.content })),
+    slug,
+    { requireBody: true }
+  )
+  if (!page) return null
+  const target = articles.find((r) => r.content.slug === slug)!
+  return { dummy: snap.dummy || target.dummy, version: target.version, content: page }
+}
+
+// Sitemap: every article that has its own page, per language.
+export async function listPublishedArticlePages(lang: CmsLang) {
+  const snap = await insightsPage.forLocale(lang).getPublishedSnapshot()
+  if (!snap || snap.dummy) return []
+  const articles = await articlesCollection.forLocale(lang).getPublishedAll()
+  const byId = new Map(articles.map((a) => [a.id, a]))
+  return snap.content.contents.items
+    .filter((i) => i.active)
+    .map((i) => byId.get(i.articleId))
+    .filter((a): a is NonNullable<typeof a> => !!a && !a.dummy && a.content.body.length > 0)
+    .map((a) => ({ slug: a.content.slug, publishedAt: a.publishedAt }))
 }

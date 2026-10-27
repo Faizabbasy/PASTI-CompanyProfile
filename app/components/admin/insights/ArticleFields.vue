@@ -116,7 +116,7 @@ function moveCategory(i: number, d: number) {
 
     <template v-if="show('body')">
       <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900" role="note">
-        Tulis isi artikel yang panjang di sini, blok demi blok (paragraf, subjudul, kutipan, daftar, gambar). Belum tampil di website — nanti muncul di halaman artikel /insights/&lt;slug&gt;. Jangan mengulang paragraf pembuka; jangan mengarang nama penulis atau tanggal.
+        Isi halaman artikel sendiri (/insights/&lt;slug&gt;), blok demi blok: paragraf, subjudul, kutipan, daftar, gambar — atau tempel tulisan jadi sekaligus. Begitu ada isinya (dan artikel di-publish + dipilih di halaman Insights), artikel punya halaman sendiri dan masuk sitemap. Subjudul otomatis jadi daftar isi. Jangan mengulang paragraf pembuka; jangan mengarang nama penulis atau tanggal (tanggal kosong = tanggal publish).
       </p>
       <div class="grid gap-5 tablet:grid-cols-2">
         <AdminFormField :id="fieldId('authorName')" v-model="form.authorName" label="Penulis (opsional)" :maxlength="LIM.author" :error="err('authorName')" />

@@ -3,8 +3,9 @@
 //                               content is dev seed data outside nuxt dev
 //   { status: 'unpublished' } — the Insights landing is not live
 //   { status: 'published', version, publishedAt, content }
-// Published snapshots only; active categories only; summary fields only (no
-// body, author or date while there is no detail page); no workflow metadata.
+// Published snapshots only; active categories only; summary fields only (the
+// body, author and date come from /api/public/insights/:slug); no workflow
+// metadata.
 // Nothing here is controllable by the request: the flag is server config.
 export default defineEventHandler(async (event) => {
   setResponseHeader(event, 'cache-control', 'no-store')

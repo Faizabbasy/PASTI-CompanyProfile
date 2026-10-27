@@ -90,8 +90,10 @@ function onOwnOrigin(href: string): string {
   }
 }
 
-/** Title, description, share card and canonical URL for the current page. */
-export function usePageSeo(seo: PageSeo) {
+/** Title, description, share card and canonical URL for the current page.
+ * `parent`: the page above this one in the breadcrumb (article pages);
+ * `type`: Open Graph type (default website). */
+export function usePageSeo(seo: PageSeo, opts: { parent?: { name: string; path: string }; type?: 'website' | 'article' } = {}) {
   const route = useRoute()
   // One address per page: never a trailing slash (server/middleware 301s them).
   const path = route.path.replace(/\/+$/, '') || '/'
@@ -127,6 +129,7 @@ export function usePageSeo(seo: PageSeo) {
     ogTitle: seo.title,
     ogDescription: seo.description,
     ogUrl: url,
+    ogType: opts.type ?? 'website',
     ogImage: image,
     ogImageWidth: 1200,
     ogImageHeight: 630,
@@ -139,7 +142,7 @@ export function usePageSeo(seo: PageSeo) {
     twitterImage: image
   })
   // Who publishes the page and what it is (schema.org graph, useStructuredData).
-  usePageLd({ url, title: seo.title, description: seo.description, image })
+  usePageLd({ url, title: seo.title, description: seo.description, image, parent: opts.parent })
 }
 
 /**

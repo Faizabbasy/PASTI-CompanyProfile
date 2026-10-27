@@ -44,6 +44,11 @@ provideCmsMarks({
     return a ? cmsFieldHref(`/admin/insights/articles/${a.id}`, lang, path) : null
   }
 })
+// "Read the full article" in the Reader opens that draft's article-page preview.
+provideInsightArticleLink((a) => {
+  const rec = data.value?.articles.find((x) => x.content.slug === a.slug)
+  return rec ? `/admin/preview/insights/articles/${rec.id}?lang=${lang}&view=page` : '#'
+})
 const notLive = computed(() => {
   const d = data.value
   if (!d) return 0

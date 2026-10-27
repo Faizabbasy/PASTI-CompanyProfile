@@ -75,7 +75,7 @@ function website(): Ld {
 }
 
 /** Every public page (via usePageSeo): Organization + WebSite + this WebPage. */
-export function usePageLd(page: { url: string; title: string; description: string; image: string }) {
+export function usePageLd(page: { url: string; title: string; description: string; image: string; parent?: { name: string; path: string } }) {
   const route = useRoute()
   const locale = localeOfPath(route.path)
   const site = useSiteUrl('/')
@@ -106,11 +106,36 @@ export function usePageLd(page: { url: string; title: string; description: strin
       '@id': `${page.url}#breadcrumb`,
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: locale === 'id' ? 'Beranda' : 'Home', item: home },
-        { '@type': 'ListItem', position: 2, name, item: page.url }
+        ...(page.parent ? [{ '@type': 'ListItem', position: 2, name: page.parent.name, item: useSiteUrl(page.parent.path) }] : []),
+        { '@type': 'ListItem', position: page.parent ? 3 : 2, name, item: page.url }
       ]
     })
   }
   ldScript('graph', { '@context': 'https://schema.org', '@graph': graph })
+}
+
+/** Article pages (/insights/:slug): the article itself. Author = the
+ * written byline when there is one, else PASTI; dates only when real. */
+export function useArticleLd(a: { headline: string; description: string; image: string; author: string; date: string; section: string; keywords: string[] }) {
+  const route = useRoute()
+  const url = useSiteUrl(route.path.replace(/\/+$/, '') || '/')
+  const org = { '@id': `${useSiteUrl('/')}#organization` }
+  ldScript('article', {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    '@id': `${url}#article`,
+    mainEntityOfPage: { '@id': `${url}#webpage` },
+    headline: a.headline.slice(0, 110),
+    description: a.description,
+    image: [useSiteUrl(a.image)],
+    inLanguage: localeOfPath(route.path) === 'id' ? 'id-ID' : 'en-US',
+    articleSection: a.section || undefined,
+    keywords: [...new Set(a.keywords.filter(Boolean))].join(', ') || undefined,
+    ...(a.date ? { datePublished: a.date } : {}),
+    author: a.author ? { '@type': 'Person', name: a.author } : org,
+    publisher: org,
+    isPartOf: { '@id': `${useSiteUrl('/')}#website` }
+  })
 }
 
 /** Homepage: its FAQ (the site graph comes from usePageSeo). */
