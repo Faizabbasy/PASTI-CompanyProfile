@@ -1,4 +1,5 @@
 import type { Ref } from 'vue'
+import { OPEN_EN, OPEN_ID } from '~/i18n/content/open'
 
 /**
  * /open — OPEN by PASTI Technology (One Procurement Ecosystem Network).
@@ -42,7 +43,7 @@ export interface OpenMethod {
   stages: Array<Array<'teknis' | 'harga' | 'teknis+harga'>>
 }
 
-export function useOpen() {
+function openData() {
   // ---- SEO (temporary, owner brief) --------------------------------------
   const seo = {
     title: 'OPEN — Customizable Procurement Ecosystem | PASTI',
@@ -560,6 +561,15 @@ export function useOpen() {
     cta,
     contentStatus
   }
+}
+
+export type OpenData = ReturnType<typeof openData>
+
+// The deck base mixes English labels with Indonesian supporting copy; each
+// language gets its overlay (app/i18n/content/open.ts): Indonesian pages
+// translate the English parts, English pages the Indonesian parts.
+export function useOpen(): OpenData {
+  return localize(openData(), useLocale() === 'id' ? OPEN_ID : OPEN_EN)
 }
 
 /**

@@ -7,6 +7,7 @@
 // caveat that they are not a contractual schedule. No RFID, offline
 // mobile, handover or duration claims.
 const { integration } = useMatrixPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
 useMatrixReveal(sectionRef)
@@ -23,25 +24,25 @@ useMatrixReveal(sectionRef)
       <div data-fr class="mt-14 grid items-stretch gap-3 desktop:grid-cols-[1fr_1.6fr_1fr]">
         <div class="grid place-items-center rounded-[22px] bg-[color:rgba(255,255,255,0.06)] p-6 text-center ring-1 ring-[color:rgba(255,255,255,0.12)]">
           <div>
-            <p class="font-display text-[22px] font-extrabold">Your ERP</p>
-            <p class="mt-1 text-[13px] text-[color:rgba(255,255,255,0.65)]">Master data, purchasing, finance</p>
+            <p class="font-display text-[22px] font-extrabold">{{ t('Your ERP') }}</p>
+            <p class="mt-1 text-[13px] text-[color:rgba(255,255,255,0.65)]">{{ t('Master data, purchasing, finance') }}</p>
           </div>
         </div>
         <div class="rounded-[22px] border border-dashed border-[color:rgba(255,255,255,0.25)] p-5">
-          <p class="text-center font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">Inventory transactions · agreed data contract</p>
+          <p class="text-center font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">{{ t('Inventory transactions · agreed data contract') }}</p>
           <ul class="mt-4 grid grid-cols-2 gap-2 tablet:grid-cols-3">
             <li v-for="(t, i) in integration.transactions" :key="i" class="inline-flex items-center gap-2 rounded-[12px] bg-[color:rgba(255,255,255,0.06)] px-3 py-2.5 text-[13px] font-semibold">
               <svg viewBox="0 0 16 16" class="h-3.5 w-3.5 shrink-0 text-pastiYellow-500" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 5.5h11M10 2.5l3 3-3 3M14 10.5H3M6 7.5l-3 3 3 3" /></svg>{{ t }}
             </li>
           </ul>
-          <ul class="mt-4 flex flex-wrap justify-center gap-1.5" aria-label="Interface controls">
+          <ul class="mt-4 flex flex-wrap justify-center gap-1.5" :aria-label="t('Interface controls')">
             <li v-for="(c, i) in integration.controls" :key="i" class="rounded-full border border-[color:rgba(255,255,255,0.18)] px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-[0.08em] text-[color:rgba(255,255,255,0.8)]">{{ c }}</li>
           </ul>
         </div>
         <div class="grid place-items-center rounded-[22px] bg-pureWhite p-6 text-center text-slateNavy">
           <div>
             <MatrixMark :size="24" />
-            <p class="mt-2 text-[13px] text-[color:rgba(3,60,89,0.65)]">Material & warehouse operations</p>
+            <p class="mt-2 text-[13px] text-[color:rgba(3,60,89,0.65)]">{{ t('Material & warehouse operations') }}</p>
           </div>
         </div>
       </div>
@@ -49,7 +50,7 @@ useMatrixReveal(sectionRef)
 
       <!-- Implementation path -->
       <div class="mt-16">
-        <p data-fr="fade" class="m-center font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">Implementation approach</p>
+        <p data-fr="fade" class="m-center font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">{{ t('Implementation approach') }}</p>
         <ol class="mt-5 grid gap-3 tablet:grid-cols-2 desktop:grid-cols-5">
           <li v-for="(p, i) in integration.phases" :key="i" class="rounded-[18px] bg-[color:rgba(255,255,255,0.05)] p-5 ring-1 ring-[color:rgba(255,255,255,0.1)]">
             <div data-fr>
@@ -59,7 +60,7 @@ useMatrixReveal(sectionRef)
             </div>
           </li>
         </ol>
-        <p data-fr="fade" class="m-center mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">A conceptual framework, not a contractual schedule · duration and deliverables follow the agreed scope</p>
+        <p data-fr="fade" class="m-center mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">{{ t('A conceptual framework, not a contractual schedule · duration and deliverables follow the agreed scope') }}</p>
       </div>
     </BaseContainer>
   </section>

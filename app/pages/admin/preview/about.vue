@@ -22,8 +22,8 @@ interface PreviewResponse {
 }
 
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData('admin-about-preview', () =>
-  cmsFetch<PreviewResponse>('/api/admin/pages/about/preview')
+const { data, error, refresh, status } = await useAsyncData(`admin-about-preview-${useEditorLang()}`, () =>
+  cmsFetch<PreviewResponse>('/api/admin/pages/about/preview', { query: { lang: useEditorLang() } })
 )
 
 const c = computed(() => data.value?.content)

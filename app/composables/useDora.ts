@@ -1,3 +1,4 @@
+import { DORA_ID } from '~/i18n/content/dora'
 /**
  * /dora — DORA, Document Recognition & Analysis (FCP by PASTI Technology).
  * Brief + audit: docs/dora/00-dora-landing-page-brief.md.
@@ -36,7 +37,7 @@ export interface DoraField {
   review?: boolean
 }
 
-export function useDora() {
+function doraData() {
   const seo = {
     title: 'DORA — Document Recognition & OCR Verification | PASTI',
     description:
@@ -344,4 +345,12 @@ export function useDora() {
   }
 
   return { seo, register, subnav, sample, hero, problem, core, flow, extraction, verify, search, dashboard, model, governance, integration, why, demo }
+}
+
+export type DoraData = ReturnType<typeof doraData>
+
+// Bilingual site: English base data + Indonesian overlay (text only — ids,
+// statuses and sample codes stay as above). Outside Nuxt → English.
+export function useDora() {
+  return localize(doraData(), useLocale() === 'id' ? DORA_ID : undefined)
 }

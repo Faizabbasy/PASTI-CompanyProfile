@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+const t = useT()
 
 if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
@@ -35,7 +36,7 @@ useGsapContext(() => {
 <template>
   <section id="why" ref="sectionRef" class="relative overflow-hidden bg-pureWhite py-24 tablet:py-32">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Why SHIFTLY" :meta="`${pad(why.items.length)} differentiators`" />
+      <BaseSectionMark surface="light" :label="t('Why SHIFTLY')" :meta="t('{n} differentiators', { n: pad(why.items.length) })" />
       <div class="mt-14 desktop:mt-20">
         <ShiftlyHeading :eyebrow="why.eyebrow" :title="why.headline" :lede="why.body" />
       </div>

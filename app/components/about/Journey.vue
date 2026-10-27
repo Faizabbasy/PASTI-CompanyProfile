@@ -10,6 +10,7 @@ if (import.meta.client) {
 // horizontal Signal rail that fills with the scroll and lights each year as
 // it passes. Below desktop: a vertical rail. Reduced motion: fully lit.
 const items = useAboutPage().milestones
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const lit = ref(-1)
 
@@ -42,12 +43,12 @@ useGsapContext(() => {
   <section ref="sectionRef" data-header-theme="dark" class="relative overflow-hidden bg-slateNavy py-24 text-pureWhite tablet:py-32">
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="Journey" meta="2020 → today" />
+      <BaseSectionMark surface="dark" :label="t('Journey')" :meta="t('2020 → today')" />
       <div class="m-center mt-14 desktop:mt-20">
         <p class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">
-          <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />The milestones
+          <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ t('The milestones') }}
         </p>
-        <h2 class="hero-title hero-title--dark mt-4">Our journey<span class="text-pastiYellow-500">.</span></h2>
+        <h2 class="hero-title hero-title--dark mt-4">{{ t('Our journey') }}<span class="text-pastiYellow-500">.</span></h2>
       </div>
 
       <ol data-jr-list class="relative mt-14 grid desktop:mt-20 desktop:grid-cols-5 desktop:gap-6">

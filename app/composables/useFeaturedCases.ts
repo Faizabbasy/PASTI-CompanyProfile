@@ -1,3 +1,5 @@
+import { FEATURED_CASES_ID } from '~/i18n/content/featuredCases'
+
 export type CasePublicationStatus = 'approved' | 'needs_approval'
 export type CaseContentStatus = 'source-backed' | 'partial'
 
@@ -76,7 +78,16 @@ export interface FeaturedCase {
  * Stock-model photos from COMPRO are deliberately not included.
  */
 export function useFeaturedCases() {
-  const allCases: FeaturedCase[] = [
+  // English base + Indonesian overlay (app/i18n/content/featuredCases.ts).
+  // Ids, statuses, years, client names, tech stack and metric values stay.
+  const allCases = localize(featuredCasesData(), useLocale() === 'id' ? FEATURED_CASES_ID : undefined)
+  const publicCases = allCases.filter((c) => c.publicationStatus === 'approved')
+
+  return { allCases, publicCases }
+}
+
+function featuredCasesData(): FeaturedCase[] {
+  return [
     {
       id: 'powerhours',
       index: '01',
@@ -284,10 +295,6 @@ export function useFeaturedCases() {
       source: 'COMPRO 2025 p.10–11'
     }
   ]
-
-  const publicCases = allCases.filter((c) => c.publicationStatus === 'approved')
-
-  return { allCases, publicCases }
 }
 
 /** Active Featured Case on /work, shared by the case browser and the

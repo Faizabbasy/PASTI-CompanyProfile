@@ -22,6 +22,8 @@ const { navLinks, serviceLinks, platformLinks, contact, socials } = useFooter()
 const { eyebrowLine, headingLine } = useFinalCta()
 const { link: whatsappLink } = useWhatsapp()
 const { playTo } = useSectionCurtain()
+const t = useT()
+const lp = useLocalePath()
 
 const year = new Date().getFullYear()
 // "Let's build what matters" → last word carries the Yellow accent.
@@ -147,7 +149,7 @@ useGsapContext(() => {
               @mouseleave="setState('default')"
             >
               <span aria-hidden="true" class="absolute inset-0 origin-left scale-x-0 bg-pureWhite transition-transform duration-500 ease-editorial group-hover:scale-x-100" />
-              <span class="relative z-10">Chat on WhatsApp</span>
+              <span class="relative z-10">{{ t('Chat on WhatsApp') }}</span>
               <span class="relative z-10 grid h-10 w-10 place-items-center rounded-[10px] bg-slateNavy text-pastiYellow-500 transition-transform duration-300 ease-editorial group-hover:rotate-[-45deg]">
                 <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
               </span>
@@ -164,7 +166,7 @@ useGsapContext(() => {
           </div>
 
           <div class="m-center-col flex flex-col gap-3 desktop:items-end">
-            <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">Follow PASTI</p>
+            <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">{{ t('Follow PASTI') }}</p>
             <ul class="m-center-row flex flex-wrap items-center gap-2.5">
               <li v-for="(s, i) in socials" :key="s.key">
                 <div :ref="(el) => { socialRefs[i]!.value = s.url ? (el as HTMLElement | null) : null }" data-foot-social class="inline-block">
@@ -173,7 +175,7 @@ useGsapContext(() => {
                     :href="s.url"
                     target="_blank"
                     rel="noopener noreferrer"
-                    :aria-label="`PASTI on ${s.label}`"
+                    :aria-label="t('PASTI on {name}', { name: s.label })"
                     class="group/soc relative grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-[color:rgba(255,255,255,0.18)] text-pureWhite transition-colors duration-300 ease-editorial hover:border-pastiYellow-500 hover:text-slateNavy"
                     @mouseenter="setState('link')"
                     @mouseleave="setState('default')"
@@ -184,8 +186,8 @@ useGsapContext(() => {
                   <span
                     v-else
                     role="img"
-                    :aria-label="`${s.label} — coming soon`"
-                    :title="`${s.label} — coming soon`"
+                    :aria-label="`${s.label} — ${t('coming soon')}`"
+                    :title="`${s.label} — ${t('coming soon')}`"
                     class="grid h-12 w-12 cursor-default place-items-center rounded-full border border-dashed border-[color:rgba(255,255,255,0.14)] text-[color:rgba(255,255,255,0.35)]"
                   >
                     <span class="h-5 w-5"><LayoutSocialIcon :name="s.key" /></span>
@@ -213,12 +215,12 @@ useGsapContext(() => {
           </p>
         </div>
 
-        <nav class="footer-reveal flex flex-col md:col-span-2 md:gap-3.5" aria-label="Footer navigation">
-          <p class="foot-label mb-1 md:mb-0">Navigate</p>
+        <nav class="footer-reveal flex flex-col md:col-span-2 md:gap-3.5" :aria-label="t('Footer navigation')">
+          <p class="foot-label mb-1 md:mb-0">{{ t('Navigate') }}</p>
           <NuxtLink
             v-for="link in navLinks"
             :key="link.to"
-            :to="link.to"
+            :to="lp(link.to)"
             class="foot-link group"
             @mouseenter="setState('link')"
             @mouseleave="setState('default')"
@@ -227,12 +229,12 @@ useGsapContext(() => {
           </NuxtLink>
         </nav>
 
-        <nav class="footer-reveal flex flex-col md:col-span-3 md:gap-3.5" aria-label="Services">
-          <p class="foot-label mb-1 md:mb-0">Services</p>
+        <nav class="footer-reveal flex flex-col md:col-span-3 md:gap-3.5" :aria-label="t('Services')">
+          <p class="foot-label mb-1 md:mb-0">{{ t('Services') }}</p>
           <NuxtLink
             v-for="link in serviceLinks"
             :key="link.label"
-            :to="link.to"
+            :to="lp(link.to)"
             class="foot-link group"
             @mouseenter="setState('link')"
             @mouseleave="setState('default')"
@@ -241,15 +243,15 @@ useGsapContext(() => {
           </NuxtLink>
         </nav>
 
-        <nav class="footer-reveal flex flex-col gap-3.5 md:col-span-2" aria-label="Platforms">
-          <p class="foot-label">Platforms</p>
+        <nav class="footer-reveal flex flex-col gap-3.5 md:col-span-2" :aria-label="t('Platforms')">
+          <p class="foot-label">{{ t('Platforms') }}</p>
           <component
             :is="link.comingSoon ? 'span' : RouterLink"
             v-for="link in platformLinks"
             :key="link.to"
-            :to="link.comingSoon ? undefined : link.to"
+            :to="link.comingSoon ? undefined : lp(link.to)"
             :aria-disabled="link.comingSoon ? 'true' : undefined"
-            :title="link.comingSoon ? `${link.label} — coming soon` : undefined"
+            :title="link.comingSoon ? `${link.label} — ${t('coming soon')}` : undefined"
             class="group inline-flex w-fit flex-col items-start gap-1.5 font-display text-body-md font-medium text-paper"
             :class="link.comingSoon ? 'cursor-default' : 'hover:text-pastiYellow-500'"
             @mouseenter="link.comingSoon ? undefined : setState('link')"
@@ -259,14 +261,14 @@ useGsapContext(() => {
               <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-pastiYellow-500" aria-hidden="true" />
               {{ link.label }}
             </span>
-            <span v-if="link.comingSoon" class="ml-3 rounded-token-sm border border-navy-700 px-1.5 py-0.5 font-display text-[10px] font-semibold uppercase tracking-[0.08em] text-navy-400">Coming soon</span>
+            <span v-if="link.comingSoon" class="ml-3 rounded-token-sm border border-navy-700 px-1.5 py-0.5 font-display text-[10px] font-semibold uppercase tracking-[0.08em] text-navy-400">{{ t('Coming soon') }}</span>
           </component>
         </nav>
 
         <div class="footer-reveal col-span-2 flex flex-col gap-5 md:col-span-2">
-          <p class="foot-label">Contact</p>
+          <p class="foot-label">{{ t('Contact') }}</p>
           <div>
-            <p class="foot-meta">Direct line</p>
+            <p class="foot-meta">{{ t('Direct line') }}</p>
             <a
               :href="whatsappLink"
               target="_blank"
@@ -281,7 +283,7 @@ useGsapContext(() => {
             <a :href="`mailto:${contact.email}`" class="mt-1 inline-block break-all font-display text-body-md font-semibold text-paper hover:text-pastiYellow-500">{{ contact.email }}</a>
           </div>
           <div v-if="contact.address">
-            <p class="foot-meta">Office</p>
+            <p class="foot-meta">{{ t('Office') }}</p>
             <component
               :is="contact.mapsUrl ? 'a' : 'p'"
               :href="contact.mapsUrl ?? undefined"
@@ -292,7 +294,7 @@ useGsapContext(() => {
             >{{ contact.address }}</component>
           </div>
           <div v-if="contact.hours">
-            <p class="foot-meta">Hours</p>
+            <p class="foot-meta">{{ t('Hours') }}</p>
             <p class="mt-1 text-body-sm text-navy-200">{{ contact.hours }}</p>
           </div>
         </div>
@@ -302,14 +304,14 @@ useGsapContext(() => {
 
       <!-- Legal row. -->
       <div class="footer-reveal flex flex-col-reverse gap-6 py-8 text-body-sm text-navy-400 sm:flex-row sm:items-center sm:justify-between">
-        <p>&copy; {{ year }} {{ contact.entity }}. All rights reserved.</p>
+        <p>&copy; {{ year }} {{ contact.entity }}. {{ t('All rights reserved.') }}</p>
         <div class="flex items-center gap-6">
-          <p class="hidden text-navy-500 md:block">Technology + Creative under one roof by PASTI</p>
+          <p class="hidden text-navy-500 md:block">{{ t('Technology + Creative under one roof by PASTI') }}</p>
           <div ref="topRef" class="inline-block">
             <button
               type="button"
               class="group/top relative grid h-12 w-12 place-items-center overflow-hidden rounded-full border border-[color:rgba(255,255,255,0.2)] text-pureWhite"
-              aria-label="Back to top"
+              :aria-label="t('Back to top')"
               @click="playTo('y:0')"
               @mouseenter="setState('link')"
               @mouseleave="setState('default')"

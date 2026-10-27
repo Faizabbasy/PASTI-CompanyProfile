@@ -2,7 +2,7 @@
 // /api/admin, so the session + no-store/noindex rules apply.
 export default defineEventHandler(async (event) => {
   await requirePermission(event, 'content.preview')
-  const draft = await sharedPages.faqs.getDraftContent()
-  await audit(event, { action: 'faqs.preview', entityType: 'shared', entityId: 'faqs', metadata: { draftVersion: draft.version, revision: draft.revision } })
+  const draft = await sharedPages.faqs.forLocale(cmsLang(event)).getDraftContent()
+  await audit(event, { action: 'faqs.preview', entityType: 'shared', entityId: 'faqs', metadata: { lang: cmsLang(event), draftVersion: draft.version, revision: draft.revision } })
   return draft
 })

@@ -7,6 +7,7 @@
 // the COMING SOON ones). Advanced logic is explained as concepts, without
 // client parameters.
 const { constraints } = useFastPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const hard = ref(true)
 const scope = ref(constraints.scopes[2]!)
@@ -23,7 +24,7 @@ useFastReveal(sectionRef)
         <!-- Live hard / soft demo -->
         <div data-fr class="rounded-[24px] bg-slateNavy p-6 text-pureWhite tablet:p-8 desktop:col-span-5">
           <div class="flex items-center justify-between gap-4">
-            <p class="font-display text-[17px] font-bold">Material readiness</p>
+            <p class="font-display text-[17px] font-bold">{{ t('Material readiness') }}</p>
             <button
               type="button"
               role="switch"
@@ -47,19 +48,19 @@ useFastReveal(sectionRef)
             </div>
             <p class="mt-3 flex items-center gap-2 text-[13px] font-semibold" :class="hard ? 'text-[color:rgba(255,255,255,0.85)]' : 'text-pastiYellow-500'">
               <span class="h-1.5 w-1.5 rounded-full" :class="hard ? 'bg-[color:rgba(255,255,255,0.6)]' : 'bg-pastiYellow-500'" />
-              {{ hard ? 'Held in the queue — inputs not ready.' : 'Placed — potential breach logged to the Exception Center.' }}
+              {{ hard ? t('Held in the queue — inputs not ready.') : t('Placed — potential breach logged to the Exception Center.') }}
             </p>
           </div>
 
-          <p class="mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)]">Switch it on or off</p>
-          <div role="group" aria-label="Constraint scope" class="mt-2 flex flex-wrap gap-2">
-            <button v-for="s in constraints.scopes" :key="s" type="button" :aria-pressed="scope === s" class="min-h-10 rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :class="scope === s ? 'bg-pureWhite text-slateNavy' : 'text-[color:rgba(255,255,255,0.75)] ring-1 ring-[color:rgba(255,255,255,0.2)] hover:text-pureWhite'" @click="scope = s">{{ s }}</button>
+          <p class="mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)]">{{ t('Switch it on or off') }}</p>
+          <div role="group" :aria-label="t('Constraint scope')" class="mt-2 flex flex-wrap gap-2">
+            <button v-for="s in constraints.scopes" :key="s" type="button" :aria-pressed="scope === s" class="min-h-10 rounded-full px-3.5 font-display text-[13px] font-semibold transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :class="scope === s ? 'bg-pureWhite text-slateNavy' : 'text-[color:rgba(255,255,255,0.75)] ring-1 ring-[color:rgba(255,255,255,0.2)] hover:text-pureWhite'" @click="scope = s">{{ t(s) }}</button>
           </div>
         </div>
 
         <!-- Catalogue -->
         <div class="desktop:col-span-7">
-          <p data-fr="fade" class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">Constraint catalogue · {{ constraints.catalog.length }} rules</p>
+          <p data-fr="fade" class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">{{ t('Constraint catalogue · {n} rules', { n: constraints.catalog.length }) }}</p>
           <ul class="mt-4 grid gap-2 tablet:grid-cols-2">
             <li v-for="(c, i) in constraints.catalog" :key="i" data-fr class="flex items-start gap-3 rounded-[14px] bg-surfaceNeutral px-4 py-3">
               <span aria-hidden="true" class="mt-0.5 inline-flex h-5 w-9 shrink-0 items-center justify-end rounded-full bg-slateNavy p-0.5"><span class="h-4 w-4 rounded-full bg-pastiYellow-500" /></span>

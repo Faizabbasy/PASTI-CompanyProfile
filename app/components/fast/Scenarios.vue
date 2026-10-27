@@ -6,6 +6,7 @@
 // and simulations never reach production until published. Objectives are
 // listed as scenario objectives, not "optimization".
 const { scenarios } = useFastPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const pick = ref(2)
 useFastReveal(sectionRef)
@@ -27,7 +28,7 @@ const shape = [
       <div><FastHeading surface="dark" :eyebrow="scenarios.eyebrow" :title="scenarios.headline" :lede="scenarios.lede" /></div>
 
       <div class="mt-14 grid gap-6 desktop:grid-cols-12">
-        <ul role="group" aria-label="Scenarios" class="grid content-start gap-2 desktop:col-span-4">
+        <ul role="group" :aria-label="t('Scenarios')" class="grid content-start gap-2 desktop:col-span-4">
           <li v-for="(s, i) in scenarios.list" :key="i" data-fr>
             <button
               type="button"
@@ -40,7 +41,7 @@ const shape = [
                 <span class="block font-display text-[16px] font-bold">{{ s.name }}</span>
                 <span class="mt-0.5 block text-[13px] leading-snug" :class="pick === i ? 'text-[color:rgba(3,60,89,0.65)]' : 'text-[color:rgba(255,255,255,0.6)]'">{{ s.body }}</span>
               </span>
-              <span class="shrink-0 rounded-full px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.12em]" :class="s.status === 'Active' ? 'bg-pastiYellow-500 text-slateNavy' : pick === i ? 'bg-surfaceNeutral text-slateNavy' : 'bg-[color:rgba(255,255,255,0.1)] text-[color:rgba(255,255,255,0.75)]'">{{ s.status }}</span>
+              <span class="shrink-0 rounded-full px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.12em]" :class="s.status === 'Active' ? 'bg-pastiYellow-500 text-slateNavy' : pick === i ? 'bg-surfaceNeutral text-slateNavy' : 'bg-[color:rgba(255,255,255,0.1)] text-[color:rgba(255,255,255,0.75)]'">{{ t(s.status) }}</span>
             </button>
           </li>
         </ul>
@@ -48,8 +49,8 @@ const shape = [
         <!-- Comparison -->
         <div data-fr class="rounded-[24px] bg-[color:rgba(255,255,255,0.05)] p-6 ring-1 ring-[color:rgba(255,255,255,0.12)] tablet:p-8 desktop:col-span-8">
           <div class="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">
-            <span>KPI comparison · {{ scenarios.list[pick]!.name }} vs Active production</span>
-            <span>Illustrative</span>
+            <span>{{ t('KPI comparison · {name} vs Active production', { name: scenarios.list[pick]!.name }) }}</span>
+            <span>{{ t('Illustrative') }}</span>
           </div>
           <ul class="mt-6 grid gap-5">
             <li v-for="(k, ki) in scenarios.kpis" :key="k">
@@ -61,23 +62,23 @@ const shape = [
             </li>
           </ul>
           <p class="mt-5 flex flex-wrap gap-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.6)]">
-            <span class="inline-flex items-center gap-2"><span class="h-2 w-4 rounded-full bg-[color:rgba(255,255,255,0.22)]" />Active production</span>
+            <span class="inline-flex items-center gap-2"><span class="h-2 w-4 rounded-full bg-[color:rgba(255,255,255,0.22)]" />{{ t('Active production') }}</span>
             <span class="inline-flex items-center gap-2"><span class="h-2 w-4 rounded-full bg-pastiYellow-500" />{{ scenarios.list[pick]!.name }}</span>
           </p>
 
           <!-- Publish gate -->
           <div class="mt-8 flex flex-wrap items-center gap-3 border-t border-[color:rgba(255,255,255,0.12)] pt-6 font-display text-[13px] font-semibold">
-            <span class="rounded-full bg-[color:rgba(255,255,255,0.1)] px-3 py-1.5">Draft / simulation</span>
+            <span class="rounded-full bg-[color:rgba(255,255,255,0.1)] px-3 py-1.5">{{ t('Draft / simulation') }}</span>
             <svg viewBox="0 0 24 8" class="h-2 w-8 text-[color:rgba(255,255,255,0.4)]" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M0 4h22M18 1l4 3-4 3" /></svg>
             <span class="rounded-full border border-dashed border-pastiYellow-500 px-3 py-1.5 text-pastiYellow-500">Publish</span>
             <svg viewBox="0 0 24 8" class="h-2 w-8 text-[color:rgba(255,255,255,0.4)]" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M0 4h22M18 1l4 3-4 3" /></svg>
-            <span class="rounded-full bg-pastiYellow-500 px-3 py-1.5 text-slateNavy">Active production</span>
+            <span class="rounded-full bg-pastiYellow-500 px-3 py-1.5 text-slateNavy">{{ t('Active production') }}</span>
           </div>
         </div>
       </div>
 
       <div data-fr class="mt-12">
-        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)] max-desktop:text-center">Scenario objectives</p>
+        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)] max-desktop:text-center">{{ t('Scenario objectives') }}</p>
         <ul class="m-center-row mt-4 flex flex-wrap gap-2">
           <li v-for="(o, i) in scenarios.objectives" :key="i" class="rounded-full px-3.5 py-2 font-display text-[13px] font-semibold ring-1 ring-[color:rgba(255,255,255,0.18)]">{{ o }}</li>
         </ul>

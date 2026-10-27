@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
+const t = useT()
 
 // BUSINESS OUTCOMES — the brief's six NON-NUMERIC outcomes only (no metrics,
 // no counters). Set as one large typographic stack: each line sits as a
@@ -42,7 +43,7 @@ useGsapContext(() => {
     <BaseGridLines tone="light" />
     <EcorpMarks label="10 / 12 · Non-numeric outcomes" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Business outcomes" meta="10 / 12" />
+      <BaseSectionMark surface="light" :label="t('Business outcomes')" meta="10 / 12" />
       <EcorpHeading class="mt-12" size="md" eyebrow="Business outcomes" before="What a connected enterprise " mark="works towards" />
 
       <ul class="mt-14 border-t border-[color:rgba(3,60,89,0.14)]">

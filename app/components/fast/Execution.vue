@@ -5,6 +5,7 @@
 // operation (sample data). Right: the exception feed with severity filter.
 // No thresholds, no client values; progress is "synced", never "real-time".
 const { execution } = useFastPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const sev = ref<string | null>(null)
 useFastReveal(sectionRef)
@@ -41,16 +42,16 @@ const feed = computed(() => (sev.value ? execution.feed.filter((f) => f.sev === 
         <!-- Plan vs actual -->
         <div data-fr class="rounded-[24px] bg-surfaceNeutral p-5 tablet:p-7 desktop:col-span-7">
           <div class="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">
-            <span>Progress tracking · plan vs actual</span>
-            <span class="inline-flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Last sync · sample</span>
+            <span>{{ t('Progress tracking · plan vs actual') }}</span>
+            <span class="inline-flex items-center gap-2"><span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ t('Last sync · sample') }}</span>
           </div>
           <ul class="mt-5 grid gap-4">
             <li v-for="r in rows" :key="r.ref" class="rounded-[14px] bg-pureWhite p-4 ring-1 ring-[color:rgba(3,60,89,0.06)]">
               <div class="flex flex-wrap items-center justify-between gap-2">
                 <span class="font-display text-[14px] font-bold text-slateNavy">{{ r.ref }}</span>
                 <span class="flex items-center gap-2">
-                  <span class="font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.55)]">{{ r.exec }}</span>
-                  <span class="rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase" :class="healthTone[r.health]">{{ r.health }}</span>
+                  <span class="font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.55)]">{{ t(r.exec) }}</span>
+                  <span class="rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase" :class="healthTone[r.health]">{{ t(r.health) }}</span>
                 </span>
               </div>
               <div class="relative mt-3 h-6" aria-hidden="true">
@@ -60,8 +61,8 @@ const feed = computed(() => (sev.value ? execution.feed.filter((f) => f.sev === 
             </li>
           </ul>
           <p class="mt-4 flex flex-wrap gap-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">
-            <span class="inline-flex items-center gap-2"><span class="h-2.5 w-5 rounded-[3px] border-2 border-dashed border-[color:rgba(3,60,89,0.3)]" />Planned</span>
-            <span class="inline-flex items-center gap-2"><span class="h-2 w-5 rounded-[3px] bg-slateNavy" />Actual</span>
+            <span class="inline-flex items-center gap-2"><span class="h-2.5 w-5 rounded-[3px] border-2 border-dashed border-[color:rgba(3,60,89,0.3)]" />{{ t('Planned') }}</span>
+            <span class="inline-flex items-center gap-2"><span class="h-2 w-5 rounded-[3px] bg-slateNavy" />{{ t('Actual') }}</span>
           </p>
           <ul class="mt-6 flex flex-wrap gap-1.5 border-t border-[color:rgba(3,60,89,0.1)] pt-5">
             <li v-for="f in execution.fields" :key="f" class="rounded-full bg-pureWhite px-2.5 py-1 text-[12px] font-medium text-[color:rgba(3,60,89,0.75)] ring-1 ring-[color:rgba(3,60,89,0.08)]">{{ f }}</li>
@@ -70,27 +71,27 @@ const feed = computed(() => (sev.value ? execution.feed.filter((f) => f.sev === 
 
         <!-- Exception Center -->
         <div data-fr class="rounded-[24px] bg-slateNavy p-5 text-pureWhite tablet:p-7 desktop:col-span-5">
-          <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">Exception Center</p>
-          <div role="group" aria-label="Filter by severity" class="mt-4 flex flex-wrap gap-1.5">
-            <button type="button" :aria-pressed="sev === null" class="min-h-9 rounded-full px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :class="sev === null ? 'bg-pureWhite text-slateNavy' : 'ring-1 ring-[color:rgba(255,255,255,0.2)] text-[color:rgba(255,255,255,0.75)]'" @click="sev = null">All</button>
-            <button v-for="s in execution.severity" :key="s.name" type="button" :aria-pressed="sev === s.name" :title="s.body" class="min-h-9 rounded-full px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :class="sev === s.name ? sevTone[s.name] : 'ring-1 ring-[color:rgba(255,255,255,0.2)] text-[color:rgba(255,255,255,0.75)]'" @click="sev = s.name">{{ s.name }}</button>
+          <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">{{ t('Exception Center') }}</p>
+          <div role="group" :aria-label="t('Filter by severity')" class="mt-4 flex flex-wrap gap-1.5">
+            <button type="button" :aria-pressed="sev === null" class="min-h-9 rounded-full px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :class="sev === null ? 'bg-pureWhite text-slateNavy' : 'ring-1 ring-[color:rgba(255,255,255,0.2)] text-[color:rgba(255,255,255,0.75)]'" @click="sev = null">{{ t('All') }}</button>
+            <button v-for="s in execution.severity" :key="s.name" type="button" :aria-pressed="sev === s.name" :title="s.body" class="min-h-9 rounded-full px-3 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :class="sev === s.name ? sevTone[s.name] : 'ring-1 ring-[color:rgba(255,255,255,0.2)] text-[color:rgba(255,255,255,0.75)]'" @click="sev = s.name">{{ t(s.name) }}</button>
           </div>
           <ul class="mt-5 grid gap-2" aria-live="polite">
             <li v-for="f in feed" :key="f.type + f.ref" class="rounded-[14px] bg-[color:rgba(255,255,255,0.06)] p-4 ring-1 ring-[color:rgba(255,255,255,0.1)]">
               <div class="flex items-center justify-between gap-3">
-                <span class="rounded-full px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.1em]" :class="sevTone[f.sev]">{{ f.sev }}</span>
+                <span class="rounded-full px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.1em]" :class="sevTone[f.sev]">{{ t(f.sev) }}</span>
                 <span class="font-mono text-[10px] text-[color:rgba(255,255,255,0.55)]">{{ f.ref }}</span>
               </div>
               <p class="mt-2 font-display text-[15px] font-bold">{{ f.type }}</p>
               <p class="mt-0.5 text-[13px] leading-snug text-[color:rgba(255,255,255,0.7)]">{{ f.note }}</p>
             </li>
           </ul>
-          <p class="mt-5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.45)]">Sample feed</p>
+          <p class="mt-5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.45)]">{{ t('Sample feed') }}</p>
         </div>
       </div>
 
       <div data-fr class="mt-10">
-        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)] max-desktop:text-center">Exception categories</p>
+        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)] max-desktop:text-center">{{ t('Exception categories') }}</p>
         <ul class="m-center-row mt-3 flex flex-wrap gap-2">
           <li v-for="(c, i) in execution.categories" :key="i" class="rounded-full bg-surfaceNeutral px-3.5 py-2 font-display text-[13px] font-semibold text-slateNavy">{{ c }}</li>
         </ul>

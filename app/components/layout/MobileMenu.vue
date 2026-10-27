@@ -28,7 +28,7 @@ watch(open, (isOpen) => {
   document.documentElement.style.overflow = isOpen ? 'hidden' : ''
 
   if (isOpen) {
-    expanded.value = navItems.filter((i) => i.children?.some((c) => c.to === route.path)).map((i) => i.label)
+    expanded.value = navItems.filter((i) => i.children?.some((c) => c.to === stripLocale(route.path))).map((i) => i.label)
     nextTick(() => {
       const items = listRef.value?.querySelectorAll(':scope > li')
       if (!items?.length) return
@@ -55,6 +55,8 @@ onBeforeUnmount(() => {
   document.documentElement.style.overflow = ''
   mm?.revert()
 })
+const t = useT()
+const lp = useLocalePath()
 </script>
 
 <template>
@@ -78,7 +80,7 @@ onBeforeUnmount(() => {
         enter-from-class="opacity-0 -translate-y-4"
         enter-to-class="opacity-100 translate-y-0"
       >
-        <nav aria-label="Main" class="container-page flex h-full flex-col justify-between gap-8 overflow-y-auto py-28">
+        <nav :aria-label="t('Main')" class="container-page flex h-full flex-col justify-between gap-8 overflow-y-auto py-28">
           <ul ref="listRef" class="flex flex-col gap-1">
             <li
               v-for="item in navItems"
@@ -114,13 +116,13 @@ onBeforeUnmount(() => {
                     <ul class="pb-3">
                       <li v-for="c in item.children" :key="c.to">
                         <NuxtLink
-                          :to="c.to"
-                          :aria-current="route.path === c.to ? 'page' : undefined"
+                          :to="lp(c.to)"
+                          :aria-current="stripLocale(route.path) === c.to ? 'page' : undefined"
                           class="grid min-h-[64px] grid-cols-[2.75rem_1fr_auto] items-center gap-x-3.5 rounded-[14px] px-1 py-2 transition-colors duration-300 active:bg-[color:rgba(3,60,89,0.06)]"
-                          :class="{ 'bg-[color:rgba(3,60,89,0.05)]': route.path === c.to }"
+                          :class="{ 'bg-[color:rgba(3,60,89,0.05)]': stripLocale(route.path) === c.to }"
                           @click="close()"
                         >
-                          <span aria-hidden="true" class="grid h-11 w-11 place-items-center rounded-[11px]" :class="route.path === c.to ? 'bg-pastiYellow-500 text-slateNavy' : 'bg-slateNavy text-pureWhite'">
+                          <span aria-hidden="true" class="grid h-11 w-11 place-items-center rounded-[11px]" :class="stripLocale(route.path) === c.to ? 'bg-pastiYellow-500 text-slateNavy' : 'bg-slateNavy text-pureWhite'">
                             <LayoutNavIcon :name="c.icon" class="h-5 w-5" />
                           </span>
                           <span class="min-w-0">
@@ -139,11 +141,11 @@ onBeforeUnmount(() => {
               <component
                 :is="item.comingSoon ? 'span' : RouterLink"
                 v-else
-                :to="item.comingSoon ? undefined : item.to"
+                :to="item.comingSoon ? undefined : lp(item.to)"
                 :aria-disabled="item.comingSoon ? 'true' : undefined"
-                :title="item.comingSoon ? `${item.label} — coming soon` : undefined"
+                :title="item.comingSoon ? `${item.label} — ${t('coming soon')}` : undefined"
                 class="flex items-center gap-2 py-4 font-display text-display-sm font-semibold text-ink transition-colors duration-400 ease-editorial hover:text-navy-500"
-                :class="[{ 'text-navy-700': route.path === item.to }, { 'cursor-default opacity-50': item.comingSoon }]"
+                :class="[{ 'text-navy-700': stripLocale(route.path) === item.to }, { 'cursor-default opacity-50': item.comingSoon }]"
                 @click="item.comingSoon ? undefined : close()"
               >
                 <span
@@ -155,6 +157,8 @@ onBeforeUnmount(() => {
               </component>
             </li>
           </ul>
+
+          <LayoutLangSwitch size="lg" class="self-start" />
 
           <a :href="whatsappLink" target="_blank" rel="noopener noreferrer" class="btn-accent w-full" @click="close()">
             {{ primaryCta.label }}

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
+const t = useT()
 
 // e-CORPORATE HERO — "blueprint" signature: dot grid, registration marks and
 // an outlined e-CORPORATE wordmark cropped by the bottom edge. H1 is the
@@ -94,11 +95,11 @@ useGsapContext(() => {
             <span class="sr-only">e-CORPORATE, {{ category }}: </span>
             <span v-for="(w, i) in heroLines" :key="w" class="block overflow-hidden pb-[0.06em]">
               <span data-eh-word class="block">
-                <span class="text-[color:rgba(3,60,89,0.4)]">Connect </span><span
+                <span class="text-[color:rgba(3,60,89,0.4)]">{{ `${t('Connect')} ` }}</span><span
                   class="relative inline-block cursor-default transition-colors duration-300"
                   :class="focus && focus !== w ? 'text-[color:rgba(3,60,89,0.35)]' : ''"
                   @mouseenter="setFocus(w)"
-                >{{ w }}<span
+                >{{ t(w) }}<span
                   aria-hidden="true"
                   class="absolute inset-x-0 -bottom-[0.02em] h-[0.07em] min-h-[3px] origin-left bg-pastiYellow-500 transition-transform duration-500 ease-editorial"
                   :class="focus === w || (!focus && i === heroLines.length - 1) ? 'scale-x-100' : 'scale-x-0'"
@@ -108,8 +109,8 @@ useGsapContext(() => {
           </h1>
 
           <!-- Keyboard / touch access to the same highlight (tablet+) -->
-          <div data-eh-fade class="m-center-row mt-5 hidden items-center gap-1 tablet:flex" role="group" aria-label="Highlight in the workspace">
-            <span class="mr-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)]">Show</span>
+          <div data-eh-fade class="m-center-row mt-5 hidden items-center gap-1 tablet:flex" role="group" :aria-label="t('Highlight in the workspace')">
+            <span class="mr-2 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)]">{{ t('Show') }}</span>
             <button
               v-for="w in heroLines"
               :key="w"
@@ -118,15 +119,15 @@ useGsapContext(() => {
               :class="focus === w ? 'border-slateNavy bg-slateNavy text-pureWhite' : 'border-[color:rgba(3,60,89,0.2)] text-slateNavy hover:border-slateNavy'"
               :aria-pressed="focus === w"
               @click="toggleFocus(w)"
-            >{{ w }}</button>
+            >{{ t(w) }}</button>
           </div>
 
           <p data-eh-fade class="hero-lede m-center mt-6 max-w-[34rem] desktop:mt-[3svh]">{{ short }}</p>
 
           <div data-eh-fade class="mt-8 desktop:mt-[4svh]">
             <BaseHeroCtas
-              :primary="{ label: 'Request a Demo' }"
-              :secondary="{ label: 'Explore Platform', down: true }"
+              :primary="{ label: t('Request a Demo') }"
+              :secondary="{ label: t('Explore Platform'), down: true }"
               @primary="scrollTo('demo')"
               @secondary="scrollTo('overview')"
             />

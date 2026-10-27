@@ -9,5 +9,5 @@ export default defineEventHandler(async (event) => {
   await requirePermission(event, 'content.edit')
   const { user } = await requirePermission(event, 'content.saveDraft')
   const { revision, content } = await readZodBody(event, Body)
-  return sharedPages.ctas.saveDraft(event, user, revision, content)
+  return sharedPages.ctas.forLocale(cmsLang(event)).saveDraft(event, user, revision, content)
 })

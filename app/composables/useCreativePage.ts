@@ -1,4 +1,5 @@
 import type { InjectionKey } from 'vue'
+import { CREATIVE_PAGE_ID } from '~/i18n/content/creative'
 import { isSafeLinkUrl } from '#shared/cms/fields'
 import {
   COMPANY_MILESTONE_REFS,
@@ -40,7 +41,7 @@ export function buildLegacyCreativeContent(): CreativePageContent {
   const { link: whatsappLink } = useWhatsapp()
   // "Creative that gets business results." → the last two words start line two.
   const words = c.heading.replace(/\.$/, '').split(' ')
-  return {
+  const built: CreativePageContent = {
     source: 'legacy',
     cmsVersion: null,
     hero: {
@@ -92,8 +93,11 @@ export function buildLegacyCreativeContent(): CreativePageContent {
       standards: c.why.standards.map((s) => ({ name: s.name, body: s.body })),
       milestones: c.why.milestones.map((m) => ({ year: m.year, text: m.text }))
     },
-    seo: { ...pageSeo.creative }
+    seo: { ...localizedPageSeo('creative') }
   }
+  // Indonesian wording on Indonesian pages (app/i18n/content/creative.ts);
+  // English (and migration scripts) get the code copy unchanged.
+  return localize(built, useLocale() === 'id' ? CREATIVE_PAGE_ID : undefined)
 }
 
 // ---- TEMPORARY reference layer (until Work / Testimonial / Company CMS) ----
@@ -246,13 +250,15 @@ export function adaptCreativeCms(legacy: CreativePageContent, cms: Pick<PublicCr
 // Called once by pages/creative.vue.
 export async function resolveCreativePageContent() {
   const legacy = buildLegacyCreativeContent()
-  const state = useState<CreativePageContent>(STATE_KEY, () => legacy)
+  const locale = useLocale()
+  const state = useState<CreativePageContent>(`${STATE_KEY}-${locale}`, () => legacy)
 
-  const { data } = await useAsyncData('creative-cms-source', async () => {
+  const { data } = await useAsyncData(`creative-cms-source-${locale}`, async () => {
     // SSR: skip the call entirely when the server-side flag is off.
     if (import.meta.server && !creativeCmsEnabledOnServer()) return { status: 'disabled' as const }
     try {
-      const raw = await $fetch('/api/public/pages/creative', { timeout: 2500 })
+      // Published record of this page's language; none → that language's code copy.
+      const raw = await $fetch('/api/public/pages/creative', { query: { lang: locale }, timeout: 2500 })
       const parsed = PublicCreativeResponseSchema.safeParse(raw)
       if (!parsed.success) {
         if (import.meta.server) console.error('[creative] CMS response failed validation — using legacy content')
@@ -285,6 +291,6 @@ export function provideCreativePreview(content: CreativePageContent) {
 export function useCreativePage(): CreativePageContent {
   const preview = inject(PREVIEW_KEY, null)
   if (preview) return preview
-  const state = useState<CreativePageContent | undefined>(STATE_KEY)
+  const state = useState<CreativePageContent | undefined>(`${STATE_KEY}-${useLocale()}`)
   return state.value ?? buildLegacyCreativeContent()
 }

@@ -31,6 +31,8 @@ import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 
+// --lang id → build and write the Indonesian record (default: English, the original record).
+const LANG = process.argv.includes('--lang') && process.argv[process.argv.indexOf('--lang') + 1] === 'id' ? 'id' : 'en'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = new Set(process.argv.slice(2))
 const DRY = args.has('--dry-run')
@@ -47,6 +49,7 @@ const jiti = createJiti(import.meta.url, {
   interopDefault: true
 })
 const load = (p) => jiti.import(resolve(root, p))
+await (await import('./lib/nuxt-shims.mjs')).installNuxtShims(load, LANG)
 
 // The legacy composables call each other through Nuxt auto-imports; provide
 // those names as globals so the real, unmodified files run as-is.
@@ -61,8 +64,14 @@ globalThis.useTechnology = useTechnology
 
 const { buildLegacyTechnologyContent, technologyWorkRefFor, resolveTechnologyWorkRef } = await load('app/composables/useTechnologyPage.ts')
 const { legacyToTechnologyContent, TECHNOLOGY_MIGRATION_VERSION, TECHNOLOGY_DUMMY_MARKERS } = await load('shared/utils/technologyMigration.ts')
+const MIG_VERSION = LANG === 'id' ? TECHNOLOGY_MIGRATION_VERSION.replace('-v', '-id-v') : TECHNOLOGY_MIGRATION_VERSION
 const { TechnologyContentSchema, TECHNOLOGY_WORK_REFS } = await load('shared/utils/technologySchema.ts')
-const { buildMigratedTechnologyRecord, TECHNOLOGY_RECORD_KEY, TECHNOLOGY_REVISION_PREFIX } = await load('server/utils/cms/technologyPage.ts')
+// The record for the chosen language (--lang id → Indonesian; default English = the original record).
+const { technologyFor } = await load('server/utils/cms/technologyPage.ts')
+const _engine = technologyFor(LANG)
+const buildMigratedTechnologyRecord = _engine.buildMigratedRecord
+const TECHNOLOGY_RECORD_KEY = _engine.RECORD_KEY
+const TECHNOLOGY_REVISION_PREFIX = _engine.REVISION_PREFIX
 
 // Same origin usePageSeo() builds the canonical from (runtimeConfig.public.siteUrl).
 const siteUrl = (process.env.NUXT_PUBLIC_SITE_URL || 'https://www.pastipeople.id').replace(/\/+$/, '')
@@ -100,7 +109,7 @@ if (leftovers.length) {
 }
 
 const summary = {
-  version: TECHNOLOGY_MIGRATION_VERSION,
+  version: MIG_VERSION,
   headline: [content.hero.headlineLine1, content.hero.headlineLine2, content.hero.headlineLine3],
   capabilities: content.capabilities.items.map((c) => c.id),
   work: content.work.items.map((w) => w.ref)
@@ -109,9 +118,9 @@ const summary = {
 const storage = await openCmsStore(root)
 const existing = await storage.getItem(TECHNOLOGY_RECORD_KEY)
 
-const sameMigration = existing?.source?.kind === 'migration' && existing.source.version === TECHNOLOGY_MIGRATION_VERSION
+const sameMigration = existing?.source?.kind === 'migration' && existing.source.version === MIG_VERSION
 if (sameMigration && JSON.stringify(existing.draft.content) === text) {
-  console.log(`${TAG} Already migrated (${TECHNOLOGY_MIGRATION_VERSION}); draft unchanged — nothing to do.`)
+  console.log(`${TAG} Already migrated (${MIG_VERSION}); draft unchanged — nothing to do.`)
   process.exit(0)
 }
 if (existing && existing.dummy === false) {
@@ -131,7 +140,7 @@ if (DRY) {
 }
 
 const now = new Date().toISOString()
-const record = buildMigratedTechnologyRecord(content, TECHNOLOGY_MIGRATION_VERSION, now)
+const record = buildMigratedTechnologyRecord(content, MIG_VERSION, now)
 
 // Remove the dev-seed snapshot history so no dummy version survives.
 const revisionKeys = await storage.getKeys(TECHNOLOGY_REVISION_PREFIX)
@@ -146,7 +155,7 @@ const entry = {
   entityId: 'technology',
   timestamp: now,
   metadata: {
-    version: TECHNOLOGY_MIGRATION_VERSION,
+    version: MIG_VERSION,
     source: 'legacy Technology (useTechnology + Hero/Work template constants) + pageSeo.technology',
     replaced: existing ? (existing.dummy ? 'dummy seed record' : 'real draft (--force)') : 'none',
     removedRevisions: revisionKeys.length,
@@ -155,5 +164,5 @@ const entry = {
 }
 await storage.setItem(`audit:${now.replace(/[:.]/g, '')}-${entry.id.slice(0, 8)}`, entry)
 
-console.log(`${TAG} Migrated ${TECHNOLOGY_MIGRATION_VERSION} into the Technology draft (status: draft, not published).`)
+console.log(`${TAG} Migrated ${MIG_VERSION} into the Technology draft (status: draft, not published).`)
 console.log(JSON.stringify({ ...summary, replaced: entry.metadata.replaced, removedRevisions: revisionKeys.length }, null, 2))

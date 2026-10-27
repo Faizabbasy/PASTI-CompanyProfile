@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
+const t = useT()
 
 // GOVERNANCE, VISIBILITY & CONTROL — deep navy structural section built only
 // on the brief's safe themes (no certifications, compliance or encryption
@@ -34,7 +35,7 @@ useGsapContext(() => {
     <BaseGridLines tone="dark" />
     <EcorpMarks surface="dark" label="09 / 12 · Accountability" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark label="Governance" meta="09 / 12" />
+      <BaseSectionMark :label="t('Governance')" meta="09 / 12" />
 
       <div class="mt-12 grid gap-14 desktop:grid-cols-12 desktop:gap-8">
         <div class="desktop:col-span-5">
@@ -49,11 +50,11 @@ useGsapContext(() => {
 
         <!-- Approval trail (illustrative) -->
         <div data-eg-trail class="desktop:col-span-6 desktop:col-start-7 desktop:self-center">
-          <div class="border border-[color:rgba(255,255,255,0.18)] bg-pureWhite text-slateNavy" role="img" aria-label="Illustrative approval trail: request submitted by the requester, reviewed by the department head, approved by the approver and recorded by the information owner.">
+          <div class="border border-[color:rgba(255,255,255,0.18)] bg-pureWhite text-slateNavy" role="img" :aria-label="t('Illustrative approval trail: request submitted by the requester, reviewed by the department head, approved by the approver and recorded by the information owner.')">
             <div aria-hidden="true">
               <div class="flex items-center justify-between border-b border-[color:rgba(3,60,89,0.1)] px-5 py-3.5">
-                <span class="flex items-center gap-3"><EcorpWordmark class="text-[13px]" /><span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">Approval trail</span></span>
-                <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">Illustrative</span>
+                <span class="flex items-center gap-3"><EcorpWordmark class="text-[13px]" /><span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">{{ t('Approval trail') }}</span></span>
+                <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">{{ t('Illustrative') }}</span>
               </div>
               <ol class="relative px-5 py-4">
                 <span data-eg-spine class="absolute bottom-8 left-[31px] top-8 w-[2px] origin-top bg-pastiYellow-500" />
@@ -66,9 +67,9 @@ useGsapContext(() => {
                 </li>
               </ol>
               <div class="grid grid-cols-3 border-t border-[color:rgba(3,60,89,0.1)] font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.6)]">
-                <span class="border-r border-[color:rgba(3,60,89,0.1)] px-5 py-3">Owner per step</span>
-                <span class="border-r border-[color:rgba(3,60,89,0.1)] px-5 py-3">Visible status</span>
-                <span class="px-5 py-3">One record</span>
+                <span class="border-r border-[color:rgba(3,60,89,0.1)] px-5 py-3">{{ t('Owner per step') }}</span>
+                <span class="border-r border-[color:rgba(3,60,89,0.1)] px-5 py-3">{{ t('Visible status') }}</span>
+                <span class="px-5 py-3">{{ t('One record') }}</span>
               </div>
             </div>
           </div>

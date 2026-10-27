@@ -29,6 +29,7 @@ const { active, openCase } = useActiveCase()
 // The default active case ('powerhours') may not be in a CMS selection.
 if (!publicCases.some((c) => c.id === active.value) && publicCases[0]) active.value = publicCases[0].id
 const pad = (n: number) => String(n).padStart(2, '0')
+const t = useT()
 
 const sectionRef = ref<HTMLElement | null>(null)
 const headingRef = ref<HTMLElement | null>(null)
@@ -114,7 +115,7 @@ useGsapContext(() => {
     <span v-for="c in publicCases" :id="`case-${c.id}`" :key="c.id" aria-hidden="true" class="pointer-events-none absolute left-0 top-0" />
 
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" :label="cases.sectionLabel" :meta="`${pad(publicCases.length)} featured`" />
+      <BaseSectionMark surface="dark" :label="cases.sectionLabel" :meta="t('{n} featured', { n: pad(publicCases.length) })" />
 
       <div class="mt-12 grid gap-6 desktop:mt-16 desktop:grid-cols-12 desktop:items-end desktop:gap-10">
         <h2 ref="headingRef" class="m-center font-display text-[length:clamp(40px,6vw,96px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-pureWhite desktop:col-span-8">
@@ -123,7 +124,7 @@ useGsapContext(() => {
         <div class="m-center desktop:col-span-4 desktop:pb-3">
           <p class="text-token-body-large text-[color:rgba(255,255,255,0.7)]">{{ cases.supportingCopy }}</p>
           <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">
-            <span class="hidden desktop:inline">Select a case</span><span class="desktop:hidden">Swipe &amp; tap a case</span>
+            <span class="hidden desktop:inline">{{ t('Select a case') }}</span><span class="desktop:hidden">{{ t('Swipe & tap a case') }}</span>
           </p>
         </div>
       </div>
@@ -134,7 +135,7 @@ useGsapContext(() => {
       <div class="container-page desktop:px-[max(4vw,calc((100vw-1440px)/2+4vw))]">
         <div
           role="tablist"
-          aria-label="Featured case studies"
+          :aria-label="t('Featured case studies')"
           class="snap-rail -mx-gutter flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-px-gutter px-gutter pb-2 desktop:mx-0 desktop:h-[min(64svh,600px)] desktop:min-h-[460px] desktop:snap-none desktop:overflow-visible desktop:px-0 desktop:pb-0"
         >
           <button
@@ -233,22 +234,22 @@ useGsapContext(() => {
             <p class="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-pastiYellow-500">{{ c.category }}</p>
             <dl v-if="c.client || c.year" class="m-center-row mt-6 flex flex-wrap gap-x-8 gap-y-3 border-t border-[color:rgba(255,255,255,0.14)] pt-5">
               <div v-if="c.client">
-                <dt class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">Client</dt>
+                <dt class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">{{ t('Client') }}</dt>
                 <dd class="mt-1 text-[15px] font-semibold text-pureWhite">{{ c.client }}</dd>
               </div>
               <div v-if="c.year">
-                <dt class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">Year</dt>
+                <dt class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">{{ t('Year') }}</dt>
                 <dd class="mt-1 text-[15px] font-semibold text-pureWhite">{{ c.year }}</dd>
               </div>
             </dl>
             <p v-if="c.businessContext" class="mt-6 text-[17px] leading-relaxed text-[color:rgba(255,255,255,0.8)]">{{ c.businessContext }}</p>
 
             <div class="m-center-row mt-8 flex items-center gap-3">
-              <button type="button" class="grid h-12 w-12 place-items-center rounded-full ring-1 ring-[color:rgba(255,255,255,0.25)] transition-colors duration-300 hover:bg-pureWhite hover:text-slateNavy focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :aria-label="`Previous case: ${publicCases[(i - 1 + publicCases.length) % publicCases.length]!.title}`" @click="step(-1)">
+              <button type="button" class="grid h-12 w-12 place-items-center rounded-full ring-1 ring-[color:rgba(255,255,255,0.25)] transition-colors duration-300 hover:bg-pureWhite hover:text-slateNavy focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :aria-label="`${t('Previous case')}: ${publicCases[(i - 1 + publicCases.length) % publicCases.length]!.title}`" @click="step(-1)">
                 <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 8H3M7 4L3 8l4 4" /></svg>
               </button>
               <span class="font-mono text-[12px] tracking-[0.18em] text-[color:rgba(255,255,255,0.5)]"><span class="text-pureWhite">{{ c.index }}</span> / {{ pad(publicCases.length) }}</span>
-              <button type="button" class="group grid h-12 w-12 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy transition-transform duration-300 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pureWhite" :aria-label="`Next case: ${publicCases[(i + 1) % publicCases.length]!.title}`" @click="step(1)">
+              <button type="button" class="group grid h-12 w-12 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy transition-transform duration-300 active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pureWhite" :aria-label="`${t('Next case')}: ${publicCases[(i + 1) % publicCases.length]!.title}`" @click="step(1)">
                 <svg viewBox="0 0 16 16" class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
               </button>
             </div>

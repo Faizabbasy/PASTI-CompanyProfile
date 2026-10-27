@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // GOVERNANCE, APPROVAL & AUDITABILITY (slides 14, 15, 16) — one section,
 // three beats on one idea: control lives inside the process.
 // 1. Governance embedded in every step (Request → … → Completion) over the
@@ -41,11 +42,11 @@ watch(demoIn, (v) => {
 onBeforeUnmount(stop)
 const done = computed(() => step.value >= flow.length - 1)
 // Who acted at each step (roles from the deck's example; "Sistem" at the end).
-const who = ['User', 'Reviewer', 'Approver 1', 'Approver 2', 'Final Approver', 'Sistem']
+const who = ['User', 'Reviewer', 'Approver 1', 'Approver 2', 'Final Approver', 'System']
 const status = computed(() => [
   { k: 'Who', v: who[step.value] ?? '' },
   { k: 'What', v: flow[step.value]?.body ?? '' },
-  { k: 'When', v: 'Tercatat otomatis' },
+  { k: 'When', v: 'Recorded automatically' },
   { k: 'Status', v: done.value ? 'Completed' : step.value === 0 ? 'Submitted' : 'In approval' },
   { k: 'Next Action', v: done.value ? '—' : flow[step.value + 1]?.label ?? '' }
 ])
@@ -75,7 +76,7 @@ const log = [
       </div>
 
       <div ref="laneRef" class="mt-14" :class="{ 'is-in': laneIn }">
-        <p class="m-center font-display text-[15px] font-bold text-slateNavy">Governance embedded in every step</p>
+        <p class="m-center font-display text-[15px] font-bold text-slateNavy">{{ t('Governance embedded in every step') }}</p>
         <ol class="relative mt-6 grid gap-5 tablet:grid-cols-5 tablet:gap-3">
           <span aria-hidden="true" class="op-draw absolute left-3 right-3 top-[15px] hidden h-[2px] bg-pastiYellow-500 tablet:block" />
           <span aria-hidden="true" class="op-drawy absolute bottom-3 left-[15px] top-3 w-[2px] bg-pastiYellow-500 tablet:hidden" />
@@ -106,7 +107,7 @@ const log = [
           <div class="m-center mt-8 rounded-[20px] bg-[color:rgba(251,186,0,0.14)] p-6">
             <p class="text-[14px] text-[color:rgba(3,60,89,0.75)]">{{ governance.approvalQuestionIntro }}</p>
             <p class="mt-1 font-display text-[24px] font-extrabold tracking-[-0.02em] text-slateNavy">{{ governance.approvalQuestion }}</p>
-            <p class="mt-4 text-[14px] text-[color:rgba(3,60,89,0.75)]">Sistem akan menunjukkan:</p>
+            <p class="mt-4 text-[14px] text-[color:rgba(3,60,89,0.75)]">{{ t('The system will show:') }}</p>
             <p class="mt-1 font-display text-[16px] font-bold text-slateNavy">{{ governance.approvalShows.join(' → ') }}</p>
           </div>
         </div>
@@ -114,10 +115,10 @@ const log = [
         <div ref="demoRef" class="desktop:col-span-7">
           <div class="rounded-[24px] border border-[color:rgba(3,60,89,0.12)] bg-pureWhite p-5 shadow-[0_50px_100px_-70px_rgba(3,60,89,0.7)] tablet:p-7">
             <div class="flex items-center justify-between gap-3">
-              <p class="flex items-center gap-2 font-display text-[15px] font-extrabold text-slateNavy"><OpenMark :size="18" />Multi-level approval flow</p>
+              <p class="flex items-center gap-2 font-display text-[15px] font-extrabold text-slateNavy"><OpenMark :size="18" />{{ t('Multi-level approval flow') }}</p>
               <button type="button" class="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[color:rgba(3,60,89,0.18)] px-3 text-[12.5px] font-bold text-slateNavy hover:border-slateNavy" @click="run">
                 <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 109.4-3.9M12 1.5v3h-3" /></svg>
-                Ulangi
+                {{ t('Replay') }}
               </button>
             </div>
             <ol class="mt-6 grid grid-cols-3 gap-y-5 tablet:grid-cols-6">
@@ -135,11 +136,11 @@ const log = [
             </ol>
             <dl class="mt-7 grid grid-cols-2 overflow-hidden rounded-[16px] bg-slateNavy text-pureWhite tablet:grid-cols-5">
               <div v-for="s in status" :key="s.k" class="border-b border-r border-[color:rgba(255,255,255,0.1)] px-4 py-4 tablet:border-b-0 tablet:last:border-r-0">
-                <dt class="text-[12px] text-[color:rgba(255,255,255,0.55)]">{{ s.k }}</dt>
-                <dd class="mt-1 font-display text-[14px] font-bold leading-snug" :class="s.k === 'Status' ? 'text-pastiYellow-500' : ''">{{ s.v }}</dd>
+                <dt class="text-[12px] text-[color:rgba(255,255,255,0.55)]">{{ t(s.k) }}</dt>
+                <dd class="mt-1 font-display text-[14px] font-bold leading-snug" :class="s.k === 'Status' ? 'text-pastiYellow-500' : ''">{{ t(s.v) }}</dd>
               </div>
             </dl>
-            <p class="mt-4 text-[13px] text-[color:rgba(3,60,89,0.6)]">{{ governance.approvalLine }} Contoh alur — jumlah level mengikuti authority matrix organisasi.</p>
+            <p class="mt-4 text-[13px] text-[color:rgba(3,60,89,0.6)]">{{ governance.approvalLine }} {{ t('Example flow — the number of levels follows the organization’s authority matrix.') }}</p>
           </div>
         </div>
       </div>
@@ -164,27 +165,27 @@ const log = [
         <div ref="logRef" class="desktop:col-span-7" :class="{ 'is-in': logIn }">
           <div class="overflow-hidden rounded-[24px] border border-[color:rgba(3,60,89,0.12)] bg-pureWhite shadow-[0_50px_100px_-70px_rgba(3,60,89,0.7)]">
             <div class="flex items-center justify-between border-b border-[color:rgba(3,60,89,0.08)] px-5 py-4">
-              <p class="flex items-center gap-2 font-display text-[15px] font-extrabold text-slateNavy"><OpenMark :size="18" />Audit Log</p>
-              <span class="text-[12px] text-[color:rgba(3,60,89,0.5)]">Ilustrasi</span>
+              <p class="flex items-center gap-2 font-display text-[15px] font-extrabold text-slateNavy"><OpenMark :size="18" />{{ t('Audit Log') }}</p>
+              <span class="text-[12px] text-[color:rgba(3,60,89,0.5)]">{{ t('Illustration') }}</span>
             </div>
             <table class="w-full text-left">
               <thead class="hidden tablet:table-header-group">
                 <tr class="text-[12px] text-[color:rgba(3,60,89,0.55)]">
-                  <th scope="col" class="px-5 py-3 font-semibold">Timestamp</th>
-                  <th scope="col" class="px-3 py-3 font-semibold">User</th>
-                  <th scope="col" class="px-3 py-3 font-semibold">Action</th>
-                  <th scope="col" class="px-3 py-3 font-semibold">Document</th>
-                  <th scope="col" class="px-5 py-3 font-semibold">Status</th>
+                  <th scope="col" class="px-5 py-3 font-semibold">{{ t('Timestamp') }}</th>
+                  <th scope="col" class="px-3 py-3 font-semibold">{{ t('User') }}</th>
+                  <th scope="col" class="px-3 py-3 font-semibold">{{ t('Action') }}</th>
+                  <th scope="col" class="px-3 py-3 font-semibold">{{ t('Document') }}</th>
+                  <th scope="col" class="px-5 py-3 font-semibold">{{ t('Status') }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(r, i) in log" :key="r.action" class="op-fade grid grid-cols-[1fr_auto] gap-x-3 border-t border-[color:rgba(3,60,89,0.07)] px-5 py-3.5 tablet:table-row tablet:px-0 tablet:py-0" :style="{ '--d': `${i * 120}ms` }">
                   <td class="op-num text-[12.5px] text-[color:rgba(3,60,89,0.45)] tablet:px-5 tablet:py-3.5">hh:mm</td>
-                  <td class="col-start-1 font-display text-[14px] font-bold text-slateNavy tablet:px-3 tablet:py-3.5">{{ r.user }}</td>
-                  <td class="col-start-1 text-[13.5px] text-slateNavy tablet:px-3 tablet:py-3.5">{{ r.action }}</td>
-                  <td class="hidden text-[13px] text-[color:rgba(3,60,89,0.6)] tablet:table-cell tablet:px-3 tablet:py-3.5">Request</td>
+                  <td class="col-start-1 font-display text-[14px] font-bold text-slateNavy tablet:px-3 tablet:py-3.5">{{ t(r.user) }}</td>
+                  <td class="col-start-1 text-[13.5px] text-slateNavy tablet:px-3 tablet:py-3.5">{{ t(r.action) }}</td>
+                  <td class="hidden text-[13px] text-[color:rgba(3,60,89,0.6)] tablet:table-cell tablet:px-3 tablet:py-3.5">{{ t('Request') }}</td>
                   <td class="col-start-2 row-span-3 row-start-1 self-center tablet:px-5 tablet:py-3.5">
-                    <span class="rounded-full px-2.5 py-1 text-[11.5px] font-bold" :class="r.status === 'Success' ? 'bg-[color:rgba(3,60,89,0.08)] text-slateNavy' : 'bg-[color:rgba(251,186,0,0.22)] text-slateNavy'">{{ r.status }}</span>
+                    <span class="rounded-full px-2.5 py-1 text-[11.5px] font-bold" :class="r.status === 'Success' ? 'bg-[color:rgba(3,60,89,0.08)] text-slateNavy' : 'bg-[color:rgba(251,186,0,0.22)] text-slateNavy'">{{ t(r.status) }}</span>
                   </td>
                 </tr>
               </tbody>

@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
 
   let page: Awaited<ReturnType<typeof getPublishedShared>>
   try {
-    page = await getPublishedShared('ctas')
+    page = await getPublishedShared('ctas', cmsLang(event))
   } catch (err) {
     console.error('[cms] public Global CTAs read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

@@ -17,8 +17,8 @@ interface PreviewResponse {
 }
 
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData(`admin-shared-${props.id}-preview`, () =>
-  cmsFetch<PreviewResponse>(`/api/admin/shared/${props.id}/preview`)
+const { data, error, refresh, status } = await useAsyncData(`admin-shared-${props.id}-preview-${useEditorLang()}`, () =>
+  cmsFetch<PreviewResponse>(`/api/admin/shared/${props.id}/preview`, { query: { lang: useEditorLang() } })
 )
 
 const sources = { clients: clientsSource, faqs: faqsSource, ctas: ctasSource }

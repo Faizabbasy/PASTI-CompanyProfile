@@ -27,8 +27,10 @@ if (import.meta.client) {
 // Below `desktop` (1024px) and under reduced motion there is no pin and no
 // ring: the section is a plain vertical editorial feed (Featured -> Supporting
 // x3), shown via the `data-motion-stage="simple"` swap in main.css.
+const t = useT()
+const lp = useLocalePath()
 const heading = 'Insights'
-const cta = 'View all'
+const cta = t('View all')
 
 const { articles } = useInsights()
 const featured = articles.find((a) => a.role === 'featured')!
@@ -347,7 +349,7 @@ watch(activeIndex, (next, prev) => {
                 </p>
               </div>
               <NuxtLink
-                to="/insights"
+                :to="lp('/insights')"
                 class="group/cta relative inline-flex items-center gap-2 pb-1.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-slateNavy hover:text-cobalt"
               >
                 {{ cta }}
@@ -356,7 +358,7 @@ watch(activeIndex, (next, prev) => {
               </NuxtLink>
             </div>
             <div data-ins-chrome class="flex flex-col items-end gap-2.5">
-              <div class="flex items-center gap-1" role="tablist" aria-label="Insight topics">
+              <div class="flex items-center gap-1" role="tablist" :aria-label="t('Insight topics')">
                 <button
                   v-for="(article, i) in homepageArticles"
                   :key="article.index"
@@ -395,7 +397,7 @@ watch(activeIndex, (next, prev) => {
           @mouseenter="setState('view', 'Read')"
           @mouseleave="setState('default')"
         >
-          <NuxtLink to="/insights" :aria-label="article.title" tabindex="-1" class="group/card block h-full w-full">
+          <NuxtLink :to="lp('/insights')" :aria-label="article.title" tabindex="-1" class="group/card block h-full w-full">
             <div
               data-card-inner
               class="relative h-full w-full overflow-hidden rounded-card border border-structural-light bg-pureWhite shadow-[0_36px_70px_-38px_rgba(3,60,89,0.4)]"
@@ -431,7 +433,7 @@ watch(activeIndex, (next, prev) => {
       <BaseContainer class="absolute inset-x-0 bottom-[4.5svh] z-30">
         <div ref="captionRowRef" class="flex items-end justify-between gap-10">
           <NuxtLink
-            to="/insights"
+            :to="lp('/insights')"
             data-ins-chrome
             class="group block max-w-[46rem]"
             @mouseenter="setState('link')"
@@ -461,9 +463,9 @@ watch(activeIndex, (next, prev) => {
           <!-- Circular Read CTA with a turning text ring. -->
           <div ref="readRef" data-ins-chrome class="shrink-0">
             <NuxtLink
-              to="/insights"
+              :to="lp('/insights')"
               class="group/read relative grid h-[112px] w-[112px] place-items-center"
-              aria-label="Read insight"
+              :aria-label="t('Read insight')"
               @mouseenter="setState('link')"
               @mouseleave="setState('default')"
             >
@@ -472,7 +474,7 @@ watch(activeIndex, (next, prev) => {
                   <path id="ins-read-ring" d="M60,60 m-47,0 a47,47 0 1,1 94,0 a47,47 0 1,1 -94,0" />
                 </defs>
                 <text class="fill-slateNavy font-display text-[10px] font-semibold uppercase">
-                  <textPath href="#ins-read-ring" textLength="292" lengthAdjust="spacing">Read insight · Read insight · </textPath>
+                  <textPath href="#ins-read-ring" textLength="292" lengthAdjust="spacing">{{ t('Read insight') }} · {{ t('Read insight') }} · </textPath>
                 </text>
               </svg>
               <span class="relative grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-slateNavy text-pureWhite transition-transform duration-500 ease-editorial group-hover/read:scale-110">
@@ -498,7 +500,7 @@ watch(activeIndex, (next, prev) => {
           {{ heading }}
         </h2>
         <NuxtLink
-          to="/insights"
+          :to="lp('/insights')"
           class="group/cta relative mb-1 inline-flex min-h-11 shrink-0 items-center gap-2 font-display text-token-metadata font-semibold uppercase tracking-[0.08em] text-slateNavy active:text-cobalt"
         >
           {{ cta }}
@@ -511,7 +513,7 @@ watch(activeIndex, (next, prev) => {
     <ul
       ref="mobileTrackRef"
       class="snap-rail relative z-10 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-gutter px-gutter pb-2"
-      aria-label="Insight articles"
+      :aria-label="t('Insight articles')"
     >
       <li
         v-for="(article, i) in homepageArticles"
@@ -520,7 +522,7 @@ watch(activeIndex, (next, prev) => {
         :aria-current="i === mobileActive ? 'true' : undefined"
       >
         <NuxtLink
-          to="/insights"
+          :to="lp('/insights')"
           class="block origin-left transition-[transform,opacity] duration-500 ease-editorial active:scale-[0.98]"
           :class="i === mobileActive ? 'scale-100 opacity-100' : 'scale-[0.94] opacity-60'"
         >

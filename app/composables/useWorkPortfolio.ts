@@ -27,13 +27,16 @@ export interface WorkProjectEntry {
 export function useWorkPortfolio() {
   const { projects: selected } = useSelectedWork()
   const { publicCases } = useFeaturedCases()
+  // Filter group per project, keyed by its stable index (not by category
+  // text, which is translated on Indonesian pages). Group names are filter
+  // keys; ProjectIndex shows them through t().
   const groupOf: Record<string, string> = {
-    'Omnichannel E-Commerce': 'Commerce',
-    'Enterprise Platform': 'Enterprise',
-    'Fitness & Wellness App': 'Wellness',
-    'Employee Wellness Platform': 'Wellness',
-    'Corporate Campaign': 'Campaign',
-    'Mobile Banking': 'Fintech'
+    '01': 'Commerce', // Omnichannel E-Commerce
+    '02': 'Enterprise', // Enterprise Platform
+    '03': 'Wellness', // Fitness & Wellness App
+    '04': 'Wellness', // Employee Wellness Platform
+    '05': 'Campaign', // Corporate Campaign
+    '06': 'Fintech' // Mobile Banking
   }
   const projects: WorkProjectEntry[] = selected.map((p) => ({
     index: p.index,
@@ -41,7 +44,7 @@ export function useWorkPortfolio() {
     category: p.category,
     description: p.description,
     image: p.image,
-    group: groupOf[p.category] ?? 'Other',
+    group: groupOf[p.index] ?? 'Other',
     caseId: publicCases.find((c) => c.projectRef === p.title)?.id
   }))
   const groups = ['All', ...Array.from(new Set(projects.map((p) => p.group)))]

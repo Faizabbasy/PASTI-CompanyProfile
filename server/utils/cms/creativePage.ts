@@ -34,8 +34,8 @@ export const setCreativeStatus = creative.setStatus
 // order kept and the internal sortOrder dropped.
 const publicList = <T extends { active: boolean; sortOrder: number }>(list: T[]) => activeOnly(list).map(({ sortOrder: _s, ...rest }) => rest)
 
-export async function getPublishedCreative() {
-  const snap = await creative.getPublishedSnapshot()
+export async function getPublishedCreative(lang: CmsLang = 'en') {
+  const snap = await creative.forLocale(lang).getPublishedSnapshot()
   if (!snap) return null
   const c = snap.content
   return {
@@ -50,3 +50,6 @@ export async function getPublishedCreative() {
     }
   }
 }
+
+// Bilingual CMS: the record for one language (English = the original record).
+export const creativeFor = (lang: CmsLang) => creative.forLocale(lang)

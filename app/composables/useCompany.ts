@@ -1,3 +1,4 @@
+import { COMPANY_ID } from '~/i18n/content/company'
 export interface CompanyStandard {
   name: 'Innovation' | 'Security' | 'Efficiency' | 'Integrity'
   body: string
@@ -21,7 +22,7 @@ export interface CompanyMilestone {
  * - Excluded entirely: the Project Shareholder / RD Abdul Goni pages (pp.3–4),
  *   NPWP and AHU numbers.
  */
-export function useCompany() {
+function companyData() {
   const facts = [
     { label: 'Company', value: 'PT Hidup Pasti Bahagia' },
     { label: 'Brand', value: 'PASTI' },
@@ -82,4 +83,18 @@ export function useCompany() {
   const sectors = ['State-owned enterprises', 'Public sector', 'Finance', 'FMCG', 'Lifestyle']
 
   return { facts, story, vision, mission, standards, pickStandards, milestones, pickMilestones, founder, sectors }
+}
+
+export type CompanyData = ReturnType<typeof companyData>
+
+export function useCompany() {
+  const c = localize(companyData(), useLocale() === 'id' ? COMPANY_ID : undefined)
+  // Rebuilt over the translated lists (the originals close over the English
+  // ones). Standard names and milestone years are lookup keys — they stay
+  // English in the data; components show them through t().
+  return {
+    ...c,
+    pickStandards: (...names: CompanyStandard['name'][]) => names.map((n) => c.standards.find((s) => s.name === n)!),
+    pickMilestones: (...years: string[]) => years.map((y) => c.milestones.find((m) => m.year === y)!)
+  }
 }

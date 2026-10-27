@@ -6,7 +6,7 @@
 // pillars) → Technology × Creative proof → client logos. Footer carries the
 // CTA. Copy: useAbout + useCompany. Shareholder pages are excluded.
 
-usePageSeo(pageSeo.about)
+usePageSeo(localizedPageSeo('about'))
 
 // Content source is resolved once here (legacy code by default; the
 // published CMS snapshot only when the server-side flag allows it) and read

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+const t = useT()
 
 if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
@@ -36,17 +37,17 @@ useGsapContext(() => {
   <section id="platform" ref="sectionRef" class="surface-light relative overflow-hidden py-24 tablet:py-32" style="--lift-x: 85%; --lift-y: 15%">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Platform" meta="More than just HRIS" />
+      <BaseSectionMark surface="light" :label="t('Platform')" :meta="t('More than just HRIS')" />
       <div class="mt-14 grid gap-12 desktop:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <div class="desktop:col-span-5">
           <ShiftlyHeading :eyebrow="platform.eyebrow" :title="platform.headline" :lede="platform.body" />
           <p class="m-center mt-8 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">
-            <span aria-hidden="true" class="grid h-5 w-5 place-items-center rounded-full bg-pastiYellow-500 text-[11px] text-slateNavy">↓</span>Pick a layer to see what it powers
+            <span aria-hidden="true" class="grid h-5 w-5 place-items-center rounded-full bg-pastiYellow-500 text-[11px] text-slateNavy">↓</span>{{ t('Pick a layer to see what it powers') }}
           </p>
         </div>
 
         <!-- Layer buttons -->
-        <div data-pf-stack role="group" aria-label="Operating layers" class="flex flex-col gap-2 desktop:col-span-7">
+        <div data-pf-stack role="group" :aria-label="t('Operating layers')" class="flex flex-col gap-2 desktop:col-span-7">
           <button
             v-for="(l, i) in platform.layers"
             :key="l.name"

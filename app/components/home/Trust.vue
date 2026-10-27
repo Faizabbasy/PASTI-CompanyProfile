@@ -3,9 +3,10 @@ import gsap from 'gsap'
 
 // Owner decision 2026-10-07: "Our Beloved Client" (the COMPRO 2025 client-wall
 // title, p.7) replaces the mapping doc's "Trusted by leading organizations".
-const heading = 'Our Beloved Client'
+const t = useT()
+const heading = t('Our Beloved Client')
 // Client-sector line condensed from COMPRO 2025 p.25 (same source as useWhoWeAre).
-const lede = 'State-owned enterprises, multinational corporations and leading brands across Indonesia.'
+const lede = t('State-owned enterprises, multinational corporations and leading brands across Indonesia.')
 
 // Owner decisions 2026-10-07: the marquee shows real clients (useClients)
 // instead of the 7 platform logos (moved to HomeTechStrip), and the section
@@ -195,7 +196,7 @@ useGsapContext(() => {
     />
 
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Trusted" meta="06 / 11" />
+      <BaseSectionMark surface="light" :label="t('Trusted')" meta="06 / 11" />
 
       <!-- Editorial head: heading left, live client count right. -->
       <div class="mt-16 grid items-end gap-10 md:mt-20 desktop:grid-cols-12 desktop:gap-8">
@@ -212,7 +213,7 @@ useGsapContext(() => {
             <span ref="countRef" aria-hidden="true">{{ String(clients.length).padStart(2, '0') }}</span><span aria-hidden="true" class="text-pastiYellow-500">+</span>
           </span>
           <div class="pb-1 desktop:max-w-[22ch]">
-            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">Clients</p>
+            <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">{{ t('Clients') }}</p>
             <p class="mt-1.5 text-[14px] leading-snug text-[color:rgba(3,60,89,0.72)]">{{ lede }}</p>
           </div>
         </div>
@@ -236,7 +237,7 @@ useGsapContext(() => {
         <ul
           :ref="(el) => { if (el) trackRefs[r] = el as HTMLElement }"
           class="flex w-max items-center motion-reduce:w-full motion-reduce:flex-wrap motion-reduce:justify-center"
-          :aria-label="r === 0 ? 'Client logos' : undefined"
+          :aria-label="r === 0 ? t('Client logos') : undefined"
         >
           <li
             v-for="(client, i) in [...row, ...row]"
@@ -273,7 +274,7 @@ useGsapContext(() => {
 
     <BaseContainer class="relative z-10 mt-6">
       <div class="m-center-row flex items-center gap-4">
-        <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.45)]">Est. 2020 · PT Hidup Pasti Bahagia</span>
+        <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.45)]">{{ t('Est. 2020') }} · PT Hidup Pasti Bahagia</span>
         <LayoutBrandMark surface="light" :height="13" class="ml-auto max-desktop:hidden" />
       </div>
     </BaseContainer>

@@ -1,3 +1,5 @@
+import { CREATIVE_ID } from '~/i18n/content/creative'
+
 export type CreativeArt = 'communication' | 'campaign' | 'social' | 'video' | 'production' | 'brand'
 
 export interface CreativeRelated {
@@ -45,7 +47,7 @@ export interface CreativeVisual {
  * - `why`: Mission (p.27), the 2022 creative milestone (p.26) and the
  *   creative-relevant Standards (p.28).
  */
-export function useCreative() {
+function creativeData() {
   const eyebrow = 'Creative'
   const heading = 'Creative that gets business results.'
   const introBody =
@@ -188,4 +190,11 @@ export function useCreative() {
   ]
 
   return { eyebrow, heading, introBody, servicesEyebrow, servicesHeading, services, work, why, visuals }
+}
+
+export type CreativeData = ReturnType<typeof creativeData>
+
+// Indonesian overlay on Indonesian pages (app/i18n/content/creative.ts).
+export function useCreative() {
+  return localize(creativeData(), useLocale() === 'id' ? CREATIVE_ID : undefined)
 }

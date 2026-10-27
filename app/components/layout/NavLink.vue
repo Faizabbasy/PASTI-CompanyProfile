@@ -11,19 +11,21 @@ withDefaults(defineProps<{ item: NavItem; dark?: boolean }>(), { dark: false })
 const route = useRoute()
 const labelRef = ref<HTMLElement | null>(null)
 const { setState } = useCustomCursor()
+const t = useT()
+const lp = useLocalePath()
 </script>
 
 <template>
   <component
     :is="item.comingSoon ? 'span' : RouterLink"
-    :to="item.comingSoon ? undefined : item.to"
+    :to="item.comingSoon ? undefined : lp(item.to)"
     :aria-disabled="item.comingSoon ? 'true' : undefined"
-    :title="item.comingSoon ? `${item.label} — coming soon` : undefined"
+    :title="item.comingSoon ? `${item.label} — ${t('coming soon')}` : undefined"
     class="group relative flex items-center gap-1.5 whitespace-nowrap py-2 font-display text-sm font-bold tracking-tight transition-opacity duration-400 ease-editorial"
     :class="[
       dark
-        ? ['text-pureWhite/80', { 'text-pureWhite': route.path === item.to }]
-        : ['text-navy-950', { 'text-navy-700': route.path === item.to }],
+        ? ['text-pureWhite/80', { 'text-pureWhite': stripLocale(route.path) === item.to }]
+        : ['text-navy-950', { 'text-navy-700': stripLocale(route.path) === item.to }],
       { 'cursor-default opacity-50': item.comingSoon }
     ]"
     @mouseenter="setState(item.comingSoon ? 'default' : 'link')"
@@ -53,7 +55,7 @@ const { setState } = useCustomCursor()
     </span>
     <span
       class="pointer-events-none absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 transition-transform duration-400 ease-editorial group-hover:scale-x-100"
-      :class="[dark ? 'bg-pastiYellow-500' : 'bg-yellow-500', { 'scale-x-100': route.path === item.to }]"
+      :class="[dark ? 'bg-pastiYellow-500' : 'bg-yellow-500', { 'scale-x-100': stripLocale(route.path) === item.to }]"
       aria-hidden="true"
     />
   </component>

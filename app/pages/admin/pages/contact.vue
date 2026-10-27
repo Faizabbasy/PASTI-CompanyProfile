@@ -7,6 +7,8 @@ import { CONTACT_LIMITS as LIM, type ContactAdminState } from '#shared/utils/con
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Contact · Pages' })
 
+// Bilingual: which language record is being edited (?lang=, default Indonesian).
+const lang = useEditorLang()
 const {
   loadStatus, loadError, refresh, form, state, dirty, activeTab, errorCount, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, canPublish, canUnpublish, canArchive, publishDisabledReason
@@ -14,6 +16,7 @@ const {
   name: 'Contact',
   endpoint: '/api/admin/pages/contact',
   asyncKey: 'admin-contact',
+  lang,
   tabs: CONTACT_TABS,
   toForm: toContactForm,
   toPayload: toContactPayload,
@@ -65,9 +68,10 @@ const codeManaged = [
     crumb="Pages"
     crumb-to="/admin/pages"
     public-path="/contact"
+    :lang="lang"
     flag="NUXT_CMS_CONTACT_PUBLIC_ENABLED"
     :tabs="CONTACT_TABS"
-    preview-path="/admin/preview/contact"
+    :preview-path="`/admin/preview/contact?lang=${lang}`"
     :code-managed="codeManaged"
     :dummy="state?.dummy !== false"
     :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
@@ -89,7 +93,7 @@ const codeManaged = [
         :state="state"
         :dirty="dirty"
         :busy="busy"
-        preview-href="/admin/preview/contact"
+        :preview-href="`/admin/preview/contact?lang=${lang}`"
         :can-publish="canPublish"
         :can-unpublish="canUnpublish"
         :can-archive="canArchive"

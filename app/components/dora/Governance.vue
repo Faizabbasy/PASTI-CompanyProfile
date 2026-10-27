@@ -6,6 +6,7 @@
 // trail, SSO/MFA or encryption claim (design recommendations / open
 // decisions in the source — docs/dora/00).
 const { governance } = useDoraPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const picked = ref(2)
 const role = computed(() => governance.roles[picked.value]!)
@@ -30,7 +31,7 @@ useFastReveal(sectionRef)
 
         <div class="desktop:col-span-7">
           <div data-fr class="overflow-hidden rounded-[22px] ring-1 ring-[color:rgba(3,60,89,0.12)]">
-            <ul class="grid grid-cols-1 border-b border-[color:rgba(3,60,89,0.1)] bg-surfaceNeutral tablet:grid-cols-5" aria-label="Roles">
+            <ul class="grid grid-cols-1 border-b border-[color:rgba(3,60,89,0.1)] bg-surfaceNeutral tablet:grid-cols-5" :aria-label="t('Roles')">
               <li v-for="(r, i) in governance.roles" :key="i" class="border-[color:rgba(3,60,89,0.08)] max-tablet:border-b tablet:border-r tablet:last:border-r-0">
                 <button
                   type="button"
@@ -49,7 +50,7 @@ useFastReveal(sectionRef)
             <div id="dgv-role" class="bg-pureWhite p-6 tablet:p-8" aria-live="polite">
               <p class="font-display text-[26px] font-extrabold tracking-[-0.02em] text-slateNavy">{{ role.name }}</p>
               <p class="mt-2 max-w-[52ch] text-[15.5px] leading-relaxed text-[color:rgba(3,60,89,0.72)]">{{ role.body }}</p>
-              <p class="mt-6 font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">Baseline access</p>
+              <p class="mt-6 font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">{{ t('Baseline access') }}</p>
               <ul class="mt-2.5 flex flex-wrap gap-2">
                 <li v-for="c in role.can" :key="c" class="inline-flex items-center gap-2 rounded-full bg-slateNavy px-3.5 py-1.5 font-display text-[13px] font-semibold text-pureWhite">
                   <svg viewBox="0 0 12 12" class="h-3 w-3 text-pastiYellow-500" aria-hidden="true"><path d="M2.5 6.2 5 8.6l4.6-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>{{ c }}
@@ -62,7 +63,7 @@ useFastReveal(sectionRef)
           <div data-fr class="mt-3 flex gap-4 rounded-[22px] bg-slateNavy p-6 text-pureWhite tablet:p-7">
             <svg viewBox="0 0 24 24" class="h-6 w-6 shrink-0 text-doraCyan" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2.8 4 6v5.6c0 4.7 3.3 8.6 8 9.6 4.7-1 8-4.9 8-9.6V6z" /><path d="M8.5 12.2 11 14.6l4.6-4.8" /></svg>
             <div>
-              <p class="font-display text-[17px] font-bold">Privacy follows your policy</p>
+              <p class="font-display text-[17px] font-bold">{{ t('Privacy follows your policy') }}</p>
               <p class="mt-1.5 text-[14.5px] leading-relaxed text-[color:rgba(255,255,255,0.75)]">{{ governance.policy }}</p>
             </div>
           </div>

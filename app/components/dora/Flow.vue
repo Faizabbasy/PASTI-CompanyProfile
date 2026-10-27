@@ -11,6 +11,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
 const { flow } = useDoraPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const lit = ref(-1)
 const picked = ref(0)
@@ -107,11 +108,11 @@ useGsapContext(() => {
               </div>
               <dl class="col-span-6 grid grid-cols-2 gap-4">
                 <div class="rounded-[14px] bg-[color:rgba(0,0,0,0.2)] p-4">
-                  <dt class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">Actor</dt>
+                  <dt class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">{{ t('Actor') }}</dt>
                   <dd class="mt-1.5 font-display text-[16px] font-bold">{{ s.actor }}</dd>
                 </div>
                 <div class="rounded-[14px] bg-[color:rgba(0,0,0,0.2)] p-4">
-                  <dt class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">Result</dt>
+                  <dt class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">{{ t('Result') }}</dt>
                   <dd class="mt-1.5 text-[14.5px] font-semibold leading-snug">{{ s.result }}</dd>
                 </div>
               </dl>

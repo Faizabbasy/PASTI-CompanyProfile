@@ -28,6 +28,8 @@ import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 
+// --lang id → build and write the Indonesian record (default: English, the original record).
+const LANG = process.argv.includes('--lang') && process.argv[process.argv.indexOf('--lang') + 1] === 'id' ? 'id' : 'en'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = new Set(process.argv.slice(2))
 const DRY = args.has('--dry-run')
@@ -44,6 +46,7 @@ const jiti = createJiti(import.meta.url, {
   interopDefault: true
 })
 const load = (p) => jiti.import(resolve(root, p))
+await (await import('./lib/nuxt-shims.mjs')).installNuxtShims(load, LANG)
 
 // Provide the Nuxt auto-imports the legacy composables use as globals so the
 // real, unmodified files run as-is.

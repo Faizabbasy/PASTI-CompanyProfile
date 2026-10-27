@@ -14,6 +14,7 @@ withDefaults(defineProps<{ markers?: boolean; active?: Key | null; flag?: Key | 
   active: null,
   flag: null
 })
+const t = useT()
 </script>
 
 <template>
@@ -21,7 +22,7 @@ withDefaults(defineProps<{ markers?: boolean; active?: Key | null; flag?: Key | 
   <div
     class="dsd relative bg-pureWhite text-[#1B1F23]"
     role="img"
-    aria-label="Synthetic sample letter from a fictitious agency, with document number, subject, date and name marked as extracted fields."
+    :aria-label="t('Synthetic sample letter from a fictitious agency, with document number, subject, date and name marked as extracted fields.')"
   >
     <div aria-hidden="true">
       <div class="text-center">

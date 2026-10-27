@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+const t = useT()
 
 if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
@@ -65,15 +66,15 @@ onBeforeUnmount(() => pulse?.kill())
   <section id="devices" ref="sectionRef" data-header-theme="dark" class="relative overflow-hidden bg-slateNavy py-24 text-pureWhite tablet:py-32">
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="Devices" meta="Enterprise add-on" />
+      <BaseSectionMark surface="dark" :label="t('Devices')" :meta="t('Enterprise add-on')" />
       <div class="mt-14 desktop:mt-20">
         <ShiftlyHeading surface="dark" :eyebrow="devices.eyebrow" :title="devices.headline" :lede="devices.body" />
       </div>
 
       <!-- Desktop diagram -->
       <div class="mt-16 hidden grid-cols-12 items-center gap-8 desktop:grid">
-        <ul class="col-span-4 flex flex-col gap-3" aria-label="Supported device types">
-          <li class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.5)]" aria-hidden="true">Select a device ↓</li>
+        <ul class="col-span-4 flex flex-col gap-3" :aria-label="t('Supported device types')">
+          <li class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.5)]" aria-hidden="true">{{ t('Select a device ↓') }}</li>
           <li v-for="(d, i) in devices.items" :key="d.id" data-dv-item>
             <button
               type="button"
@@ -103,7 +104,7 @@ onBeforeUnmount(() => pulse?.kill())
         <div class="col-span-4">
           <div data-dv-item class="rounded-[24px] bg-pureWhite p-7 text-slateNavy shadow-[0_40px_80px_-40px_rgba(0,8,16,0.9)]">
             <ShiftlyMark :size="20" />
-            <p class="mt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">Real-time sync · Centralized monitoring</p>
+            <p class="mt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">{{ t('Real-time sync · Centralized monitoring') }}</p>
             <h3 class="mt-5 font-display text-[24px] font-extrabold leading-tight tracking-[-0.02em] text-slateNavy">{{ devices.items[active]!.name }}</h3>
             <p class="mt-2 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.75)]" aria-live="polite">{{ devices.items[active]!.body }}</p>
           </div>
@@ -121,7 +122,7 @@ onBeforeUnmount(() => pulse?.kill())
         </ul>
         <div class="mt-3 flex items-center gap-3 rounded-[16px] bg-pureWhite px-5 py-4">
           <ShiftlyIcon name="check" class="h-5 w-5 text-pastiYellow-500" />
-          <span class="text-[14px] font-semibold text-slateNavy">Synced to</span>
+          <span class="text-[14px] font-semibold text-slateNavy">{{ t('Synced to') }}</span>
           <ShiftlyMark :size="17" />
         </div>
         <p class="mt-4 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.5)]">{{ devices.note }}</p>

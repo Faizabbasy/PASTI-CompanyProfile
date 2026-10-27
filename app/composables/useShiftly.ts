@@ -1,3 +1,5 @@
+import { SHIFTLY_ID } from '~/i18n/content/shiftly'
+
 export type ShiftlyStatus = 'confirmed' | 'needs_approval' | 'placeholder'
 
 export interface ShiftlyModule {
@@ -37,7 +39,7 @@ export interface ShiftlyCompareRow {
  * "Technology meets wellness" (off-positioning). Pricing is stored in
  * `commercial` with publicationStatus 'needs_approval' and is NOT rendered.
  */
-export function useShiftly() {
+function shiftlyData() {
   const seo = {
     title: 'SHIFTLY — Modern HRIS & Workforce Platform | PASTI',
     description:
@@ -255,6 +257,13 @@ export function useShiftly() {
   ]
 
   return { seo, hero, platform, moduleGroups, modulesMore, compare, plans, devices, branding, why, architecture, commercial, pricing, demo, subnav }
+}
+
+export type ShiftlyData = ReturnType<typeof shiftlyData>
+
+// English base + Indonesian overlay on Indonesian pages (app/i18n/content/shiftly.ts).
+export function useShiftly(): ShiftlyData {
+  return localize(shiftlyData(), useLocale() === 'id' ? SHIFTLY_ID : undefined)
 }
 
 export function useShiftlyScroll() {

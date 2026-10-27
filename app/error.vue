@@ -15,13 +15,16 @@ const digits = computed(() => String(code.value).split(''))
 
 const { link: whatsappLink } = useWhatsapp()
 
-useHead({ htmlAttrs: { lang: 'en' } })
+const t = useT()
+const locale = useLocale()
+const lp = useLocalePath()
+useHead({ htmlAttrs: { lang: locale } })
 useSeoMeta({
-  title: () => (notFound.value ? 'Page not found | PASTI' : 'Something went wrong | PASTI'),
+  title: () => (notFound.value ? t('Page not found | PASTI') : t('Something went wrong | PASTI')),
   robots: 'noindex'
 })
 
-const home = () => clearError({ redirect: '/' })
+const home = () => clearError({ redirect: lp('/') })
 </script>
 
 <template>
@@ -29,14 +32,14 @@ const home = () => clearError({ redirect: '/' })
     <div aria-hidden="true" class="err-grid pointer-events-none absolute inset-0" />
 
     <header class="relative z-10 px-6 pt-6 tablet:px-10 tablet:pt-8">
-      <button type="button" class="block" aria-label="PASTI — back to home" @click="home">
+      <button type="button" class="block" :aria-label="t('PASTI — back to home')" @click="home">
         <img src="/images/pasti-logo.webp" alt="PASTI" width="1205" height="527" class="h-6 w-auto tablet:h-7">
       </button>
     </header>
 
     <section class="relative z-10 m-center mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center px-6 py-14 tablet:px-10">
       <div class="err-in" style="--d: 0.05s">
-        <BaseHeroMarker :label="`Error ${code}`" />
+        <BaseHeroMarker :label="t('Error {code}', { code })" />
       </div>
 
       <p class="err-code m-center-row mt-6 flex select-none items-center font-display font-extrabold leading-none tracking-[-0.06em]" aria-hidden="true">
@@ -49,18 +52,18 @@ const home = () => clearError({ redirect: '/' })
       </p>
 
       <h1 class="err-in mt-6 max-w-xl font-display text-[34px] font-bold leading-[1.02] tracking-[-0.035em] tablet:text-[48px]" style="--d: 0.34s">
-        <template v-if="notFound">Page not found<span class="text-pastiYellow-500">.</span></template>
-        <template v-else>Something went wrong<span class="text-pastiYellow-500">.</span></template>
+        <template v-if="notFound">{{ t('Page not found') }}<span class="text-pastiYellow-500">.</span></template>
+        <template v-else>{{ t('Something went wrong') }}<span class="text-pastiYellow-500">.</span></template>
       </h1>
       <p class="hero-lede err-in m-center mt-4" style="--d: 0.42s">
-        <template v-if="notFound">The link may be broken, or the page has moved. Let’s get you back on track.</template>
-        <template v-else>We hit an unexpected error on our side. Please try again in a moment.</template>
+        <template v-if="notFound">{{ t('The link may be broken, or the page has moved. Let’s get you back on track.') }}</template>
+        <template v-else>{{ t('We hit an unexpected error on our side. Please try again in a moment.') }}</template>
       </p>
 
       <div class="err-in mt-9" style="--d: 0.5s">
         <BaseHeroCtas
-          :primary="{ label: 'Back to home' }"
-          :secondary="{ label: 'Tell us about it', href: whatsappLink }"
+          :primary="{ label: t('Back to home') }"
+          :secondary="{ label: t('Tell us about it'), href: whatsappLink }"
           @primary="home"
         />
       </div>

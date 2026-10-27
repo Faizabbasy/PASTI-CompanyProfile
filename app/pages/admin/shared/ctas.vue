@@ -10,6 +10,7 @@ useHead({ title: 'Global CTAs · Shared Content' })
 const TABS = [{ key: 'ctas', label: 'Global CTAs', sections: ['eyebrow', 'headline', 'email', 'address', 'mapsUrl', 'hours', 'positioning', 'socials'] }] as const
 const toJson = <T,>(v: T) => JSON.parse(JSON.stringify(v)) as T
 
+const lang = useEditorLang()
 const {
   loadStatus, loadError, refresh, form, state, dirty, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, canPublish, canUnpublish, canArchive, publishDisabledReason
@@ -17,6 +18,7 @@ const {
   name: 'Global CTAs',
   endpoint: '/api/admin/shared/ctas',
   asyncKey: 'admin-shared-ctas',
+  lang,
   tabs: TABS,
   toForm: toJson,
   toPayload: toJson,
@@ -38,6 +40,7 @@ const socials = [
     name="Global CTAs"
     where="Bagian penutup footer di SEMUA halaman (“Have a challenge?” / “Let’s build what matters.” + tombol email + ikon sosial media), kolom kontak di footer, dan info kontak di halaman Contact. Teks ajakan ini juga dipakai sebagai judul halaman Contact selama halaman Contact belum di-publish lewat Pages → Contact."
     flag="NUXT_CMS_CTAS_PUBLIC_ENABLED"
+    :lang="lang"
     :dummy="state?.dummy !== false"
     :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
     :code-managed="[
@@ -58,7 +61,7 @@ const socials = [
         :state="state"
         :dirty="dirty"
         :busy="busy"
-        preview-href="/admin/preview/ctas"
+        :preview-href="`/admin/preview/ctas?lang=${lang}`"
         :can-publish="canPublish"
         :can-unpublish="canUnpublish"
         :can-archive="canArchive"
@@ -85,14 +88,17 @@ const socials = [
 
       <fieldset class="grid gap-5">
         <legend class="mb-1 text-base font-bold">Info kontak</legend>
+        <p v-if="lang === 'en'" class="rounded-md border border-navy-100 bg-navy-50/60 px-3 py-2 text-xs text-navy-600">Email, alamat, link Google Maps dan sosial media diatur sekali di versi <a href="?lang=id" class="font-semibold underline">Indonesia</a> dan dipakai untuk kedua bahasa.</p>
+        <template v-if="lang === 'id'">
         <AdminFormField :id="fieldId('email')" v-model="form.email" label="Email" hint="Tampil sebagai tombol di footer dan di halaman Contact." :maxlength="LIM.email" required :error="err('email')" />
         <AdminFormField :id="fieldId('address')" v-model="form.address" label="Alamat kantor" multiline :rows="2" hint="Kosongkan untuk menyembunyikan alamat." :maxlength="LIM.address" :error="err('address')" />
         <AdminFormField :id="fieldId('mapsUrl')" v-model="form.mapsUrl" label="Link Google Maps" inputmode="url" hint="Opsional. Kosong = link pencarian Google Maps dibuat otomatis dari alamat (di halaman Contact)." :maxlength="LIM.url" :error="err('mapsUrl')" />
+        </template>
         <AdminFormField :id="fieldId('hours')" v-model="form.hours" label="Jam kerja" hint="Opsional, contoh: Mon–Fri, 09:00–18:00 WIB. Kosong = tidak ditampilkan." :maxlength="LIM.hours" :error="err('hours')" />
         <AdminFormField :id="fieldId('positioning')" v-model="form.positioning" label="Kalimat di bawah logo footer" hint="Contoh: Technology × Creative Execution Partner" :maxlength="LIM.positioning" required :error="err('positioning')" />
       </fieldset>
 
-      <fieldset class="grid gap-5">
+      <fieldset v-if="lang === 'id'" class="grid gap-5">
         <legend class="mb-1 text-base font-bold">Sosial media</legend>
         <p class="-mt-3 text-xs text-navy-500">Isi link lengkap profil resmi. Kosong = ikonnya tampil redup dan tidak bisa diklik. Ikon WhatsApp selalu aktif.</p>
         <AdminFormField

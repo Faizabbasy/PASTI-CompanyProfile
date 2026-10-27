@@ -19,6 +19,7 @@ import gsap from 'gsap'
 // decoration. One answer open at a time (parent-controlled), native
 // <details> kept in every row. Below desktop the panel collapses to the
 // heading + CTA and the list reads top to bottom.
+const t = useT()
 const heading = 'FAQ'
 const { items } = useFaq()
 const { link: whatsappLink } = useWhatsapp()
@@ -87,7 +88,7 @@ watch(activeIndex, (next, prev) => {
               @mouseenter="setState('contact')"
               @mouseleave="setState('default')"
             >
-              Tell us about it
+              {{ t('Tell us about it') }}
               <span aria-hidden="true" class="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[color:rgba(255,255,255,0.12)] transition-transform duration-200 ease-editorial group-hover:translate-x-1">→</span>
             </a>
           </div>

@@ -1,0 +1,46 @@
+// Indonesian UI strings for: work. Key = the exact English text used in the
+// components (t('…')), value = Indonesian. Missing keys fall back to English.
+export default {
+  // Hero
+  '{p} projects · {c} case studies': '{p} proyek · {c} studi kasus',
+  'Go to {title}': 'Lihat {title}',
+  'Open': 'Buka',
+  'Move to fan · click to open': 'Gerakkan untuk membuka kipas · klik untuk membuka',
+  'Tap a project': 'Ketuk sebuah proyek',
+  // Project index (group names are filter keys from useWorkPortfolio)
+  'Filter · Grid / List': 'Filter · Grid / Daftar',
+  'Filter projects': 'Filter proyek',
+  'Layout': 'Tata letak',
+  'grid': 'grid',
+  'list': 'daftar',
+  'All': 'Semua',
+  'Commerce': 'Commerce',
+  'Enterprise': 'Enterprise',
+  'Wellness': 'Wellness',
+  'Campaign': 'Kampanye',
+  'Fintech': 'Fintech',
+  'Other': 'Lainnya',
+  'Case study': 'Studi kasus',
+  'Read the {title} case study': 'Baca studi kasus {title}',
+  // Featured cases
+  '{n} featured': '{n} pilihan',
+  'Select a case': 'Pilih studi kasus',
+  'Swipe & tap a case': 'Geser & ketuk studi kasus',
+  'Featured case studies': 'Studi kasus pilihan',
+  'Client': 'Klien',
+  'Year': 'Tahun',
+  'Previous case': 'Studi kasus sebelumnya',
+  'Next case': 'Studi kasus berikutnya',
+  'Challenge': 'Tantangan',
+  'What we built': 'Yang kami bangun',
+  'What was requested': 'Yang diminta',
+  'Outcome': 'Hasil',
+  'Insight': 'Insight',
+  'Delivery timeline': 'Timeline pengerjaan',
+  'Technology stack': 'Technology stack',
+  'Inside the product': 'Di dalam produk',
+  'Delivery timeline, {total} in total': 'Timeline pengerjaan, total {total}',
+  '{n}w': '{n}mg',
+  '{n} wk': '{n} mg',
+  '{n} weeks in total.': 'Total {n} minggu.'
+} as Record<string, string>

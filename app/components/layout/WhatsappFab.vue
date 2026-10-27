@@ -47,6 +47,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey)
   window.removeEventListener('pointerdown', onOutside)
 })
+const t = useT()
 </script>
 
 <template>
@@ -61,25 +62,25 @@ onBeforeUnmount(() => {
         v-if="open"
         id="wa-card"
         role="dialog"
-        aria-label="Contact PASTI on WhatsApp"
+        :aria-label="t('Contact PASTI on WhatsApp')"
         class="w-[min(320px,calc(100vw-32px))] origin-bottom-right overflow-hidden rounded-[22px] border border-[color:rgba(3,60,89,0.12)] bg-pureWhite shadow-[0_40px_80px_-30px_rgba(3,30,46,0.55)]"
       >
         <div class="relative bg-slateNavy px-5 pb-5 pt-4 text-pureWhite">
           <div class="flex items-center justify-between">
             <LayoutBrandMark surface="dark" :height="13" />
-            <button type="button" aria-label="Close" class="-mr-2 grid h-11 w-11 place-items-center rounded-full text-[color:rgba(255,255,255,0.7)] hover:text-pureWhite" @click="close">
+            <button type="button" :aria-label="t('Close')" class="-mr-2 grid h-11 w-11 place-items-center rounded-full text-[color:rgba(255,255,255,0.7)] hover:text-pureWhite" @click="close">
               <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" /></svg>
             </button>
           </div>
-          <p class="mt-2 font-display text-[22px] font-extrabold leading-tight tracking-[-0.02em]">Contact Us<span class="text-pastiYellow-500">.</span></p>
+          <p class="mt-2 font-display text-[22px] font-extrabold leading-tight tracking-[-0.02em]">{{ t('Contact Us') }}<span class="text-pastiYellow-500">.</span></p>
           <p class="mt-1 inline-flex items-center gap-2 text-[13px] text-[color:rgba(255,255,255,0.7)]">
             <span class="relative flex h-2 w-2"><span class="absolute inset-0 animate-ping rounded-full bg-[#25D366] opacity-60 motion-reduce:animate-none" /><span class="relative h-2 w-2 rounded-full bg-[#25D366]" /></span>
-            PASTI team · WhatsApp
+            {{ t('PASTI team · WhatsApp') }}
           </p>
         </div>
         <div class="p-5">
           <div class="rounded-[14px] rounded-tl-[4px] bg-surfaceNeutral px-4 py-3 text-[14px] leading-relaxed text-slateNavy">
-            Halo! Ada yang bisa kami bantu? Ceritakan kebutuhan Anda — tim PASTI akan membalas lewat WhatsApp.
+            {{ t('Hi! How can we help? Tell us what you need — the PASTI team will reply on WhatsApp.') }}
           </div>
           <a
             :href="whatsappLink"
@@ -89,7 +90,7 @@ onBeforeUnmount(() => {
             @click="close"
           >
             <span class="h-5 w-5"><LayoutSocialIcon name="whatsapp" /></span>
-            Start chat
+            {{ t('Start chat') }}
           </a>
         </div>
       </div>
@@ -114,7 +115,7 @@ onBeforeUnmount(() => {
           </span>
         </span>
         <!-- Phones: icon-only disc so it never covers copy; label from tablet up. -->
-        <span class="sr-only tablet:not-sr-only tablet:pr-3.5">Contact Us</span>
+        <span class="sr-only tablet:not-sr-only tablet:pr-3.5">{{ t('Contact Us') }}</span>
         <span aria-hidden="true" class="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-pastiYellow-500 ring-2 ring-slateNavy tablet:right-3 tablet:top-2 tablet:h-2 tablet:w-2 tablet:ring-0" />
       </button>
     </div>

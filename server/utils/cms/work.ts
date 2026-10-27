@@ -330,8 +330,8 @@ export async function getRecordPreviewData(kind: 'project' | 'caseStudy', id: st
 // Published Work snapshot joined with PUBLISHED projects / case studies only.
 // Confirmed + active claims and media only; no source notes, ids of drafts,
 // actors or workflow metadata. Never reads drafts and never seeds.
-export async function getPublishedWork() {
-  const snap = await workPage.getPublishedSnapshot()
+export async function getPublishedWork(lang: CmsLang = 'en') {
+  const snap = await workPage.forLocale(lang).getPublishedSnapshot()
   if (!snap) return null
   const [projects, cases] = await Promise.all([projectsCollection.getPublishedAll(), casesCollection.getPublishedAll()])
   const publishedProjectIds = new Set(projects.map((p) => p.id))

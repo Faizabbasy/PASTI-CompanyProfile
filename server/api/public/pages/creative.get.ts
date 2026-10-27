@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   let creative: Awaited<ReturnType<typeof getPublishedCreative>>
   try {
-    creative = await getPublishedCreative()
+    creative = await getPublishedCreative(cmsLang(event))
   } catch (err) {
     console.error('[cms] public Creative read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

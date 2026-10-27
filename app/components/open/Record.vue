@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // Hero product slice — an OPEN procurement record, rebuilt as UI (not a
 // screenshot, no device frame). From slide 3's overview screen: the process
 // lifecycle (Request → … → Closing), the approval flow by role, and the
@@ -44,15 +45,15 @@ const trace = computed(() => steps.slice(0, active.value + 1).slice(-3).reverse(
       <!-- Title bar -->
       <div class="flex items-center gap-3 border-b border-[color:rgba(3,60,89,0.08)] px-5 py-4">
         <OpenMark :size="20" />
-        <span class="font-display text-[15px] font-extrabold tracking-[-0.01em] text-slateNavy">Procurement Overview</span>
+        <span class="font-display text-[15px] font-extrabold tracking-[-0.01em] text-slateNavy">{{ t('Procurement Overview') }}</span>
         <span class="ml-auto hidden h-7 w-28 rounded-full bg-[color:rgba(3,60,89,0.05)] tablet:block" />
       </div>
 
       <div class="grid tablet:grid-cols-[1fr_168px]">
         <div class="p-5 tablet:p-6">
           <!-- Lifecycle -->
-          <p class="font-display text-[13px] font-bold text-slateNavy">Process Lifecycle</p>
-          <ol class="relative mt-5 grid grid-cols-6" aria-label="Process lifecycle">
+          <p class="font-display text-[13px] font-bold text-slateNavy">{{ t('Process Lifecycle') }}</p>
+          <ol class="relative mt-5 grid grid-cols-6" :aria-label="t('Process lifecycle')">
             <span aria-hidden="true" class="absolute left-[8.33%] right-[8.33%] top-[13px] h-[2px] bg-[color:rgba(3,60,89,0.1)]" />
             <span
               aria-hidden="true"
@@ -73,7 +74,7 @@ const trace = computed(() => steps.slice(0, active.value + 1).slice(-3).reverse(
           <!-- Approval flow + trace -->
           <div class="mt-7 grid gap-5 border-t border-[color:rgba(3,60,89,0.08)] pt-5 tablet:grid-cols-2">
             <div>
-              <p class="font-display text-[13px] font-bold text-slateNavy">Approval Flow</p>
+              <p class="font-display text-[13px] font-bold text-slateNavy">{{ t('Approval Flow') }}</p>
               <ol class="mt-3 space-y-2.5">
                 <li v-for="(r, i) in roles" :key="r" class="flex items-center gap-2.5">
                   <span
@@ -82,17 +83,17 @@ const trace = computed(() => steps.slice(0, active.value + 1).slice(-3).reverse(
                   >
                     <svg viewBox="0 0 16 16" class="h-2.5 w-2.5" fill="none" stroke="currentColor" stroke-width="2.8" aria-hidden="true"><path d="M3 8.5l3 3 7-7" /></svg>
                   </span>
-                  <span class="text-[12.5px] font-semibold text-slateNavy">{{ r }}</span>
+                  <span class="text-[12.5px] font-semibold text-slateNavy">{{ t(r) }}</span>
                 </li>
               </ol>
             </div>
             <div aria-live="off">
-              <p class="font-display text-[13px] font-bold text-slateNavy">Audit Trail</p>
+              <p class="font-display text-[13px] font-bold text-slateNavy">{{ t('Audit Trail') }}</p>
               <TransitionGroup tag="ol" name="rec" class="relative mt-3 space-y-2">
-                <li v-for="(t, i) in trace" :key="t" class="flex items-center gap-2.5 rounded-[10px] px-2.5 py-2" :class="i === 0 ? 'bg-[color:rgba(251,186,0,0.14)]' : 'bg-[color:rgba(3,60,89,0.04)]'">
+                <li v-for="(step, i) in trace" :key="step" class="flex items-center gap-2.5 rounded-[10px] px-2.5 py-2" :class="i === 0 ? 'bg-[color:rgba(251,186,0,0.14)]' : 'bg-[color:rgba(3,60,89,0.04)]'">
                   <span class="h-1.5 w-1.5 shrink-0 rounded-full" :class="i === 0 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(3,60,89,0.3)]'" />
-                  <span class="text-[12px] font-semibold text-slateNavy">{{ t }}</span>
-                  <span class="ml-auto text-[11px] text-[color:rgba(3,60,89,0.5)]">recorded</span>
+                  <span class="text-[12px] font-semibold text-slateNavy">{{ step }}</span>
+                  <span class="ml-auto text-[11px] text-[color:rgba(3,60,89,0.5)]">{{ t('recorded') }}</span>
                 </li>
               </TransitionGroup>
             </div>
@@ -104,14 +105,14 @@ const trace = computed(() => steps.slice(0, active.value + 1).slice(-3).reverse(
           <li v-for="(g, i) in hero.rail" :key="g.label" class="border-b border-[color:rgba(3,60,89,0.06)] px-4 py-3 last:border-0">
             <span class="flex items-center gap-2">
               <span class="h-1.5 w-1.5 rounded-full transition-colors duration-500" :class="i === active % hero.rail.length ? 'bg-pastiYellow-500' : 'bg-[color:rgba(3,60,89,0.2)]'" />
-              <span class="font-display text-[12px] font-bold text-slateNavy">{{ g.label }}</span>
+              <span class="font-display text-[12px] font-bold text-slateNavy">{{ t(g.label) }}</span>
             </span>
             <span class="mt-0.5 block pl-3.5 text-[10.5px] leading-snug text-[color:rgba(3,60,89,0.58)]">{{ g.body }}</span>
           </li>
         </ul>
       </div>
     </div>
-    <p class="mt-3 text-right text-[11px] text-[color:rgba(3,60,89,0.45)]">Ilustrasi antarmuka OPEN</p>
+    <p class="mt-3 text-right text-[11px] text-[color:rgba(3,60,89,0.45)]">{{ t('OPEN interface illustration') }}</p>
   </div>
 </template>
 

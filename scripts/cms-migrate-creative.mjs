@@ -27,6 +27,8 @@ import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 
+// --lang id → build and write the Indonesian record (default: English, the original record).
+const LANG = process.argv.includes('--lang') && process.argv[process.argv.indexOf('--lang') + 1] === 'id' ? 'id' : 'en'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = new Set(process.argv.slice(2))
 const DRY = args.has('--dry-run')
@@ -43,6 +45,7 @@ const jiti = createJiti(import.meta.url, {
   interopDefault: true
 })
 const load = (p) => jiti.import(resolve(root, p))
+await (await import('./lib/nuxt-shims.mjs')).installNuxtShims(load, LANG)
 
 // The legacy composables call each other through Nuxt auto-imports; provide
 // those names as globals so the real, unmodified files run as-is.
@@ -57,8 +60,14 @@ globalThis.useCreative = useCreative
 
 const { buildLegacyCreativeContent, creativeLegacyRefs, adaptCreativeCms } = await load('app/composables/useCreativePage.ts')
 const { legacyToCreativeContent, CREATIVE_MIGRATION_VERSION, CREATIVE_DUMMY_MARKERS } = await load('shared/utils/creativeMigration.ts')
+const MIG_VERSION = LANG === 'id' ? CREATIVE_MIGRATION_VERSION.replace('-v', '-id-v') : CREATIVE_MIGRATION_VERSION
 const { CreativeContentSchema } = await load('shared/utils/creativeSchema.ts')
-const { buildMigratedCreativeRecord, CREATIVE_RECORD_KEY, CREATIVE_REVISION_PREFIX } = await load('server/utils/cms/creativePage.ts')
+// The record for the chosen language (--lang id → Indonesian; default English = the original record).
+const { creativeFor } = await load('server/utils/cms/creativePage.ts')
+const _engine = creativeFor(LANG)
+const buildMigratedCreativeRecord = _engine.buildMigratedRecord
+const CREATIVE_RECORD_KEY = _engine.RECORD_KEY
+const CREATIVE_REVISION_PREFIX = _engine.REVISION_PREFIX
 
 // Same origin usePageSeo() builds the canonical from (runtimeConfig.public.siteUrl).
 const siteUrl = (process.env.NUXT_PUBLIC_SITE_URL || 'https://www.pastipeople.id').replace(/\/+$/, '')
@@ -111,7 +120,7 @@ if (!isDeepStrictEqual(strip(adapted), strip(legacy))) {
 }
 
 const summary = {
-  version: CREATIVE_MIGRATION_VERSION,
+  version: MIG_VERSION,
   headline: [content.hero.headlineLine1, content.hero.headlineLine2],
   services: content.services.items.map((s) => s.id),
   visuals: content.wall.visuals.map((v) => v.id),
@@ -122,9 +131,9 @@ const summary = {
 const storage = await openCmsStore(root)
 const existing = await storage.getItem(CREATIVE_RECORD_KEY)
 
-const sameMigration = existing?.source?.kind === 'migration' && existing.source.version === CREATIVE_MIGRATION_VERSION
+const sameMigration = existing?.source?.kind === 'migration' && existing.source.version === MIG_VERSION
 if (sameMigration && JSON.stringify(existing.draft.content) === text) {
-  console.log(`${TAG} Already migrated (${CREATIVE_MIGRATION_VERSION}); draft unchanged — nothing to do.`)
+  console.log(`${TAG} Already migrated (${MIG_VERSION}); draft unchanged — nothing to do.`)
   process.exit(0)
 }
 if (existing && existing.dummy === false) {
@@ -144,7 +153,7 @@ if (DRY) {
 }
 
 const now = new Date().toISOString()
-const record = buildMigratedCreativeRecord(content, CREATIVE_MIGRATION_VERSION, now)
+const record = buildMigratedCreativeRecord(content, MIG_VERSION, now)
 
 // Remove the dev-seed snapshot history so no dummy version survives.
 const revisionKeys = await storage.getKeys(CREATIVE_REVISION_PREFIX)
@@ -159,7 +168,7 @@ const entry = {
   entityId: 'creative',
   timestamp: now,
   metadata: {
-    version: CREATIVE_MIGRATION_VERSION,
+    version: MIG_VERSION,
     source: 'legacy Creative (useCreative + Hero/Services/Wall/Work template constants) + pageSeo.creative',
     replaced: existing ? (existing.dummy ? 'dummy seed record' : 'real draft (--force)') : 'none',
     removedRevisions: revisionKeys.length,
@@ -168,5 +177,5 @@ const entry = {
 }
 await storage.setItem(`audit:${now.replace(/[:.]/g, '')}-${entry.id.slice(0, 8)}`, entry)
 
-console.log(`${TAG} Migrated ${CREATIVE_MIGRATION_VERSION} into the Creative draft (status: draft, not published).`)
+console.log(`${TAG} Migrated ${MIG_VERSION} into the Creative draft (status: draft, not published).`)
 console.log(JSON.stringify({ ...summary, replaced: entry.metadata.replaced, removedRevisions: revisionKeys.length }, null, 2))

@@ -6,10 +6,11 @@ import type { CreativeArt } from '~/composables/useCreative'
 // accent) so it reads as a placeholder diagram of the discipline — never as
 // client work. Replace per capability once real creative visuals exist.
 defineProps<{ art: CreativeArt; label: string }>()
+const t = useT()
 </script>
 
 <template>
-  <div class="cap-art relative h-full w-full overflow-hidden bg-slateNavy" role="img" :aria-label="`Illustration: ${label}`">
+  <div class="cap-art relative h-full w-full overflow-hidden bg-slateNavy" role="img" :aria-label="t('Illustration: {label}', { label })">
     <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid meet" class="absolute inset-0 h-full w-full" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <!-- shared dot grid -->
       <g fill="rgba(255,255,255,0.12)" stroke="none">

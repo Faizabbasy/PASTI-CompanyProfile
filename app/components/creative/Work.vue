@@ -16,6 +16,8 @@ if (import.meta.client) {
 // The eyebrow interpolation keeps the trailing space the former literal
 // copy rendered, so legacy markup stays byte-identical.
 const { work } = useCreativePage()
+const t = useT()
+const lp = useLocalePath()
 const f = work.feature
 const sectionRef = ref<HTMLElement | null>(null)
 const { setState } = useCustomCursor()
@@ -50,7 +52,7 @@ useGsapContext(() => {
         <div data-cwk-item class="desktop:col-span-5">
           <div class="relative mx-auto aspect-[4/5] max-w-[420px] overflow-hidden rounded-[24px] bg-slateNavy shadow-[0_40px_80px_-40px_rgba(3,60,89,0.6)] desktop:sticky desktop:top-28 desktop:max-w-none">
             <img :src="f.image" :srcset="imgSet(f.image)" sizes="(max-width: 1023px) 92vw, 40vw" :alt="f.title" loading="lazy" draggable="false" class="h-full w-full object-cover object-top">
-            <span class="absolute left-3 top-3 rounded-full bg-pastiYellow-500 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-slateNavy">Case study</span>
+            <span class="absolute left-3 top-3 rounded-full bg-pastiYellow-500 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-slateNavy">{{ t('Case study') }}</span>
           </div>
         </div>
         <div class="min-w-0 desktop:col-span-7">
@@ -60,7 +62,7 @@ useGsapContext(() => {
           </div>
 
           <div data-cwk-item class="mt-8 border-t border-[color:rgba(3,60,89,0.14)] pt-6">
-            <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">Challenge</h4>
+            <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">{{ t('Challenge') }}</h4>
             <ol class="mt-4 space-y-3">
               <li v-for="(c, i) in f.challenge" :key="i" class="grid grid-cols-[28px_1fr] text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.8)]">
                 <span class="pt-[3px] font-mono text-[10px] text-[color:rgba(3,60,89,0.4)]">{{ String(i + 1).padStart(2, '0') }}</span>{{ c }}
@@ -69,12 +71,12 @@ useGsapContext(() => {
           </div>
 
           <div data-cwk-item class="mt-8 rounded-[18px] bg-slateNavy p-6 text-pureWhite">
-            <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">Game plan</h4>
+            <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">{{ t('Game plan') }}</h4>
             <p class="mt-3 text-[16px] font-semibold leading-relaxed">{{ f.gamePlan }}</p>
           </div>
 
           <div data-cwk-item class="mt-8">
-            <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">Acquisition funnel</h4>
+            <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">{{ t('Acquisition funnel') }}</h4>
             <ol class="mt-4 grid gap-2 tablet:grid-cols-4">
               <li v-for="(s, i) in f.funnel" :key="i" class="relative rounded-[14px] p-4 ring-1 ring-[color:rgba(3,60,89,0.14)]" :class="i === f.funnel.length - 1 ? 'bg-pastiYellow-500 ring-pastiYellow-500' : 'bg-pureWhite'">
                 <span class="font-mono text-[10px] text-[color:rgba(3,60,89,0.5)]">{{ String(i + 1).padStart(2, '0') }}</span>
@@ -85,7 +87,7 @@ useGsapContext(() => {
           </div>
 
           <div data-cwk-item class="mt-8">
-            <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">Marketing playbook</h4>
+            <h4 class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">{{ t('Marketing playbook') }}</h4>
             <ul class="mt-4 space-y-2.5">
               <li v-for="(p, i) in f.playbook" :key="i" class="grid grid-cols-[28px_1fr] text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.8)]">
                 <span aria-hidden="true" class="mt-[9px] h-px w-3 bg-pastiYellow-500" />{{ p }}
@@ -98,10 +100,10 @@ useGsapContext(() => {
       <!-- Campaign + testimonial -->
       <div class="mt-20 grid gap-6 desktop:mt-28 desktop:grid-cols-12">
         <NuxtLink
-          :to="work.campaign.to"
+          :to="lp(work.campaign.to)"
           data-cwk-item
           class="group grid overflow-hidden rounded-[24px] bg-pureWhite ring-1 ring-[color:rgba(3,60,89,0.1)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slateNavy tablet:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] desktop:col-span-7"
-          @mouseenter="setState('view', 'View')"
+          @mouseenter="setState('view', t('View'))"
           @mouseleave="setState('default')"
         >
           <div class="aspect-[4/5] overflow-hidden bg-slateNavy tablet:aspect-auto">
@@ -113,7 +115,7 @@ useGsapContext(() => {
               <h3 class="mt-2 font-display text-[28px] font-extrabold leading-[1.08] tracking-[-0.03em] text-slateNavy">{{ work.campaign.title }}</h3>
               <p class="mt-3 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.75)]">{{ work.campaign.description }}</p>
             </div>
-            <span class="inline-flex items-center gap-2 text-[14px] font-semibold text-slateNavy">View in Work
+            <span class="inline-flex items-center gap-2 text-[14px] font-semibold text-slateNavy">{{ t('View in Work') }}
               <svg viewBox="0 0 16 16" class="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
             </span>
           </div>
@@ -151,9 +153,9 @@ useGsapContext(() => {
         <ul class="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 desktop:grid-cols-4 desktop:gap-6">
           <li v-for="u in work.uiux.items" :key="u.title" data-cwk-item>
             <NuxtLink
-              :to="u.to"
+              :to="lp(u.to)"
               class="group block rounded-[18px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slateNavy"
-              @mouseenter="setState('view', 'View')"
+              @mouseenter="setState('view', t('View'))"
               @mouseleave="setState('default')"
             >
               <div class="aspect-[4/5] overflow-hidden rounded-[18px] bg-slateNavy">

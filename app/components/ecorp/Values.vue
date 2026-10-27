@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // KEY VALUE — exactly the brief's six values, told against the CONFIRMED
 // copy. Desktop: a sticky-scroll story — the left column pins a giant value
 // word + index + progress ticks; on the right each value gets a full-height
@@ -36,7 +37,7 @@ onBeforeUnmount(() => io?.disconnect())
     <div aria-hidden="true" class="ec-dots--dark pointer-events-none absolute inset-0 [mask-image:linear-gradient(90deg,#000,transparent_55%)]" />
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark label="Key value" meta="04 / 12" />
+      <BaseSectionMark :label="t('Key value')" meta="04 / 12" />
       <EcorpHeading class="mt-12" surface="dark" eyebrow="Key value" before="Six principles, " mark="one platform" />
 
       <!-- Desktop: sticky story -->
@@ -56,7 +57,7 @@ onBeforeUnmount(() => io?.disconnect())
                 <span :key="currentTitle" class="ec-outline ev-num absolute bottom-0 left-0 text-[length:clamp(140px,16vw,260px)]">{{ String(active + 1).padStart(2, '0') }}</span>
               </Transition>
             </div>
-            <ol class="grid grid-cols-6 gap-1.5" aria-label="Key values">
+            <ol class="grid grid-cols-6 gap-1.5" :aria-label="t('Key values')">
               <li v-for="(v, i) in values" :key="v.title">
                 <button
                   type="button"
@@ -85,7 +86,7 @@ onBeforeUnmount(() => io?.disconnect())
             <p class="mt-6 font-display text-[length:clamp(24px,2.3vw,36px)] font-semibold leading-[1.3] tracking-[-0.015em] text-[color:rgba(255,255,255,0.6)]">
               {{ split(v).before }}<span class="text-pureWhite underline decoration-pastiYellow-500 decoration-[3px] underline-offset-[7px]">{{ split(v).hit }}</span>{{ split(v).after }}
             </p>
-            <p class="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.4)]">From the platform positioning</p>
+            <p class="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.4)]">{{ t('From the platform positioning') }}</p>
           </article>
         </div>
       </div>

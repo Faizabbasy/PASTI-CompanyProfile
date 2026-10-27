@@ -12,6 +12,7 @@
 // messages, the WhatsApp hand-off — stays here in code.
 const { needs, phone } = useContact()
 const { form: copy } = useContactPage()
+const t = useT()
 
 type Field = 'name' | 'company' | 'email' | 'phone' | 'message'
 const form = reactive<Record<Field, string>>({ name: '', company: '', email: '', phone: '', message: '' })
@@ -33,10 +34,10 @@ const toggle = (n: string) => {
 }
 
 const validate = () => {
-  errors.name = form.name.trim() ? '' : 'Please enter your name.'
-  errors.company = form.company.trim() ? '' : 'Please enter your company.'
-  errors.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) ? '' : 'Please enter a valid work email.'
-  errors.phone = !form.phone.trim() || /^[+\d][\d\s-]{6,}$/.test(form.phone.trim()) ? '' : 'Please enter a valid phone or WhatsApp number.'
+  errors.name = form.name.trim() ? '' : t('Please enter your name.')
+  errors.company = form.company.trim() ? '' : t('Please enter your company.')
+  errors.email = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()) ? '' : t('Please enter a valid work email.')
+  errors.phone = !form.phone.trim() || /^[+\d][\d\s-]{6,}$/.test(form.phone.trim()) ? '' : t('Please enter a valid phone or WhatsApp number.')
   const first = (['name', 'company', 'email', 'phone'] as Field[]).find((f) => errors[f])
   if (first) nextTick(() => formRef.value?.querySelector<HTMLElement>(`#ct-${first}`)?.focus())
   return !first
@@ -99,10 +100,10 @@ const input =
       </p>
       <div class="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3">
         <a :href="fallbackUrl" target="_blank" rel="noopener noreferrer" class="inline-flex h-12 items-center gap-2 rounded-full bg-slateNavy px-6 font-display text-[15px] font-bold text-pureWhite transition-transform duration-200 active:scale-[0.98]">
-          Open WhatsApp
+          {{ t('Open WhatsApp') }}
           <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
         </a>
-        <button type="button" class="h-12 font-display text-[15px] font-semibold underline decoration-pastiYellow-500 decoration-2 underline-offset-4" @click="reset">Start a new brief</button>
+        <button type="button" class="h-12 font-display text-[15px] font-semibold underline decoration-pastiYellow-500 decoration-2 underline-offset-4" @click="reset">{{ t('Start a new brief') }}</button>
       </div>
     </div>
 

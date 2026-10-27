@@ -13,6 +13,7 @@ import type { GanttStep } from '~/composables/useFast'
 if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
 const { board, gantt } = useFastPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const step = ref<GanttStep>(0)
 const dir = ref<'fwd' | 'bwd'>('fwd')
@@ -89,14 +90,14 @@ useGsapContext(() => {
           <!-- Board -->
           <div class="min-w-0 desktop:col-span-8">
             <div class="flex flex-wrap items-center justify-between gap-3">
-              <div role="group" aria-label="Scheduling direction" class="inline-flex rounded-full bg-surfaceNeutral p-1">
+              <div role="group" :aria-label="t('Scheduling direction')" class="inline-flex rounded-full bg-surfaceNeutral p-1">
                 <button v-for="d in (['fwd', 'bwd'] as const)" :key="d" type="button" :aria-pressed="dir === d" class="min-h-10 rounded-full px-4 font-display text-[13px] font-bold transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :class="dir === d ? 'bg-slateNavy text-pureWhite' : 'text-[color:rgba(3,60,89,0.7)] hover:text-slateNavy'" @click="dir = d">
-                  {{ d === 'fwd' ? 'Forward' : 'Backward' }}
+                  {{ d === 'fwd' ? t('Forward') : t('Backward') }}
                 </button>
               </div>
-              <div role="group" aria-label="Timeline view" class="inline-flex rounded-full bg-surfaceNeutral p-1">
+              <div role="group" :aria-label="t('Timeline view')" class="inline-flex rounded-full bg-surfaceNeutral p-1">
                 <button v-for="v in (['hour', 'day', 'week'] as const)" :key="v" type="button" :aria-pressed="view === v" class="min-h-10 rounded-full px-4 font-display text-[13px] font-bold capitalize transition-colors duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :class="view === v ? 'bg-slateNavy text-pureWhite' : 'text-[color:rgba(3,60,89,0.7)] hover:text-slateNavy'" @click="view = v">
-                  {{ v }}
+                  {{ t(v) }}
                 </button>
               </div>
             </div>
@@ -104,13 +105,13 @@ useGsapContext(() => {
             <div class="mt-4 overflow-hidden rounded-[20px] bg-pureWhite shadow-[0_40px_80px_-50px_rgba(3,60,89,0.6)] ring-1 ring-[color:rgba(3,60,89,0.1)]">
               <!-- Unscheduled queue -->
               <div class="border-b border-[color:rgba(3,60,89,0.08)] bg-surfaceNeutral px-4 py-3">
-                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">Unscheduled queue · {{ queue.length }}</p>
+                <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">{{ t('Unscheduled queue') }} · {{ queue.length }}</p>
                 <ul class="mt-2 flex flex-wrap gap-2">
                   <li v-for="o in queue" :key="o.id" class="inline-flex items-center gap-2 rounded-[10px] bg-pureWhite px-2.5 py-1.5 text-[12px] ring-1 ring-[color:rgba(3,60,89,0.1)]">
                     <span class="font-display font-bold text-slateNavy">{{ o.id }}</span>
-                    <span class="text-[color:rgba(3,60,89,0.6)]">due {{ dueLabel(o.due) }}</span>
-                    <span class="rounded-full px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase" :class="o.priority === 'Rush' ? 'bg-pastiYellow-500 text-slateNavy' : o.priority === 'High' ? 'bg-slateNavy text-pureWhite' : 'bg-[color:rgba(3,60,89,0.08)] text-[color:rgba(3,60,89,0.7)]'">{{ o.priority }}</span>
-                    <span v-if="o.readiness === 'Material shortage'" class="inline-flex items-center gap-1 font-semibold text-[#C2412D]"><span class="h-1.5 w-1.5 rounded-full bg-[#C2412D]" />{{ step >= 1 ? 'Blocked · material shortage' : 'Material shortage' }}</span>
+                    <span class="text-[color:rgba(3,60,89,0.6)]">{{ t('due') }} {{ dueLabel(o.due) }}</span>
+                    <span class="rounded-full px-1.5 py-0.5 font-mono text-[9px] font-semibold uppercase" :class="o.priority === 'Rush' ? 'bg-pastiYellow-500 text-slateNavy' : o.priority === 'High' ? 'bg-slateNavy text-pureWhite' : 'bg-[color:rgba(3,60,89,0.08)] text-[color:rgba(3,60,89,0.7)]'">{{ t(o.priority) }}</span>
+                    <span v-if="o.readiness === 'Material shortage'" class="inline-flex items-center gap-1 font-semibold text-[#C2412D]"><span class="h-1.5 w-1.5 rounded-full bg-[#C2412D]" />{{ step >= 1 ? t('Blocked · material shortage') : t('Material shortage') }}</span>
                   </li>
                 </ul>
               </div>
@@ -122,19 +123,19 @@ useGsapContext(() => {
               <!-- Validation strip -->
               <div class="flex flex-wrap items-center justify-between gap-3 border-t border-[color:rgba(3,60,89,0.08)] px-4 py-3" aria-live="polite">
                 <p class="text-[13px] leading-snug" :class="step === 2 ? 'text-[#C2412D]' : 'text-[color:rgba(3,60,89,0.7)]'">
-                  <template v-if="step === 0">Four orders waiting. Press “Schedule” or keep scrolling.</template>
-                  <template v-else-if="step === 1">Every eligible operation placed {{ dir === 'fwd' ? 'as early as possible' : 'back from its due date' }}. Validating…</template>
-                  <template v-else-if="step === 2"><strong>PRD-1047 · Op 20</strong> overlaps planned maintenance on Work Center 03. Drag it onto Work Center 04.</template>
-                  <template v-else>Conflict resolved by the planner. The board is valid and saved as a draft — the active plan is untouched.</template>
+                  <template v-if="step === 0">{{ t('Four orders waiting. Press “Schedule” or keep scrolling.') }}</template>
+                  <template v-else-if="step === 1">{{ dir === 'fwd' ? t('Every eligible operation placed as early as possible. Validating…') : t('Every eligible operation placed back from its due date. Validating…') }}</template>
+                  <template v-else-if="step === 2"><strong>PRD-1047 · Op 20</strong> {{ t('overlaps planned maintenance on Work Center 03. Drag it onto Work Center 04.') }}</template>
+                  <template v-else>{{ t('Conflict resolved by the planner. The board is valid and saved as a draft — the active plan is untouched.') }}</template>
                 </p>
                 <button v-if="step === 2" type="button" class="inline-flex min-h-10 items-center gap-2 rounded-full bg-slateNavy px-4 font-display text-[13px] font-bold text-pureWhite focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pastiYellow-500" @click="resolve">
-                  Move it for me
+                  {{ t('Move it for me') }}
                   <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v11M4 9l4 4 4-4" /></svg>
                 </button>
-                <span v-else-if="step === 3" class="inline-flex items-center gap-2 rounded-full bg-[color:rgba(251,186,0,0.18)] px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8A5A00]"><span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Draft · not published</span>
+                <span v-else-if="step === 3" class="inline-flex items-center gap-2 rounded-full bg-[color:rgba(251,186,0,0.18)] px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8A5A00]"><span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ t('Draft · not published') }}</span>
               </div>
             </div>
-            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.45)] max-desktop:text-center">Illustrative sample data · not a product screenshot</p>
+            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.45)] max-desktop:text-center">{{ t('Illustrative sample data · not a product screenshot') }}</p>
           </div>
         </div>
       </BaseContainer>

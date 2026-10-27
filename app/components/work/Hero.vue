@@ -9,6 +9,7 @@ import gsap from 'gsap'
 // jumps. Reduced motion: a static fan.
 const { hero, index: { projects }, cases: { items: publicCases } } = useWorkPage()
 const pad = (n: number) => String(n).padStart(2, '0')
+const t = useT()
 
 const stageRef = ref<HTMLElement | null>(null)
 const cardRefs = ref<HTMLElement[]>([])
@@ -109,7 +110,7 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10 flex flex-1 flex-col desktop:justify-center">
       <div class="grid items-center gap-6 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-6">
-          <div data-wh-fade><BaseHeroMarker :label="hero.eyebrow" :meta="`${pad(projects.length)} projects · ${pad(publicCases.length)} case studies`" /></div>
+          <div data-wh-fade><BaseHeroMarker :label="hero.eyebrow" :meta="t('{p} projects · {c} case studies', { p: pad(projects.length), c: pad(publicCases.length) })" /></div>
           <h1 class="hero-title mt-6 desktop:mt-[3svh]">
             <span class="wh-mask block"><span data-wh-word class="inline-block">{{ hero.headlineLines[0] }}</span></span>
             <span class="wh-mask block"><span data-wh-word class="inline-block">{{ hero.headlineLines[1] }}<span class="text-pastiYellow-500">.</span></span></span>
@@ -134,9 +135,9 @@ useGsapContext(() => {
               :key="p.key"
               :ref="(el) => { if (el) cardRefs[i] = el as HTMLElement }"
               type="button"
-              :aria-label="`Go to ${p.title}`"
+              :aria-label="t('Go to {title}', { title: p.title })"
               class="absolute left-0 top-0 -ml-[clamp(75px,7.5vw,125px)] -mt-[clamp(94px,9.4vw,156px)] w-[clamp(150px,15vw,250px)] origin-bottom overflow-hidden rounded-[18px] bg-pureWhite shadow-[0_40px_70px_-30px_rgba(3,60,89,0.55)] ring-1 ring-[color:rgba(3,60,89,0.12)]"
-              @mouseenter="hovered = i; setState('view', 'Open')"
+              @mouseenter="hovered = i; setState('view', t('Open'))"
               @mouseleave="setState('default')"
               @click="jump(i)"
             >
@@ -148,7 +149,7 @@ useGsapContext(() => {
             </button>
           </div>
           <p data-wh-fade class="absolute bottom-0 right-0 font-mono left-0 text-center desktop:left-auto desktop:text-left text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.5)]">
-            <span class="hidden desktop:inline">Move to fan · click to open</span><span class="desktop:hidden">Tap a project</span>
+            <span class="hidden desktop:inline">{{ t('Move to fan · click to open') }}</span><span class="desktop:hidden">{{ t('Tap a project') }}</span>
           </p>
         </div>
       </div>

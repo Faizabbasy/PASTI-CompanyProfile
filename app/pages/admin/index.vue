@@ -8,6 +8,7 @@ useHead({ title: 'Dashboard' })
 type Status = 'draft' | 'published' | 'archived' | 'none'
 interface DashboardItem {
   key: string
+  lang: 'id' | 'en' | null
   label: string
   group: string
   to: string
@@ -125,7 +126,7 @@ function siteLine(i: DashboardItem) {
           <ul class="divide-y divide-navy-100">
             <li v-for="i in g.items" :key="i.key">
               <NuxtLink :to="i.to" class="grid gap-1 px-5 py-2.5 text-sm hover:bg-navy-50 tablet:grid-cols-[12rem_minmax(0,1fr)_auto] tablet:items-center tablet:gap-4">
-                <span class="font-medium">{{ i.label }}</span>
+                <span class="flex items-center gap-2 font-medium">{{ i.label }}<span v-if="i.lang" class="rounded border border-navy-200 px-1.5 text-[10px] font-semibold tracking-wider text-navy-500">{{ i.lang === 'id' ? 'ID' : 'EN' }}</span></span>
                 <span class="flex flex-wrap items-center gap-2">
                   <span class="rounded-full px-2 py-0.5 text-[11px] font-semibold" :class="STATUS[i.status].cls">{{ STATUS[i.status].label }}</span>
                   <span v-if="i.dummy" class="rounded-full border border-dashed border-navy-300 px-2 py-0.5 text-[11px] font-semibold text-navy-500">Data contoh</span>

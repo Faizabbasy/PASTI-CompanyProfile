@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   let page: Awaited<ReturnType<typeof getPublishedEcorporate>>
   try {
-    page = await getPublishedEcorporate()
+    page = await getPublishedEcorporate(cmsLang(event))
   } catch (err) {
     console.error('[cms] public ECORPORATE read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

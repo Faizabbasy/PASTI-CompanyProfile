@@ -262,8 +262,8 @@ export async function getCategoryPreviewData(id: string) {
 // Published landing joined with PUBLISHED articles and PUBLISHED + active
 // categories only. No drafts, actors or workflow metadata; the body, author
 // and date are not public yet (no detail page). Never seeds.
-export async function getPublishedInsights() {
-  const snap = await insightsPage.getPublishedSnapshot()
+export async function getPublishedInsights(lang: CmsLang = 'en') {
+  const snap = await insightsPage.forLocale(lang).getPublishedSnapshot()
   if (!snap) return null
   const [articles, categories] = await Promise.all([articlesCollection.getPublishedAll(), categoriesCollection.getPublishedAll()])
   const toSrc = <C>(r: { id: string; content: C }) => ({ id: r.id, content: r.content })

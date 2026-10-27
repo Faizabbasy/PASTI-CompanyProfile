@@ -12,6 +12,7 @@ if (import.meta.client) {
 // (COMPRO p.2), then the five-step method from the brand guide §01 as a
 // timeline whose rail fills and whose nodes light up in sequence.
 const { story } = useAboutPage()
+const t = useT()
 const { introHeading, introBody, method, more: storyMore, facts } = story
 
 const accent = new Set(story.accentWords)
@@ -89,7 +90,7 @@ useGsapContext(() => {
 
       <!-- Method timeline -->
       <div ref="methodRef" class="mt-24 tablet:mt-32">
-        <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">How PASTI works</p>
+        <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.55)]">{{ t('How PASTI works') }}</p>
         <ol class="relative mt-8 grid gap-0 desktop:grid-cols-5 desktop:gap-6">
           <!-- Rail: vertical on mobile, horizontal on desktop -->
           <span aria-hidden="true" class="absolute bottom-6 left-[15px] top-4 w-px bg-[color:rgba(3,60,89,0.14)] desktop:bottom-auto desktop:left-0 desktop:right-0 desktop:top-[15px] desktop:h-px desktop:w-auto" />

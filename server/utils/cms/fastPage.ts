@@ -23,3 +23,6 @@ export const saveFastDraft = page.saveDraft
 export const publishFast = page.publish
 export const setFastStatus = page.setStatus
 export const getPublishedFast = page.getPublished
+
+// Bilingual CMS: the record for one language (English = the original record).
+export const fastFor = (lang: CmsLang) => page.forLocale(lang)

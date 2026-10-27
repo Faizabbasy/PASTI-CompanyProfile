@@ -1,3 +1,5 @@
+import { ABOUT_ID } from '~/i18n/content/about'
+
 export interface AboutPillar {
   index: string
   name: string
@@ -14,7 +16,7 @@ export interface AboutPillar {
  * from the live site. Proof numbers are the COMPRO 2025 70+ / 50+ shared
  * with the homepage (useWhoWeAre) — nothing new is claimed here.
  */
-export function useAbout() {
+function aboutData() {
   const eyebrow = 'About PASTI'
   const promise = 'We turn complexity into certainty.'
   const essence = 'Certainty Through Execution'
@@ -63,4 +65,11 @@ export function useAbout() {
     storyMore,
     company
   }
+}
+
+export type AboutData = ReturnType<typeof aboutData>
+
+// Indonesian overlay on Indonesian pages (app/i18n/content/about.ts).
+export function useAbout() {
+  return localize(aboutData(), useLocale() === 'id' ? ABOUT_ID : undefined)
 }

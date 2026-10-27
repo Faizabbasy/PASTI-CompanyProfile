@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   let page: Awaited<ReturnType<typeof getPublishedFast>>
   try {
-    page = await getPublishedFast()
+    page = await getPublishedFast(cmsLang(event))
   } catch (err) {
     console.error('[cms] public FAST read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

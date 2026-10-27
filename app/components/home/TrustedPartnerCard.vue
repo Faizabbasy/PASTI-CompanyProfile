@@ -64,6 +64,7 @@ useGsapContext(() => {
     return () => tl.kill()
   })
 })
+const t = useT()
 </script>
 
 <template>
@@ -79,7 +80,7 @@ useGsapContext(() => {
 
       <!-- Corner signature -->
       <div aria-hidden="true" class="pointer-events-none absolute right-5 top-5 z-20 hidden items-center gap-3 desktop:flex">
-        <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.4)]">Trusted Partner</span>
+        <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.4)]">{{ t('Trusted Partner') }}</span>
         <LayoutBrandMark surface="dark" :height="14" />
       </div>
 
@@ -127,7 +128,7 @@ useGsapContext(() => {
 
       <!-- Title -->
       <div class="flex flex-col justify-center desktop:col-span-3 desktop:pl-4">
-        <p data-tp-item class="font-mono text-[10px] uppercase tracking-[0.22em] text-[color:rgba(255,255,255,0.45)]">— Since day one</p>
+        <p data-tp-item class="font-mono text-[10px] uppercase tracking-[0.22em] text-[color:rgba(255,255,255,0.45)]">— {{ t('Since day one') }}</p>
         <h3 data-tp-item class="mt-3 font-display text-[clamp(34px,3.4vw,52px)] font-extrabold leading-[0.98] tracking-[-0.035em] text-pureWhite">
           {{ partner.title }}
         </h3>

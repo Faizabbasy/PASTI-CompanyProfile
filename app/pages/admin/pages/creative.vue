@@ -15,6 +15,8 @@ import {
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Creative · Pages' })
 
+// Bilingual: which language record is being edited (?lang=, default Indonesian).
+const lang = useEditorLang()
 const {
   loadStatus, loadError, refresh, form, state, dirty, activeTab, errors, errorCount, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, publishedIds, canPublish, canUnpublish, canArchive, publishDisabledReason
@@ -22,6 +24,7 @@ const {
   name: 'Creative',
   endpoint: '/api/admin/pages/creative',
   asyncKey: 'admin-creative',
+  lang,
   tabs: CREATIVE_TABS,
   toForm: toCreativeForm,
   toPayload: toCreativePayload,
@@ -87,9 +90,10 @@ const hasErr = (prefix: string) => (i: number) => Object.keys(errors.value).some
     crumb="Pages"
     crumb-to="/admin/pages"
     public-path="/creative"
+    :lang="lang"
     flag="NUXT_CMS_CREATIVE_PUBLIC_ENABLED"
     :tabs="CREATIVE_TABS"
-    preview-path="/admin/preview/creative"
+    :preview-path="`/admin/preview/creative?lang=${lang}`"
     :code-managed="codeManaged"
     :dummy="state?.dummy !== false"
     :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
@@ -111,7 +115,7 @@ const hasErr = (prefix: string) => (i: number) => Object.keys(errors.value).some
         :state="state"
         :dirty="dirty"
         :busy="busy"
-        preview-href="/admin/preview/creative"
+        :preview-href="`/admin/preview/creative?lang=${lang}`"
         :can-publish="canPublish"
         :can-unpublish="canUnpublish"
         :can-archive="canArchive"

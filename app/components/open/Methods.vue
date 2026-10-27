@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // Procurement methods OPEN handles (slide 10): 1T1S / 1T2S / 2T2S. A radio
 // switcher; the diagram draws each method as stages × envelopes (sampul),
 // so the difference is visible, not just listed: one envelope with both
@@ -17,16 +18,16 @@ const onKey = (e: KeyboardEvent) => {
   ;(e.currentTarget as HTMLElement).parentElement?.querySelectorAll<HTMLElement>('[role="radio"]')[pickedIdx.value]?.focus()
 }
 
-const envLabel = { teknis: 'Teknis', harga: 'Harga', 'teknis+harga': 'Teknis + Harga' } as const
+const envLabel = { teknis: 'Technical', harga: 'Price', 'teknis+harga': 'Technical + Price' } as const
 </script>
 
 <template>
   <div class="rounded-[24px] border border-[color:rgba(3,60,89,0.12)] bg-pureWhite p-5 tablet:p-8">
     <div class="grid gap-8 desktop:grid-cols-12">
       <div class="desktop:col-span-4">
-        <p class="m-center font-display text-[22px] font-extrabold tracking-[-0.02em] text-slateNavy">Metode procurement yang didukung</p>
+        <p class="m-center font-display text-[22px] font-extrabold tracking-[-0.02em] text-slateNavy">{{ t('Supported procurement methods') }}</p>
         <p class="m-center mt-3 text-[14.5px] leading-relaxed text-[color:rgba(3,60,89,0.72)]">{{ procurement.methodsIntro }}</p>
-        <div role="radiogroup" aria-label="Metode procurement" class="mt-6 grid grid-cols-3 gap-1 rounded-full bg-[color:rgba(3,60,89,0.06)] p-1">
+        <div role="radiogroup" :aria-label="t('Procurement method')" class="mt-6 grid grid-cols-3 gap-1 rounded-full bg-[color:rgba(3,60,89,0.06)] p-1">
           <button
             v-for="(m, i) in methods"
             :key="m.code"
@@ -40,7 +41,7 @@ const envLabel = { teknis: 'Teknis', harga: 'Harga', 'teknis+harga': 'Teknis + H
             @keydown="onKey"
           >{{ m.code }}</button>
         </div>
-        <p class="mt-6 text-[13px] font-semibold text-[color:rgba(3,60,89,0.55)]">Perbedaan utama yang dikelola OPEN:</p>
+        <p class="mt-6 text-[13px] font-semibold text-[color:rgba(3,60,89,0.55)]">{{ t('Key differences OPEN manages:') }}</p>
         <ul class="mt-2 space-y-1.5">
           <li v-for="d in procurement.methodsManaged" :key="d" class="flex items-center gap-2 text-[14px] font-semibold text-slateNavy"><span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ d }}</li>
         </ul>
@@ -57,7 +58,7 @@ const envLabel = { teknis: 'Teknis', harga: 'Harga', 'teknis+harga': 'Teknis + H
             :key="`${picked.code}-${si}`"
             class="flex-1 rounded-[18px] border-2 border-dashed border-[color:rgba(3,60,89,0.18)] p-4"
           >
-            <p class="text-[12px] font-bold text-[color:rgba(3,60,89,0.55)]">Tahap {{ si + 1 }}</p>
+            <p class="text-[12px] font-bold text-[color:rgba(3,60,89,0.55)]">{{ t('Stage') }} {{ si + 1 }}</p>
             <div class="mt-3 flex gap-3">
               <div
                 v-for="(env, ei) in stage"
@@ -67,8 +68,8 @@ const envLabel = { teknis: 'Teknis', harga: 'Harga', 'teknis+harga': 'Teknis + H
                 :style="{ '--d': `${(si * 2 + ei) * 90}ms` }"
               >
                 <svg viewBox="0 0 32 24" class="h-6 w-8" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="1.5" y="1.5" width="29" height="21" rx="3" /><path d="M2 3l14 10 14-10" /></svg>
-                <span class="font-display text-[13px] font-bold">Sampul {{ picked.code === '1T1S' ? '' : si + ei + 1 }}</span>
-                <span class="text-[12px] opacity-80">{{ envLabel[env] }}</span>
+                <span class="font-display text-[13px] font-bold">{{ t('Envelope') }} {{ picked.code === '1T1S' ? '' : si + ei + 1 }}</span>
+                <span class="text-[12px] opacity-80">{{ t(envLabel[env]) }}</span>
                 <span v-if="env === 'harga' && picked.code === '1T2S'" class="absolute -right-2 -top-2 grid h-7 w-7 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy">
                   <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="10" height="7" rx="1.5" /><path d="M5.5 7V5a2.5 2.5 0 015 0" /></svg>
                 </span>
@@ -82,7 +83,7 @@ const envLabel = { teknis: 'Teknis', harga: 'Harga', 'teknis+harga': 'Teknis + H
             <svg viewBox="0 0 16 16" class="mt-1 h-3.5 w-3.5 shrink-0 text-pastiYellow-600" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M3 8.5l3 3 7-7" /></svg>{{ p }}
           </li>
         </ul>
-        <p class="mt-6 border-t border-[color:rgba(3,60,89,0.1)] pt-4 text-[14px] text-[color:rgba(3,60,89,0.7)]"><strong class="text-slateNavy">{{ procurement.methodsLine }}</strong> OPEN memastikan setiap metode dijalankan dengan kontrol dan transparansi.</p>
+        <p class="mt-6 border-t border-[color:rgba(3,60,89,0.1)] pt-4 text-[14px] text-[color:rgba(3,60,89,0.7)]"><strong class="text-slateNavy">{{ procurement.methodsLine }}</strong> {{ t('OPEN makes sure every method runs with control and transparency.') }}</p>
       </div>
     </div>
   </div>

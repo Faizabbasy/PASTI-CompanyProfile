@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // VISIBILITY, INTEGRATION & SECURITY (slides 17, 18, 19) — the management
 // and IT questions in one section.
 // 1. Monitoring: a dashboard rebuilt as UI with the deck's seven views as
@@ -46,8 +47,8 @@ const panels = visibility.items.map((label: string, i: number) => {
         <div ref="dashRef" class="desktop:col-span-8" :class="{ 'is-in': dashIn }" aria-hidden="true">
           <div class="overflow-hidden rounded-[24px] border border-[color:rgba(3,60,89,0.12)] bg-[color:#F4F7FA] p-3 shadow-[0_60px_120px_-70px_rgba(3,60,89,0.7)] tablet:p-4">
             <div class="flex items-center justify-between px-2 pb-3 pt-1">
-              <span class="flex items-center gap-2 font-display text-[14px] font-extrabold text-slateNavy"><OpenMark :size="16" />Procurement Monitoring Dashboard</span>
-              <span class="flex items-center gap-2 text-[11.5px] font-semibold text-[color:rgba(3,60,89,0.6)]"><span class="op-live h-2 w-2 rounded-full bg-pastiYellow-500" />Live</span>
+              <span class="flex items-center gap-2 font-display text-[14px] font-extrabold text-slateNavy"><OpenMark :size="16" />{{ t('Procurement Monitoring Dashboard') }}</span>
+              <span class="flex items-center gap-2 text-[11.5px] font-semibold text-[color:rgba(3,60,89,0.6)]"><span class="op-live h-2 w-2 rounded-full bg-pastiYellow-500" />{{ t('Live') }}</span>
             </div>
             <div class="grid grid-cols-2 gap-2 tablet:grid-cols-3 tablet:gap-2.5">
               <div
@@ -82,7 +83,7 @@ const panels = visibility.items.map((label: string, i: number) => {
               </div>
             </div>
           </div>
-          <p class="mt-3 text-right text-[11px] text-[color:rgba(3,60,89,0.45)]">Ilustrasi antarmuka OPEN</p>
+          <p class="mt-3 text-right text-[11px] text-[color:rgba(3,60,89,0.45)]">{{ t('OPEN interface illustration') }}</p>
         </div>
       </div>
 
@@ -122,7 +123,7 @@ const panels = visibility.items.map((label: string, i: number) => {
             <div class="op-pop grid h-[156px] w-[156px] place-items-center rounded-full border-[10px] border-pastiYellow-500 bg-pureWhite text-center text-slateNavy" style="--d: 400ms">
               <span>
                 <span class="block font-display text-[30px] font-extrabold tracking-[-0.04em]">OPEN</span>
-                <span class="block text-[11px] font-semibold leading-tight text-[color:rgba(3,60,89,0.7)]">Procurement<br>Ecosystem</span>
+                <span class="block text-[11px] font-semibold leading-tight text-[color:rgba(3,60,89,0.7)]">{{ t('Procurement') }}<br>{{ t('Ecosystem') }}</span>
               </span>
             </div>
           </div>

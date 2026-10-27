@@ -5,6 +5,7 @@
 // Right: seven plain statements from the source's challenge table (§2). No
 // quantified pain. Reveal: useMatrixReveal (fill-up).
 const { problem, sample } = useMatrixPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const barRef = ref<HTMLElement | null>(null)
 const split = ref(false)
@@ -35,16 +36,16 @@ onBeforeUnmount(() => stop())
               <p aria-hidden="true" class="flex items-end gap-3 max-desktop:justify-center tablet:gap-5">
                 <span>
                   <span class="mxp-out block font-display font-extrabold leading-[0.8] tracking-[-0.06em]">{{ sample.mix.onHand }}</span>
-                  <span class="mt-3 block font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">On hand</span>
+                  <span class="mt-3 block font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">{{ t('On hand') }}</span>
                 </span>
                 <span class="mxp-neq pb-9 font-display font-extrabold leading-none text-[color:rgba(3,60,89,0.35)]">≠</span>
                 <span>
                   <span class="mxp-solid relative isolate inline-block font-display font-extrabold leading-[0.8] tracking-[-0.06em] text-slateNavy">{{ netAvailable(sample.mix) }}</span>
-                  <span class="mt-3 block font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">Ready to issue</span>
+                  <span class="mt-3 block font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">{{ t('Ready to issue') }}</span>
                 </span>
               </p>
               <div class="mt-7" aria-hidden="true"><MatrixStockBar :mix="sample.mix" :split="split" :legend="false" /></div>
-              <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.45)] max-desktop:text-center">{{ sample.name }} · illustrative</p>
+              <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.45)] max-desktop:text-center">{{ sample.name }} · {{ t('illustrative') }}</p>
             </div>
           </div>
         </div>

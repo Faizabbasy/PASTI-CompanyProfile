@@ -25,6 +25,8 @@ const props = withDefaults(
 const emit = defineEmits<{ resolve: [] }>()
 
 const { gantt } = useFastPage()
+// `tr`, not `t`: this file already uses `t` for tones and ticks.
+const tr = useT()
 const { setState } = useCustomCursor()
 const dark = computed(() => props.surface === 'dark')
 const rowIndex = (res: string) => gantt.resources.findIndex((r) => r.id === res)
@@ -35,7 +37,7 @@ const span = computed(() => win.value[1] - win.value[0])
 const pct = (h: number) => ((h - win.value[0]) / span.value) * 100
 
 const ticks = computed(() => {
-  if (props.view === 'week') return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => ({ at: i * 24, label: d }))
+  if (props.view === 'week') return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d, i) => ({ at: i * 24, label: tr(d) }))
   const every = props.view === 'hour' ? 2 : 3
   const out: { at: number; label: string }[] = []
   for (let h = win.value[0]; h < win.value[1]; h += every) out.push({ at: h, label: `${String((gantt.start + h) % 24).padStart(2, '0')}:00` })
@@ -131,8 +133,9 @@ const tone = (t: number, d: boolean) =>
 
 const summary = computed(
   () =>
-    `Sample scheduling board: ${R} resources over a ${props.view} view. ` +
-    (props.step === 0 ? 'Four orders wait in the unscheduled queue.' : props.step === 1 ? 'Operations are placed by a scheduling run.' : props.step === 2 ? 'Validation flags one operation that overlaps planned maintenance; one order is held for material shortage.' : 'The conflicting operation has been moved to Work Center 04; the schedule is valid.')
+    tr('Sample scheduling board: {n} resources over a {view} view.', { n: R, view: tr(props.view) }) +
+    ' ' +
+    tr(props.step === 0 ? 'Four orders wait in the unscheduled queue.' : props.step === 1 ? 'Operations are placed by a scheduling run.' : props.step === 2 ? 'Validation flags one operation that overlaps planned maintenance; one order is held for material shortage.' : 'The conflicting operation has been moved to Work Center 04; the schedule is valid.')
 )
 </script>
 
@@ -140,10 +143,10 @@ const summary = computed(
   <div class="fg relative select-none" :class="[dark ? 'fg--dark text-pureWhite' : 'text-slateNavy', compact ? 'fg--compact' : '']" role="img" :aria-label="summary">
     <!-- Board header -->
     <div v-if="!compact" class="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3" :class="dark ? 'border-[color:rgba(255,255,255,0.12)]' : 'border-[color:rgba(3,60,89,0.1)]'">
-      <p class="font-mono text-[10px] uppercase tracking-[0.18em]" :class="dark ? 'text-[color:rgba(255,255,255,0.6)]' : 'text-[color:rgba(3,60,89,0.55)]'">Scheduling board · {{ dir === 'fwd' ? 'Forward' : 'Backward' }} · {{ view }}</p>
+      <p class="font-mono text-[10px] uppercase tracking-[0.18em]" :class="dark ? 'text-[color:rgba(255,255,255,0.6)]' : 'text-[color:rgba(3,60,89,0.55)]'">{{ tr('Scheduling board') }} · {{ dir === 'fwd' ? tr('Forward') : tr('Backward') }} · {{ tr(view) }}</p>
       <p class="inline-flex items-center gap-2 rounded-full px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em]" :class="conflicts ? 'bg-[color:rgba(194,65,45,0.12)] text-[#C2412D]' : step === 3 ? 'bg-[color:rgba(251,186,0,0.18)] text-[#8A5A00]' : dark ? 'bg-[color:rgba(255,255,255,0.08)] text-[color:rgba(255,255,255,0.7)]' : 'bg-surfaceNeutral text-[color:rgba(3,60,89,0.6)]'">
         <span class="h-1.5 w-1.5 rounded-full" :class="conflicts ? 'bg-[#C2412D]' : step === 3 ? 'bg-pastiYellow-500' : 'bg-current opacity-50'" />
-        {{ step === 0 ? '4 orders unscheduled' : step === 1 ? 'Run complete · validating' : step === 2 ? `${conflicts} conflict · 1 blocked` : 'Valid · saved as draft' }}
+        {{ step === 0 ? tr('4 orders unscheduled') : step === 1 ? tr('Run complete · validating') : step === 2 ? tr('{n} conflict · 1 blocked', { n: conflicts }) : tr('Valid · saved as draft') }}
       </p>
     </div>
 
@@ -177,7 +180,7 @@ const summary = computed(
             class="fg-downtime absolute"
             :style="{ left: `${pct(d.from)}%`, width: `${pct(d.to) - pct(d.from)}%`, top: `${(rowIndex(d.res) / R) * 100}%`, height: `${100 / R}%` }"
           >
-            <span v-if="!compact && view !== 'week'" class="absolute left-1.5 top-1 font-mono text-[8px] uppercase tracking-[0.1em] text-[color:rgba(194,65,45,0.85)]">Maintenance</span>
+            <span v-if="!compact && view !== 'week'" class="absolute left-1.5 top-1 font-mono text-[8px] uppercase tracking-[0.1em] text-[color:rgba(194,65,45,0.85)]">{{ tr('Maintenance') }}</span>
           </span>
 
           <!-- Dependency links -->
@@ -235,7 +238,7 @@ const summary = computed(
 
           <!-- NOW line -->
           <span v-if="view !== 'week'" aria-hidden="true" class="pointer-events-none absolute inset-y-0 z-[25] w-[2px] bg-pastiYellow-500" :style="{ left: `${pct(now)}%` }">
-            <span class="absolute -top-[22px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-pastiYellow-500 px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase text-slateNavy">Now</span>
+            <span class="absolute -top-[22px] left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-pastiYellow-500 px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase text-slateNavy">{{ tr('Now') }}</span>
           </span>
         </div>
       </div>

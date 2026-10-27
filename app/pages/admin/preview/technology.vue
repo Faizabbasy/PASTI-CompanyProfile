@@ -22,8 +22,8 @@ interface PreviewResponse {
 }
 
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData('admin-technology-preview', () =>
-  cmsFetch<PreviewResponse>('/api/admin/pages/technology/preview')
+const { data, error, refresh, status } = await useAsyncData(`admin-technology-preview-${useEditorLang()}`, () =>
+  cmsFetch<PreviewResponse>('/api/admin/pages/technology/preview', { query: { lang: useEditorLang() } })
 )
 
 const { why } = useTechnology()

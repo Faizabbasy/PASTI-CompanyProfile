@@ -5,7 +5,8 @@
 // clients, so the label claims no partnership. Deliberately simple — no
 // motion beyond a CSS hover; logos keep their own identity (04-spec §Partner
 // Logo Respect), only desaturated at rest.
-const label = 'Technologies we build with'
+const t = useT()
+const label = t('Technologies we build with')
 // Same names/files as useTrustedClients, but served from public/logos/tech/:
 // copies trimmed to the mark with transparent backgrounds (the originals carry
 // uneven padding, and TikTok/WordPress an opaque background), so one height

@@ -38,6 +38,7 @@ useGsapContext(() => {
     return () => { a.kill(); tl.kill() }
   })
 })
+const t = useT()
 </script>
 
 <template>
@@ -67,7 +68,7 @@ useGsapContext(() => {
           >
             <span class="pt-1.5 font-mono text-[11px] text-pastiYellow-500">{{ String(i + 1).padStart(2, '0') }}</span>
             <div>
-              <h3 class="font-display text-[20px] font-bold leading-tight tracking-[-0.02em] text-pureWhite">{{ st.name }}</h3>
+              <h3 class="font-display text-[20px] font-bold leading-tight tracking-[-0.02em] text-pureWhite">{{ t(st.name) }}</h3>
               <p class="mt-2 text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.72)]">{{ st.body }}</p>
             </div>
           </li>
@@ -76,14 +77,14 @@ useGsapContext(() => {
 
       <!-- Milestones -->
       <div class="mt-20 desktop:mt-28">
-        <p data-why-item class="m-center font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">Milestones</p>
+        <p data-why-item class="m-center font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">{{ t('Milestones') }}</p>
         <div class="relative mt-8">
           <span ref="lineRef" aria-hidden="true" class="absolute left-0 right-0 top-[7px] hidden h-px bg-pastiYellow-500 tablet:block" />
           <ol class="grid gap-8 tablet:gap-6" :class="why.milestones.length === 3 ? 'tablet:grid-cols-3' : 'tablet:grid-cols-4'">
             <li v-for="m in why.milestones" :key="m.year" data-why-item class="relative pl-7 tablet:pl-0 tablet:pt-9">
               <span data-why-node aria-hidden="true" class="absolute left-0 top-1 block h-[15px] w-[15px] rounded-full border-2 border-pastiYellow-500 bg-slateNavy tablet:top-0" />
               <span aria-hidden="true" class="absolute bottom-[-2rem] left-[7px] top-6 w-px bg-[color:rgba(255,255,255,0.18)] tablet:hidden" />
-              <p class="font-display text-[clamp(24px,2vw,32px)] font-extrabold leading-none tracking-[-0.04em] text-pureWhite">{{ m.year }}</p>
+              <p class="font-display text-[clamp(24px,2vw,32px)] font-extrabold leading-none tracking-[-0.04em] text-pureWhite">{{ t(m.year) }}</p>
               <p class="mt-3 max-w-[28ch] text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.72)]">{{ m.text }}</p>
             </li>
           </ol>

@@ -1,4 +1,5 @@
 import type { InjectionKey } from 'vue'
+import { TECHNOLOGY_PAGE_ID } from '~/i18n/content/technologyPage'
 import { isSafeLinkUrl } from '#shared/cms/fields'
 import { TECHNOLOGY_WORK_REFS } from '#shared/utils/technologySchema'
 import {
@@ -28,7 +29,9 @@ export function buildLegacyTechnologyContent(): TechnologyPageContent {
   const { link: whatsappLink } = useWhatsapp()
   // "Technology built to move business forward." → the hero's three lines.
   const words = t.heading.replace(/\.$/, '').split(' ')
-  return {
+  // English base; Indonesian wording (incl. the three hero lines) overlaid on
+  // Indonesian pages (app/i18n/content/technologyPage.ts).
+  return localize<TechnologyPageContent>({
     source: 'legacy',
     cmsVersion: null,
     hero: {
@@ -53,8 +56,8 @@ export function buildLegacyTechnologyContent(): TechnologyPageContent {
       }))
     },
     work: { sectionLabel: 'Case studies', eyebrow: 'Proof of delivery', title: 'Technology case studies', cards: t.cases },
-    seo: { ...pageSeo.technology }
-  }
+    seo: { ...localizedPageSeo('technology') }
+  }, useLocale() === 'id' ? TECHNOLOGY_PAGE_ID : undefined)
 }
 
 // TEMPORARY reference layer (until a Work CMS exists): a ref names an
@@ -140,13 +143,14 @@ export function adaptTechnologyCms(legacy: TechnologyPageContent, cms: Pick<Publ
 // Called once by pages/technology.vue.
 export async function resolveTechnologyPageContent() {
   const legacy = buildLegacyTechnologyContent()
-  const state = useState<TechnologyPageContent>(STATE_KEY, () => legacy)
+  const locale = useLocale()
+  const state = useState<TechnologyPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
 
-  const { data } = await useAsyncData('technology-cms-source', async () => {
+  const { data } = await useAsyncData(`technology-cms-source-${locale}`, async () => {
     // SSR: skip the call entirely when the server-side flag is off.
     if (import.meta.server && !technologyCmsEnabledOnServer()) return { status: 'disabled' as const }
     try {
-      const raw = await $fetch('/api/public/pages/technology', { timeout: 2500 })
+      const raw = await $fetch('/api/public/pages/technology', { query: { lang: locale }, timeout: 2500 })
       const parsed = PublicTechnologyResponseSchema.safeParse(raw)
       if (!parsed.success) {
         if (import.meta.server) console.error('[technology] CMS response failed validation — using legacy content')
@@ -179,6 +183,6 @@ export function provideTechnologyPreview(content: TechnologyPageContent) {
 export function useTechnologyPage(): TechnologyPageContent {
   const preview = inject(PREVIEW_KEY, null)
   if (preview) return preview
-  const state = useState<TechnologyPageContent | undefined>(STATE_KEY)
+  const state = useState<TechnologyPageContent | undefined>(`${STATE_KEY}-${useLocale()}`)
   return state.value ?? buildLegacyTechnologyContent()
 }

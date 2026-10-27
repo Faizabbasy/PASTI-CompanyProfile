@@ -5,6 +5,7 @@
 // while the section is on screen; visitors can pick a state themselves.
 // Reduced motion: no cycling, first state shown.
 const { readiness } = useFastPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const active = ref(0)
 const auto = ref(true)
@@ -46,12 +47,12 @@ const pick = (i: number) => {
         <!-- Readiness meter -->
         <div data-fr class="rounded-[22px] bg-pureWhite p-5 ring-1 ring-[color:rgba(3,60,89,0.08)] desktop:col-span-6">
           <div class="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">
-            <span>PRD-1047 · material readiness</span><span>sample</span>
+            <span>PRD-1047 · {{ t('material readiness') }}</span><span>{{ t('sample') }}</span>
           </div>
           <div class="mt-3 h-3 overflow-hidden rounded-full bg-[color:rgba(3,60,89,0.08)]">
             <span class="block h-full rounded-full transition-[width,background-color] duration-700 ease-editorial" :class="toneBg[readiness.states[active]!.tone]" :style="{ width: fill[active] }" />
           </div>
-          <div role="group" aria-label="Readiness states" class="mt-4 grid grid-cols-2 gap-2 tablet:grid-cols-4">
+          <div role="group" :aria-label="t('Readiness states')" class="mt-4 grid grid-cols-2 gap-2 tablet:grid-cols-4">
             <button
               v-for="(s, i) in readiness.states"
               :key="s.name"

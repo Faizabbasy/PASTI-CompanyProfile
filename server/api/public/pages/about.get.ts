@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   let about: Awaited<ReturnType<typeof getPublishedAbout>>
   try {
-    about = await getPublishedAbout({ includeProof: flags.aboutPublicProofEnabled })
+    about = await getPublishedAbout({ includeProof: flags.aboutPublicProofEnabled }, cmsLang(event))
   } catch (err) {
     console.error('[cms] public About read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

@@ -8,6 +8,7 @@ import type { StockKey } from '~/composables/useMatrix'
 // keeps a fixed minimum height and layout containment, so switching never
 // shifts the page. Synthetic data; source §1, §3, §4.
 const { intelligence, sample } = useMatrixPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const picked = ref<(typeof intelligence.states)[number]['id']>('net')
 const state = computed(() => intelligence.states.find((s) => s.id === picked.value)!)
@@ -33,7 +34,7 @@ const serialTone: Record<string, string> = {
 
       <div data-fr class="mt-12 grid gap-4 desktop:grid-cols-12 desktop:gap-8">
         <!-- State picker -->
-        <div role="group" aria-label="Material states" class="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 [scrollbar-width:none] desktop:col-span-4 desktop:mx-0 desktop:grid desktop:gap-1 desktop:overflow-visible desktop:px-0 desktop:pb-0" data-lenis-prevent>
+        <div role="group" :aria-label="t('Material states')" class="-mx-5 flex gap-2 overflow-x-auto px-5 pb-2 [scrollbar-width:none] desktop:col-span-4 desktop:mx-0 desktop:grid desktop:gap-1 desktop:overflow-visible desktop:px-0 desktop:pb-0" data-lenis-prevent>
           <button
             v-for="s in intelligence.states"
             :key="s.id"
@@ -53,7 +54,7 @@ const serialTone: Record<string, string> = {
         <div id="mxi-panel" class="min-h-[400px] rounded-[22px] bg-surfaceNeutral p-5 ring-1 ring-[color:rgba(3,60,89,0.08)] [contain:layout_paint] tablet:p-8 desktop:col-span-8" aria-live="polite">
           <div class="flex flex-wrap items-baseline justify-between gap-2">
             <p class="font-mono text-[11px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">{{ sample.code }} · {{ sample.name }}</p>
-            <p class="font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.45)]">Illustrative</p>
+            <p class="font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.45)]">{{ t('Illustrative') }}</p>
           </div>
           <p class="mt-5 font-display text-[28px] font-extrabold leading-tight tracking-[-0.02em] text-slateNavy tablet:text-[34px]">
             {{ state.label }}<template v-if="qty[picked] !== undefined"> · {{ qty[picked] }} {{ sample.unit }}</template>
@@ -66,7 +67,7 @@ const serialTone: Record<string, string> = {
               <MatrixStockBar :mix="sample.mix" :focus="focus" :requirement="picked === 'critical'" />
               <p v-if="picked === 'critical'" class="mt-4 inline-flex items-center gap-2 rounded-full bg-[color:rgba(194,65,45,0.1)] px-3 py-1.5 text-[13px] font-semibold text-[#9E3322]">
                 <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M8 1.5 15 14H1z" stroke-linejoin="round" /><path d="M8 6v3.5M8 11.6v.2" stroke-linecap="round" /></svg>
-                Short {{ (sample.mix.requirement ?? 0) - net }} {{ sample.unit }} against the near-term requirement
+                {{ t('Short {n} {unit} against the near-term requirement', { n: (sample.mix.requirement ?? 0) - net, unit: sample.unit }) }}
               </p>
             </div>
 
@@ -75,7 +76,7 @@ const serialTone: Record<string, string> = {
               <li v-for="l in sample.locations" :key="l.path" class="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3.5">
                 <span class="min-w-0 font-mono text-[12.5px] text-slateNavy">{{ l.path }}</span>
                 <span class="inline-flex items-center gap-3 text-[13px]">
-                  <span class="font-semibold" :class="l.state === 'Quarantine' ? 'text-[color:rgba(3,60,89,0.6)]' : 'text-slateNavy'">{{ l.state }}</span>
+                  <span class="font-semibold" :class="l.state === 'Quarantine' ? 'text-[color:rgba(3,60,89,0.6)]' : 'text-slateNavy'">{{ t(l.state) }}</span>
                   <strong class="font-display text-[16px] tabular-nums text-slateNavy">{{ l.qty }} {{ sample.unit }}</strong>
                 </span>
               </li>
@@ -85,7 +86,7 @@ const serialTone: Record<string, string> = {
             <ul v-else-if="picked === 'serial'" class="grid grid-cols-2 gap-2 tablet:grid-cols-4">
               <li v-for="s in sample.serials" :key="s.id" class="rounded-[14px] bg-pureWhite p-3.5 ring-1 ring-[color:rgba(3,60,89,0.08)]">
                 <span class="block font-mono text-[12.5px] text-slateNavy">{{ s.id }}</span>
-                <span class="mt-2 inline-block rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em]" :class="serialTone[s.state]">{{ s.state }}</span>
+                <span class="mt-2 inline-block rounded-full px-2 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.08em]" :class="serialTone[s.state]">{{ t(s.state) }}</span>
               </li>
             </ul>
 
@@ -97,12 +98,12 @@ const serialTone: Record<string, string> = {
                   <dd class="mt-1 font-display text-[18px] font-bold text-slateNavy">{{ p.value }}</dd>
                 </div>
               </dl>
-              <p class="mt-4 text-[13.5px] text-[color:rgba(3,60,89,0.72)]">Net available ({{ net }}) is below the reorder point (8) — the item is flagged for <strong class="text-slateNavy">replenishment review</strong>, not ordered automatically.</p>
+              <p class="mt-4 text-[13.5px] text-[color:rgba(3,60,89,0.72)]">{{ t('Net available ({n}) is below the reorder point (8) — the item is flagged for', { n: net }) }} <strong class="text-slateNavy">{{ t('replenishment review') }}</strong>{{ t(', not ordered automatically.') }}</p>
             </div>
 
             <!-- Aging -->
             <dl v-else-if="picked === 'aging'" class="grid grid-cols-2 gap-2 tablet:grid-cols-4">
-              <div v-for="a in [{ l: 'Last movement', v: 'Day 4' }, { l: 'Movement class', v: sample.movement }, { l: 'Age band', v: '0–90 days' }, { l: 'Surplus candidate', v: 'No' }]" :key="a.l" class="rounded-[14px] bg-pureWhite p-3.5 ring-1 ring-[color:rgba(3,60,89,0.08)]">
+              <div v-for="a in [{ l: t('Last movement'), v: t('Day 4') }, { l: t('Movement class'), v: sample.movement }, { l: t('Age band'), v: t('0–90 days') }, { l: t('Surplus candidate'), v: t('No') }]" :key="a.l" class="rounded-[14px] bg-pureWhite p-3.5 ring-1 ring-[color:rgba(3,60,89,0.08)]">
                 <dt class="text-[12px] text-[color:rgba(3,60,89,0.6)]">{{ a.l }}</dt>
                 <dd class="mt-1 font-display text-[16px] font-bold text-slateNavy">{{ a.v }}</dd>
               </div>

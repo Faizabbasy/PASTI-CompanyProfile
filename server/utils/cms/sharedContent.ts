@@ -54,6 +54,8 @@ const ctas = defineSingletonPage<'ctas', CtasContent>({
 })
 
 export const sharedPages = { clients, faqs, ctas }
+// Clients are language-neutral (logos + company names): one record for both
+// languages — always the original record, whatever ?lang= says.
 export type SharedPageId = keyof typeof sharedPages
 
 // Used by scripts/cms-migrate-shared.mjs.
@@ -64,10 +66,20 @@ export const buildMigratedSharedRecord = (id: SharedPageId, content: unknown, ve
   (sharedPages[id].buildMigratedRecord as (c: unknown, v: string, n: string) => unknown)(content, version, now)
 
 // Public read path: published snapshot only; inactive items removed.
-export async function getPublishedShared(id: SharedPageId) {
-  const snap = await sharedPages[id].getPublishedSnapshot()
+export async function getPublishedShared(id: SharedPageId, lang: CmsLang = 'en') {
+  const snap = await sharedPages[id].forLocale(lang).getPublishedSnapshot()
   if (!snap) return null
   const c = snap.content as Record<string, unknown>
-  const content = id === 'ctas' ? c : { items: activeOnly(c.items as { active: boolean }[]) }
+  let content = id === 'ctas' ? c : { items: activeOnly(c.items as { active: boolean }[]) }
+  // Global CTAs: the wording is per language, but the contact facts (email,
+  // address, maps link, socials) are entered once — on the Indonesian
+  // record — and used for both languages.
+  if (id === 'ctas' && lang === 'en') {
+    const idSnap = await sharedPages.ctas.forLocale('id').getPublishedSnapshot()
+    if (idSnap && !idSnap.dummy) {
+      const f = idSnap.content as Record<string, unknown>
+      content = { ...c, email: f.email, address: f.address, mapsUrl: f.mapsUrl, socials: f.socials }
+    }
+  }
   return { dummy: snap.dummy, version: snap.version, publishedAt: snap.publishedAt, content }
 }

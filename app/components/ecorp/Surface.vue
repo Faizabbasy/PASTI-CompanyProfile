@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // ENTERPRISE OPERATING SURFACE — the hero visual. A UI-native slice of an
 // e-CORPORATE workspace: navigation rail (workflow, approvals, documents,
 // monitoring, information, people), one internal request moving through its
@@ -58,7 +59,7 @@ const stateOf = (i: number) => (i < active.value ? 'done' : i === active.value ?
   <div
     ref="rootRef"
     role="img"
-    aria-label="Illustration of an e-CORPORATE workspace: an internal request moving from submission to review, approval and record, with roles, documents and process status in one environment."
+    :aria-label="t('Illustration of an e-CORPORATE workspace: an internal request moving from submission to review, approval and record, with roles, documents and process status in one environment.')"
     class="relative"
   >
     <div aria-hidden="true">
@@ -69,7 +70,7 @@ const stateOf = (i: number) => (i < active.value ? 'done' : i === active.value ?
           <span class="flex items-center gap-3">
             <EcorpWordmark surface="dark" class="text-[14px]" />
             <span class="h-3 w-px bg-[color:rgba(255,255,255,0.25)]" />
-            <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.6)]">Workspace</span>
+            <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.6)]">{{ t('Workspace') }}</span>
           </span>
           <span class="es-region flex items-center gap-1.5" :class="region('people')">
             <span v-for="r in ['RQ', 'DH', 'AP']" :key="r" class="grid h-6 w-6 place-items-center rounded-full border border-[color:rgba(255,255,255,0.25)] font-mono text-[9px] text-pureWhite">{{ r }}</span>
@@ -85,7 +86,7 @@ const stateOf = (i: number) => (i < active.value ? 'done' : i === active.value ?
               class="flex items-center gap-2.5 px-4 py-2 font-display text-[12px] font-semibold"
               :class="i === 0 ? 'border-l-2 border-pastiYellow-500 bg-[color:rgba(3,60,89,0.04)] text-slateNavy' : 'border-l-2 border-transparent text-[color:rgba(3,60,89,0.55)]'"
             >
-              <span class="h-1.5 w-1.5" :class="i === 0 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(3,60,89,0.25)]'" />{{ r }}
+              <span class="h-1.5 w-1.5" :class="i === 0 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(3,60,89,0.25)]'" />{{ t(r) }}
             </li>
           </ul>
 
@@ -93,8 +94,8 @@ const stateOf = (i: number) => (i < active.value ? 'done' : i === active.value ?
           <div class="col-span-9 p-5">
             <div class="es-region" :class="region('processes')">
             <div class="flex items-baseline justify-between">
-              <span class="font-display text-[15px] font-bold text-slateNavy">Internal request</span>
-              <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.5)]">Workflow</span>
+              <span class="font-display text-[15px] font-bold text-slateNavy">{{ t('Internal request') }}</span>
+              <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.5)]">{{ t('Workflow') }}</span>
             </div>
 
             <!-- Workflow lane -->
@@ -113,8 +114,8 @@ const stateOf = (i: number) => (i < active.value ? 'done' : i === active.value ?
                   <svg v-if="stateOf(i) === 'done'" viewBox="0 0 16 16" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 8.5l3 3 7-7" /></svg>
                   <span v-else class="font-mono text-[9px]">{{ i + 1 }}</span>
                 </span>
-                <span class="mt-2 font-display text-[12px] font-bold text-slateNavy">{{ s.label }}</span>
-                <span class="mt-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.5)]">{{ s.role }}</span>
+                <span class="mt-2 font-display text-[12px] font-bold text-slateNavy">{{ t(s.label) }}</span>
+                <span class="mt-0.5 font-mono text-[9px] uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.5)]">{{ t(s.role) }}</span>
               </li>
             </ol>
             </div>
@@ -122,21 +123,21 @@ const stateOf = (i: number) => (i < active.value ? 'done' : i === active.value ?
             <div class="es-region mt-6 grid grid-cols-2 gap-3" :class="region('information')">
               <!-- Documents -->
               <div class="border border-[color:rgba(3,60,89,0.1)]">
-                <div class="border-b border-[color:rgba(3,60,89,0.08)] px-3 py-2 font-mono text-[9px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">Documents</div>
+                <div class="border-b border-[color:rgba(3,60,89,0.08)] px-3 py-2 font-mono text-[9px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">{{ t('Documents') }}</div>
                 <ul class="px-3 py-1">
                   <li v-for="d in docs" :key="d" class="flex items-center gap-2 border-b border-[color:rgba(3,60,89,0.06)] py-2 font-display text-[11px] font-semibold text-slateNavy last:border-0">
                     <svg viewBox="0 0 16 16" class="h-3.5 w-3.5 shrink-0 text-[color:rgba(3,60,89,0.45)]" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 1.5h5.5L13 5v9.5H4z M9.5 1.5V5H13" /></svg>
-                    {{ d }}
+                    {{ t(d) }}
                   </li>
                 </ul>
               </div>
               <!-- Monitoring -->
               <div class="border border-[color:rgba(3,60,89,0.1)]">
-                <div class="border-b border-[color:rgba(3,60,89,0.08)] px-3 py-2 font-mono text-[9px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">Monitoring</div>
+                <div class="border-b border-[color:rgba(3,60,89,0.08)] px-3 py-2 font-mono text-[9px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">{{ t('Monitoring') }}</div>
                 <ul class="px-3 py-1">
                   <li v-for="s in status" :key="s.label" class="flex items-center gap-2 border-b border-[color:rgba(3,60,89,0.06)] py-2 font-display text-[11px] font-semibold text-slateNavy last:border-0">
                     <span class="h-2 w-2 shrink-0" :class="s.tone === 'yellow' ? 'bg-pastiYellow-500' : s.tone === 'navy' ? 'bg-slateNavy' : 'border border-slateNavy'" />
-                    {{ s.label }}
+                    {{ t(s.label) }}
                   </li>
                 </ul>
               </div>
@@ -148,12 +149,12 @@ const stateOf = (i: number) => (i < active.value ? 'done' : i === active.value ?
       <!-- Approval prompt (edge-bled overlay, desktop/tablet) -->
       <div class="absolute -bottom-20 -left-6 hidden w-[240px] border border-[color:rgba(3,60,89,0.12)] bg-pureWhite p-4 shadow-[0_30px_60px_-30px_rgba(3,60,89,0.7)] tablet:block desktop:-left-12">
         <div class="flex items-center gap-2 font-mono text-[9px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">
-          <span class="h-1.5 w-1.5 bg-pastiYellow-500" />Approval required
+          <span class="h-1.5 w-1.5 bg-pastiYellow-500" />{{ t('Approval required') }}
         </div>
-        <p class="mt-2 font-display text-[13px] font-bold text-slateNavy">Internal request · Step 3</p>
+        <p class="mt-2 font-display text-[13px] font-bold text-slateNavy">{{ t('Internal request · Step 3') }}</p>
         <div class="mt-3 flex gap-2">
-          <span class="flex-1 bg-slateNavy py-1.5 text-center font-display text-[11px] font-bold text-pureWhite">Approve</span>
-          <span class="flex-1 border border-[color:rgba(3,60,89,0.2)] py-1.5 text-center font-display text-[11px] font-bold text-slateNavy">Review</span>
+          <span class="flex-1 bg-slateNavy py-1.5 text-center font-display text-[11px] font-bold text-pureWhite">{{ t('Approve') }}</span>
+          <span class="flex-1 border border-[color:rgba(3,60,89,0.2)] py-1.5 text-center font-display text-[11px] font-bold text-slateNavy">{{ t('Review') }}</span>
         </div>
       </div>
 
@@ -161,7 +162,7 @@ const stateOf = (i: number) => (i < active.value ? 'done' : i === active.value ?
       <div class="overflow-hidden rounded-[12px] border border-[color:rgba(3,60,89,0.14)] bg-pureWhite tablet:hidden">
         <div class="flex items-center justify-between bg-slateNavy px-4 py-3">
           <EcorpWordmark surface="dark" class="text-[13px]" />
-          <span class="font-mono text-[9px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">Internal request</span>
+          <span class="font-mono text-[9px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">{{ t('Internal request') }}</span>
         </div>
         <ol class="px-4 py-2">
           <li v-for="(s, i) in steps" :key="s.label" class="flex items-center gap-3 border-b border-[color:rgba(3,60,89,0.06)] py-2.5 last:border-0">
@@ -176,8 +177,8 @@ const stateOf = (i: number) => (i < active.value ? 'done' : i === active.value ?
               <svg v-if="stateOf(i) === 'done'" viewBox="0 0 16 16" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 8.5l3 3 7-7" /></svg>
               <span v-else class="font-mono text-[9px]">{{ i + 1 }}</span>
             </span>
-            <span class="flex-1 font-display text-[14px] font-bold text-slateNavy">{{ s.label }}</span>
-            <span class="font-mono text-[9px] uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.5)]">{{ s.role }}</span>
+            <span class="flex-1 font-display text-[14px] font-bold text-slateNavy">{{ t(s.label) }}</span>
+            <span class="font-mono text-[9px] uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.5)]">{{ t(s.role) }}</span>
           </li>
         </ol>
       </div>

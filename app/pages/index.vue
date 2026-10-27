@@ -21,7 +21,7 @@
 // actively used by creative.vue/insights.vue/technology.vue/work.vue —
 // only this homepage usage is removed.
 
-usePageSeo(pageSeo.home)
+usePageSeo(localizedPageSeo('home'))
 // Testimoni reads shared testimonials (CMS when live, else legacy). Home
 // itself stays code-managed — this is shared content, not a Home record.
 await resolveTestimonials()

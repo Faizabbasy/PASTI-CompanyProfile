@@ -5,6 +5,7 @@ import gsap from 'gsap'
 // the studio's loud transition out of the yellow hero. They run in opposite
 // directions and speed up with scroll velocity. Static under reduced motion.
 const names = useCreativePage().services.items.map((s) => s.title)
+const t = useT()
 const rowRefs = ref<HTMLElement[]>([])
 
 useGsapContext(() => {
@@ -28,7 +29,7 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <section aria-label="Creative disciplines" class="relative h-[200px] overflow-hidden bg-pastiYellow-500 tablet:h-[260px]">
+  <section :aria-label="t('Creative disciplines')" class="relative h-[200px] overflow-hidden bg-pastiYellow-500 tablet:h-[260px]">
     <div
       v-for="r in 2"
       :key="r"

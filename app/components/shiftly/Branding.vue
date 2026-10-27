@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+const t = useT()
 
 if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
@@ -38,7 +39,7 @@ useGsapContext(() => {
   <section id="branding" ref="sectionRef" class="surface-light relative overflow-hidden py-24 tablet:py-32" style="--lift-x: 80%; --lift-y: 30%">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Branding suite" meta="Enterprise add-on" />
+      <BaseSectionMark surface="light" :label="t('Branding suite')" :meta="t('Enterprise add-on')" />
       <div class="mt-14 grid gap-14 desktop:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <div class="desktop:col-span-5">
           <ShiftlyHeading :eyebrow="branding.eyebrow" :title="branding.headline" :lede="branding.body" />
@@ -53,8 +54,8 @@ useGsapContext(() => {
 
         <!-- Re-skinnable app shell -->
         <div data-bs-item class="desktop:col-span-7">
-          <div role="radiogroup" aria-label="Preview a corporate identity" class="m-center-row flex flex-wrap items-center gap-2">
-            <span class="mr-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">Preview identity</span>
+          <div role="radiogroup" :aria-label="t('Preview a corporate identity')" class="m-center-row flex flex-wrap items-center gap-2">
+            <span class="mr-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">{{ t('Preview identity') }}</span>
             <button
               v-for="(x, i) in brands"
               :key="x.id"
@@ -66,7 +67,7 @@ useGsapContext(() => {
               @click="brand = i"
             >
               <span class="flex" aria-hidden="true"><span class="h-3.5 w-3.5 rounded-full" :style="{ background: x.primary }" /><span class="-ml-1 h-3.5 w-3.5 rounded-full ring-2 ring-pureWhite" :style="{ background: x.accent }" /></span>
-              {{ x.label }}<span v-if="i > 0" class="sr-only"> example {{ i }}</span>
+              {{ x.label }}<span v-if="i > 0" class="sr-only"> {{ t('example {n}', { n: i }) }}</span>
             </button>
           </div>
 
@@ -105,7 +106,7 @@ useGsapContext(() => {
               </div>
             </div>
           </div>
-          <p class="m-center mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.5)]">Schematic preview — example identities, not client data</p>
+          <p class="m-center mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.5)]">{{ t('Schematic preview — example identities, not client data') }}</p>
         </div>
       </div>
     </BaseContainer>

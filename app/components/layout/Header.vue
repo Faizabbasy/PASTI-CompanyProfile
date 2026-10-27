@@ -45,7 +45,7 @@ const activated = ref(false)
 // treatment even after activation (never the light bordered bar) — a
 // transparent header re-appearing over light sections (Trusted, Insight) is
 // kept legible by the scrim below, not by a filled background.
-const heroIsDark = computed(() => route.path === '/')
+const heroIsDark = computed(() => stripLocale(route.path) === '/')
 
 // Owner revision (2026-09-30): the homepage is now light-dominant, so the
 // transparent homepage bar can't stay white-on-dark. Dark sections carry
@@ -204,6 +204,7 @@ useGsapContext(() => {
     progressTrigger?.kill()
   }
 }, { defer: false })
+const t = useT()
 </script>
 
 <template>
@@ -241,14 +242,16 @@ useGsapContext(() => {
 
         <!-- Grouped bar (2026-10-16): Services / Platforms open a panel
              (LayoutNavGroup); the rest are plain links. -->
-        <nav ref="navRef" aria-label="Main" class="header-nav ml-auto hidden items-center gap-6 pl-6 lg:flex xl:gap-8 wide:gap-11">
+        <nav ref="navRef" :aria-label="t('Main')" class="header-nav ml-auto hidden items-center gap-6 pl-6 lg:flex xl:gap-8 wide:gap-11">
           <template v-for="item in navItems" :key="item.to">
             <LayoutNavGroup v-if="item.children" :item="item" :dark="darkMode" />
             <LayoutNavLink v-else :item="item" :dark="darkMode" />
           </template>
         </nav>
 
-        <div ref="ctaRef" class="ml-6 hidden shrink-0 lg:block wide:ml-10">
+        <LayoutLangSwitch class="ml-5 hidden shrink-0 lg:inline-flex wide:ml-8" :dark="darkMode" />
+
+        <div ref="ctaRef" class="ml-4 hidden shrink-0 lg:block wide:ml-6">
           <div ref="ctaLinkRef" class="inline-block">
             <a
               :href="whatsappLink"
@@ -262,7 +265,8 @@ useGsapContext(() => {
           </div>
         </div>
 
-        <div ref="toggleRef" class="ml-auto lg:hidden">
+        <LayoutLangSwitch class="ml-auto mr-3 lg:hidden" :dark="darkMode" />
+        <div ref="toggleRef" class="lg:hidden">
           <LayoutMenuToggle :open="mobileOpen" :dark="darkMode" @toggle="toggleMobile" />
         </div>
       </div>

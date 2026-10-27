@@ -1,4 +1,5 @@
 import type { InjectionKey } from 'vue'
+import { WORK_PAGE_ID } from '~/i18n/content/workPage'
 import { isSafeLinkUrl } from '#shared/cms/fields'
 import {
   PublicWorkResponseSchema,
@@ -29,7 +30,10 @@ export function buildLegacyWorkContent(): WorkPageContent {
   const { projects, groups } = useWorkPortfolio()
   const { publicCases } = useFeaturedCases()
   const { link: whatsappLink } = useWhatsapp()
-  return {
+  // English base; Indonesian wording overlaid on Indonesian pages
+  // (app/i18n/content/workPage.ts). Projects and cases arrive translated;
+  // filter groups stay English keys (shown through t()).
+  return localize<WorkPageContent>({
     source: 'legacy',
     cmsVersion: null,
     hero: {
@@ -79,8 +83,8 @@ export function buildLegacyWorkContent(): WorkPageContent {
         visuals: approvedVisuals(c).map((v) => ({ src: v.src, alt: v.alt, kind: v.kind }))
       }))
     },
-    seo: { ...pageSeo.work }
-  }
+    seo: { ...localizedPageSeo('work') }
+  }, useLocale() === 'id' ? WORK_PAGE_ID : undefined)
 }
 
 const orUndef = <T>(list: T[]) => (list.length ? list : undefined)
@@ -168,9 +172,13 @@ export function adaptWorkCms(legacy: WorkPageContent, cms: { version: number; co
 // Called once by pages/work.vue.
 export async function resolveWorkPageContent() {
   const legacy = buildLegacyWorkContent()
-  const state = useState<WorkPageContent>(STATE_KEY, () => legacy)
+  const locale = useLocale()
+  const state = useState<WorkPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
 
-  const { data } = await useAsyncData('work-cms-source', async () => {
+  const { data } = await useAsyncData(`work-cms-source-${locale}`, async () => {
+    // The published CMS copy is English for now: Indonesian pages use the
+    // translated code copy until Indonesian CMS records exist.
+    if (locale === 'id') return { status: 'disabled' as const }
     // SSR: skip the call entirely when the server-side flag is off.
     if (import.meta.server && !workCmsEnabledOnServer()) return { status: 'disabled' as const }
     try {
@@ -207,6 +215,6 @@ export function provideWorkPreview(content: WorkPageContent) {
 export function useWorkPage(): WorkPageContent {
   const preview = inject(PREVIEW_KEY, null)
   if (preview) return preview
-  const state = useState<WorkPageContent | undefined>(STATE_KEY)
+  const state = useState<WorkPageContent | undefined>(`${STATE_KEY}-${useLocale()}`)
   return state.value ?? buildLegacyWorkContent()
 }

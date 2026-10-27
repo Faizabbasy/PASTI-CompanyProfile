@@ -10,6 +10,7 @@ if (import.meta.client) {
 // usePlatforms). Two large dark cards; on desktop they tilt toward the
 // pointer and the cover image zooms; both keep the honest "Coming soon" state.
 const { platforms } = usePlatforms()
+const t = useT()
 
 const sectionRef = ref<HTMLElement | null>(null)
 const cardRefs = platforms.map(() => ref<HTMLElement | null>(null))
@@ -41,11 +42,11 @@ useGsapContext(() => {
   <section ref="sectionRef" data-header-theme="dark" class="relative overflow-hidden bg-slateNavy py-24 text-pureWhite tablet:py-32">
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="Platforms" meta="Built by PASTI" />
+      <BaseSectionMark surface="dark" :label="t('Platforms')" :meta="t('Built by PASTI')" />
 
       <div class="m-center mt-14 overflow-hidden pb-2 desktop:mt-20">
         <h2 data-tp-head class="hero-title hero-title--dark">
-          Our own <span class="text-pastiYellow-500">platforms.</span>
+          {{ t('Our own') }} <span class="text-pastiYellow-500">{{ t('platforms.') }}</span>
         </h2>
       </div>
 
@@ -53,7 +54,7 @@ useGsapContext(() => {
         <div v-for="(p, i) in platforms" :key="p.name" :ref="(el) => { cardRefs[i]!.value = el as HTMLElement | null }" style="transform-style: preserve-3d">
           <article data-tp-card class="group/pf relative flex h-full flex-col overflow-hidden rounded-[24px] border border-[color:rgba(255,255,255,0.1)] bg-[linear-gradient(160deg,#033C59_0%,#022436_100%)]">
             <div class="relative aspect-[16/10] overflow-hidden">
-              <img :src="p.image" :alt="`${p.name} platform`" loading="lazy" class="h-full w-full object-cover transition-transform duration-700 ease-editorial group-hover/pf:scale-105">
+              <img :src="p.image" :alt="t('{name} platform', { name: p.name })" loading="lazy" class="h-full w-full object-cover transition-transform duration-700 ease-editorial group-hover/pf:scale-105">
               <span class="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
                 <LayoutBrandMark surface="dark" :height="10" />
                 <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.25)]" />
@@ -67,7 +68,7 @@ useGsapContext(() => {
               <h3 class="mt-3 font-display text-[length:clamp(36px,4vw,60px)] font-extrabold text-pureWhite leading-none tracking-[-0.04em]">{{ p.name }}</h3>
               <p class="mt-4 max-w-[46ch] text-token-body text-[color:rgba(255,255,255,0.7)]">{{ p.positioning }}</p>
               <span v-if="p.comingSoon" class="mt-6 inline-flex w-fit items-center gap-2 rounded-full border border-[color:rgba(255,255,255,0.18)] px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.65)]">
-                <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Coming soon
+                <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ t('Coming soon') }}
               </span>
             </div>
           </article>

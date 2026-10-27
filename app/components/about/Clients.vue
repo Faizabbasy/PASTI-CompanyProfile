@@ -12,6 +12,7 @@ if (import.meta.client) {
 // marquee) and keep their own colours (04-spec §Partner Logo Respect).
 const clients = useClients().clients.filter((c) => c.trusted && c.logo)
 const { company } = useAbout()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 
 const size = (r: number) => {
@@ -39,12 +40,12 @@ useGsapContext(() => {
 <template>
   <section ref="sectionRef" class="relative overflow-hidden bg-pureWhite py-24 tablet:py-32">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Clients" :meta="`${clients.length}+ organizations`" />
+      <BaseSectionMark surface="light" :label="t('Clients')" :meta="t('{n}+ organizations', { n: clients.length })" />
       <div class="mt-14 grid items-end gap-8 desktop:mt-20 desktop:grid-cols-12">
         <div class="m-center desktop:col-span-7">
-          <h2 class="hero-title">Our beloved client<span class="text-pastiYellow-500">.</span></h2>
+          <h2 class="hero-title">{{ t('Our beloved client') }}<span class="text-pastiYellow-500">.</span></h2>
         </div>
-        <ul class="m-center-row flex flex-wrap gap-2 desktop:col-span-5 desktop:justify-end" aria-label="Sectors">
+        <ul class="m-center-row flex flex-wrap gap-2 desktop:col-span-5 desktop:justify-end" :aria-label="t('Sectors')">
           <li v-for="s in company.sectors" :key="s" class="rounded-full px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.65)] ring-1 ring-[color:rgba(3,60,89,0.16)]">{{ s }}</li>
         </ul>
       </div>

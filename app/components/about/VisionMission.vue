@@ -9,6 +9,7 @@ if (import.meta.client) {
 // VISION & MISSION (COMPRO 2025 p.27). Two statements on navy: Vision large,
 // Mission as the supporting paragraph; a yellow rule draws between them.
 const { visionMission: vm } = useAboutPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 
 useGsapContext(() => {
@@ -32,7 +33,7 @@ useGsapContext(() => {
   <section ref="sectionRef" data-header-theme="dark" class="relative overflow-hidden bg-slateNavy py-24 text-pureWhite tablet:py-32">
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="Vision & mission" meta="Why we exist" />
+      <BaseSectionMark surface="dark" :label="t('Vision & mission')" :meta="t('Why we exist')" />
       <div class="mt-14 grid gap-12 desktop:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-7">
           <p data-vm-item class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">

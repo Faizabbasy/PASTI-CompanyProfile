@@ -17,6 +17,7 @@ type Key = DoraField['key']
 const props = withDefaults(defineProps<{ step: VerifyStep; active?: Key | null; compact?: boolean }>(), { active: null, compact: false })
 const emit = defineEmits<{ select: [key: Key]; decide: [] }>()
 const { sample } = useDoraPage()
+const t = useT()
 
 const reviewKey = sample.fields.find((f) => f.review)?.key ?? null
 const edits = reactive<Partial<Record<Key, string>>>({})
@@ -24,7 +25,7 @@ const shown = (f: DoraField) => edits[f.key] ?? (props.step >= 3 ? f.value : f.o
 const flag = computed(() => (props.step === 2 ? reviewKey : null))
 const marker = computed<Key | null>(() => (props.step <= 0 ? null : props.active ?? (props.step >= 2 && props.step < 4 ? reviewKey : null)))
 const verified = computed(() => props.step >= 4)
-const statusLabel = computed(() => (props.step < 0 ? 'Recognising…' : verified.value ? 'Verified' : 'Waiting verification'))
+const statusLabel = computed(() => t(props.step < 0 ? 'Recognising…' : verified.value ? 'Verified' : 'Waiting verification'))
 const uid = useId()
 </script>
 
@@ -52,10 +53,10 @@ const uid = useId()
 
       <!-- Panel -->
       <div class="border-[color:rgba(255,255,255,0.08)] p-4 max-tablet:border-t" :class="compact ? 'tablet:border-l' : 'max-desktop:border-t desktop:border-l'">
-        <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">Document type</p>
+        <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">{{ t('Document type') }}</p>
         <p class="mt-1.5 flex items-center justify-between rounded-[10px] bg-[color:rgba(255,255,255,0.06)] px-3 py-2 font-display text-[13.5px] font-semibold">
-          <span>{{ step < 0 ? 'Detecting…' : sample.type }}</span>
-          <span class="font-mono text-[9.5px] uppercase tracking-[0.12em] text-[color:rgba(255,255,255,0.5)]">{{ step < 0 ? '' : 'Auto-detected' }}</span>
+          <span>{{ step < 0 ? t('Detecting…') : t(sample.type) }}</span>
+          <span class="font-mono text-[9.5px] uppercase tracking-[0.12em] text-[color:rgba(255,255,255,0.5)]">{{ step < 0 ? '' : t('Auto-detected') }}</span>
         </p>
 
         <ul class="mt-4 grid gap-2.5">
@@ -88,11 +89,11 @@ const uid = useId()
                   <span class="font-display text-[13px] font-bold">{{ f.label }}</span>
                   <span v-if="f.review && step === 2" class="inline-flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-[#FF8A73]">
                     <svg viewBox="0 0 12 12" class="h-3 w-3" aria-hidden="true"><path d="M6 1 11 10.5H1z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" /><path d="M6 4.6v2.6M6 8.6v.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
-                    Needs review · {{ f.conf }}%
+                    {{ t('Needs review') }} · {{ f.conf }}%
                   </span>
                   <span v-else-if="f.review && step >= 3" class="inline-flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-[0.1em] text-pastiYellow-400">
                     <svg viewBox="0 0 12 12" class="h-3 w-3" aria-hidden="true"><path d="M2.5 6.2 5 8.6l4.6-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                    Corrected
+                    {{ t('Corrected') }}
                   </span>
                   <span v-else class="inline-flex items-center gap-1.5 font-mono text-[10px] tabular-nums text-[color:rgba(255,255,255,0.7)]">
                     <span aria-hidden="true" class="relative block h-1 w-8 overflow-hidden rounded-full bg-[color:rgba(255,255,255,0.12)]"><span class="absolute inset-y-0 left-0 rounded-full bg-doraCyan" :style="{ width: `${f.conf}%` }" /></span>
@@ -104,7 +105,7 @@ const uid = useId()
 
               <!-- Field under review: editable from step 2 (full mode). -->
               <div v-if="!compact && f.review && step >= 2" class="-mt-1 px-3 pb-3">
-                <label :for="`${uid}-${f.key}`" class="sr-only">{{ f.label }} — correct the value</label>
+                <label :for="`${uid}-${f.key}`" class="sr-only">{{ f.label }} — {{ t('correct the value') }}</label>
                 <input
                   :id="`${uid}-${f.key}`"
                   :value="shown(f)"
@@ -131,9 +132,9 @@ const uid = useId()
             @click="emit('decide')"
           >
             <svg v-if="verified" viewBox="0 0 12 12" class="h-3.5 w-3.5" aria-hidden="true"><path d="M2.5 6.2 5 8.6l4.6-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            {{ verified ? 'Verified' : 'Complete verification' }}
+            {{ verified ? t('Verified') : t('Complete verification') }}
           </button>
-          <span class="inline-flex min-h-10 items-center rounded-full px-4 font-display text-[13px] font-semibold text-[color:rgba(255,255,255,0.55)] ring-1 ring-[color:rgba(255,255,255,0.14)]">Reject</span>
+          <span class="inline-flex min-h-10 items-center rounded-full px-4 font-display text-[13px] font-semibold text-[color:rgba(255,255,255,0.55)] ring-1 ring-[color:rgba(255,255,255,0.14)]">{{ t('Reject') }}</span>
         </div>
       </div>
     </div>

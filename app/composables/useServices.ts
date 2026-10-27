@@ -1,3 +1,4 @@
+import { SERVICES_ID } from '~/i18n/content/services'
 export interface Service {
   index: string
   title: string
@@ -23,7 +24,7 @@ export interface Service {
  */
 // COMPRO 2025 enrichment (2026-10-07): bodies of rows 02, 03 and 05 condensed
 // from the company profile's service pages (p.31, p.32, p.33).
-export function useServices() {
+function servicesData() {
   const services: Service[] = [
     {
       index: '01',
@@ -63,4 +64,10 @@ export function useServices() {
   ]
 
   return { services }
+}
+
+export type ServicesData = ReturnType<typeof servicesData>
+
+export function useServices() {
+  return localize(servicesData(), useLocale() === 'id' ? SERVICES_ID : undefined)
 }

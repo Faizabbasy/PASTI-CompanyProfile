@@ -1,3 +1,5 @@
+import { CONTACT_ID } from '~/i18n/content/contact'
+
 /**
  * /contact content (2026-10-16). Composed entirely from data that already
  * exists — no new contact facts:
@@ -14,7 +16,7 @@
  * The form hands off to WhatsApp (owner decision 2026-10-16) — there is no
  * form backend.
  */
-export function useContact() {
+function contactData() {
   const { contact, socials, platformLinks } = useFooter()
   const { eyebrowLine, headingLine } = useFinalCta()
   const { link: whatsappLink, phone } = useWhatsapp()
@@ -40,4 +42,15 @@ export function useContact() {
     whatsappLink,
     phone
   }
+}
+
+export type ContactData = ReturnType<typeof contactData>
+
+// Indonesian overlay on Indonesian pages (app/i18n/content/contact.ts). The
+// "Other" chip is translated here (the other chips are service / platform
+// names, translated at their source).
+export function useContact() {
+  const locale = useLocale()
+  const data = localize(contactData(), locale === 'id' ? CONTACT_ID : undefined)
+  return { ...data, needs: data.needs.map((n) => (n === 'Other' ? translate('Other', locale) : n)) }
 }

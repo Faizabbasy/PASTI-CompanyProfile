@@ -30,16 +30,25 @@ async function publishedAt(id: string): Promise<string | null> {
 
 export default defineEventHandler(async (event) => {
   const base = useRuntimeConfig(event).public.siteUrl.replace(/\/+$/, '')
+  // Every page in both languages (Indonesian at /…, English at /en/…), each
+  // entry listing its alternates so search engines pair them.
+  const enPath = (p: string) => (p === '/' ? '/en' : `/en${p}`)
   const rows = await Promise.all(
     routes.map(async (r) => {
       const lastmod = r.cms ? await publishedAt(r.cms) : null
-      return `  <url><loc>${base}${r.path}</loc>${lastmod ? `<lastmod>${lastmod}</lastmod>` : ''}</url>`
+      const alts = [
+        `<xhtml:link rel="alternate" hreflang="id" href="${base}${r.path}"/>`,
+        `<xhtml:link rel="alternate" hreflang="en" href="${base}${enPath(r.path)}"/>`,
+        `<xhtml:link rel="alternate" hreflang="x-default" href="${base}${r.path}"/>`
+      ].join('')
+      const lm = lastmod ? `<lastmod>${lastmod}</lastmod>` : ''
+      return [`  <url><loc>${base}${r.path}</loc>${lm}${alts}</url>`, `  <url><loc>${base}${enPath(r.path)}</loc>${lm}${alts}</url>`].join('\n')
     })
   )
 
   setHeader(event, 'content-type', 'application/xml; charset=utf-8')
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${rows.join('\n')}
 </urlset>
 `

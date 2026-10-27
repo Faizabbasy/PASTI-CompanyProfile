@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
+const t = useT()
 
 // CAPABILITY AREAS — the brief's eight TEMPORARY capability areas (not
 // confirmed fixed modules; flagged `temporary` in useEcorporate and said so
@@ -45,7 +46,7 @@ useGsapContext(() => {
     <BaseGridLines tone="light" />
     <EcorpMarks label="05 / 12 · Indicative capability areas" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Capability areas" meta="05 / 12" />
+      <BaseSectionMark surface="light" :label="t('Capability areas')" meta="05 / 12" />
       <div class="mt-12 grid gap-6 desktop:grid-cols-12 desktop:items-end">
         <EcorpHeading class="desktop:col-span-8" eyebrow="Capability areas" before="What the environment " mark="brings together" />
         <p class="m-center max-w-[22rem] font-mono text-[11px] uppercase leading-relaxed tracking-[0.14em] text-[color:rgba(3,60,89,0.55)] desktop:col-span-4 desktop:justify-self-end desktop:text-right">{{ capabilityNote }}</p>

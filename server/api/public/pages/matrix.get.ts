@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   let page: Awaited<ReturnType<typeof getPublishedMatrix>>
   try {
-    page = await getPublishedMatrix()
+    page = await getPublishedMatrix(cmsLang(event))
   } catch (err) {
     console.error('[cms] public MATRIX read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

@@ -35,8 +35,8 @@ export const setAboutStatus = about.setStatus
 
 // Public read path: inactive items removed. `proof` is dropped unless
 // explicitly allowed (claims stay code-managed by default).
-export async function getPublishedAbout(opts: { includeProof: boolean }) {
-  const snap = await about.getPublishedSnapshot()
+export async function getPublishedAbout(opts: { includeProof: boolean }, lang: CmsLang = 'en') {
+  const snap = await about.forLocale(lang).getPublishedSnapshot()
   if (!snap) return null
   const c = snap.content
   const { proof, ...rest } = c
@@ -54,3 +54,6 @@ export async function getPublishedAbout(opts: { includeProof: boolean }) {
     }
   }
 }
+
+// Bilingual CMS: the record for one language (English = the original record).
+export const aboutFor = (lang: CmsLang) => about.forLocale(lang)

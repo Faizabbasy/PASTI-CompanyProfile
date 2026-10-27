@@ -1,3 +1,4 @@
+import { WHO_WE_ARE_ID } from '~/i18n/content/whoWeAre'
 export interface WhoWeArePortrait {
   src: string
   alt: string
@@ -26,7 +27,7 @@ export interface WhoWeAreStat {
  * Portraits (who-01..03) and the Trusted Partner cutout (work-with-us) are
  * cropped from the owner's reference images (2026-09-30).
  */
-export function useWhoWeAre() {
+function whoWeAreData() {
   const eyebrow = 'Who We Are'
   // `highlight` is rendered on the PASTI Yellow marker bar.
   const heading = { before: 'Trusted', highlight: '100%', after: 'by many people, gradually.' }
@@ -63,4 +64,10 @@ export function useWhoWeAre() {
   const cta = { label: "Let's Work" }
 
   return { eyebrow, heading, body, facts, portraits, clientStat, partner, cta }
+}
+
+export type WhoWeAreData = ReturnType<typeof whoWeAreData>
+
+export function useWhoWeAre() {
+  return localize(whoWeAreData(), useLocale() === 'id' ? WHO_WE_ARE_ID : undefined)
 }

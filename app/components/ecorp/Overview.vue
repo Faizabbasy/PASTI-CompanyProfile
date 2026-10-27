@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // PLATFORM OVERVIEW — "a digital operating foundation, not a single workflow
 // tool". An interactive system diagram of the brief's core relationship
 // (People ↔ Processes ↔ Information ↔ Workflow ↔ Monitoring ↔ Integration):
@@ -31,7 +32,7 @@ void tabRefs
     <BaseGridLines tone="light" />
     <EcorpMarks label="03 / 12 · System map" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Platform overview" meta="03 / 12" />
+      <BaseSectionMark surface="light" :label="t('Platform overview')" meta="03 / 12" />
 
       <div class="mt-12 grid gap-8 desktop:grid-cols-12 desktop:items-end">
         <EcorpHeading class="desktop:col-span-7" eyebrow="Platform overview" before="A digital operating " mark="foundation" />
@@ -43,8 +44,8 @@ void tabRefs
         <!-- Diagram (desktop) -->
         <div class="relative hidden desktop:col-span-7 desktop:block">
           <div class="ec-dots relative border border-[color:rgba(3,60,89,0.12)] bg-pureWhite p-8">
-            <span class="absolute left-4 top-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.45)]">System map</span>
-            <div role="tablist" aria-label="e-CORPORATE platform elements" class="relative grid grid-cols-3 gap-x-10 gap-y-[120px] pt-6" @keydown="onKey">
+            <span class="absolute left-4 top-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.45)]">{{ t('System map') }}</span>
+            <div role="tablist" :aria-label="t('e-CORPORATE platform elements')" class="relative grid grid-cols-3 gap-x-10 gap-y-[120px] pt-6" @keydown="onKey">
               <!-- Horizontal chain links -->
               <span aria-hidden="true" class="absolute left-[16%] right-[16%] top-[calc(1.5rem+28px)] h-px bg-[color:rgba(3,60,89,0.16)]" />
               <span aria-hidden="true" class="absolute bottom-[28px] left-[16%] right-[16%] h-px bg-[color:rgba(3,60,89,0.16)]" />
@@ -73,14 +74,14 @@ void tabRefs
               <!-- Foundation bus -->
               <div aria-hidden="true" class="absolute inset-x-0 top-1/2 flex h-[30px] -translate-y-[calc(50%-14px)] items-center justify-center overflow-hidden bg-slateNavy">
                 <span class="eo-signal absolute left-0 top-1/2 h-[3px] w-16 -translate-y-1/2 bg-gradient-to-r from-transparent to-pastiYellow-500" />
-                <EcorpWordmark surface="dark" class="text-[13px]" /><span class="ml-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.6)]">Operating foundation</span>
+                <EcorpWordmark surface="dark" class="text-[13px]" /><span class="ml-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.6)]">{{ t('Operating foundation') }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Tabs (below desktop) -->
-        <div role="tablist" aria-label="e-CORPORATE platform elements" class="grid grid-cols-2 gap-2 tablet:grid-cols-3 desktop:hidden" @keydown="onKey">
+        <div role="tablist" :aria-label="t('e-CORPORATE platform elements')" class="grid grid-cols-2 gap-2 tablet:grid-cols-3 desktop:hidden" @keydown="onKey">
           <button
             v-for="(n, i) in nodes"
             :key="n.id"
@@ -103,11 +104,11 @@ void tabRefs
           <h3 class="mt-3 font-display text-[32px] font-extrabold leading-[1.05] tracking-[-0.03em] text-slateNavy tablet:text-[40px]">{{ current.title }}</h3>
           <p class="mt-4 max-w-[26rem] text-[16px] leading-relaxed text-[color:rgba(3,60,89,0.76)]">{{ current.body }}</p>
           <p class="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 font-mono text-[11px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">
-            <span>Connected to</span>
+            <span>{{ t('Connected to') }}</span>
             <template v-for="(n, i) in nodes" :key="n.id">
               <span v-if="isNeighbour(i)" class="border-b-2 border-pastiYellow-500 pb-0.5 text-slateNavy">{{ n.title }}</span>
             </template>
-            <span class="text-slateNavy">· Foundation</span>
+            <span class="text-slateNavy">· {{ t('Foundation') }}</span>
           </p>
         </div>
       </div>

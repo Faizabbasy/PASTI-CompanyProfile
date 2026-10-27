@@ -13,6 +13,7 @@ if (import.meta.client) {
 // The rings lean toward the pointer on desktop. Proof numbers (owner-verified,
 // shared with the homepage) count up beside it.
 const { positioning, stats, coreEmotion } = useAboutPage().venn
+const t = useT()
 
 const sectionRef = ref<HTMLElement | null>(null)
 const svgRef = ref<SVGSVGElement | null>(null)
@@ -77,7 +78,7 @@ useGsapContext(() => {
   <section ref="sectionRef" data-header-theme="dark" class="relative overflow-hidden bg-slateNavy py-24 text-pureWhite tablet:py-32">
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="Positioning" meta="Technology × Creative" />
+      <BaseSectionMark surface="dark" :label="t('Positioning')" :meta="t('Technology × Creative')" />
 
       <div class="mt-14 grid items-center gap-14 desktop:mt-20 desktop:grid-cols-12 desktop:gap-8">
         <!-- Diagram -->
@@ -94,8 +95,8 @@ useGsapContext(() => {
               <circle data-vn-b cx="355" cy="200" :r="R" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="1.5" />
               <circle data-vn-a cx="245" cy="200" :r="R + 18" fill="none" stroke="rgba(255,255,255,0.12)" stroke-dasharray="2 8" />
               <circle data-vn-b cx="355" cy="200" :r="R + 18" fill="none" stroke="rgba(255,255,255,0.12)" stroke-dasharray="2 8" />
-              <text data-vn-label x="95" y="40" fill="#fff" font-size="15" font-weight="700" letter-spacing="0.2em" font-family="var(--font-mono)">TECHNOLOGY</text>
-              <text data-vn-label x="505" y="40" text-anchor="end" fill="#fff" font-size="15" font-weight="700" letter-spacing="0.2em" font-family="var(--font-mono)">CREATIVE</text>
+              <text data-vn-label x="95" y="40" fill="#fff" font-size="15" font-weight="700" letter-spacing="0.2em" font-family="var(--font-mono)">{{ t('TECHNOLOGY') }}</text>
+              <text data-vn-label x="505" y="40" text-anchor="end" fill="#fff" font-size="15" font-weight="700" letter-spacing="0.2em" font-family="var(--font-mono)">{{ t('CREATIVE') }}</text>
             </svg>
             <!-- PASTI mark in the intersection -->
             <div data-vn-mark class="pointer-events-none absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 place-items-center">
@@ -108,12 +109,12 @@ useGsapContext(() => {
 
         <!-- Copy + proof -->
         <div class="m-center desktop:col-span-5">
-          <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.55)]">Where PASTI sits</p>
+          <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.55)]">{{ t('Where PASTI sits') }}</p>
           <h2 class="hero-title hero-title--dark mt-4">
             {{ positioning.split('×')[0] }}<span class="text-pastiYellow-500">×</span>{{ positioning.split('×')[1] }}
           </h2>
           <p class="mt-5 max-w-[44ch] text-token-body text-[color:rgba(255,255,255,0.7)]">
-            Never only a software house, never only a creative agency, never only a consultancy — PASTI sits between technology, product, creative and business execution.
+            {{ t('Never only a software house, never only a creative agency, never only a consultancy — PASTI sits between technology, product, creative and business execution.') }}
           </p>
 
           <dl class="mt-10 grid grid-cols-2 gap-6 border-t border-[color:rgba(255,255,255,0.14)] pt-8">
@@ -126,7 +127,7 @@ useGsapContext(() => {
           </dl>
 
           <p class="m-center-row mt-8 flex flex-wrap items-center gap-x-3 gap-y-2 font-display text-[15px] font-semibold text-[color:rgba(255,255,255,0.75)]">
-            <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.45)]">Core emotion</span>
+            <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.45)]">{{ t('Core emotion') }}</span>
             <template v-for="(e, i) in coreEmotion" :key="e">
               <span v-if="i" aria-hidden="true" class="text-pastiYellow-500">+</span>{{ e }}
             </template>

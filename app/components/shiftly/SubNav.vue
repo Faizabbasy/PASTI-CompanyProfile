@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+const t = useT()
 
 // Compact SHIFTLY sub-navigation (Overview · Modules · Enterprise · Devices
 // · Pricing · Demo). Not a second navbar: a slim bar docked bottom-centre on
@@ -32,7 +33,7 @@ onBeforeUnmount(() => st?.kill())
 
 <template>
   <nav
-    aria-label="SHIFTLY page sections"
+    :aria-label="t('SHIFTLY page sections')"
     class="fixed bottom-6 left-1/2 z-40 hidden -translate-x-1/2 transition-[opacity,transform] duration-500 ease-editorial desktop:block"
     :class="visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-6 opacity-0'"
     :inert="!visible || undefined"
@@ -52,7 +53,7 @@ onBeforeUnmount(() => st?.kill())
         <span aria-hidden="true" class="absolute inset-x-3 bottom-1.5 h-[2px] origin-left bg-pastiYellow-500 transition-transform duration-300" :class="active === it.id ? 'scale-x-100' : 'scale-x-0'" />
       </button>
       <button type="button" class="h-11 bg-pastiYellow-500 px-5 font-display text-[13px] font-bold text-slateNavy focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-slateNavy" @click="scrollTo('demo')">
-        Demo
+        {{ t('Demo') }}
       </button>
     </div>
   </nav>

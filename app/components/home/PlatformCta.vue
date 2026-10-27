@@ -13,24 +13,26 @@ const RouterLink = resolveComponent('NuxtLink')
 // visible, not just dimmed.
 defineProps<{ platform: Platform }>()
 const { setState } = useCustomCursor()
+const t = useT()
+const lp = useLocalePath()
 </script>
 
 <template>
   <component
     :is="platform.comingSoon ? 'span' : RouterLink"
-    :to="platform.comingSoon ? undefined : platform.to"
+    :to="platform.comingSoon ? undefined : lp(platform.to)"
     :aria-disabled="platform.comingSoon ? 'true' : undefined"
-    :title="platform.comingSoon ? `${platform.name} — coming soon` : undefined"
+    :title="platform.comingSoon ? `${platform.name} — ${t('coming soon')}` : undefined"
     class="group/cta relative inline-flex items-center gap-3 pb-1.5 font-display text-token-metadata font-semibold uppercase tracking-[0.08em]"
     :class="platform.comingSoon ? 'cursor-default text-[color:rgba(255,255,255,0.6)]' : 'text-cobalt'"
     @mouseenter="platform.comingSoon ? undefined : setState('link')"
     @mouseleave="setState('default')"
   >
-    <span>Explore {{ platform.name }}</span>
+    <span>{{ t('Explore {name}', { name: platform.name }) }}</span>
     <span
       v-if="platform.comingSoon"
       class="rounded-token-sm border border-[color:rgba(255,255,255,0.18)] px-2 py-0.5 text-[10px] tracking-[0.1em] text-[color:rgba(255,255,255,0.75)]"
-      >Coming soon</span
+      >{{ t('Coming soon') }}</span
     >
     <span
       v-else

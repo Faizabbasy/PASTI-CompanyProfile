@@ -7,6 +7,7 @@ import gsap from 'gsap'
 // scroll, then it eases back — the page "feels" the scroll. Static rows
 // under reduced motion.
 const names = useTechnologyPage().capabilities.items.map((s) => s.title)
+const t = useT()
 
 const rowRefs = ref<HTMLElement[]>([])
 
@@ -43,7 +44,7 @@ useGsapContext(() => {
 </script>
 
 <template>
-  <section data-header-theme="dark" aria-label="Technology capabilities" class="relative overflow-hidden border-y border-[color:rgba(255,255,255,0.08)] bg-slateNavy py-10 tablet:py-14">
+  <section data-header-theme="dark" :aria-label="t('Technology capabilities')" class="relative overflow-hidden border-y border-[color:rgba(255,255,255,0.08)] bg-slateNavy py-10 tablet:py-14">
     <div v-for="r in 2" :key="r" class="overflow-hidden" :class="r === 2 ? 'mt-2 tablet:mt-4' : ''">
       <div :ref="(el) => { if (el) rowRefs[r - 1] = el as HTMLElement }" class="flex w-max items-center will-change-transform">
         <template v-for="copy in 2" :key="copy">

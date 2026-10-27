@@ -11,6 +11,7 @@ type FaqForm = { items: Keyed<FaqsContent['items'][number]>[] }
 const TABS = [{ key: 'items', label: 'Pertanyaan', sections: ['items'] }] as const
 const toPayload = (f: FaqForm) => ({ items: unkeyed(f.items) })
 
+const lang = useEditorLang()
 const {
   loadStatus, loadError, refresh, form, state, dirty, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, publishedIds, canPublish, canUnpublish, canArchive, publishDisabledReason
@@ -18,6 +19,7 @@ const {
   name: 'FAQs',
   endpoint: '/api/admin/shared/faqs',
   asyncKey: 'admin-shared-faqs',
+  lang,
   tabs: TABS,
   toForm: (c) => ({ items: keyed((JSON.parse(JSON.stringify(c)) as FaqsContent).items) }),
   toPayload,
@@ -37,6 +39,7 @@ function addFaq() {
     name="FAQs"
     where="Homepage, bagian “FAQ” (dekat bagian bawah): daftar pertanyaan bernomor di kanan; pertanyaan yang dibuka tampil besar dengan nomornya di kiri (desktop)."
     flag="NUXT_CMS_FAQS_PUBLIC_ENABLED"
+    :lang="lang"
     :dummy="state?.dummy !== false"
     :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
     :code-managed="[
@@ -56,7 +59,7 @@ function addFaq() {
         :state="state"
         :dirty="dirty"
         :busy="busy"
-        preview-href="/admin/preview/faqs"
+        :preview-href="`/admin/preview/faqs?lang=${lang}`"
         :can-publish="canPublish"
         :can-unpublish="canUnpublish"
         :can-archive="canArchive"

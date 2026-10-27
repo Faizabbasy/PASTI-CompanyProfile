@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   let contact: Awaited<ReturnType<typeof getPublishedContact>>
   try {
-    contact = await getPublishedContact()
+    contact = await getPublishedContact(cmsLang(event))
   } catch (err) {
     console.error('[cms] public Contact read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

@@ -37,7 +37,9 @@ interface HeroSlide {
   /** Longer lines → one step smaller title. */
   compact?: boolean
 }
-const slides: HeroSlide[] = [
+const t = useT()
+const lp = useLocalePath()
+const SLIDES_EN: HeroSlide[] = [
   {
     // Boss feedback 2026-10-06: the "agency in Indonesia." line ran too long.
     // Re-balanced into three even lines, set flush-left (no staircase).
@@ -51,6 +53,21 @@ const slides: HeroSlide[] = [
     body: 'We build technology and creative solutions for businesses ready to move forward.'
   }
 ]
+// Indonesian title lines keep the same rhythm: three short lines, the FCP
+// marker word, the yellow full stop on the last line.
+const SLIDES_ID: HeroSlide[] = [
+  {
+    lines: ['Agensi teknologi', 'FCP pertama', 'di Indonesia.'],
+    highlight: 'FCP',
+    body: 'Agensi teknologi pertama di Indonesia yang berfokus pada Framework Code Product (FCP). Kami membangun fondasi teknologi yang dapat disesuaikan dengan bisnis, proses, dan ekosistem Anda.',
+    compact: true
+  },
+  {
+    lines: ['Teknologi.', 'Kreativitas.', 'Dampak.'],
+    body: 'Kami membangun solusi teknologi dan kreatif untuk bisnis yang siap melangkah maju.'
+  }
+]
+const slides: HeroSlide[] = useLocale() === 'id' ? SLIDES_ID : SLIDES_EN
 const SLIDE_MS = 6000
 const pad2 = (n: number) => String(n).padStart(2, '0')
 
@@ -65,17 +82,17 @@ function lineParts(line: string, highlight?: string) {
 
 const activeSlide = ref(0)
 const leavingSlide = ref(-1)
-const ctaPrimary = { label: 'Explore our work' }
-const ctaSecondary = { label: 'Tell us about it' }
+const ctaPrimary = { label: t('Explore our work') }
+const ctaSecondary = { label: t('Tell us about it') }
 // Owner-supplied hero furniture (reference comp, 2026-10-01). The service
 // list reuses the real titles from useServices() — no invented offers.
-const partnerCard = { label: 'Your Partner in', strong: 'Digital Transformation', to: '/about' }
-const ringTag = { from: 'Ideas', to: 'Real Solutions' }
-const sideNote = 'Innovation drives real business growth.'
+const partnerCard = { label: t('Your Partner in'), strong: t('Digital Transformation'), to: lp('/about') }
+const ringTag = { from: t('Ideas'), to: t('Real Solutions') }
+const sideNote = t('Innovation drives real business growth.')
 const { services } = useServices()
 const heroServices = services.slice(0, 4).map((s) => ({
   title: s.title,
-  to: s.category === 'creative' ? '/creative' : '/technology'
+  to: lp(s.category === 'creative' ? '/creative' : '/technology')
 }))
 
 const { projects } = useSelectedWork()
@@ -593,7 +610,7 @@ useGsapContext(() => {
                 :key="i"
                 type="button"
                 class="group/seg relative grid h-8 w-10 place-items-center"
-                :aria-label="`Show slide ${i + 1}`"
+                :aria-label="t('Show slide {n}', { n: i + 1 })"
                 :aria-current="i === activeSlide ? 'true' : undefined"
                 @click="goToSlide(i)"
               >
@@ -802,7 +819,7 @@ useGsapContext(() => {
         >
           <div class="container-page">
             <p class="flex items-center gap-4 font-display text-[length:clamp(36px,4.2vw,68px)] font-bold leading-[0.95] tracking-[-0.035em] text-slateNavy">
-              <span>Success Project<span class="text-pastiYellow-500">.</span></span>
+              <span>{{ t('Success Project') }}<span class="text-pastiYellow-500">.</span></span>
               <span aria-hidden="true" class="mt-[0.35em] hidden h-px flex-1 bg-[color:rgba(3,60,89,0.16)] md:block" />
               <LayoutBrandMark surface="light" :height="14" class="mt-[0.3em] hidden md:inline-block" />
             </p>

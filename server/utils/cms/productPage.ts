@@ -25,8 +25,8 @@ export function defineProductPage<Id extends string, C extends AnyProductContent
 
   // Public read path: published snapshot only, copied through the field map
   // so nothing outside the public contract can leak through.
-  async function getPublished() {
-    const snap = await page.getPublishedSnapshot()
+  async function getPublished(lang: CmsLang = 'en') {
+    const snap = await page.forLocale(lang).getPublishedSnapshot()
     if (!snap) return null
     const c = snap.content as unknown as Record<string, unknown> & { seo: AnyProductContent['seo'] }
     const s = c.seo

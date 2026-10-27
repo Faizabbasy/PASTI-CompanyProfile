@@ -15,6 +15,8 @@ if (import.meta.client) {
 // drawn illustration (CreativeCapArt) instead of project posters, plus the
 // sentence's key terms and "Related work" where COMPRO has a matching case.
 const { sectionLabel, eyebrow: servicesEyebrow, title: servicesHeading, items: services } = useCreativePage().services
+const t = useT()
+const lp = useLocalePath()
 const active = ref(0)
 const sectionRef = ref<HTMLElement | null>(null)
 const cardRefs = ref<HTMLElement[]>([])
@@ -59,7 +61,7 @@ useGsapContext(() => {
 <template>
   <section id="creative-services" ref="sectionRef" class="surface-light relative py-24 tablet:py-32" style="--lift-x: 10%; --lift-y: 10%">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" :label="sectionLabel" :meta="`${pad(services.length)} disciplines`" />
+      <BaseSectionMark surface="light" :label="sectionLabel" :meta="t('{n} disciplines', { n: pad(services.length) })" />
 
       <div class="mt-14 grid gap-12 desktop:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <!-- Sticky index -->
@@ -115,12 +117,12 @@ useGsapContext(() => {
               <h3 class="font-display text-[length:clamp(26px,2.6vw,38px)] font-extrabold leading-[1.05] tracking-[-0.03em] text-slateNavy">{{ s.title }}</h3>
               <div>
                 <p class="text-token-body text-[color:rgba(3,60,89,0.72)]">{{ s.body }}</p>
-                <ul class="m-center-row mt-4 flex flex-wrap gap-1.5" :aria-label="`${s.title} — key areas`">
+                <ul class="m-center-row mt-4 flex flex-wrap gap-1.5" :aria-label="t('{title} — key areas', { title: s.title })">
                   <li v-for="k in s.keywords" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)]">{{ k }}</li>
                 </ul>
                 <div v-if="s.related.length" class="m-center-row mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
-                  <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">Related work</span>
-                  <NuxtLink v-for="w in s.related" :key="w.label" :to="w.to ?? '#'" class="inline-flex min-h-11 items-center text-[14px] font-semibold text-slateNavy underline decoration-pastiYellow-500 decoration-2 underline-offset-4 hover:decoration-slateNavy">{{ w.label }} <span aria-hidden="true" class="ml-1">↗</span></NuxtLink>
+                  <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">{{ t('Related work') }}</span>
+                  <NuxtLink v-for="w in s.related" :key="w.label" :to="lp(w.to ?? '#')" class="inline-flex min-h-11 items-center text-[14px] font-semibold text-slateNavy underline decoration-pastiYellow-500 decoration-2 underline-offset-4 hover:decoration-slateNavy">{{ w.label }} <span aria-hidden="true" class="ml-1">↗</span></NuxtLink>
                 </div>
               </div>
             </div>

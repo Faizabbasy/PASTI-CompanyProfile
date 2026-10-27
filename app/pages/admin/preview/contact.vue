@@ -24,8 +24,8 @@ interface PreviewResponse {
 }
 
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData('admin-contact-preview', () =>
-  cmsFetch<PreviewResponse>('/api/admin/pages/contact/preview')
+const { data, error, refresh, status } = await useAsyncData(`admin-contact-preview-${useEditorLang()}`, () =>
+  cmsFetch<PreviewResponse>('/api/admin/pages/contact/preview', { query: { lang: useEditorLang() } })
 )
 
 const legacy = buildLegacyContactContent()

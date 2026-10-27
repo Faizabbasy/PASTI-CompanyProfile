@@ -5,6 +5,7 @@
 // rack with three levels (one model, not three modules). Below, the conceptual
 // work cycle and the control principle about inspection and availability.
 const { layers } = useMatrixPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
 useMatrixReveal(sectionRef)
@@ -27,7 +28,7 @@ useMatrixReveal(sectionRef)
           <li v-for="(l, i) in layers.items" :key="i" class="relative">
             <div data-fr class="grid gap-5 rounded-t-[14px] p-5 tablet:p-7 desktop:grid-cols-12 desktop:items-end desktop:gap-8" :class="i === 1 ? 'bg-slateNavy text-pureWhite' : 'bg-pureWhite text-slateNavy'">
               <div class="desktop:col-span-4">
-                <p class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em]" :class="i === 1 ? 'text-pastiYellow-400' : 'text-[color:rgba(3,60,89,0.5)]'">Level {{ pad(i + 1) }}</p>
+                <p class="font-mono text-[11px] font-semibold uppercase tracking-[0.14em]" :class="i === 1 ? 'text-pastiYellow-400' : 'text-[color:rgba(3,60,89,0.5)]'">{{ t('Level') }} {{ pad(i + 1) }}</p>
                 <h3 class="mt-1 font-display text-[26px] font-extrabold leading-tight tracking-[-0.02em]" :class="i === 1 ? 'text-pureWhite' : 'text-slateNavy'">{{ l.name }}</h3>
                 <p class="mt-2 text-[14px] leading-snug" :class="i === 1 ? 'text-[color:rgba(255,255,255,0.72)]' : 'text-[color:rgba(3,60,89,0.68)]'">{{ l.out }}</p>
               </div>
@@ -43,7 +44,7 @@ useMatrixReveal(sectionRef)
 
       <!-- Work cycle -->
       <div data-fr class="mt-14">
-        <p class="m-center font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">The work cycle</p>
+        <p class="m-center font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">{{ t('The work cycle') }}</p>
         <ol class="mt-4 flex flex-wrap items-center gap-x-1.5 gap-y-2 max-desktop:justify-center">
           <template v-for="(c, i) in layers.cycle" :key="i">
             <li class="rounded-[6px] bg-pureWhite px-3.5 py-2 font-display text-[13px] font-bold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.12)]">{{ c }}</li>

@@ -23,22 +23,23 @@ type Flag = keyof ReturnType<typeof cmsPublicFlags>
 type Group = 'Pages' | 'Products' | 'Shared Content' | 'Work' | 'Insights'
 
 // Singletons: record id → label, group, editor, public flag.
-const SINGLETONS: { id: string; label: string; group: Group; to: string; flag: Flag }[] = [
-  { id: 'technology', label: 'Technology', group: 'Pages', to: '/admin/pages/technology', flag: 'technologyPublicEnabled' },
-  { id: 'creative', label: 'Creative', group: 'Pages', to: '/admin/pages/creative', flag: 'creativePublicEnabled' },
-  { id: 'about', label: 'About', group: 'Pages', to: '/admin/pages/about', flag: 'aboutPublicEnabled' },
-  { id: 'contact', label: 'Contact', group: 'Pages', to: '/admin/pages/contact', flag: 'contactPublicEnabled' },
-  { id: 'open', label: 'OPEN', group: 'Products', to: '/admin/products/open', flag: 'openPublicEnabled' },
-  { id: 'shiftly', label: 'SHIFTLY', group: 'Products', to: '/admin/products/shiftly', flag: 'shiftlyPublicEnabled' },
-  { id: 'e-corporate', label: 'e-CORPORATE', group: 'Products', to: '/admin/products/e-corporate', flag: 'ecorporatePublicEnabled' },
-  { id: 'fast', label: 'FAST', group: 'Products', to: '/admin/products/fast', flag: 'fastPublicEnabled' },
-  { id: 'dora', label: 'DORA', group: 'Products', to: '/admin/products/dora', flag: 'doraPublicEnabled' },
-  { id: 'matrix', label: 'MATRIX', group: 'Products', to: '/admin/products/matrix', flag: 'matrixPublicEnabled' },
+// `bilingual`: one record per language (Indonesian `@id` + English original).
+const SINGLETONS: { id: string; label: string; group: Group; to: string; flag: Flag; bilingual?: boolean }[] = [
+  { id: 'technology', label: 'Technology', group: 'Pages', to: '/admin/pages/technology', flag: 'technologyPublicEnabled' , bilingual: true },
+  { id: 'creative', label: 'Creative', group: 'Pages', to: '/admin/pages/creative', flag: 'creativePublicEnabled' , bilingual: true },
+  { id: 'about', label: 'About', group: 'Pages', to: '/admin/pages/about', flag: 'aboutPublicEnabled' , bilingual: true },
+  { id: 'contact', label: 'Contact', group: 'Pages', to: '/admin/pages/contact', flag: 'contactPublicEnabled' , bilingual: true },
+  { id: 'open', label: 'OPEN', group: 'Products', to: '/admin/products/open', flag: 'openPublicEnabled' , bilingual: true },
+  { id: 'shiftly', label: 'SHIFTLY', group: 'Products', to: '/admin/products/shiftly', flag: 'shiftlyPublicEnabled' , bilingual: true },
+  { id: 'e-corporate', label: 'e-CORPORATE', group: 'Products', to: '/admin/products/e-corporate', flag: 'ecorporatePublicEnabled' , bilingual: true },
+  { id: 'fast', label: 'FAST', group: 'Products', to: '/admin/products/fast', flag: 'fastPublicEnabled' , bilingual: true },
+  { id: 'dora', label: 'DORA', group: 'Products', to: '/admin/products/dora', flag: 'doraPublicEnabled' , bilingual: true },
+  { id: 'matrix', label: 'MATRIX', group: 'Products', to: '/admin/products/matrix', flag: 'matrixPublicEnabled' , bilingual: true },
   { id: 'work', label: 'Work page', group: 'Work', to: '/admin/work', flag: 'workPublicEnabled' },
   { id: 'insights', label: 'Insights page', group: 'Insights', to: '/admin/insights', flag: 'insightsPublicEnabled' },
   { id: 'clients', label: 'Clients', group: 'Shared Content', to: '/admin/shared/clients', flag: 'clientsPublicEnabled' },
-  { id: 'faqs', label: 'FAQs', group: 'Shared Content', to: '/admin/shared/faqs', flag: 'faqsPublicEnabled' },
-  { id: 'ctas', label: 'Global CTAs', group: 'Shared Content', to: '/admin/shared/ctas', flag: 'ctasPublicEnabled' }
+  { id: 'faqs', label: 'FAQs', group: 'Shared Content', to: '/admin/shared/faqs', flag: 'faqsPublicEnabled' , bilingual: true },
+  { id: 'ctas', label: 'Global CTAs', group: 'Shared Content', to: '/admin/shared/ctas', flag: 'ctasPublicEnabled' , bilingual: true }
 ]
 
 // Collections: storage name → label, group, list/editor paths, public flag,
@@ -56,6 +57,8 @@ const needsPublish = (r: StoredRecord) => r.status !== 'archived' && r.draft.cha
 
 export interface DashboardItem {
   key: string
+  // Language of this record; null = one record for both languages.
+  lang: CmsLang | null
   label: string
   group: Group
   to: string
@@ -83,23 +86,29 @@ export async function buildDashboard(event: H3Event) {
     if (needsPublish(r)) totals.needsPublish += 1
   }
 
+  const LANG_NAME: Record<CmsLang, string> = { id: 'Indonesia', en: 'English' }
   for (const s of SINGLETONS) {
     labels.set(`page:${s.id}`, { label: s.label, to: s.to })
     labels.set(`shared:${s.id}`, { label: s.label, to: s.to })
-    const r = await store.getItem<StoredRecord>(`pages:${s.id}`)
+    for (const lang of s.bilingual ? CMS_LANGS : [null]) {
+    const r = await store.getItem<StoredRecord>(`pages:${s.id}${lang ? langSuffix(lang) : ''}`)
     const flagOn = flags[s.flag]
+    const to = lang ? `${s.to}?lang=${lang}` : s.to
+    const key = lang ? `${s.id}:${lang}` : s.id
+    const pendingLabel = lang ? `${s.label} (${LANG_NAME[lang]})` : s.label
     if (!r) {
-      items.push({ key: s.id, label: s.label, group: s.group, to: s.to, status: 'none', dummy: false, needsPublish: false, live: false, flagOn, updatedAt: null, updatedBy: null })
+      items.push({ key, lang, label: s.label, group: s.group, to, status: 'none', dummy: false, needsPublish: false, live: false, flagOn, updatedAt: null, updatedBy: null })
       continue
     }
     count(r)
     const np = !r.dummy && needsPublish(r)
-    if (np) pending.push({ label: s.label, to: s.to, group: s.group, updatedAt: r.draft.updatedAt, neverPublished: !r.published })
+    if (np) pending.push({ label: pendingLabel, to, group: s.group, updatedAt: r.draft.updatedAt, neverPublished: !r.published })
     items.push({
-      key: s.id,
+      key,
+      lang,
       label: s.label,
       group: s.group,
-      to: s.to,
+      to,
       status: r.status,
       dummy: !!r.dummy,
       needsPublish: np,
@@ -108,6 +117,7 @@ export async function buildDashboard(event: H3Event) {
       updatedAt: r.draft.updatedAt,
       updatedBy: r.draft.updatedBy?.name ?? null
     })
+    }
   }
 
   for (const c of COLLECTIONS) {
@@ -130,6 +140,7 @@ export async function buildDashboard(event: H3Event) {
     }
     items.push({
       key: c.name,
+      lang: null,
       label: c.label,
       group: c.group,
       to: c.to,
@@ -174,14 +185,16 @@ async function recentActivity(labels: Map<string, { label: string; to: string }>
     if (!e || !ACTIVITY.test(e.action)) continue
     const verbKey = e.action.split('.').pop()!
     const ref = labels.get(`${e.entityType}:${e.entityId}`)
+    const eLang = (e.metadata as { lang?: string } | undefined)?.lang
+    const langNote = eLang === 'id' ? ' (Indonesia)' : eLang === 'en' ? ' (English)' : ''
     const media = e.action.startsWith('media.')
     out.push({
       id: e.id,
       at: e.timestamp,
       who: e.userId ? users.get(e.userId) ?? 'Pengguna terhapus' : 'Sistem (migrasi)',
       verb: VERB[verbKey] ?? verbKey,
-      label: media ? mediaNames.get(e.entityId ?? '') ?? 'gambar (sudah dihapus)' : ref?.label ?? (e.entityId ?? e.entityType),
-      to: media ? '/admin/media' : ref?.to ?? null
+      label: media ? mediaNames.get(e.entityId ?? '') ?? 'gambar (sudah dihapus)' : `${ref?.label ?? (e.entityId ?? e.entityType)}${langNote}`,
+      to: media ? '/admin/media' : ref ? (eLang === 'id' || eLang === 'en' ? `${ref.to}?lang=${eLang}` : ref.to) : null
     })
   }
   return out

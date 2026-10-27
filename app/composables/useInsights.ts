@@ -1,3 +1,5 @@
+import { INSIGHTS_ID } from '~/i18n/content/insights'
+
 /**
  * Composition role per 04-homepage-spec.md §7's locked homepage architecture:
  * exactly 1 Featured (Digital Editorial Feature) + 3 Supporting, relatively
@@ -82,21 +84,27 @@ export interface InsightArticle {
  * §11's verification task (or be replaced/marked placeholder).
  */
 export function useInsights() {
+  return localize(insightsData(), useLocale() === 'id' ? INSIGHTS_ID : undefined)
+}
+
+// English base copy (Indonesian overlay: app/i18n/content/insights.ts).
+function insightsData() {
   // PASTI perspective per article (owner 2026-10-07: "jangan sampe diluar
   // konteks atau dari PASTI") — sentences pulled from the same COMPRO
   // sources the service pages use, so the copy lives in one place.
   const tech = useTechnology().services
   const creative = useCreative().services
   const company = useCompany()
-  const body = (list: { title: string; body: string }[], title: string) => list.find((x) => x.title === title)!.body
+  // Matched by the service's stable index, not its (translated) title.
+  const body = (list: { index: string; body: string }[], index: string) => list.find((x) => x.index === index)!.body
   const perspective: Record<string, InsightPerspective> = {
-    '01': { label: 'How PASTI approaches it', text: body(tech, 'Cybersecurity & Compliance Architecture'), source: 'COMPRO 2025 p.34', links: [{ label: 'Technology capabilities', to: '/technology#capabilities' }] },
-    '02': { label: 'How PASTI approaches it', text: body(tech, 'Enterprise Platforms'), source: 'COMPRO 2025 p.32', links: [{ label: 'Textile Production Monitoring', to: '/work#case-textile' }, { label: 'Workflow Automation (AT-WF)', to: '/work#case-at-wf' }] },
-    '03': { label: 'How PASTI approaches it', text: body(tech, 'Custom Built AI Solutions'), source: 'COMPRO 2025 p.31', links: [{ label: 'Technology capabilities', to: '/technology#capabilities' }] },
+    '01': { label: 'How PASTI approaches it', text: body(tech, '05'), source: 'COMPRO 2025 p.34', links: [{ label: 'Technology capabilities', to: '/technology#capabilities' }] },
+    '02': { label: 'How PASTI approaches it', text: body(tech, '03'), source: 'COMPRO 2025 p.32', links: [{ label: 'Textile Production Monitoring', to: '/work#case-textile' }, { label: 'Workflow Automation (AT-WF)', to: '/work#case-at-wf' }] },
+    '03': { label: 'How PASTI approaches it', text: body(tech, '02'), source: 'COMPRO 2025 p.31', links: [{ label: 'Technology capabilities', to: '/technology#capabilities' }] },
     '04': { label: 'Our vision', text: company.vision, source: 'COMPRO 2025 p.27', links: [{ label: 'About PASTI', to: '/about' }] },
-    '05': { label: 'How PASTI approaches it', text: body(creative, 'Brand Identity & UI/UX Design'), source: 'COMPRO 2025 p.41', links: [{ label: 'Pertamina — Energi Untuk Negeri', to: '/work#work-05' }, { label: 'Selected creative work', to: '/creative#creative-work' }] },
+    '05': { label: 'How PASTI approaches it', text: body(creative, '06'), source: 'COMPRO 2025 p.41', links: [{ label: 'Pertamina — Energi Untuk Negeri', to: '/work#work-05' }, { label: 'Selected creative work', to: '/creative#creative-work' }] },
     '06': { label: `${company.founder.name}, ${company.founder.role}`, text: company.founder.quote, source: 'COMPRO 2025 p.6', links: [{ label: 'OCTO Mobile strategy', to: '/creative#creative-work' }, { label: 'About PASTI', to: '/about' }] },
-    '07': { label: 'How PASTI approaches it', text: body(tech, 'Mobile App Development & MVP'), source: 'COMPRO 2025 p.33', links: [{ label: 'PowerHours', to: '/work#case-powerhours' }, { label: 'HDI Healthy Lifestyle', to: '/work#case-hdi' }] }
+    '07': { label: 'How PASTI approaches it', text: body(tech, '04'), source: 'COMPRO 2025 p.33', links: [{ label: 'PowerHours', to: '/work#case-powerhours' }, { label: 'HDI Healthy Lifestyle', to: '/work#case-hdi' }] }
   }
 
   const articles: InsightArticle[] = [
@@ -206,3 +214,5 @@ export function useInsights() {
 
   return { articles }
 }
+
+export type InsightsData = ReturnType<typeof insightsData>

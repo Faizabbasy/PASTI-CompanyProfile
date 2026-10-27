@@ -1,6 +1,7 @@
 <script setup lang="ts">
 withDefaults(defineProps<{ open: boolean; dark?: boolean }>(), { dark: false })
 defineEmits<{ toggle: [] }>()
+const t = useT()
 </script>
 
 <template>
@@ -8,7 +9,7 @@ defineEmits<{ toggle: [] }>()
     type="button"
     class="relative z-50 flex h-11 w-11 shrink-0 items-center justify-center lg:hidden"
     :aria-expanded="open"
-    aria-label="Toggle navigation menu"
+    :aria-label="t('Toggle navigation menu')"
     @click="$emit('toggle')"
   >
     <span class="relative flex h-4 w-6 flex-col justify-between">

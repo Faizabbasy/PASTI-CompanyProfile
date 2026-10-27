@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // PROCUREMENT PROBLEM (slides 2, 3). Part one: the deck's paper pile, told
 // with its own words — six sheets ("More people." … "More risks.") fall
 // from a scatter into one pile as the section enters, and the five symptoms
@@ -56,7 +57,7 @@ const sheets = problem.pressures.map((p, i) => ({
           </div>
 
           <!-- Symptoms pinned to the pile -->
-          <ul class="relative z-20 mt-6 flex flex-wrap justify-center gap-2 desktop:absolute desktop:right-0 desktop:top-0 desktop:mt-0 desktop:h-full desktop:flex-col desktop:items-end desktop:justify-around desktop:gap-0" aria-label="Gejala">
+          <ul class="relative z-20 mt-6 flex flex-wrap justify-center gap-2 desktop:absolute desktop:right-0 desktop:top-0 desktop:mt-0 desktop:h-full desktop:flex-col desktop:items-end desktop:justify-around desktop:gap-0" :aria-label="t('Symptoms')">
             <li
               v-for="(s, i) in problem.symptoms"
               :key="s"

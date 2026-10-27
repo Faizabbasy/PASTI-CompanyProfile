@@ -16,7 +16,8 @@ if (import.meta.client) {
 // the time and has since been removed (Milestone 6 legacy decommission),
 // same discipline as Milestone 4B's ServiceCards retirement.
 
-const label = 'Platforms'
+const t = useT()
+const label = t('Platforms')
 const { platforms } = usePlatforms()
 const open = platforms[0]!
 const corporate = platforms[1]!
@@ -374,10 +375,10 @@ useGsapContext(() => {
             <span data-signal-numeral class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.1em] text-pureWhite">01 / 02</span>
           </div>
           <div class="flex items-center gap-2">
-            <button type="button" aria-label="Show OPEN" class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:rgba(255,255,255,0.25)] text-pureWhite transition-colors duration-150 ease-editorial hover:border-pastiYellow-500 hover:text-pastiYellow-500 focus-visible:border-pastiYellow-500 focus-visible:outline-none" @click="goToWorld(0)">
+            <button type="button" :aria-label="t('Show {name}', { name: 'OPEN' })" class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:rgba(255,255,255,0.25)] text-pureWhite transition-colors duration-150 ease-editorial hover:border-pastiYellow-500 hover:text-pastiYellow-500 focus-visible:border-pastiYellow-500 focus-visible:outline-none" @click="goToWorld(0)">
               <span aria-hidden="true">←</span>
             </button>
-            <button type="button" aria-label="Show e-CORPORATE" class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:rgba(255,255,255,0.25)] text-pureWhite transition-colors duration-150 ease-editorial hover:border-pastiYellow-500 hover:text-pastiYellow-500 focus-visible:border-pastiYellow-500 focus-visible:outline-none" @click="goToWorld(1)">
+            <button type="button" :aria-label="t('Show {name}', { name: 'e-CORPORATE' })" class="flex h-11 w-11 items-center justify-center rounded-full border border-[color:rgba(255,255,255,0.25)] text-pureWhite transition-colors duration-150 ease-editorial hover:border-pastiYellow-500 hover:text-pastiYellow-500 focus-visible:border-pastiYellow-500 focus-visible:outline-none" @click="goToWorld(1)">
               <span aria-hidden="true">→</span>
             </button>
           </div>
@@ -457,7 +458,7 @@ useGsapContext(() => {
                 class="absolute left-0 top-1/2 flex h-[50%] w-[30%] flex-col rounded-card border border-[color:rgba(255,255,255,0.1)] bg-[color:rgba(3,60,89,0.82)] p-5"
               >
                 <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(255,255,255,0.55)]">01</span>
-                <p class="mt-auto max-w-[62%] font-display text-token-body font-medium leading-snug text-pureWhite">From planning to contract.</p>
+                <p class="mt-auto max-w-[62%] font-display text-token-body font-medium leading-snug text-pureWhite">{{ t('From planning to contract.') }}</p>
                 <span aria-hidden="true" class="mt-4 block h-[2px] w-8 bg-pastiYellow-500" />
               </div>
               <div
@@ -465,7 +466,7 @@ useGsapContext(() => {
                 class="absolute right-0 top-1/2 flex h-[50%] w-[30%] flex-col items-end rounded-card border border-[color:rgba(251,186,0,0.35)] bg-[color:rgba(3,60,89,0.82)] p-5"
               >
                 <span class="w-[62%] font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(255,255,255,0.55)]">02</span>
-                <p class="mt-auto w-[62%] font-display text-token-body font-medium leading-snug text-pureWhite">People, processes, vendors and approvals.</p>
+                <p class="mt-auto w-[62%] font-display text-token-body font-medium leading-snug text-pureWhite">{{ t('People, processes, vendors and approvals.') }}</p>
                 <span aria-hidden="true" class="mt-4 block w-[62%]"><span class="block h-[2px] w-8 bg-pastiYellow-500" /></span>
               </div>
 
@@ -524,7 +525,7 @@ useGsapContext(() => {
                    light up in turn as the reader dwells on this world. -->
               <ol class="mt-8 max-w-md border-t border-[color:rgba(255,255,255,0.12)]">
                 <li
-                  v-for="(o, i) in ['Work smarter', 'Collaborate better', 'Operate with greater control']"
+                  v-for="(o, i) in [t('Work smarter'), t('Collaborate better'), t('Operate with greater control')]"
                   :key="o"
                   data-corp-outcome
                   class="corp-outcome relative flex items-center gap-4 border-b border-[color:rgba(255,255,255,0.08)] py-3"
@@ -549,7 +550,7 @@ useGsapContext(() => {
                 <!-- 03 Information: the data layer. -->
                 <div data-corp-plate class="corp-plate absolute inset-0 rounded-card border border-[color:rgba(251, 186, 0,0.45)] bg-[color:rgba(8,15,34,0.92)]">
                   <div aria-hidden="true" class="corp-plate__blocks absolute inset-5" />
-                  <span class="corp-plate__label">03 Information</span>
+                  <span class="corp-plate__label">03 {{ t('Information') }}</span>
                 </div>
 
                 <!-- 02 Processes: lanes and hand-offs. -->
@@ -561,7 +562,7 @@ useGsapContext(() => {
                     </g>
                     <path d="M92 74V113M232 137V176" stroke="rgba(251, 186, 0,0.75)" stroke-dasharray="3 4" />
                   </svg>
-                  <span class="corp-plate__label">02 Processes</span>
+                  <span class="corp-plate__label">02 {{ t('Processes') }}</span>
                 </div>
 
                 <!-- 01 People: the network. -->
@@ -570,7 +571,7 @@ useGsapContext(() => {
                     <path d="M80 70L190 120L310 64M190 120L130 196M190 120L280 190M310 64L340 150M80 70L60 160" stroke="rgba(255,255,255,0.25)" />
                     <circle v-for="(c, k) in [[80, 70], [190, 120], [310, 64], [130, 196], [280, 190], [340, 150], [60, 160]]" :key="k" :cx="c[0]" :cy="c[1]" :r="k === 1 ? 12 : 8" :fill="k === 1 ? '#FBBA00' : '#033C59'" stroke="rgba(255,255,255,0.7)" />
                   </svg>
-                  <span class="corp-plate__label">01 People</span>
+                  <span class="corp-plate__label">01 {{ t('People') }}</span>
                 </div>
 
                 <!-- The product, on top. -->

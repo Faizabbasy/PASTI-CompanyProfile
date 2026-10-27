@@ -1,3 +1,4 @@
+import { FOOTER_ID } from '~/i18n/content/footer'
 import type { SocialCmsKey } from '#shared/utils/sharedContentSchema'
 import { ctasSource } from './useSharedContentSource'
 
@@ -31,7 +32,7 @@ export interface FooterLink {
  * (useNavigation) and homepage platform section (usePlatforms), so footer links
  * point at the same destinations rather than inventing new routes.
  */
-export function useFooter() {
+function footerData() {
   const navLinks: FooterLink[] = [
     { label: 'Solutions', to: '/technology' },
     { label: 'Insights', to: '/insights' },
@@ -79,7 +80,7 @@ export function useFooter() {
     mapsUrl: (cms ? orNull(cms.mapsUrl) : null) as string | null,
     hours: (cms ? orNull(cms.hours) : null) as string | null,
     entity: 'PT Hidup Pasti Bahagia',
-    positioning: cms ? cms.positioning : 'Technology × Creative Execution Partner'
+    positioning: cms ? cms.positioning : useLocale() === 'id' ? 'Partner Eksekusi Teknologi × Kreatif' : 'Technology × Creative Execution Partner'
   }
 
   // Social profiles. Only WhatsApp has a real destination so far; the others
@@ -95,4 +96,10 @@ export function useFooter() {
   ]
 
   return { navLinks, serviceLinks, platformLinks, contact, socials }
+}
+
+export type FooterData = ReturnType<typeof footerData>
+
+export function useFooter() {
+  return localize(footerData(), useLocale() === 'id' ? FOOTER_ID : undefined)
 }

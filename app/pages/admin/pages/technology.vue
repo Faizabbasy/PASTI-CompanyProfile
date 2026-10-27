@@ -7,6 +7,8 @@ import { TECHNOLOGY_LIMITS as LIM, TECHNOLOGY_WORK_REFS, type TechnologyAdminSta
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'Technology · Pages' })
 
+// Bilingual: which language record is being edited (?lang=, default Indonesian).
+const lang = useEditorLang()
 const {
   loadStatus, loadError, refresh, form, state, dirty, activeTab, errors, errorCount, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, publishedIds, canPublish, canUnpublish, canArchive, publishDisabledReason
@@ -14,6 +16,7 @@ const {
   name: 'Technology',
   endpoint: '/api/admin/pages/technology',
   asyncKey: 'admin-technology',
+  lang,
   tabs: TECHNOLOGY_TABS,
   toForm: toTechnologyForm,
   toPayload: toTechnologyPayload,
@@ -66,10 +69,11 @@ const hasErr = (prefix: string) => (i: number) => Object.keys(errors.value).some
     crumb="Pages"
     crumb-to="/admin/pages"
     public-path="/technology"
+    :lang="lang"
     flag="NUXT_CMS_TECHNOLOGY_PUBLIC_ENABLED"
     :tabs="TECHNOLOGY_TABS"
     :total="6"
-    preview-path="/admin/preview/technology"
+    :preview-path="`/admin/preview/technology?lang=${lang}`"
     :code-managed="codeManaged"
     :dummy="state?.dummy !== false"
     :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
@@ -91,7 +95,7 @@ const hasErr = (prefix: string) => (i: number) => Object.keys(errors.value).some
         :state="state"
         :dirty="dirty"
         :busy="busy"
-        preview-href="/admin/preview/technology"
+        :preview-href="`/admin/preview/technology?lang=${lang}`"
         :can-publish="canPublish"
         :can-unpublish="canUnpublish"
         :can-archive="canArchive"

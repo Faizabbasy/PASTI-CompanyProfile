@@ -6,6 +6,8 @@
 // confidence. States that fields depend on the configured document type;
 // no universal-detection or accuracy claim. Reduced motion: no autoplay.
 const { extraction, sample } = useDoraPage()
+// `tr`, not `t`: the template already loops with `t`.
+const tr = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const stageRef = ref<HTMLElement | null>(null)
 const picked = ref(0)
@@ -105,7 +107,7 @@ const textLayer = ['INSTANSI CONTOH', 'UNIT KERJA CONTOH', 'Nomor : 000.1/OO01/C
                   <span class="inline-flex shrink-0 items-center gap-1.5 font-mono text-[10.5px] uppercase tracking-[0.1em]" :class="f.ok ? 'text-doraCyan' : 'text-[#FF8A73]'">
                     <svg v-if="f.ok" viewBox="0 0 12 12" class="h-3 w-3" aria-hidden="true"><path d="M2.5 6.2 5 8.6l4.6-5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
                     <svg v-else viewBox="0 0 12 12" class="h-3 w-3" aria-hidden="true"><path d="m3 3 6 6M9 3 3 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
-                    {{ f.ok ? 'Accepted' : 'Rejected · file type' }}
+                    {{ f.ok ? tr('Accepted') : tr('Rejected · file type') }}
                   </span>
                 </li>
               </ul>
@@ -126,36 +128,36 @@ const textLayer = ['INSTANSI CONTOH', 'UNIT KERJA CONTOH', 'Nomor : 000.1/OO01/C
               <!-- 03 Classification -->
               <div v-else-if="picked === 2" key="2" class="mt-6">
                 <div class="rounded-[16px] bg-[color:rgba(255,255,255,0.05)] p-5 ring-1 ring-[color:rgba(255,255,255,0.08)]">
-                  <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">Document type</p>
+                  <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">{{ tr('Document type') }}</p>
                   <div class="mt-3 flex flex-wrap items-center gap-3">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-doraCyan px-4 py-2 font-display text-[15px] font-bold text-slateNavy">Official letter</span>
-                    <span class="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[color:rgba(255,255,255,0.6)]">Auto-detected</span>
+                    <span class="inline-flex items-center gap-2 rounded-full bg-doraCyan px-4 py-2 font-display text-[15px] font-bold text-slateNavy">{{ tr('Official letter') }}</span>
+                    <span class="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[color:rgba(255,255,255,0.6)]">{{ tr('Auto-detected') }}</span>
                   </div>
-                  <p class="mt-5 text-[14px] leading-relaxed text-[color:rgba(255,255,255,0.72)]">Or chosen at upload when a batch holds one type. A reviewer can still change it during verification.</p>
+                  <p class="mt-5 text-[14px] leading-relaxed text-[color:rgba(255,255,255,0.72)]">{{ tr('Or chosen at upload when a batch holds one type. A reviewer can still change it during verification.') }}</p>
                 </div>
-                <p class="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">Types and rules are configured per organization</p>
+                <p class="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">{{ tr('Types and rules are configured per organization') }}</p>
                 <ul class="mt-3 flex flex-wrap gap-2">
-                  <li v-for="t in ['Official letter', 'Application form', 'Internal report', 'Other']" :key="t" class="rounded-full px-3 py-1.5 font-display text-[12.5px] font-semibold ring-1" :class="t === 'Official letter' ? 'text-pureWhite ring-doraCyan' : 'text-[color:rgba(255,255,255,0.6)] ring-[color:rgba(255,255,255,0.14)]'">{{ t }}</li>
+                  <li v-for="t in ['Official letter', 'Application form', 'Internal report', 'Other']" :key="t" class="rounded-full px-3 py-1.5 font-display text-[12.5px] font-semibold ring-1" :class="t === 'Official letter' ? 'text-pureWhite ring-doraCyan' : 'text-[color:rgba(255,255,255,0.6)] ring-[color:rgba(255,255,255,0.14)]'">{{ tr(t) }}</li>
                 </ul>
               </div>
 
               <!-- 04 Fields / 05 Confidence -->
               <div v-else key="3" class="mt-6">
-                <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">Template · Official letter</p>
+                <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">{{ tr('Template · Official letter') }}</p>
                 <dl class="mt-3 divide-y divide-[color:rgba(255,255,255,0.08)] rounded-[16px] bg-[color:rgba(255,255,255,0.05)] ring-1 ring-[color:rgba(255,255,255,0.08)]">
                   <div v-for="f in sample.fields" :key="f.key" class="grid grid-cols-[7.5rem_1fr] items-center gap-3 px-4 py-3.5 tablet:grid-cols-[8.5rem_1fr_auto]">
                     <dt class="font-display text-[13px] font-bold text-[color:rgba(255,255,255,0.8)]">{{ f.label }}</dt>
                     <dd class="min-w-0 truncate font-mono text-[12.5px]">{{ f.ocr }}</dd>
                     <dd v-if="picked === 4" class="col-span-2 flex items-center gap-2 font-mono text-[10.5px] tabular-nums tablet:col-span-1">
                       <span aria-hidden="true" class="relative block h-1.5 w-20 overflow-hidden rounded-full bg-[color:rgba(255,255,255,0.12)]"><span class="dex-bar absolute inset-y-0 left-0 rounded-full" :class="f.review ? 'bg-[#FF8A73]' : 'bg-doraCyan'" :style="{ width: `${f.conf}%` }" /></span>
-                      <span :class="f.review ? 'text-[#FF8A73]' : 'text-[color:rgba(255,255,255,0.75)]'">{{ f.conf }}%{{ f.review ? ' · review' : '' }}</span>
+                      <span :class="f.review ? 'text-[#FF8A73]' : 'text-[color:rgba(255,255,255,0.75)]'">{{ f.conf }}%{{ f.review ? ` · ${tr('review')}` : '' }}</span>
                     </dd>
                   </div>
                 </dl>
               </div>
             </Transition>
 
-            <p class="mt-6 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.45)]">Synthetic sample · illustrative values</p>
+            <p class="mt-6 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.45)]">{{ tr('Synthetic sample · illustrative values') }}</p>
           </div>
           <p data-fr="fade" class="m-center mt-4 max-w-[60ch] text-[13.5px] leading-relaxed text-[color:rgba(3,60,89,0.65)]">{{ extraction.note }}</p>
         </div>

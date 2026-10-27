@@ -17,6 +17,8 @@ if (import.meta.client) {
 // arrow promising a detail page that doesn't exist (2026-10-07).
 const { index: { sectionLabel, projects, groups } } = useWorkPage()
 const filter = ref('All')
+// Group names are filter keys (English); shown through t().
+const t = useT()
 const view = ref<'grid' | 'list'>('grid')
 const listRef = ref<HTMLElement | null>(null)
 const { setState } = useCustomCursor()
@@ -93,11 +95,11 @@ useGsapContext(() => {
 <template>
   <section id="work-index" class="relative bg-pureWhite py-24 tablet:py-32">
     <BaseContainer>
-      <BaseSectionMark surface="light" :label="sectionLabel" meta="Filter · Grid / List" />
+      <BaseSectionMark surface="light" :label="sectionLabel" :meta="t('Filter · Grid / List')" />
 
       <!-- Controls -->
       <div class="mt-12 flex flex-col gap-6 desktop:flex-row desktop:items-center desktop:justify-between">
-        <div class="snap-rail -mx-gutter flex gap-2 overflow-x-auto px-gutter desktop:mx-0 desktop:flex-wrap desktop:px-0" role="tablist" aria-label="Filter projects">
+        <div class="snap-rail -mx-gutter flex gap-2 overflow-x-auto px-gutter desktop:mx-0 desktop:flex-wrap desktop:px-0" role="tablist" :aria-label="t('Filter projects')">
           <button
             v-for="g in groups"
             :key="g"
@@ -108,11 +110,11 @@ useGsapContext(() => {
             :class="filter === g ? 'border-slateNavy bg-slateNavy text-pureWhite' : 'border-[color:rgba(3,60,89,0.18)] text-slateNavy hover:border-slateNavy'"
             @click="setFilter(g)"
           >
-            {{ g }}
+            {{ t(g) }}
             <span class="font-mono text-[10px]" :class="filter === g ? 'text-pastiYellow-500' : 'text-[color:rgba(3,60,89,0.45)]'">{{ String(countFor(g)).padStart(2, '0') }}</span>
           </button>
         </div>
-        <div class="flex shrink-0 items-center gap-1 self-start rounded-full bg-surfaceNeutral p-1 ring-1 ring-[color:rgba(3,60,89,0.1)] desktop:self-auto" role="group" aria-label="Layout">
+        <div class="flex shrink-0 items-center gap-1 self-start rounded-full bg-surfaceNeutral p-1 ring-1 ring-[color:rgba(3,60,89,0.1)] desktop:self-auto" role="group" :aria-label="t('Layout')">
           <button
             v-for="v in (['grid', 'list'] as const)"
             :key="v"
@@ -124,7 +126,7 @@ useGsapContext(() => {
           >
             <svg v-if="v === 'grid'" viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="currentColor" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1" /><rect x="9" y="1" width="6" height="6" rx="1" /><rect x="1" y="9" width="6" height="6" rx="1" /><rect x="9" y="9" width="6" height="6" rx="1" /></svg>
             <svg v-else viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="currentColor" aria-hidden="true"><rect x="1" y="2" width="14" height="3" rx="1" /><rect x="1" y="7" width="14" height="3" rx="1" /><rect x="1" y="12" width="14" height="3" rx="1" /></svg>
-            {{ v }}
+            {{ t(v) }}
           </button>
         </div>
       </div>
@@ -140,7 +142,7 @@ useGsapContext(() => {
           class="group/wi relative"
           :class="view === 'list' ? 'grid grid-cols-[96px_1fr] items-center gap-5 border-t border-[color:rgba(3,60,89,0.14)] py-6 last:border-b tablet:grid-cols-[160px_1fr_auto] tablet:gap-8' : ''"
           @pointermove="onTilt"
-          @pointerenter="p.caseId && setState('view', 'Case study')"
+          @pointerenter="p.caseId && setState('view', t('Case study'))"
           @pointerleave="offTilt"
         >
           <div
@@ -156,7 +158,7 @@ useGsapContext(() => {
               <span class="font-mono text-[10px] text-pureWhite">{{ p.index }}</span>
             </span>
             <span v-if="p.caseId" class="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-pastiYellow-500 px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-slateNavy" :class="view === 'list' ? 'hidden tablet:inline-flex' : ''">
-              Case study
+              {{ t('Case study') }}
             </span>
           </div>
           <div :class="view === 'grid' ? 'mt-5 px-1' : 'min-w-0'">
@@ -176,7 +178,7 @@ useGsapContext(() => {
             v-if="p.caseId"
             :href="`#case-${p.caseId}`"
             class="absolute inset-0 z-10 rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slateNavy"
-            :aria-label="`Read the ${p.title} case study`"
+            :aria-label="t('Read the {title} case study', { title: p.title })"
             @click.prevent="openCase(p.caseId)"
           />
         </li>

@@ -23,3 +23,6 @@ export const saveDoraDraft = page.saveDraft
 export const publishDora = page.publish
 export const setDoraStatus = page.setStatus
 export const getPublishedDora = page.getPublished
+
+// Bilingual CMS: the record for one language (English = the original record).
+export const doraFor = (lang: CmsLang) => page.forLocale(lang)

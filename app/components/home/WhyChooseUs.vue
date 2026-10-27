@@ -30,7 +30,13 @@ const { setState } = useCustomCursor()
 
 const afterWords = heading.after.split(' ')
 const pad = (n: number) => String(n).padStart(2, '0')
-const weekLabels = Array.from({ length: weeks }, (_, i) => `W${pad(i + 1)}`)
+const t = useT()
+// Captured once: the render loop below has its own local `t` (timeline time).
+const weekLabel = t('Week')
+const ongoingLabel = t('Ongoing')
+// W = week (M = minggu on Indonesian pages).
+const W = t('W')
+const weekLabels = Array.from({ length: weeks }, (_, i) => `${W}${pad(i + 1)}`)
 
 /** Pill anchoring: late steps align to their end so they never leave the board. */
 function pillStyle(lane: (typeof lanes)[number]) {
@@ -43,7 +49,7 @@ function trackStyle(lane: (typeof lanes)[number]) {
   return { left: `${(lane.start / weeks) * 100}%`, width: `${(lane.length / weeks) * 100}%` }
 }
 function span(lane: (typeof lanes)[number]) {
-  return `W${pad(Math.floor(lane.start) + 1)} – W${pad(Math.ceil(lane.start + lane.length))}`
+  return `${W}${pad(Math.floor(lane.start) + 1)} – ${W}${pad(Math.ceil(lane.start + lane.length))}`
 }
 
 const sectionRef = ref<HTMLElement | null>(null)
@@ -96,7 +102,7 @@ useGsapContext(() => {
     const shift = clamp(-x, laneW - x - kw, -kw / 2)
     knob.style.transform = `translateX(${shift}px)`
     const week = clamp(1, weeks, Math.ceil(w) || 1)
-    if (readoutRef.value) readoutRef.value.textContent = `Week ${pad(week)} / ${weeks}`
+    if (readoutRef.value) readoutRef.value.textContent = `${weekLabel} ${pad(week)} / ${weeks}`
     knob.setAttribute('aria-valuenow', String(week))
 
     let done = 0
@@ -108,7 +114,7 @@ useGsapContext(() => {
       p.track.style.transform = `scaleX(${prog})`
       const s = prog <= 0 ? 'idle' : prog < 1 ? 'active' : lane.ongoing ? 'live' : 'done'
       if (p.el.dataset.state !== s) p.el.dataset.state = s
-      p.pct.textContent = s === 'live' ? 'Ongoing' : `${Math.round(prog * 100)}%`
+      p.pct.textContent = s === 'live' ? ongoingLabel : `${Math.round(prog * 100)}%`
       if (s === 'done') done++
       else if (s !== 'idle') active++
     })
@@ -280,7 +286,7 @@ useGsapContext(() => {
     <BaseGridLines tone="light" />
     <div ref="stageRef" class="relative py-24 tablet:py-28 desktop:flex desktop:h-[100svh] desktop:min-h-[680px] desktop:items-center desktop:pb-[4svh] desktop:pt-[12svh]">
       <BaseContainer class="relative z-10 w-full">
-        <BaseSectionMark surface="light" label="Why Choose Us" meta="05 / 11" />
+        <BaseSectionMark surface="light" :label="t('Why Choose Us')" meta="05 / 11" />
 
         <div class="mt-12 grid gap-12 desktop:mt-[5svh] desktop:grid-cols-12 desktop:items-center desktop:gap-10">
           <!-- Copy -->
@@ -387,7 +393,7 @@ useGsapContext(() => {
                         :key="role"
                         class="wcu-role grid h-8 w-8 place-items-center rounded-full border-2 font-display text-[11px] font-bold"
                         :class="[role === 'T' ? 'wcu-role--t' : 'wcu-role--c', ri ? '-ml-2.5' : '']"
-                        :title="role === 'T' ? 'Technology' : 'Creative'"
+                        :title="role === 'T' ? t('Technology') : t('Creative')"
                       >{{ role }}</span>
                     </span>
                   </div>
@@ -404,7 +410,7 @@ useGsapContext(() => {
                     role="slider"
                     :aria-valuemin="1"
                     :aria-valuemax="weeks"
-                    aria-label="Timeline week — drag or use arrow keys"
+                    :aria-label="t('Timeline week — drag or use arrow keys')"
                     class="wcu-knob pointer-events-auto absolute left-0 top-0 inline-flex h-11 cursor-grab touch-none items-center gap-2 whitespace-nowrap rounded-full bg-slateNavy pl-2 pr-3.5 font-display text-[12px] font-bold text-pureWhite shadow-[0_14px_30px_-12px_rgba(3,60,89,0.8)] active:cursor-grabbing"
                     @mouseenter="setState('view', 'Drag')"
                     @mouseleave="setState('default')"
@@ -412,7 +418,7 @@ useGsapContext(() => {
                     <span class="grid h-7 w-7 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy">
                       <svg viewBox="0 0 16 16" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4L1.5 8 5 12M11 4l3.5 4L11 12" /></svg>
                     </span>
-                    <span ref="readoutRef" class="tabular-nums">Week 01 / {{ weeks }}</span>
+                    <span ref="readoutRef" class="tabular-nums">{{ t('Week') }} 01 / {{ weeks }}</span>
                   </button>
                 </div>
               </div>
@@ -428,8 +434,8 @@ useGsapContext(() => {
               </span>
             </div>
             <p class="mt-9 text-center font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.45)] tablet:mt-4 desktop:text-right">
-              <span class="desktop:hidden">Drag the playhead · tap a week</span>
-              <span class="hidden desktop:inline">Scroll or drag the playhead</span>
+              <span class="desktop:hidden">{{ t('Drag the playhead · tap a week') }}</span>
+              <span class="hidden desktop:inline">{{ t('Scroll or drag the playhead') }}</span>
             </p>
           </div>
         </div>

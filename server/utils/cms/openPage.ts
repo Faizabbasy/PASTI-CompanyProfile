@@ -23,3 +23,6 @@ export const saveOpenDraft = open.saveDraft
 export const publishOpen = open.publish
 export const setOpenStatus = open.setStatus
 export const getPublishedOpen = open.getPublished
+
+// Bilingual CMS: the record for one language (English = the original record).
+export const openFor = (lang: CmsLang) => open.forLocale(lang)

@@ -23,3 +23,6 @@ export const saveShiftlyDraft = page.saveDraft
 export const publishShiftly = page.publish
 export const setShiftlyStatus = page.setStatus
 export const getPublishedShiftly = page.getPublished
+
+// Bilingual CMS: the record for one language (English = the original record).
+export const shiftlyFor = (lang: CmsLang) => page.forLocale(lang)

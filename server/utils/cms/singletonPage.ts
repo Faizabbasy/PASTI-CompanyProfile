@@ -124,10 +124,32 @@ export function activeOnly<T extends { active: boolean }>(list: T[]): Omit<T, 'a
   return list.filter((i) => i.active).map(({ active: _a, ...rest }) => rest)
 }
 
+// Bilingual CMS (2026-10-27): every singleton has one record per language.
+// The original records hold the English copy and keep their keys
+// (`pages:<id>`); the Indonesian copy lives beside them (`pages:<id>@id`)
+// with its own draft / publish cycle. `forLocale(lang)` picks the engine;
+// the engine returned directly is the English one (unchanged behaviour for
+// every existing caller).
+export type CmsLang = 'id' | 'en'
+export const CMS_LANGS: readonly CmsLang[] = ['id', 'en']
+export const langSuffix = (lang: CmsLang) => (lang === 'id' ? '@id' : '')
+
+/** `?lang=id|en` from an admin/public request (default English = the original records). */
+export function cmsLang(event: H3Event): CmsLang {
+  return getQuery(event).lang === 'id' ? 'id' : 'en'
+}
+
 export function defineSingletonPage<Id extends string, C extends object, I = C>(cfg: SingletonPageConfig<Id, C>) {
+  const en = buildSingletonEngine<Id, C, I>(cfg, 'en')
+  let id: typeof en | undefined
+  const forLocale = (lang: CmsLang) => (lang === 'id' ? (id ??= buildSingletonEngine<Id, C, I>(cfg, 'id')) : en)
+  return { ...en, forLocale }
+}
+
+function buildSingletonEngine<Id extends string, C extends object, I = C>(cfg: SingletonPageConfig<Id, C>, lang: CmsLang) {
   type Rec = SingletonRecord<Id, C>
-  const KEY = `pages:${cfg.id}`
-  const REVISION_PREFIX = `page-revisions:${cfg.id}`
+  const KEY = `pages:${cfg.id}${langSuffix(lang)}`
+  const REVISION_PREFIX = `page-revisions:${cfg.id}${langSuffix(lang)}`
   const revisionKey = (v: number) => `${REVISION_PREFIX}:v${String(v).padStart(4, '0')}`
 
   async function readRecord(): Promise<Rec> {
@@ -242,7 +264,7 @@ export function defineSingletonPage<Id extends string, C extends object, I = C>(
     r.updatedAt = now
     r.updatedBy = who
     await cmsStorage().setItem(KEY, r)
-    await audit(event, { action: cfg.actions.update, entityType: 'page', entityId: cfg.id, metadata: { draftVersion: version, revision: r.draft.revision, changedSections: sections } })
+    await audit(event, { action: cfg.actions.update, entityType: 'page', entityId: cfg.id, metadata: { lang, draftVersion: version, revision: r.draft.revision, changedSections: sections } })
     return { state: toAdminState(r), revision: r.draft.revision, changedSections: sections }
   }
 
@@ -279,7 +301,7 @@ export function defineSingletonPage<Id extends string, C extends object, I = C>(
     r.updatedAt = now
     r.updatedBy = who
     await cmsStorage().setItem(KEY, r)
-    await audit(event, { action: cfg.actions.publish, entityType: 'page', entityId: cfg.id, metadata: { version: r.published.version, fromStatus } })
+    await audit(event, { action: cfg.actions.publish, entityType: 'page', entityId: cfg.id, metadata: { lang, version: r.published.version, fromStatus } })
     return { state: toAdminState(r), revision: r.draft.revision }
   }
 
@@ -298,7 +320,7 @@ export function defineSingletonPage<Id extends string, C extends object, I = C>(
       action: to === 'archived' ? cfg.actions.archive : cfg.actions.unpublish,
       entityType: 'page',
       entityId: cfg.id,
-      metadata: { fromStatus: from, toStatus: to, publishedVersion: r.published?.version ?? null }
+      metadata: { lang, fromStatus: from, toStatus: to, publishedVersion: r.published?.version ?? null }
     })
     return { state: toAdminState(r), revision: r.draft.revision }
   }
@@ -325,6 +347,7 @@ export function defineSingletonPage<Id extends string, C extends object, I = C>(
   }
 
   return {
+    lang,
     RECORD_KEY: KEY,
     REVISION_PREFIX,
     buildMigratedRecord,

@@ -12,6 +12,9 @@ import type { GanttStep } from '~/composables/useFast'
 // pointer the board tilts a few degrees toward the cursor (transform only).
 // Reduced motion: the resolved board, static, no sweep, no tilt.
 const { hero } = useFastPage()
+const t = useT()
+// Headline lines, split into the masked words the entrance animates.
+const h1Lines = computed(() => [t('Your Production.'), t('Your Rules.')].map((l) => l.split(' ')))
 const scrollTo = useFastScroll()
 const stageRef = ref<HTMLElement | null>(null)
 const step = ref<GanttStep>(0)
@@ -73,7 +76,7 @@ useGsapContext(() => {
   })
 })
 
-const stepLabel = computed(() => ['Queue', 'Scheduled', 'Validated · 1 conflict', 'Adjusted · valid'][step.value])
+const stepLabel = computed(() => t(['Queue', 'Scheduled', 'Validated · 1 conflict', 'Adjusted · valid'][step.value]!))
 </script>
 
 <template>
@@ -88,13 +91,15 @@ const stepLabel = computed(() => ['Queue', 'Scheduled', 'Validated · 1 conflict
     <BaseContainer class="relative z-10 w-full">
       <div class="grid items-center gap-14 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-5">
-          <div data-fh-fade><BaseHeroMarker surface="dark" :label="hero.eyebrow" meta="by PASTI Technology" /></div>
+          <div data-fh-fade><BaseHeroMarker surface="dark" :label="hero.eyebrow" :meta="t('by PASTI Technology')" /></div>
           <div data-fh-fade class="mt-8"><FastMark surface="dark" :size="44" /></div>
           <p data-fh-fade class="mt-3 font-mono text-[11px] uppercase tracking-[0.22em] text-[color:rgba(255,255,255,0.62)]">{{ hero.full }}</p>
-          <h1 class="hero-title hero-title--dark relative mt-7" aria-label="Your Production. Your Rules.">
+          <h1 class="hero-title hero-title--dark relative mt-7" :aria-label="`${t('Your Production.')} ${t('Your Rules.')}`">
             <span aria-hidden="true" class="block">
-              <span class="fh-hmask"><span data-fh-hword class="inline-block">Your</span></span> <span class="fh-hmask"><span data-fh-hword class="inline-block">Production.</span></span><br>
-              <span class="fh-hmask"><span data-fh-hword class="inline-block text-pastiYellow-500">Your</span></span> <span class="fh-hmask"><span data-fh-hword class="inline-block text-pastiYellow-500">Rules.</span></span>
+              <template v-for="(line, li) in h1Lines" :key="li">
+                <template v-for="(w, wi) in line" :key="wi"><span class="fh-hmask"><span data-fh-hword class="inline-block" :class="li === 1 ? 'text-pastiYellow-500' : ''">{{ w }}</span></span>{{ wi < line.length - 1 ? ' ' : '' }}</template>
+                <br v-if="li === 0">
+              </template>
             </span>
             <!-- Playhead: the scheduling "now" line sweeps the headline once. -->
             <span data-fh-sweep aria-hidden="true" class="pointer-events-none absolute -bottom-2 -top-2 left-0 w-[3px] rounded-full bg-pastiYellow-500 opacity-0 shadow-[0_0_24px_rgba(251,186,0,0.7)]" />
@@ -103,8 +108,8 @@ const stepLabel = computed(() => ['Queue', 'Scheduled', 'Validated · 1 conflict
           <div data-fh-fade class="mt-9">
             <BaseHeroCtas
               surface="dark"
-              :primary="{ label: 'Request a Demo' }"
-              :secondary="{ label: 'Explore FAST', down: true }"
+              :primary="{ label: t('Request a Demo') }"
+              :secondary="{ label: t('Explore FAST'), down: true }"
               @primary="scrollTo('demo')"
               @secondary="scrollTo('scheduling')"
             />
@@ -122,7 +127,7 @@ const stepLabel = computed(() => ['Queue', 'Scheduled', 'Validated · 1 conflict
               <span class="h-2.5 w-2.5 rounded-full bg-[color:rgba(3,60,89,0.18)]" />
               <span class="h-2.5 w-2.5 rounded-full bg-[color:rgba(3,60,89,0.18)]" />
               <span class="h-2.5 w-2.5 rounded-full bg-pastiYellow-500" />
-              <span class="ml-3 h-5 flex-1 truncate rounded-full bg-pureWhite px-3 font-mono text-[10px] leading-5 text-[color:rgba(3,60,89,0.45)]">fast · scheduling board</span>
+              <span class="ml-3 h-5 flex-1 truncate rounded-full bg-pureWhite px-3 font-mono text-[10px] leading-5 text-[color:rgba(3,60,89,0.45)]">fast · {{ t('scheduling board') }}</span>
             </div>
             <div class="px-1 pb-3 pt-4 tablet:px-3">
               <FastGantt :step="step" compact view="day" :now="9" />
@@ -131,7 +136,7 @@ const stepLabel = computed(() => ['Queue', 'Scheduled', 'Validated · 1 conflict
               <span class="inline-flex items-center gap-2" aria-live="polite">
                 <span class="h-1.5 w-1.5 rounded-full" :class="step === 2 ? 'bg-[#C2412D]' : step === 3 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(3,60,89,0.35)]'" />{{ stepLabel }}
               </span>
-              <span>Illustrative sample data</span>
+              <span>{{ t('Illustrative sample data') }}</span>
             </figcaption>
           </figure>
         </div>

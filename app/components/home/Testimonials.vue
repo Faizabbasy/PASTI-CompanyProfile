@@ -31,7 +31,8 @@ if (import.meta.client) {
 //
 // Below `desktop` and under reduced motion: no pin; the same cards sit in a
 // native horizontal swipe row with the full quote on each card.
-const label = 'What clients say'
+const t = useT()
+const label = t('What clients say')
 
 // Shared Testimonials CMS when live, else legacy (resolved in pages/index.vue).
 const voices = useTestimonialsSource()
@@ -315,7 +316,7 @@ useGsapContext(() => {
             <div class="flex items-center gap-2">
               <button
                 type="button"
-                aria-label="Previous testimony"
+                :aria-label="t('Previous testimony')"
                 :disabled="active === 0"
                 class="flex h-11 w-11 items-center justify-center rounded-button border border-[color:rgba(3,60,89,0.216)] text-slateNavy transition-colors duration-150 ease-editorial hover:border-cobalt hover:text-cobalt focus-visible:border-cobalt focus-visible:outline-none disabled:opacity-30"
                 @click="goTo(active - 1)"
@@ -326,7 +327,7 @@ useGsapContext(() => {
               </button>
               <button
                 type="button"
-                aria-label="Next testimony"
+                :aria-label="t('Next testimony')"
                 :disabled="active === N - 1"
                 class="flex h-11 w-11 items-center justify-center rounded-button border border-pastiYellow-500 bg-pastiYellow-500 text-slateNavy transition-colors duration-150 ease-editorial hover:bg-slateNavy hover:border-slateNavy hover:text-pureWhite focus-visible:bg-slateNavy focus-visible:text-pureWhite focus-visible:outline-none disabled:opacity-30"
                 @click="goTo(active + 1)"
@@ -395,7 +396,7 @@ useGsapContext(() => {
       <!-- Bottom-right: segmented progress (one segment per voice). -->
       <BaseContainer class="pointer-events-none absolute inset-x-0 bottom-[7svh] z-30">
         <div class="ml-auto flex w-fit items-center gap-4">
-          <span class="font-display text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.63)]">Client voices</span>
+          <span class="font-display text-[10px] font-semibold uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.63)]">{{ t('Client voices') }}</span>
           <span class="flex items-center gap-1.5">
             <span
               v-for="n in N"
@@ -415,7 +416,7 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10">
       <BaseSectionMark surface="light" label="Testimoni" meta="07 / 11" />
       <h2 ref="mobileHeadingRef" class="m-center mt-14 font-display text-token-section-monumental font-bold text-slateNavy">{{ label }}</h2>
-      <p class="m-center mt-4 font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.63)]">{{ total }} client voices</p>
+      <p class="m-center mt-4 font-display text-token-metadata font-semibold uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.63)]">{{ t('{n} client voices', { n: total }) }}</p>
     </BaseContainer>
     <div class="snap-rail relative z-10 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-gutter px-gutter pb-4">
       <article

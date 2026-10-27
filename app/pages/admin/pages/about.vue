@@ -7,6 +7,8 @@ import { ABOUT_LIMITS as LIM, VALUE_ICONS, type AboutAdminState } from '#shared/
 definePageMeta({ layout: 'admin' })
 useHead({ title: 'About · Pages' })
 
+// Bilingual: which language record is being edited (?lang=, default Indonesian).
+const lang = useEditorLang()
 const {
   loadStatus, loadError, refresh, form, state, dirty, activeTab, errors, errorCount, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, publishedIds, canPublish, canUnpublish, canArchive, publishDisabledReason
@@ -14,6 +16,7 @@ const {
   name: 'About',
   endpoint: '/api/admin/pages/about',
   asyncKey: 'admin-about',
+  lang,
   tabs: ABOUT_TABS,
   toForm: toAboutForm,
   toPayload: toAboutPayload,
@@ -60,9 +63,10 @@ const anyErr = (...prefixes: string[]) => Object.keys(errors.value).some((k) => 
     crumb="Pages"
     crumb-to="/admin/pages"
     public-path="/about"
+    :lang="lang"
     flag="NUXT_CMS_ABOUT_PUBLIC_ENABLED"
     :tabs="ABOUT_TABS"
-    preview-path="/admin/preview/about"
+    :preview-path="`/admin/preview/about?lang=${lang}`"
     :code-managed="codeManaged"
     :dummy="state?.dummy !== false"
     :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
@@ -84,7 +88,7 @@ const anyErr = (...prefixes: string[]) => Object.keys(errors.value).some((k) => 
         :state="state"
         :dirty="dirty"
         :busy="busy"
-        preview-href="/admin/preview/about"
+        :preview-href="`/admin/preview/about?lang=${lang}`"
         :can-publish="canPublish"
         :can-unpublish="canUnpublish"
         :can-archive="canArchive"

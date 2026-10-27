@@ -5,6 +5,7 @@
 // delivery path with each stage's output (§2). The "not a replacement"
 // boundary is stated plainly. Reveal: useFastReveal clip.
 const { core } = useDoraPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
 useFastReveal(sectionRef)
@@ -28,7 +29,7 @@ useFastReveal(sectionRef)
           <!-- Configuration layer -->
           <div data-fr class="rounded-[22px] border-2 border-dashed border-[color:rgba(3,60,89,0.22)] bg-pureWhite p-5 tablet:p-6">
             <p class="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.6)]">
-              <span>Your configuration</span><span>per organization</span>
+              <span>{{ t('Your configuration') }}</span><span>{{ t('per organization') }}</span>
             </p>
             <ul class="mt-4 flex flex-wrap gap-2">
               <li v-for="(c, i) in core.config" :key="i" class="inline-flex items-center gap-2 rounded-full bg-surfaceNeutral px-3 py-1.5 font-display text-[13px] font-semibold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.1)]">
@@ -43,7 +44,7 @@ useFastReveal(sectionRef)
           <!-- Core -->
           <div data-fr class="relative overflow-hidden rounded-[22px] bg-slateNavy p-5 text-pureWhite tablet:p-6">
             <p class="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.6)]">
-              <span class="inline-flex items-center gap-2"><DoraMark surface="dark" :size="12" /> core</span><span>reusable</span>
+              <span class="inline-flex items-center gap-2"><DoraMark surface="dark" :size="12" /> {{ t('core') }}</span><span>{{ t('reusable') }}</span>
             </p>
             <ul class="mt-4 grid grid-cols-2 gap-2 tablet:grid-cols-3">
               <li v-for="(m, i) in core.modules" :key="i" class="rounded-[12px] bg-[color:rgba(255,255,255,0.06)] px-3 py-3 ring-1 ring-[color:rgba(255,255,255,0.08)]">
@@ -57,7 +58,7 @@ useFastReveal(sectionRef)
 
       <!-- FCP path -->
       <div class="mt-16 desktop:mt-20">
-        <p data-fr="fade" class="m-center font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">The FCP path</p>
+        <p data-fr="fade" class="m-center font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">{{ t('The FCP path') }}</p>
         <ol class="mt-5 grid grid-cols-2 gap-px overflow-hidden rounded-[18px] bg-[color:rgba(3,60,89,0.1)] ring-1 ring-[color:rgba(3,60,89,0.1)] tablet:grid-cols-3 desktop:grid-cols-6">
           <!-- Reveal on the inner block (inside the padding) — see DoraWhy. -->
           <li v-for="(s, i) in core.path" :key="i" class="bg-pureWhite p-5">

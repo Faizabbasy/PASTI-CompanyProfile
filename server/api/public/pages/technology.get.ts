@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   let technology: Awaited<ReturnType<typeof getPublishedTechnology>>
   try {
-    technology = await getPublishedTechnology()
+    technology = await getPublishedTechnology(cmsLang(event))
   } catch (err) {
     console.error('[cms] public Technology read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

@@ -10,6 +10,7 @@ if (import.meta.client) {
 // These are PASTI's public values; the brand-guide pillars further down are
 // framed as working principles ("How we work") so the two don't compete.
 const { standards } = useAboutPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
 
@@ -30,12 +31,12 @@ useGsapContext(() => {
   <section ref="sectionRef" class="surface-light relative overflow-hidden py-24 tablet:py-32" style="--lift-x: 85%; --lift-y: 20%">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Standards" :meta="`${pad(standards.length)} we live by`" />
+      <BaseSectionMark surface="light" :label="t('Standards')" :meta="t('{n} we live by', { n: pad(standards.length) })" />
       <div class="m-center mt-14 desktop:mt-20">
         <p class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
-          <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Our values
+          <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ t('Our values') }}
         </p>
-        <h2 class="hero-title mt-4">What we stand for<span class="text-pastiYellow-500">.</span></h2>
+        <h2 class="hero-title mt-4">{{ t('What we stand for') }}<span class="text-pastiYellow-500">.</span></h2>
       </div>
 
       <ol class="mt-12 grid gap-4 tablet:grid-cols-2 desktop:mt-16 desktop:gap-5">

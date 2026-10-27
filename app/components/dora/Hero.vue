@@ -11,6 +11,10 @@ import type { VerifyStep } from '~/composables/useDora'
 // once (the Signal), a giant outline DORA sits behind as a watermark.
 // Reduced motion: the verified workspace, static.
 const { hero } = useDoraPage()
+const t = useT()
+// Headline = plain lead + yellow mark, split into the masked words the entrance animates.
+const h1Lead = computed(() => t('Turn Documents Into Structured,').split(' '))
+const h1Mark = computed(() => t('Verifiable Data.').split(' '))
 const scrollTo = useFastScroll()
 const stageRef = ref<HTMLElement | null>(null)
 const step = ref<VerifyStep>(-1)
@@ -64,11 +68,11 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10 w-full">
       <div class="grid items-center gap-14 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-5">
-          <div data-dh-fade><BaseHeroMarker surface="dark" :label="hero.eyebrow" meta="by PASTI Technology" /></div>
+          <div data-dh-fade><BaseHeroMarker surface="dark" :label="hero.eyebrow" :meta="t('by PASTI Technology')" /></div>
           <div data-dh-fade class="mt-8"><DoraMark surface="dark" :size="44" /></div>
           <p data-dh-fade class="mt-3 font-mono text-[11px] uppercase tracking-[0.22em] text-[color:rgba(255,255,255,0.62)]">{{ hero.full }}</p>
-          <h1 class="hero-title hero-title--dark relative mt-7 !text-[clamp(36px,4.4vw,68px)]" aria-label="Turn Documents Into Structured, Verifiable Data.">
-            <span aria-hidden="true" class="block"><span class="dh-hmask"><span data-dh-hword class="inline-block">Turn</span></span> <span class="dh-hmask"><span data-dh-hword class="inline-block">Documents</span></span> <span class="dh-hmask"><span data-dh-hword class="inline-block">Into</span></span> <span class="dh-hmask"><span data-dh-hword class="inline-block">Structured,</span></span> <span class="dh-hmask"><span data-dh-hword class="inline-block text-pastiYellow-500">Verifiable</span></span> <span class="dh-hmask"><span data-dh-hword class="inline-block text-pastiYellow-500">Data.</span></span></span>
+          <h1 class="hero-title hero-title--dark relative mt-7 !text-[clamp(36px,4.4vw,68px)]" :aria-label="`${t('Turn Documents Into Structured,')} ${t('Verifiable Data.')}`">
+            <span aria-hidden="true" class="block"><template v-for="(w, i) in h1Lead" :key="`l${i}`"><span class="dh-hmask"><span data-dh-hword class="inline-block">{{ w }}</span></span>{{ ' ' }}</template><template v-for="(w, i) in h1Mark" :key="`m${i}`"><span class="dh-hmask"><span data-dh-hword class="inline-block text-pastiYellow-500">{{ w }}</span></span>{{ i < h1Mark.length - 1 ? ' ' : '' }}</template></span>
             <!-- Signal: a recognition line crosses the headline once. -->
             <span data-dh-scan aria-hidden="true" class="pointer-events-none absolute -left-2 -right-2 top-0 h-[2px] rounded-full bg-doraCyan opacity-0 shadow-[0_0_22px_rgba(31,214,238,0.8)]" />
           </h1>
@@ -76,8 +80,8 @@ useGsapContext(() => {
           <div data-dh-fade class="mt-9">
             <BaseHeroCtas
               surface="dark"
-              :primary="{ label: 'Request a Demo' }"
-              :secondary="{ label: 'Explore DORA', down: true }"
+              :primary="{ label: t('Request a Demo') }"
+              :secondary="{ label: t('Explore DORA'), down: true }"
               @primary="scrollTo('demo')"
               @secondary="scrollTo('verification')"
             />
@@ -93,8 +97,8 @@ useGsapContext(() => {
           <figure>
             <div data-dh-board class="shadow-[0_50px_100px_-40px_rgba(0,8,16,0.9)]"><DoraWorkspace :step="step" compact /></div>
             <figcaption class="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">
-              <span>Recognise · extract · review · verify</span>
-              <span>Synthetic sample · illustrative values</span>
+              <span>{{ t('Recognise · extract · review · verify') }}</span>
+              <span>{{ t('Synthetic sample · illustrative values') }}</span>
             </figcaption>
           </figure>
         </div>

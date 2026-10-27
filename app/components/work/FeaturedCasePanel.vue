@@ -9,6 +9,8 @@ import type { WorkCaseView } from '#shared/utils/workPublic'
 // the remaining approved visuals at their own ratio.
 // Rows marked [data-cp-anim] settle in on case change (FeaturedCases).
 const props = defineProps<{ item: WorkCaseView }>()
+// `tr` (not `t`): the chapter lists below loop with `t` as the item name.
+const tr = useT()
 
 const gallery = computed(() => props.item.visuals.slice(1))
 const metrics = computed(() => props.item.metrics)
@@ -18,14 +20,14 @@ type ChapterKey = 'challenge' | 'second' | 'outcome' | 'insight' | 'timeline' | 
 const chapters = computed(() => {
   const c = props.item
   const out: Array<{ key: ChapterKey; label: string }> = []
-  if (c.challenge?.length) out.push({ key: 'challenge', label: 'Challenge' })
-  if (c.solution?.length) out.push({ key: 'second', label: 'What we built' })
-  else if (c.request?.length) out.push({ key: 'second', label: 'What was requested' })
-  if (c.outcome?.length || metrics.value.length) out.push({ key: 'outcome', label: 'Outcome' })
-  if (c.insight) out.push({ key: 'insight', label: 'Insight' })
-  if (c.timeline) out.push({ key: 'timeline', label: 'Delivery timeline' })
-  if (c.technologyStack?.length) out.push({ key: 'stack', label: 'Technology stack' })
-  if (gallery.value.length) out.push({ key: 'gallery', label: 'Inside the product' })
+  if (c.challenge?.length) out.push({ key: 'challenge', label: tr('Challenge') })
+  if (c.solution?.length) out.push({ key: 'second', label: tr('What we built') })
+  else if (c.request?.length) out.push({ key: 'second', label: tr('What was requested') })
+  if (c.outcome?.length || metrics.value.length) out.push({ key: 'outcome', label: tr('Outcome') })
+  if (c.insight) out.push({ key: 'insight', label: tr('Insight') })
+  if (c.timeline) out.push({ key: 'timeline', label: tr('Delivery timeline') })
+  if (c.technologyStack?.length) out.push({ key: 'stack', label: tr('Technology stack') })
+  if (gallery.value.length) out.push({ key: 'gallery', label: tr('Inside the product') })
   return out
 })
 const secondItems = computed(() => props.item.solution ?? props.item.request ?? [])
@@ -81,18 +83,18 @@ const secondItems = computed(() => props.item.solution ?? props.item.request ?? 
       <!-- Timeline -->
       <div v-else-if="ch.key === 'timeline' && item.timeline">
         <p class="font-display text-[length:clamp(36px,4vw,56px)] font-extrabold leading-none tracking-[-0.04em] text-pureWhite">{{ item.timeline.total }}</p>
-        <ol class="mt-6 flex gap-1.5" :aria-label="`Delivery timeline, ${item.timeline.total} in total`">
+        <ol class="mt-6 flex gap-1.5" :aria-label="tr('Delivery timeline, {total} in total', { total: item.timeline.total })">
           <li v-for="(s, i) in item.timeline.steps" :key="s.label" class="min-w-0" :style="{ flexGrow: s.weeks, flexBasis: 0 }">
             <span aria-hidden="true" class="block h-3 rounded-full" :class="i === 2 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(255,255,255,0.25)]'" />
-            <span class="mt-2 block font-mono text-[10px] text-[color:rgba(255,255,255,0.5)]">{{ s.weeks }}w</span>
+            <span class="mt-2 block font-mono text-[10px] text-[color:rgba(255,255,255,0.5)]">{{ tr('{n}w', { n: s.weeks }) }}</span>
           </li>
         </ol>
         <ul class="mt-5 grid gap-x-6 gap-y-2 tablet:grid-cols-2">
           <li v-for="(s, i) in item.timeline.steps" :key="s.label" class="flex items-center gap-2.5 text-[14px] text-[color:rgba(255,255,255,0.8)]">
-            <span aria-hidden="true" class="h-2 w-2 shrink-0 rounded-full" :class="i === 2 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(255,255,255,0.35)]'" />{{ s.label }} <span class="text-[color:rgba(255,255,255,0.45)]">· {{ s.weeks }} wk</span>
+            <span aria-hidden="true" class="h-2 w-2 shrink-0 rounded-full" :class="i === 2 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(255,255,255,0.35)]'" />{{ s.label }} <span class="text-[color:rgba(255,255,255,0.45)]">· {{ tr('{n} wk', { n: s.weeks }) }}</span>
           </li>
         </ul>
-        <span class="sr-only">{{ weeks }} weeks in total.</span>
+        <span class="sr-only">{{ tr('{n} weeks in total.', { n: weeks }) }}</span>
       </div>
 
       <!-- Stack -->

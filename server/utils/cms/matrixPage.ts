@@ -23,3 +23,6 @@ export const saveMatrixDraft = page.saveDraft
 export const publishMatrix = page.publish
 export const setMatrixStatus = page.setStatus
 export const getPublishedMatrix = page.getPublished
+
+// Bilingual CMS: the record for one language (English = the original record).
+export const matrixFor = (lang: CmsLang) => page.forLocale(lang)

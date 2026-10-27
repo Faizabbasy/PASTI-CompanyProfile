@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // MEET OPEN (slides 1, 4) — the product's own wordmark as the H1: the yellow
 // ring-and-check is the "O", as on the cover. Left: what OPEN is (a
 // customizable procurement framework, not blank-page build, not rigid SaaS).
@@ -46,8 +47,8 @@ const go = computed(() => mounted.value && pageReady.value)
 
           <div class="op-fade mt-9" style="--d: 700ms">
             <BaseHeroCtas
-              :primary="{ label: hero.primaryCtaLabel }"
-              :secondary="{ label: hero.secondaryCtaLabel, down: true }"
+              :primary="{ label: t(hero.primaryCtaLabel) }"
+              :secondary="{ label: t(hero.secondaryCtaLabel), down: true }"
               @primary="requestDemo()"
               @secondary="scrollTo('problem')"
             />

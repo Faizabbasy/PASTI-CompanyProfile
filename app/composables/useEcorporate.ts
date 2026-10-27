@@ -1,3 +1,5 @@
+import { ECORPORATE_ID } from '~/i18n/content/ecorporate'
+
 /**
  * /e-corporate — e-CORPORATE, Enterprise Digital Platform.
  *
@@ -28,7 +30,7 @@ export interface EcorpUseCase extends EcorpItem {
   steps: string[]
 }
 
-export function useEcorporate() {
+function ecorporateData() {
   // ---- SEO (editable content) -------------------------------------------
   const seo = {
     title: 'e-CORPORATE — Enterprise Digital Platform | PASTI',
@@ -190,6 +192,13 @@ export function useEcorporate() {
     why,
     demo
   }
+}
+
+export type EcorporateData = ReturnType<typeof ecorporateData>
+
+// English base + Indonesian overlay on Indonesian pages (app/i18n/content/ecorporate.ts).
+export function useEcorporate(): EcorporateData {
+  return localize(ecorporateData(), useLocale() === 'id' ? ECORPORATE_ID : undefined)
 }
 
 /** In-page scroll helper shared by e-CORPORATE CTAs (Lenis-aware). */

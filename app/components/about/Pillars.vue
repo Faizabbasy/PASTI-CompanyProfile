@@ -11,6 +11,7 @@ if (import.meta.client) {
 // translation and its own animated glyph; the others collapse to a vertical
 // name. Touch / small screens: an accordion with the same content.
 const { pillars } = useAbout()
+const t = useT()
 const active = ref(0)
 const { setState } = useCustomCursor()
 
@@ -40,18 +41,18 @@ useGsapContext(() => {
   <section ref="sectionRef" class="surface-light relative overflow-hidden py-24 tablet:py-32" style="--lift-x: 85%; --lift-y: 15%">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="How we work" :meta="`${String(pillars.length).padStart(2, '0')} principles`" />
+      <BaseSectionMark surface="light" :label="t('How we work')" :meta="t('{n} principles', { n: String(pillars.length).padStart(2, '0') })" />
       <div class="m-stack mt-14 flex flex-wrap items-end justify-between gap-6 desktop:mt-20">
         <div class="overflow-hidden pb-2">
           <h2 data-pl-head class="hero-title">
-            How PASTI behaves<span class="text-pastiYellow-500">.</span>
+            {{ t('How PASTI behaves') }}<span class="text-pastiYellow-500">.</span>
           </h2>
         </div>
-        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)]"><span class="hidden desktop:inline">Hover a pillar</span><span class="desktop:hidden">Tap a pillar</span></p>
+        <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)]"><span class="hidden desktop:inline">{{ t('Hover a pillar') }}</span><span class="desktop:hidden">{{ t('Tap a pillar') }}</span></p>
       </div>
 
       <!-- Desktop: expanding panels -->
-      <div class="mt-12 hidden h-[560px] gap-3 desktop:flex" role="tablist" aria-label="Brand pillars">
+      <div class="mt-12 hidden h-[560px] gap-3 desktop:flex" role="tablist" :aria-label="t('Brand pillars')">
         <button
           v-for="(p, i) in pillars"
           :key="p.index"
@@ -90,11 +91,11 @@ useGsapContext(() => {
               <span class="block font-display text-[length:clamp(44px,4.4vw,72px)] font-extrabold leading-none tracking-[-0.045em]">{{ p.name }}<span class="text-pastiYellow-500">.</span></span>
               <span class="mt-5 grid max-w-[46rem] grid-cols-2 gap-8 border-t border-[color:rgba(255,255,255,0.16)] pt-5">
                 <span class="block">
-                  <span class="block font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">Meaning</span>
+                  <span class="block font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">{{ t('Meaning') }}</span>
                   <span class="mt-2 block text-token-body text-[color:rgba(255,255,255,0.85)]">{{ p.meaning }}</span>
                 </span>
                 <span class="block">
-                  <span class="block font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">In design</span>
+                  <span class="block font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">{{ t('In design') }}</span>
                   <span class="mt-2 block text-token-body text-[color:rgba(255,255,255,0.65)]">{{ p.visual }}</span>
                 </span>
               </span>
@@ -118,9 +119,9 @@ useGsapContext(() => {
               <div class="mb-6 flex gap-5 rounded-[18px] bg-slateNavy p-5 text-pureWhite">
                 <AboutPillarGlyph :index="i" :active="active === i" class="h-16 w-16 shrink-0" />
                 <div>
-                  <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">Meaning</p>
+                  <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-pastiYellow-500">{{ t('Meaning') }}</p>
                   <p class="mt-1.5 text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.85)]">{{ p.meaning }}</p>
-                  <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">In design</p>
+                  <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">{{ t('In design') }}</p>
                   <p class="mt-1.5 text-[14px] leading-relaxed text-[color:rgba(255,255,255,0.65)]">{{ p.visual }}</p>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+const t = useT()
 
 if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
@@ -128,7 +129,7 @@ useGsapContext(() => {
             </svg>
 
             <!-- Node hit targets (HTML, keyboard reachable) -->
-            <div class="absolute inset-0" aria-label="Pilih fungsi" role="group">
+            <div class="absolute inset-0" :aria-label="t('Choose a function')" role="group">
               <button
                 v-for="(p, i) in pts"
                 :key="p.id"
@@ -156,7 +157,7 @@ useGsapContext(() => {
                 class="pointer-events-auto mt-3 hidden min-h-9 items-center gap-1.5 rounded-full bg-slateNavy px-3.5 text-[12px] font-bold text-pureWhite transition-colors hover:bg-[color:#022436] tablet:inline-flex"
                 @click="openModule(current.module!)"
               >
-                {{ moduleLabel[current.module!] }}
+                {{ t(moduleLabel[current.module!]!) }}
                 <svg viewBox="0 0 16 16" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
               </button>
             </div>
@@ -185,7 +186,7 @@ useGsapContext(() => {
             <span class="font-display text-[20px] font-extrabold tracking-[-0.02em] text-slateNavy">{{ c.label }}</span>
             <span class="mt-2 text-[14px] leading-relaxed text-[color:rgba(3,60,89,0.7)]">{{ c.body }}</span>
             <span class="mt-5 inline-flex items-center gap-2 text-[13px] font-bold text-slateNavy">
-              Lihat modul
+              {{ t('View module') }}
               <svg viewBox="0 0 16 16" class="h-3.5 w-3.5 transition-transform duration-300 ease-editorial group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
             </span>
           </button>

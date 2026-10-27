@@ -1,3 +1,4 @@
+import { PLATFORMS_ID } from '~/i18n/content/platforms'
 export interface Platform {
   index: string
   name: string
@@ -22,7 +23,7 @@ export interface Platform {
  * the client, replacing the earlier "e-CORPORATE: keep high-level, Coming soon"
  * placeholder — both platforms now have real, client-approved positioning.
  */
-export function usePlatforms() {
+function platformsData() {
   const platforms: Platform[] = [
     {
       index: '01',
@@ -45,4 +46,10 @@ export function usePlatforms() {
   ]
 
   return { platforms }
+}
+
+export type PlatformsData = ReturnType<typeof platformsData>
+
+export function usePlatforms() {
+  return localize(platformsData(), useLocale() === 'id' ? PLATFORMS_ID : undefined)
 }

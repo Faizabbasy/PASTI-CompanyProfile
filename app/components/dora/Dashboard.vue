@@ -7,6 +7,7 @@
 // html[data-lite]): no per-frame line drawing — the finished chart fades in
 // once (opacity is composited; stroke-dashoffset repaints every frame).
 const { dashboard } = useDoraPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const chartRef = ref<SVGSVGElement | null>(null)
 const drawn = ref(false)
@@ -51,23 +52,23 @@ const label = 'font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgb
 
       <div class="mt-10 grid gap-3 tablet:mt-12 tablet:grid-cols-3">
         <div data-fr :class="card">
-          <p :class="label">Processed documents</p>
+          <p :class="label">{{ t('Processed documents') }}</p>
           <p class="mt-3 flex items-baseline gap-2"><span class="font-display text-[32px] font-extrabold leading-none tablet:text-[40px]">{{ dashboard.processed.docs }}</span><span class="text-[14px] text-[color:rgba(255,255,255,0.65)]">{{ dashboard.processed.pages }}</span></p>
         </div>
         <div data-fr :class="card">
-          <p :class="label">Waiting verification</p>
+          <p :class="label">{{ t('Waiting verification') }}</p>
           <p class="mt-3 flex items-baseline gap-2"><span class="font-display text-[32px] font-extrabold leading-none tablet:text-[40px] text-doraCyan">{{ dashboard.waiting.docs }}</span><span class="text-[14px] text-[color:rgba(255,255,255,0.65)]">{{ dashboard.waiting.split }}</span></p>
         </div>
         <div data-fr :class="card">
-          <p :class="label">Quality</p>
+          <p :class="label">{{ t('Quality') }}</p>
           <p class="mt-3 flex items-baseline gap-2"><span class="font-display text-[32px] font-extrabold leading-none tablet:text-[40px]">{{ dashboard.quality.value }}</span><span class="text-[14px] text-[color:rgba(255,255,255,0.65)]">{{ dashboard.quality.label }}</span></p>
         </div>
       </div>
 
       <div class="mt-3 grid gap-3 desktop:grid-cols-3">
         <figure data-fr class="desktop:col-span-2" :class="card">
-          <figcaption :class="label">14-day volume · documents per day</figcaption>
-          <svg ref="chartRef" :viewBox="`0 -4 ${W} ${H + 8}`" class="mt-4 h-auto w-full overflow-visible" :class="lite ? ['dd-lite', drawn ? 'opacity-100' : 'opacity-0'] : ''" role="img" :aria-label="`Illustrative 14-day volume, between ${Math.min(...dashboard.volume)} and ${max} documents per day.`">
+          <figcaption :class="label">{{ t('14-day volume · documents per day') }}</figcaption>
+          <svg ref="chartRef" :viewBox="`0 -4 ${W} ${H + 8}`" class="mt-4 h-auto w-full overflow-visible" :class="lite ? ['dd-lite', drawn ? 'opacity-100' : 'opacity-0'] : ''" role="img" :aria-label="t('Illustrative 14-day volume, between {min} and {max} documents per day.', { min: Math.min(...dashboard.volume), max })">
             <g aria-hidden="true">
               <line v-for="g in 4" :key="g" x1="0" :x2="W" :y1="(H / 4) * (g - 1) + 6" :y2="(H / 4) * (g - 1) + 6" stroke="rgba(255,255,255,0.08)" />
               <path :d="area" fill="rgba(31,214,238,0.12)" class="transition-opacity duration-1000" :class="drawn ? 'opacity-100' : 'opacity-0'" />
@@ -77,26 +78,26 @@ const label = 'font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgb
           </svg>
         </figure>
         <div data-fr :class="card">
-          <p :class="label">Needs attention</p>
+          <p :class="label">{{ t('Needs attention') }}</p>
           <div class="mt-4 rounded-[12px] border-l-[3px] border-doraCyan bg-[color:rgba(31,214,238,0.08)] px-4 py-3">
-            <p class="font-display text-[15px] font-bold text-doraCyan">{{ dashboard.waiting.docs }} documents waiting verification</p>
-            <p class="mt-0.5 text-[13px] text-[color:rgba(255,255,255,0.7)]">Open the verification queue</p>
+            <p class="font-display text-[15px] font-bold text-doraCyan">{{ t('{n} documents waiting verification', { n: dashboard.waiting.docs }) }}</p>
+            <p class="mt-0.5 text-[13px] text-[color:rgba(255,255,255,0.7)]">{{ t('Open the verification queue') }}</p>
           </div>
         </div>
       </div>
 
       <div data-fr class="mt-3" :class="card">
-        <p :class="label">Recent documents</p>
+        <p :class="label">{{ t('Recent documents') }}</p>
         <ul class="mt-3 divide-y divide-[color:rgba(255,255,255,0.08)]">
           <li v-for="r in dashboard.recent" :key="r.file" class="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 py-3 tablet:grid-cols-[1.4fr_1fr_1.2fr_auto] tablet:gap-4">
             <span class="truncate font-display text-[14px] font-bold">{{ r.file }}</span>
-            <span class="inline-flex items-center gap-2 justify-self-end text-[12.5px] font-semibold tablet:order-3 tablet:justify-self-start tablet:text-[13px]" :class="r.status === 'Verified' ? 'text-pastiYellow-400' : 'text-doraCyan'"><span aria-hidden="true" class="h-1.5 w-1.5 rounded-full" :class="r.status === 'Verified' ? 'bg-pastiYellow-500' : 'bg-doraCyan'" />{{ r.status === 'Waiting verification' ? 'Waiting' : r.status }}</span>
-            <span class="text-[12.5px] text-[color:rgba(255,255,255,0.6)] tablet:order-2 tablet:text-[13px]">{{ r.type }}<span class="tablet:hidden"> · {{ r.pages }} {{ r.pages === 1 ? 'page' : 'pages' }}</span></span>
-            <span class="hidden font-mono text-[11px] tabular-nums text-[color:rgba(255,255,255,0.55)] tablet:order-4 tablet:block">{{ r.pages }} {{ r.pages === 1 ? 'page' : 'pages' }}</span>
+            <span class="inline-flex items-center gap-2 justify-self-end text-[12.5px] font-semibold tablet:order-3 tablet:justify-self-start tablet:text-[13px]" :class="r.status === 'Verified' ? 'text-pastiYellow-400' : 'text-doraCyan'"><span aria-hidden="true" class="h-1.5 w-1.5 rounded-full" :class="r.status === 'Verified' ? 'bg-pastiYellow-500' : 'bg-doraCyan'" />{{ r.status === 'Waiting verification' ? t('Waiting') : t(r.status) }}</span>
+            <span class="text-[12.5px] text-[color:rgba(255,255,255,0.6)] tablet:order-2 tablet:text-[13px]">{{ t(r.type) }}<span class="tablet:hidden"> · {{ r.pages }} {{ r.pages === 1 ? t('page') : t('pages') }}</span></span>
+            <span class="hidden font-mono text-[11px] tabular-nums text-[color:rgba(255,255,255,0.55)] tablet:order-4 tablet:block">{{ r.pages }} {{ r.pages === 1 ? t('page') : t('pages') }}</span>
           </li>
         </ul>
       </div>
-      <p data-fr="fade" class="m-center mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">Illustrative values · {{ dashboard.note }}</p>
+      <p data-fr="fade" class="m-center mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">{{ t('Illustrative values') }} · {{ dashboard.note }}</p>
     </BaseContainer>
   </section>
 </template>

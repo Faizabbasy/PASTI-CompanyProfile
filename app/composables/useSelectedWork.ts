@@ -1,3 +1,4 @@
+import { SELECTED_WORK_ID } from '~/i18n/content/selectedWork'
 // MILESTONE 4C — Selected Work, total rework per
 // docs/rework-v2/04-homepage-spec.md §3 ("Pinned Project Exchange" / "A
 // Curated Sequence of Execution Proof, Not Ten Slides With Ten Effects").
@@ -51,7 +52,7 @@ export interface SelectedWorkProject {
   treatment: ProjectTreatment
 }
 
-export function useSelectedWork() {
+function selectedWorkData() {
   const projects: SelectedWorkProject[] = [
     {
       index: '01',
@@ -119,4 +120,10 @@ export function useSelectedWork() {
   ]
 
   return { projects }
+}
+
+export type SelectedWorkData = ReturnType<typeof selectedWorkData>
+
+export function useSelectedWork() {
+  return localize(selectedWorkData(), useLocale() === 'id' ? SELECTED_WORK_ID : undefined)
 }

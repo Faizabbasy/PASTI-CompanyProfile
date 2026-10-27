@@ -12,6 +12,7 @@ import gsap from 'gsap'
 const { hero, channels: copy } = useContactPage()
 const { contact, socials, whatsappLink } = useContact()
 const { setState } = useCustomCursor()
+const t = useT()
 
 const stageRef = ref<HTMLElement | null>(null)
 const headingWords = hero.headline.replace(/\.$/, '').split(/\s+/)
@@ -61,7 +62,7 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10">
       <div class="grid gap-14 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-5">
-          <div data-ct-fade><BaseHeroMarker label="Contact" :meta="hero.eyebrow" /></div>
+          <div data-ct-fade><BaseHeroMarker :label="t('Contact')" :meta="hero.eyebrow" /></div>
           <h1 class="hero-title mt-6 desktop:mt-8" :aria-label="hero.headline">
             <span aria-hidden="true">
               <span v-for="(w, i) in headingWords" :key="i" class="ct-mask mr-[0.22em] inline-block last:mr-0"><span data-ct-word class="inline-block">{{ w }}<span v-if="i === headingWords.length - 1" class="text-pastiYellow-500">.</span></span></span>

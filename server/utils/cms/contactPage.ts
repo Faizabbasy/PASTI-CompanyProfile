@@ -30,8 +30,8 @@ export const setContactStatus = contact.setStatus
 
 // Public read path: published snapshot only. The content is copied field by
 // field so nothing outside the public contract can ever leak through.
-export async function getPublishedContact() {
-  const snap = await contact.getPublishedSnapshot()
+export async function getPublishedContact(lang: CmsLang = 'en') {
+  const snap = await contact.forLocale(lang).getPublishedSnapshot()
   if (!snap) return null
   const { hero, channels, form, seo } = snap.content
   return {
@@ -67,3 +67,6 @@ export async function getPublishedContact() {
     }
   }
 }
+
+// Bilingual CMS: the record for one language (English = the original record).
+export const contactFor = (lang: CmsLang) => contact.forLocale(lang)

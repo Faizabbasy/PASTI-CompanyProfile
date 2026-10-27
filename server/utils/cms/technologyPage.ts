@@ -33,8 +33,8 @@ export const setTechnologyStatus = technology.setStatus
 // order kept and the internal sortOrder dropped.
 const publicList = <T extends { active: boolean; sortOrder: number }>(list: T[]) => activeOnly(list).map(({ sortOrder: _s, ...rest }) => rest)
 
-export async function getPublishedTechnology() {
-  const snap = await technology.getPublishedSnapshot()
+export async function getPublishedTechnology(lang: CmsLang = 'en') {
+  const snap = await technology.forLocale(lang).getPublishedSnapshot()
   if (!snap) return null
   const c = snap.content
   return {
@@ -48,3 +48,6 @@ export async function getPublishedTechnology() {
     }
   }
 }
+
+// Bilingual CMS: the record for one language (English = the original record).
+export const technologyFor = (lang: CmsLang) => technology.forLocale(lang)

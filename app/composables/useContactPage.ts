@@ -1,4 +1,5 @@
 import type { InjectionKey } from 'vue'
+import { CONTACT_PAGE_ID } from '~/i18n/content/contact'
 import { PublicContactResponseSchema, type ContactPageContent, type PublicContactPublished } from '#shared/utils/contactPublic'
 
 // Public /contact wording source. The page resolves it ONCE and the Contact
@@ -24,7 +25,7 @@ const PREVIEW_KEY: InjectionKey<ContactPageContent> = Symbol('contact-preview')
 
 export function buildLegacyContactContent(): ContactPageContent {
   const { hero } = useContact()
-  return {
+  const built: ContactPageContent = {
     source: 'legacy',
     cmsVersion: null,
     hero: { eyebrow: hero.eyebrow, headline: hero.heading.replace(/\.$/, ''), body: hero.body },
@@ -49,8 +50,11 @@ export function buildLegacyContactContent(): ContactPageContent {
       success: { title: 'Your brief is ready in WhatsApp.', message: 'Press send in WhatsApp to reach the PASTI team.' },
       error: { title: 'WhatsApp didn’t open.', message: 'Your browser may have blocked the new window. Use the button below to open it.' }
     },
-    seo: { ...pageSeo.contact }
+    seo: { ...localizedPageSeo('contact') }
   }
+  // Indonesian wording on Indonesian pages (app/i18n/content/contact.ts);
+  // English (and migration scripts) get the code copy unchanged.
+  return localize(built, useLocale() === 'id' ? CONTACT_PAGE_ID : undefined)
 }
 
 // Maps the published CMS wording onto the normalized shape.
@@ -89,13 +93,15 @@ export function adaptContactCms(legacy: ContactPageContent, cms: Pick<PublicCont
 // Called once by pages/contact.vue.
 export async function resolveContactPageContent() {
   const legacy = buildLegacyContactContent()
-  const state = useState<ContactPageContent>(STATE_KEY, () => legacy)
+  const locale = useLocale()
+  const state = useState<ContactPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
 
-  const { data } = await useAsyncData('contact-cms-source', async () => {
+  const { data } = await useAsyncData(`contact-cms-source-${locale}`, async () => {
     // SSR: skip the call entirely when the server-side flag is off.
     if (import.meta.server && !contactCmsEnabledOnServer()) return { status: 'disabled' as const }
     try {
-      const raw = await $fetch('/api/public/pages/contact', { timeout: 2500 })
+      // Published record of this page's language; none → that language's code copy.
+      const raw = await $fetch('/api/public/pages/contact', { query: { lang: locale }, timeout: 2500 })
       const parsed = PublicContactResponseSchema.safeParse(raw)
       if (!parsed.success) {
         if (import.meta.server) console.error('[contact] CMS response failed validation — using legacy content')
@@ -128,6 +134,6 @@ export function provideContactPreview(content: ContactPageContent) {
 export function useContactPage(): ContactPageContent {
   const preview = inject(PREVIEW_KEY, null)
   if (preview) return preview
-  const state = useState<ContactPageContent | undefined>(STATE_KEY)
+  const state = useState<ContactPageContent | undefined>(`${STATE_KEY}-${useLocale()}`)
   return state.value ?? buildLegacyContactContent()
 }

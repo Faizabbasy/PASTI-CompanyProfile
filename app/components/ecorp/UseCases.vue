@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
+const t = useT()
 
 // USE CASES — six TEMPORARY example scenarios (illustrative; not client
 // implementations — said on the page and flagged in the data).
@@ -69,7 +70,7 @@ const stepOn = (panel: number) => current.value === -1 || panel === current.valu
       <EcorpMarks label="06 / 12 · Example scenarios" />
 
       <BaseContainer class="relative z-10">
-        <BaseSectionMark surface="light" label="Use cases" meta="06 / 12" />
+        <BaseSectionMark surface="light" :label="t('Use cases')" meta="06 / 12" />
         <div class="mt-8 flex items-end justify-between gap-10">
           <EcorpHeading eyebrow="Use cases" before="Where it " mark="fits in" />
           <div class="flex w-64 shrink-0 flex-col items-end gap-3 pb-2">
@@ -81,7 +82,7 @@ const stepOn = (panel: number) => current.value === -1 || panel === current.valu
       </BaseContainer>
 
       <div class="uc-clip relative z-10 mt-10 overflow-hidden">
-        <ol ref="trackRef" data-motion-track class="flex w-max gap-6 px-[max(4vw,calc((100vw-1440px)/2+4vw))]" aria-label="Example scenarios">
+        <ol ref="trackRef" data-motion-track class="flex w-max gap-6 px-[max(4vw,calc((100vw-1440px)/2+4vw))]" :aria-label="t('Example scenarios')">
           <li
             v-for="(u, i) in useCases"
             :key="u.id"
@@ -91,7 +92,7 @@ const stepOn = (panel: number) => current.value === -1 || panel === current.valu
           >
             <span aria-hidden="true" class="ec-outline absolute -right-2 -top-6 text-[150px]">{{ pad(i + 1) }}</span>
             <div class="relative flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.5)]">
-              <span class="flex items-center gap-2"><span aria-hidden="true" class="h-1.5 w-1.5" :class="i === current ? 'bg-pastiYellow-500' : 'bg-[color:rgba(3,60,89,0.3)]'" />Scenario {{ pad(i + 1) }}</span>
+              <span class="flex items-center gap-2"><span aria-hidden="true" class="h-1.5 w-1.5" :class="i === current ? 'bg-pastiYellow-500' : 'bg-[color:rgba(3,60,89,0.3)]'" />{{ t('Scenario') }} {{ pad(i + 1) }}</span>
               <LayoutBrandMark surface="light" :height="10" />
             </div>
             <h3 class="relative mt-6 max-w-[80%] font-display text-[length:clamp(26px,2.4vw,38px)] font-extrabold leading-[1.05] tracking-[-0.03em] text-slateNavy">{{ u.title }}</h3>
@@ -125,14 +126,14 @@ const stepOn = (panel: number) => current.value === -1 || panel === current.valu
     <div class="relative py-24 tablet:py-32 desktop:hidden">
       <BaseGridLines tone="light" />
       <BaseContainer class="relative z-10">
-        <BaseSectionMark surface="light" label="Use cases" meta="06 / 12" />
+        <BaseSectionMark surface="light" :label="t('Use cases')" meta="06 / 12" />
         <EcorpHeading class="mt-12" eyebrow="Use cases" before="Where it " mark="fits in" />
         <p class="m-center mt-4 max-w-[22rem] font-mono text-[11px] uppercase leading-relaxed tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">{{ useCaseNote }}</p>
       </BaseContainer>
-      <ul ref="railRef" aria-label="Example scenarios" class="snap-rail relative z-10 mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-px-gutter px-gutter pb-2">
+      <ul ref="railRef" :aria-label="t('Example scenarios')" class="snap-rail relative z-10 mt-10 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain scroll-px-gutter px-gutter pb-2">
         <li v-for="(u, i) in useCases" :key="u.id" class="flex w-[80vw] max-w-[380px] shrink-0 snap-start flex-col border border-[color:rgba(3,60,89,0.14)] bg-pureWhite p-6">
           <div class="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.5)]">
-            <span>Scenario {{ pad(i + 1) }}</span>
+            <span>{{ t('Scenario') }} {{ pad(i + 1) }}</span>
             <LayoutBrandMark surface="light" :height="9" class="opacity-70" />
           </div>
           <h3 class="mt-6 font-display text-[23px] font-bold leading-[1.12] tracking-[-0.02em] text-slateNavy">{{ u.title }}</h3>

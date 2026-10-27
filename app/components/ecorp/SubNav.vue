@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+const t = useT()
 
 // Compact product sub-navigation (brief: Overview · Capabilities · Use Cases
 // · Architecture · Governance · Contact). Not a second navbar: a slim ruled
@@ -38,7 +39,7 @@ onBeforeUnmount(() => st?.kill())
 
 <template>
   <nav
-    aria-label="e-CORPORATE page sections"
+    :aria-label="t('e-CORPORATE page sections')"
     class="fixed bottom-6 left-1/2 z-40 hidden -translate-x-1/2 transition-[opacity,transform] duration-500 ease-editorial desktop:block"
     :class="visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-6 opacity-0'"
     :inert="!visible || undefined"
@@ -54,11 +55,11 @@ onBeforeUnmount(() => st?.kill())
         :aria-current="active === it.id ? 'true' : undefined"
         @click="scrollTo(it.id)"
       >
-        {{ it.label }}
+        {{ t(it.label) }}
         <span aria-hidden="true" class="absolute inset-x-3 bottom-0 h-[2px] origin-left bg-pastiYellow-500 transition-transform duration-300" :class="active === it.id ? 'scale-x-100' : 'scale-x-0'" />
       </button>
       <button type="button" class="h-11 bg-pastiYellow-500 px-4 font-display text-[13px] font-bold text-slateNavy focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-slateNavy" @click="scrollTo('demo')">
-        Contact
+        {{ t('Contact') }}
       </button>
     </div>
   </nav>

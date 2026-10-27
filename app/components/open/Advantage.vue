@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // OPEN ADVANTAGE & COMPARISON (slides 23, 24, 25).
 // Six advantages, each carrying one sixth of OPEN's ring — together they
 // close it. Then the deck's comparison (Traditional SaaS / Build From
@@ -51,7 +52,7 @@ const cell = (v: string | true | null) => (v === true ? 'Ya' : v === null ? 'Tid
 
         <div class="mt-10 hidden overflow-hidden rounded-[24px] border border-[color:rgba(3,60,89,0.12)] bg-pureWhite tablet:block">
           <table class="w-full table-fixed text-left">
-            <caption class="sr-only">Perbandingan Traditional SaaS, Build From Scratch, dan OPEN</caption>
+            <caption class="sr-only">{{ t('Comparison of Traditional SaaS, Build From Scratch and OPEN') }}</caption>
             <thead>
               <tr>
                 <th scope="col" class="w-[31%] px-6 py-5" />
@@ -67,9 +68,9 @@ const cell = (v: string | true | null) => (v === true ? 'Ya' : v === null ? 'Tid
                 <td v-for="(v, j) in r.values" :key="j" class="px-4 py-4 text-center text-[14.5px]" :class="j === 2 ? 'bg-[color:rgba(3,60,89,0.96)] font-bold text-pureWhite' : 'text-[color:rgba(3,60,89,0.72)]'">
                   <template v-if="v === true">
                     <svg viewBox="0 0 16 16" class="mx-auto h-4 w-4" :class="j === 2 ? 'text-pastiYellow-500' : 'text-slateNavy'" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><path d="M3 8.5l3 3 7-7" /></svg>
-                    <span class="sr-only">Ya</span>
+                    <span class="sr-only">{{ t('Yes') }}</span>
                   </template>
-                  <template v-else-if="v === null"><span aria-hidden="true">—</span><span class="sr-only">Tidak</span></template>
+                  <template v-else-if="v === null"><span aria-hidden="true">—</span><span class="sr-only">{{ t('No') }}</span></template>
                   <template v-else>{{ v }}</template>
                 </td>
               </tr>

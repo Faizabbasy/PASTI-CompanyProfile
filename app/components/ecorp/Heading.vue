@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
+const t = useT()
 
 // e-CORPORATE section head — "Structured Precision": mono eyebrow with a
 // square yellow tick, a tight display heading, and one phrase underlined by a
@@ -49,7 +50,7 @@ const dark = computed(() => props.surface === 'dark')
   <div ref="rootRef" class="m-center">
     <div v-if="eyebrow" class="overflow-hidden">
       <p data-eh-line class="m-center-row inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em]" :class="dark ? 'text-[color:rgba(255,255,255,0.62)]' : 'text-[color:rgba(3,60,89,0.62)]'">
-        <span aria-hidden="true" class="h-1.5 w-1.5 bg-pastiYellow-500" />{{ eyebrow }}
+        <span aria-hidden="true" class="h-1.5 w-1.5 bg-pastiYellow-500" />{{ t(eyebrow) }}
       </p>
     </div>
     <div class="overflow-hidden pb-[0.14em]" :class="eyebrow ? 'mt-4' : ''">
@@ -61,10 +62,10 @@ const dark = computed(() => props.surface === 'dark')
           size === 'lg' ? 'text-[length:clamp(36px,5vw,76px)] leading-[0.98]' : 'text-[length:clamp(32px,3.8vw,58px)] leading-[1.02]'
         ]"
       >
-        {{ before }}<span v-if="mark" data-eh-rule class="eh-rule">{{ mark }}</span>{{ after }}<span v-if="dot" class="text-pastiYellow-500">.</span>
+        {{ t(before) }}<span v-if="mark" data-eh-rule class="eh-rule">{{ t(mark) }}</span>{{ t(after) }}<span v-if="dot" class="text-pastiYellow-500">.</span>
       </h2>
     </div>
-    <p v-if="lede" class="m-center mt-5 max-w-[32rem] text-[16px] leading-relaxed tablet:text-[17px]" :class="dark ? 'text-[color:rgba(255,255,255,0.74)]' : 'text-[color:rgba(3,60,89,0.76)]'">{{ lede }}</p>
+    <p v-if="lede" class="m-center mt-5 max-w-[32rem] text-[16px] leading-relaxed tablet:text-[17px]" :class="dark ? 'text-[color:rgba(255,255,255,0.74)]' : 'text-[color:rgba(3,60,89,0.76)]'">{{ t(lede) }}</p>
   </div>
 </template>
 

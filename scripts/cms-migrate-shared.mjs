@@ -19,6 +19,8 @@ import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 
+// --lang id → build and write the Indonesian record (default: English, the original record).
+const LANG = process.argv.includes('--lang') && process.argv[process.argv.indexOf('--lang') + 1] === 'id' ? 'id' : 'en'
 const NAMES = { clients: 'Clients', faqs: 'FAQs', ctas: 'Global CTAs' }
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const [id, ...rest] = process.argv.slice(2)
@@ -31,7 +33,11 @@ if (!NAMES[id]) {
 }
 const NAME = NAMES[id]
 const TAG = `[migrate-${id}]`
-const VERSION = `${id}-v1`
+const VERSION = LANG === 'id' ? `${id}-id-v1` : `${id}-v1`
+if (LANG === 'id' && id === 'clients') {
+  console.error(`${TAG} Clients are language-neutral (one record for both languages) — no --lang id.`)
+  process.exit(1)
+}
 
 if (process.env.NODE_ENV === 'production') {
   console.error(`${TAG} Refusing to run with NODE_ENV=production.`)
@@ -43,6 +49,7 @@ const jiti = createJiti(import.meta.url, {
   interopDefault: true
 })
 const load = (p) => jiti.import(resolve(root, p))
+await (await import('./lib/nuxt-shims.mjs')).installNuxtShims(load, LANG)
 
 const schemas = await load('shared/utils/sharedContentSchema.ts')
 const source = await load('app/composables/useSharedContentSource.ts')
@@ -60,8 +67,9 @@ if (id === 'clients') {
     adaptPublic(source.clientsSource, content)
   ]
 } else if (id === 'faqs') {
-  const { codeFaq } = await load('app/composables/useFaq.ts')
-  const code = codeFaq().items
+  const { codeFaq, useFaq } = await load('app/composables/useFaq.ts')
+  // --lang id: the Indonesian code copy (useFaq applies the overlay; no CMS outside Nuxt).
+  const code = (LANG === 'id' ? useFaq() : codeFaq()).items
   content = { items: code.map((f, i) => ({ id: `faq-${f.index}`, question: f.question, answer: f.answer, sortOrder: i + 1, active: true })) }
   schema = schemas.FaqsContentSchema
   roundTrip = () => [code, adaptPublic(source.faqsSource, content)]
@@ -74,7 +82,7 @@ if (id === 'clients') {
     useServices: (await load('app/composables/useServices.ts')).useServices
   })
   const { useFooter } = await load('app/composables/useFooter.ts')
-  const cta = codeFinalCta()
+  const cta = LANG === 'id' ? useFinalCta() : codeFinalCta()
   const { contact, socials } = useFooter()
   const url = (k) => socials.find((s) => s.key === k)?.url ?? ''
   content = {
@@ -115,8 +123,9 @@ if (!isDeepStrictEqual(JSON.parse(JSON.stringify(today)), JSON.parse(JSON.string
 }
 
 const serverMod = await load('server/utils/cms/sharedContent.ts')
-const RECORD_KEY = serverMod.SHARED_RECORD_KEYS[id]
-const REVISION_PREFIX = serverMod.SHARED_REVISION_PREFIXES[id]
+const engine = serverMod.sharedPages[id].forLocale(LANG)
+const RECORD_KEY = engine.RECORD_KEY
+const REVISION_PREFIX = engine.REVISION_PREFIX
 const summary = { version: VERSION, items: content.items?.length ?? null, roundTrip: 'identical to the current site' }
 
 const storage = await openCmsStore(root)
@@ -144,7 +153,7 @@ if (DRY) {
 }
 
 const now = new Date().toISOString()
-const record = serverMod.buildMigratedSharedRecord(id, content, VERSION, now)
+const record = engine.buildMigratedRecord(content, VERSION, now)
 
 // Remove the dev-seed snapshot history so no dummy version survives.
 const revisionKeys = await storage.getKeys(REVISION_PREFIX)

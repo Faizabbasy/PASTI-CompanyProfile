@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const lp = useLocalePath()
+const t = useT()
 // WHY PASTI — restrained: the brief's five points (descriptions TEMPORARY,
 // no credentials, counts or awards). Ruled numbered list beside the PASTI
 // signature and a link to /about.
@@ -9,17 +11,17 @@ const { why } = useEcorporatePage()
   <section id="why-pasti" class="relative overflow-hidden bg-pureWhite py-24 tablet:py-32">
     <BaseGridLines tone="light" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Why PASTI" meta="11 / 12" />
+      <BaseSectionMark surface="light" :label="t('Why PASTI')" meta="11 / 12" />
       <div class="mt-12 grid gap-12 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-5">
           <p class="m-center-row flex items-center gap-3">
             <EcorpWordmark class="text-[15px]" />
-            <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)]">by</span>
+            <span class="font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)]">{{ t('by') }}</span>
             <LayoutBrandMark surface="light" :height="16" />
           </p>
           <EcorpHeading class="mt-6" size="md" before="Why " mark="PASTI" />
-          <NuxtLink to="/about" class="group mt-8 inline-flex min-h-11 items-center gap-2 font-display text-[15px] font-bold text-slateNavy focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pastiYellow-500">
-            About PASTI
+          <NuxtLink :to="lp('/about')" class="group mt-8 inline-flex min-h-11 items-center gap-2 font-display text-[15px] font-bold text-slateNavy focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-pastiYellow-500">
+            {{ t('About PASTI') }}
             <svg viewBox="0 0 16 16" class="h-4 w-4 transition-transform duration-300 ease-editorial group-hover:translate-x-1" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
           </NuxtLink>
         </div>

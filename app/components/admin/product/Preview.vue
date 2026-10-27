@@ -23,8 +23,8 @@ interface PreviewResponse {
 }
 
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData(`admin-${props.slug}-preview`, () =>
-  cmsFetch<PreviewResponse>(`/api/admin/pages/${props.slug}/preview`)
+const { data, error, refresh, status } = await useAsyncData(`admin-${props.slug}-preview-${useEditorLang()}`, () =>
+  cmsFetch<PreviewResponse>(`/api/admin/pages/${props.slug}/preview`, { query: { lang: useEditorLang() } })
 )
 
 const legacy = props.buildLegacy()

@@ -6,14 +6,16 @@
 // report catalog (representative reports, no figures) and sample roles.
 // Merges the brief's Reporting section (owner D4). Source §5, §10, §11, §14.
 const { governance, sample } = useMatrixPage()
+// `tr`, not `t`: the template loops over tabs as `t`.
+const tr = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const tab = ref<'ledger' | 'audit'>('ledger')
 const tabsRef = ref<HTMLButtonElement[]>([])
 useMatrixReveal(sectionRef)
 
 const tabs = [
-  { id: 'ledger', label: 'Movement ledger' },
-  { id: 'audit', label: 'Audit trail' }
+  { id: 'ledger', label: tr('Movement ledger') },
+  { id: 'audit', label: tr('Audit trail') }
 ] as const
 const onKey = (e: KeyboardEvent) => {
   if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return
@@ -34,7 +36,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
       <!-- Ledger / audit -->
       <div data-fr class="mt-12 overflow-hidden rounded-[22px] bg-pureWhite ring-1 ring-[color:rgba(3,60,89,0.1)]">
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[color:rgba(3,60,89,0.08)] px-4 py-3 tablet:px-5">
-          <div role="tablist" aria-label="Evidence views" class="inline-flex rounded-full bg-surfaceNeutral p-1" @keydown="onKey">
+          <div role="tablist" :aria-label="tr('Evidence views')" class="inline-flex rounded-full bg-surfaceNeutral p-1" @keydown="onKey">
             <button
               v-for="(t, i) in tabs"
               :id="`mxg-tab-${t.id}`"
@@ -49,10 +51,10 @@ const pad = (n: number) => String(n).padStart(2, '0')
               :class="tab === t.id ? 'bg-slateNavy text-pureWhite' : 'text-[color:rgba(3,60,89,0.7)] hover:text-slateNavy'"
               @click="tab = t.id"
             >
-              {{ t.label }}<span class="sr-only"> ({{ i + 1 }} of 2)</span>
+              {{ t.label }}<span class="sr-only"> ({{ tr('{i} of 2', { i: i + 1 }) }})</span>
             </button>
           </div>
-          <p class="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">{{ tab === 'ledger' ? `${sample.code} · ${sample.name}` : 'Stock-impacting events' }}</p>
+          <p class="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">{{ tab === 'ledger' ? `${sample.code} · ${sample.name}` : tr('Stock-impacting events') }}</p>
         </div>
 
         <div id="mxg-panel" role="tabpanel" :aria-labelledby="`mxg-tab-${tab}`" class="px-4 py-2 tablet:px-5">
@@ -60,8 +62,8 @@ const pad = (n: number) => String(n).padStart(2, '0')
           <table class="hidden w-full text-left text-[13px] tablet:table">
             <thead>
               <tr class="font-mono text-[10px] uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.55)]">
-                <template v-if="tab === 'ledger'"><th class="py-2.5 font-medium">Time</th><th class="py-2.5 font-medium">Movement</th><th class="py-2.5 font-medium">Qty</th><th class="py-2.5 font-medium">From → to</th><th class="py-2.5 font-medium">Before → after</th><th class="py-2.5 font-medium">Actor</th><th class="py-2.5 font-medium">Ref</th></template>
-                <template v-else><th class="py-2.5 font-medium">Time</th><th class="py-2.5 font-medium">Actor</th><th class="py-2.5 font-medium">Action</th><th class="py-2.5 font-medium">Object</th><th class="py-2.5 font-medium">Before</th><th class="py-2.5 font-medium">After</th><th class="py-2.5 font-medium">Ref</th></template>
+                <template v-if="tab === 'ledger'"><th class="py-2.5 font-medium">{{ tr('Time') }}</th><th class="py-2.5 font-medium">{{ tr('Movement') }}</th><th class="py-2.5 font-medium">{{ tr('Qty') }}</th><th class="py-2.5 font-medium">{{ tr('From → to') }}</th><th class="py-2.5 font-medium">{{ tr('Before → after') }}</th><th class="py-2.5 font-medium">{{ tr('Actor') }}</th><th class="py-2.5 font-medium">{{ tr('Ref') }}</th></template>
+                <template v-else><th class="py-2.5 font-medium">{{ tr('Time') }}</th><th class="py-2.5 font-medium">{{ tr('Actor') }}</th><th class="py-2.5 font-medium">{{ tr('Action') }}</th><th class="py-2.5 font-medium">{{ tr('Object') }}</th><th class="py-2.5 font-medium">{{ tr('Before') }}</th><th class="py-2.5 font-medium">{{ tr('After') }}</th><th class="py-2.5 font-medium">{{ tr('Ref') }}</th></template>
               </tr>
             </thead>
             <tbody class="divide-y divide-[color:rgba(3,60,89,0.08)] text-slateNavy">
@@ -95,13 +97,13 @@ const pad = (n: number) => String(n).padStart(2, '0')
             </template>
           </ul>
         </div>
-        <p class="border-t border-[color:rgba(3,60,89,0.08)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.45)] tablet:px-5">Synthetic records · roles shown instead of people · searchable and exportable for review</p>
+        <p class="border-t border-[color:rgba(3,60,89,0.08)] px-4 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.45)] tablet:px-5">{{ tr('Synthetic records · roles shown instead of people · searchable and exportable for review') }}</p>
       </div>
 
       <div class="mt-4 grid gap-4 desktop:grid-cols-12">
         <!-- Enterprise controls -->
         <div data-fr class="rounded-[22px] bg-slateNavy p-6 text-pureWhite desktop:col-span-7">
-          <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">Enterprise control</p>
+          <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">{{ tr('Enterprise control') }}</p>
           <ul class="mt-4 grid gap-x-8 tablet:grid-cols-2">
             <li v-for="(c, i) in governance.controls" :key="i" class="grid grid-cols-[1.75rem_1fr] gap-2 border-t border-[color:rgba(255,255,255,0.1)] py-3.5">
               <span class="font-mono text-[10.5px] tabular-nums text-pastiYellow-400">{{ pad(i + 1) }}</span>
@@ -111,19 +113,19 @@ const pad = (n: number) => String(n).padStart(2, '0')
               </span>
             </li>
           </ul>
-          <p class="mt-4 text-[12.5px] text-[color:rgba(255,255,255,0.6)]">Sample roles: {{ governance.roles.join(' · ') }}. Names and rights follow your organization.</p>
+          <p class="mt-4 text-[12.5px] text-[color:rgba(255,255,255,0.6)]">{{ tr('Sample roles: {roles}. Names and rights follow your organization.', { roles: governance.roles.join(' · ') }) }}</p>
         </div>
 
         <!-- Report catalog -->
         <div data-fr class="rounded-[22px] bg-pureWhite p-6 ring-1 ring-[color:rgba(3,60,89,0.1)] desktop:col-span-5">
-          <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">Reporting & operational control</p>
+          <p class="font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">{{ tr('Reporting & operational control') }}</p>
           <ul class="mt-3 divide-y divide-[color:rgba(3,60,89,0.08)]">
             <li v-for="(r, i) in governance.reports" :key="i" class="flex items-center justify-between gap-3 py-2.5">
               <span class="font-display text-[14.5px] font-semibold text-slateNavy">{{ r }}</span>
-              <span class="shrink-0 font-mono text-[10px] uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.5)]">Preview · Export</span>
+              <span class="shrink-0 font-mono text-[10px] uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.5)]">{{ tr('Preview · Export') }}</span>
             </li>
           </ul>
-          <p class="mt-3 text-[12.5px] leading-snug text-[color:rgba(3,60,89,0.6)]">Representative reports. Definitions, parameters and scope are agreed during configuration.</p>
+          <p class="mt-3 text-[12.5px] leading-snug text-[color:rgba(3,60,89,0.6)]">{{ tr('Representative reports. Definitions, parameters and scope are agreed during configuration.') }}</p>
         </div>
       </div>
     </BaseContainer>

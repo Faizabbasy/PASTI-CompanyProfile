@@ -131,7 +131,8 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      htmlAttrs: { lang: 'en' },
+      // Per-page language is set by usePageSeo (id / en); this is the default.
+      htmlAttrs: { lang: 'id' },
       // Site-wide share defaults; each page sets its own title, description,
       // card and canonical through usePageSeo() (useSeo.ts).
       meta: [
@@ -154,6 +155,16 @@ export default defineNuxtConfig({
   // Nuxt adds a <link rel="prefetch"> for every dynamic chunk, which made
   // phones download it anyway — drop the hint for three's chunks only.
   hooks: {
+    // Bilingual site (owner 2026-10-27): Indonesian at /…, English at /en/….
+    // Every public page gets an /en twin that renders the same component;
+    // useLocale() reads the language from the path. Admin and dev preview
+    // routes stay single-language.
+    'pages:extend'(pages) {
+      const twins = pages
+        .filter((p) => !p.path.startsWith('/admin') && !p.path.startsWith('/preview'))
+        .map((p) => ({ ...p, path: p.path === '/' ? '/en' : `/en${p.path}`, name: p.name ? `${p.name}___en` : undefined, meta: { ...(p.meta ?? {}), locale: 'en' } }))
+      pages.push(...twins)
+    },
     'build:manifest'(manifest) {
       for (const key of Object.keys(manifest)) {
         if (key.includes('node_modules/three')) {

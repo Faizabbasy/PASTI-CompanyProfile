@@ -1,3 +1,4 @@
+import { FAQ_ID } from '~/i18n/content/faq'
 import { faqsSource } from './useSharedContentSource'
 
 export interface FaqItem {
@@ -20,8 +21,9 @@ export interface FaqItem {
  * (numbered 01, 02 … in their CMS order).
  */
 export function useFaq() {
+  // Published FAQ record of this page's language (per-language source).
   const cms = faqsSource.read()
-  return cms ? { items: cms as FaqItem[] } : codeFaq()
+  return cms ? { items: cms as FaqItem[] } : localize(codeFaq(), useLocale() === 'id' ? FAQ_ID : undefined)
 }
 
 // The code list (also the source for scripts/cms-migrate-shared.mjs).

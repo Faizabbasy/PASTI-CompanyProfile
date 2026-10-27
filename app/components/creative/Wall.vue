@@ -16,6 +16,7 @@ if (import.meta.client) {
 // The title interpolation carries the same spaces the former literal copy
 // rendered, so legacy markup stays byte-identical.
 const wall = useCreativePage().wall
+const t = useT()
 const visuals = wall.visuals
 const COLS = 4
 const ROWS = 4 // 4 rows so the wrapped board always overfills the frame (no empty bands on phones)
@@ -154,21 +155,21 @@ useGsapContext(() => {
 <template>
   <section data-header-theme="dark" class="relative overflow-hidden bg-slateNavy pt-24 text-pureWhite tablet:pt-32">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" :label="wall.sectionLabel" :meta="`${String(visuals.length).padStart(2, '0')} visuals`" />
+      <BaseSectionMark surface="dark" :label="wall.sectionLabel" :meta="t('{n} visuals', { n: String(visuals.length).padStart(2, '0') })" />
       <div class="m-stack mt-12 flex flex-wrap items-end justify-between gap-6 desktop:mt-16">
         <div class="overflow-hidden pb-2">
           <h2 data-cw-head class="hero-title hero-title--dark">
             {{ ` ${wall.titleLead} ` }}<span class="text-pastiYellow-500">{{ wall.titleAccent }}.</span>
           </h2>
         </div>
-        <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">← Drag to explore →</p>
+        <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">{{ t('← Drag to explore →') }}</p>
       </div>
     </BaseContainer>
 
     <div
       ref="frameRef"
       class="cw-frame relative mt-10 h-[min(68svh,560px)] tablet:mt-12 tablet:h-[min(78svh,760px)] cursor-grab touch-pan-y overflow-hidden"
-      @mouseenter="setState('view', 'Drag')"
+      @mouseenter="setState('view', t('Drag'))"
       @mouseleave="setState('default'); hovered = null"
     >
       <figure

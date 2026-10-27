@@ -16,6 +16,8 @@ if (import.meta.client) {
 // Touch / small screens: each row is a tappable accordion that opens onto its
 // image and description (first row open), 44px+ targets throughout.
 const { eyebrow: servicesEyebrow, title: servicesHeading, items: services } = useTechnologyPage().capabilities
+const t = useT()
+const lp = useLocalePath()
 
 const sectionRef = ref<HTMLElement | null>(null)
 const listRef = ref<HTMLElement | null>(null)
@@ -95,7 +97,7 @@ useGsapContext(() => {
     <BaseGridLines tone="light" />
 
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Capabilities" :meta="`${String(services.length).padStart(2, '0')} services`" />
+      <BaseSectionMark surface="light" :label="t('Capabilities')" :meta="t('{n} services', { n: String(services.length).padStart(2, '0') })" />
 
       <div class="mt-14 grid gap-6 desktop:mt-20 desktop:grid-cols-12 desktop:items-end">
         <div class="m-center desktop:col-span-7">
@@ -111,7 +113,7 @@ useGsapContext(() => {
           </div>
         </div>
         <p class="m-center font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)] desktop:col-span-4 desktop:col-start-9 desktop:text-right">
-          <span class="hidden desktop:inline">Hover to preview</span><span class="desktop:hidden">Tap to expand</span>
+          <span class="hidden desktop:inline">{{ t('Hover to preview') }}</span><span class="desktop:hidden">{{ t('Tap to expand') }}</span>
         </p>
       </div>
 
@@ -131,16 +133,16 @@ useGsapContext(() => {
               <h3 class="font-display text-[length:clamp(26px,2.4vw,38px)] font-bold leading-[1.08] tracking-[-0.03em] text-slateNavy transition-colors duration-500 group-hover/row:text-pureWhite">
                 {{ s.title }}
               </h3>
-              <ul class="mt-4 flex flex-wrap gap-1.5" :aria-label="`${s.title} — key areas`">
+              <ul class="mt-4 flex flex-wrap gap-1.5" :aria-label="t('{title} — key areas', { title: s.title })">
                 <li v-for="k in s.keywords" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.75)] group-hover/row:ring-[color:rgba(255,255,255,0.22)]">{{ k }}</li>
               </ul>
             </div>
             <div class="relative z-10 col-span-5 pr-4">
               <p class="text-token-body text-[color:rgba(3,60,89,0.72)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.78)]">{{ s.body }}</p>
               <div v-if="s.related.length" class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-                <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)] transition-colors duration-300 group-hover/row:text-pastiYellow-500">Related work</span>
+                <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)] transition-colors duration-300 group-hover/row:text-pastiYellow-500">{{ t('Related work') }}</span>
                 <template v-for="w in s.related" :key="w.label">
-                  <NuxtLink v-if="w.to" :to="w.to" class="cap-link text-[14px] font-semibold text-slateNavy transition-colors duration-300 group-hover/row:text-pureWhite">{{ w.label }} <span aria-hidden="true">↗</span></NuxtLink>
+                  <NuxtLink v-if="w.to" :to="lp(w.to)" class="cap-link text-[14px] font-semibold text-slateNavy transition-colors duration-300 group-hover/row:text-pureWhite">{{ w.label }} <span aria-hidden="true">↗</span></NuxtLink>
                   <span v-else class="text-[14px] font-semibold text-[color:rgba(3,60,89,0.72)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.72)]">{{ w.label }}</span>
                 </template>
               </div>
@@ -184,10 +186,10 @@ useGsapContext(() => {
                     <li v-for="k in s.keywords" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)]">{{ k }}</li>
                   </ul>
                   <div v-if="s.related.length" class="mt-5 border-t border-[color:rgba(3,60,89,0.12)] pt-4">
-                    <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">Related work</p>
+                    <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">{{ t('Related work') }}</p>
                     <ul class="mt-2 flex flex-col gap-1">
                       <li v-for="w in s.related" :key="w.label">
-                        <NuxtLink v-if="w.to" :to="w.to" class="inline-flex min-h-11 items-center gap-2 text-[15px] font-semibold text-slateNavy underline decoration-pastiYellow-500 decoration-2 underline-offset-4">{{ w.label }} <span aria-hidden="true">↗</span></NuxtLink>
+                        <NuxtLink v-if="w.to" :to="lp(w.to)" class="inline-flex min-h-11 items-center gap-2 text-[15px] font-semibold text-slateNavy underline decoration-pastiYellow-500 decoration-2 underline-offset-4">{{ w.label }} <span aria-hidden="true">↗</span></NuxtLink>
                         <span v-else class="inline-flex min-h-11 items-center text-[15px] font-semibold text-[color:rgba(3,60,89,0.72)]">{{ w.label }}</span>
                       </li>
                     </ul>

@@ -1,3 +1,5 @@
+import { PAGE_SEO_ID } from '~/i18n/content/seo'
+
 /**
  * Search + share metadata for every page (2026-10-16). One place to edit the
  * title/description Google shows and the card WhatsApp/LinkedIn/X render when
@@ -79,12 +81,29 @@ export function useSiteUrl(path = '/') {
 /** Title, description, share card and canonical URL for the current page. */
 export function usePageSeo(seo: PageSeo) {
   const route = useRoute()
-  const url = seo.canonical || useSiteUrl(route.path)
+  const locale = localeOfPath(route.path)
+  const own = useSiteUrl(route.path)
+  // A CMS canonical that is just the page's default address (…/fast) is
+  // per-page, not per-language: on /en/fast it would declare the English
+  // page a duplicate of the Indonesian one. Only a genuinely different
+  // canonical overrides the page's own URL.
+  const url = seo.canonical && seo.canonical !== useSiteUrl(stripLocale(route.path)) ? seo.canonical : own
   const image = useSiteUrl(seo.image)
+  const idUrl = useSiteUrl(localePath(route.path, 'id'))
+  const enUrl = useSiteUrl(localePath(route.path, 'en'))
 
   if (seo.noIndex) useHead({ meta: [{ name: 'robots', content: 'noindex' }] })
 
-  useHead({ link: [{ rel: 'canonical', href: url }] })
+  useHead({
+    htmlAttrs: { lang: locale },
+    link: [
+      { rel: 'canonical', href: url },
+      // The same page in each language (Indonesian is the default).
+      { rel: 'alternate', hreflang: 'id', href: idUrl },
+      { rel: 'alternate', hreflang: 'en', href: enUrl },
+      { rel: 'alternate', hreflang: 'x-default', href: idUrl }
+    ]
+  })
   useSeoMeta({
     title: seo.title,
     description: seo.description,
@@ -95,6 +114,8 @@ export function usePageSeo(seo: PageSeo) {
     ogImageWidth: 1200,
     ogImageHeight: 630,
     ogImageAlt: seo.title,
+    ogLocale: locale === 'id' ? 'id_ID' : 'en_US',
+    ogLocaleAlternate: locale === 'id' ? 'en_US' : 'id_ID',
     twitterCard: 'summary_large_image',
     twitterTitle: seo.title,
     twitterDescription: seo.description,
@@ -102,4 +123,12 @@ export function usePageSeo(seo: PageSeo) {
   })
   // Who publishes the page (schema.org Organization, see useStructuredData).
   useOrganizationLd()
+}
+
+/**
+ * pageSeo for the current language (Indonesian overlay in
+ * app/i18n/content/seo.ts). Outside a Nuxt app → English (migration scripts).
+ */
+export function localizedPageSeo(key: keyof typeof pageSeo): PageSeo {
+  return localize(pageSeo[key], useLocale() === 'id' ? PAGE_SEO_ID[key] : undefined) as PageSeo
 }

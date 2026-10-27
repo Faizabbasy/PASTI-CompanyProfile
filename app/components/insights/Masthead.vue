@@ -11,6 +11,7 @@ import gsap from 'gsap'
 const { hero, contents: { articles, topics } } = useInsightsPage()
 const count = articles.length
 const pad = (n: number) => String(n).padStart(2, '0')
+const t = useT()
 
 const toContents = () => {
   const el = document.getElementById('insights-contents')
@@ -58,7 +59,7 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10 w-full">
       <div class="grid items-center gap-14 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-7">
-          <div data-im-fade><BaseHeroMarker :label="hero.eyebrow" :meta="`${pad(count)} articles · ${pad(topics.length)} topics`" /></div>
+          <div data-im-fade><BaseHeroMarker :label="hero.eyebrow" :meta="t('{a} articles · {n} topics', { a: pad(count), n: pad(topics.length) })" /></div>
 
           <h1 class="hero-title hero-title--word im-mask relative mt-6 select-none desktop:mt-[3svh]" :aria-label="hero.headline">
             <span data-im-word class="relative inline-block" aria-hidden="true">
@@ -103,7 +104,7 @@ useGsapContext(() => {
           </div>
           <p class="m-center-row mt-8 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">
             <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-pastiYellow-500" />
-            <span class="min-w-0 truncate">Now showing · <span class="text-slateNavy">{{ articles[shown]?.title }}</span></span>
+            <span class="min-w-0 truncate">{{ t('Now showing') }} · <span class="text-slateNavy">{{ articles[shown]?.title }}</span></span>
           </p>
         </div>
       </div>

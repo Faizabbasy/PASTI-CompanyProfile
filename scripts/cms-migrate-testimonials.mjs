@@ -34,6 +34,8 @@ import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join, resolve } from 'node:path'
 
+// --lang id → build and write the Indonesian record (default: English, the original record).
+const LANG = process.argv.includes('--lang') && process.argv[process.argv.indexOf('--lang') + 1] === 'id' ? 'id' : 'en'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = new Set(process.argv.slice(2))
 const DRY = args.has('--dry-run')
@@ -51,6 +53,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const jiti = createJiti(import.meta.url, { alias: { '#shared': resolve(root, 'shared'), '~': resolve(root, 'app') }, interopDefault: true })
 const load = (p) => jiti.import(resolve(root, p))
+await (await import('./lib/nuxt-shims.mjs')).installNuxtShims(load, LANG)
 
 const { useTestimonials } = await load('app/composables/useTestimonials.ts')
 const { useClients } = await load('app/composables/useClients.ts')

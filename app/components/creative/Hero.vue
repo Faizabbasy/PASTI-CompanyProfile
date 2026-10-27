@@ -12,6 +12,7 @@ import gsap from 'gsap'
 const { hero, wall } = useCreativePage()
 const { eyebrow, lede: introBody } = hero
 const visuals = wall.visuals
+const t = useT()
 
 // Balanced two-line break (owner 2026-10-08): line two starts a new line —
 // "Creative that gets / business results." — and its last word is outlined.
@@ -144,7 +145,7 @@ useGsapContext(() => {
     <BaseContainer class="relative z-20 flex flex-1 flex-col desktop:justify-center">
       <div class="grid items-center gap-14 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-7">
-          <div data-ch-fade><BaseHeroMarker surface="yellow" :label="`${eyebrow} studio`" :meta="hero.markerMeta" /></div>
+          <div data-ch-fade><BaseHeroMarker surface="yellow" :label="t('{eyebrow} studio', { eyebrow })" :meta="hero.markerMeta" /></div>
 
           <h1 class="hero-title pointer-events-none mt-6 desktop:mt-[3svh]">
             <template v-for="(w, i) in words" :key="i"><br v-if="i === breakAt"><span class="ch-mask"><span data-ch-word class="inline-block will-change-transform" :class="i === words.length - 1 ? 'ch-outline' : ''">{{ w }}</span><span v-if="i === words.length - 1">.</span></span>{{ ' ' }}</template>

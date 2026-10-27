@@ -44,6 +44,7 @@ useGsapContext(() => {
     return () => tl.kill()
   })
 })
+const t = useT()
 </script>
 
 <template>
@@ -60,11 +61,11 @@ useGsapContext(() => {
       <BaseContainer>
         <div class="m-center-row flex items-center gap-2 overflow-hidden">
           <span aria-hidden="true" class="h-1.5 w-1.5 rounded-full bg-cobalt" />
-          <p data-sw-head class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.68)]">Selected Work</p>
+          <p data-sw-head class="font-display text-token-metadata font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.68)]">{{ t('Selected Work') }}</p>
         </div>
         <div class="m-center mt-3 overflow-hidden pb-1">
           <h2 data-sw-head class="font-display text-[length:clamp(40px,11vw,64px)] font-extrabold leading-[0.95] tracking-[-0.04em] text-slateNavy">
-            Success Project<span class="text-pastiYellow-500">.</span>
+            {{ t('Success Project') }}<span class="text-pastiYellow-500">.</span>
           </h2>
         </div>
       </BaseContainer>
@@ -74,7 +75,7 @@ useGsapContext(() => {
       <ul
         ref="trackRef"
         class="snap-rail relative mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-gutter px-gutter pb-2"
-        aria-label="Selected work projects"
+        :aria-label="t('Selected work projects')"
       >
         <li
           v-for="(project, i) in projects"

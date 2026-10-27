@@ -1,4 +1,5 @@
 import { PROOF_VALUE_PATTERN } from '#shared/utils/aboutSchema'
+import { ABOUT_PAGE_ID } from '~/i18n/content/about'
 import { PublicAboutResponseSchema, type AboutPageContent, type PublicAboutPublished } from '#shared/utils/aboutPublic'
 
 // Public /about content source (Step 3). The page resolves content ONCE and
@@ -18,7 +19,7 @@ export function buildLegacyAboutContent(): AboutPageContent {
   const about = useAbout()
   const c = about.company
   const { link: whatsappLink } = useWhatsapp()
-  return {
+  const built: AboutPageContent = {
     source: 'legacy',
     cmsVersion: null,
     hero: {
@@ -46,7 +47,7 @@ export function buildLegacyAboutContent(): AboutPageContent {
     milestones: c.milestones.map((m) => ({ key: m.year, year: m.year, text: m.text })),
     founder: {
       ...c.founder,
-      photoAlt: `${c.founder.name}, ${c.founder.role} of PASTI`
+      photoAlt: translate('{name}, {role} of PASTI', useLocale(), { name: c.founder.name, role: c.founder.role })
     },
     venn: {
       positioning: about.positioning,
@@ -54,6 +55,9 @@ export function buildLegacyAboutContent(): AboutPageContent {
       stats: about.stats.map((s) => ({ key: s.label, value: s.value, decimals: 0, suffix: s.suffix ?? '', label: s.label }))
     }
   }
+  // Indonesian wording on Indonesian pages (app/i18n/content/about.ts);
+  // English (and migration scripts) get the code copy unchanged.
+  return localize(built, useLocale() === 'id' ? ABOUT_PAGE_ID : undefined)
 }
 
 // Maps ONLY the CMS fields with an exact equivalent in the current design.
@@ -108,13 +112,15 @@ export function adaptAboutCms(legacy: AboutPageContent, cms: PublicAboutPublishe
 // Called once by pages/about.vue.
 export async function resolveAboutPageContent() {
   const legacy = buildLegacyAboutContent()
-  const state = useState<AboutPageContent>(STATE_KEY, () => legacy)
+  const locale = useLocale()
+  const state = useState<AboutPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
 
-  const { data } = await useAsyncData('about-cms-source', async () => {
+  const { data } = await useAsyncData(`about-cms-source-${locale}`, async () => {
     // SSR: skip the call entirely when the server-side flag is off.
     if (import.meta.server && !aboutCmsEnabledOnServer()) return { status: 'disabled' as const }
     try {
-      const raw = await $fetch('/api/public/pages/about', { timeout: 2500 })
+      // Published record of this page's language; none → that language's code copy.
+      const raw = await $fetch('/api/public/pages/about', { query: { lang: locale }, timeout: 2500 })
       const parsed = PublicAboutResponseSchema.safeParse(raw)
       if (!parsed.success) {
         if (import.meta.server) console.error('[about] CMS response failed validation — using legacy content')
@@ -139,6 +145,6 @@ function aboutCmsEnabledOnServer(): boolean {
 
 // Every About section reads content through this.
 export function useAboutPage(): AboutPageContent {
-  const state = useState<AboutPageContent | undefined>(STATE_KEY)
+  const state = useState<AboutPageContent | undefined>(`${STATE_KEY}-${useLocale()}`)
   return state.value ?? buildLegacyAboutContent()
 }

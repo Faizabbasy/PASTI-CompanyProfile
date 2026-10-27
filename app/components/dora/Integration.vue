@@ -6,6 +6,7 @@
 // CSS, paused off-screen and under reduced motion). No vendor names.
 // Below: what is agreed before build (§10.1).
 const { integration } = useDoraPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const live = ref(false)
 useFastReveal(sectionRef)
@@ -45,7 +46,7 @@ const right = computed(() => integration.boundaries.filter((_, i) => i % 2 === 1
         <div class="relative grid h-[220px] w-[220px] place-items-center rounded-full bg-navyDeep-950 ring-1 ring-[color:rgba(31,214,238,0.45)] shadow-[0_0_0_14px_rgba(31,214,238,0.05),0_0_0_28px_rgba(31,214,238,0.03)]">
           <div class="text-center">
             <DoraMark surface="dark" :size="30" />
-            <p class="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">Product core</p>
+            <p class="mt-2 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">{{ t('Product core') }}</p>
           </div>
         </div>
         <ul class="grid gap-4">
@@ -62,7 +63,7 @@ const right = computed(() => integration.boundaries.filter((_, i) => i % 2 === 1
       <!-- Below desktop: list hanging off the core -->
       <div class="mt-12 desktop:hidden">
         <div data-fr class="inline-flex items-center gap-3 rounded-full bg-navyDeep-950 px-5 py-3 ring-1 ring-[color:rgba(31,214,238,0.45)]">
-          <DoraMark surface="dark" :size="18" /><span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">Product core</span>
+          <DoraMark surface="dark" :size="18" /><span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">{{ t('Product core') }}</span>
         </div>
         <ul class="ml-6 border-l border-dashed border-[color:rgba(31,214,238,0.5)] pl-5">
           <li v-for="(b, i) in integration.boundaries" :key="i" data-fr class="relative pt-5">
@@ -76,12 +77,12 @@ const right = computed(() => integration.boundaries.filter((_, i) => i % 2 === 1
       </div>
 
       <p data-fr="fade" class="m-center mt-8 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">
-        <span class="mr-2 inline-block w-6 border-t border-dashed border-doraCyan align-middle" />Dashed = agreed data contract · {{ integration.note }}
+        <span class="mr-2 inline-block w-6 border-t border-dashed border-doraCyan align-middle" />{{ t('Dashed = agreed data contract') }} · {{ integration.note }}
       </p>
 
       <!-- Agreed before build -->
       <div class="mt-14 grid gap-6 border-t border-[color:rgba(255,255,255,0.12)] pt-10 desktop:grid-cols-12">
-        <p data-fr class="m-center font-display text-[22px] font-bold tracking-[-0.02em] desktop:col-span-4">Agreed before build<span class="text-pastiYellow-500">.</span></p>
+        <p data-fr class="m-center font-display text-[22px] font-bold tracking-[-0.02em] desktop:col-span-4">{{ t('Agreed before build') }}<span class="text-pastiYellow-500">.</span></p>
         <ul class="grid gap-x-8 tablet:grid-cols-2 desktop:col-span-8">
           <li v-for="(c, i) in integration.contract" :key="i" data-fr class="flex items-start gap-3 border-b border-[color:rgba(255,255,255,0.1)] py-3.5 text-[14.5px] leading-snug text-[color:rgba(255,255,255,0.82)]">
             <span aria-hidden="true" class="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-doraCyan" />{{ c }}

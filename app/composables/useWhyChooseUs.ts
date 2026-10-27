@@ -1,3 +1,4 @@
+import { WHY_CHOOSE_US_ID } from '~/i18n/content/whyChooseUs'
 export interface DeliveryLane {
   /** Step label — PASTI's own working method (useAbout().method). */
   label: string
@@ -22,7 +23,7 @@ export interface DeliveryLane {
  * brand method steps from useAbout() — an illustrative sprint, not a client
  * project and not a delivery-time claim.
  */
-export function useWhyChooseUs() {
+function whyChooseUsData() {
   const eyebrow = 'Why Choose Us'
   // `highlight` sits on the PASTI Yellow marker bar.
   const heading = { highlight: 'Fast', after: 'work is our focus.' }
@@ -45,4 +46,10 @@ export function useWhyChooseUs() {
   const board = { title: 'Delivery timeline', done: 'Done', progress: 'In progress', finish: 'Delivered' }
 
   return { eyebrow, heading, body, reasons, lanes, weeks, board }
+}
+
+export type WhyChooseUsData = ReturnType<typeof whyChooseUsData>
+
+export function useWhyChooseUs() {
+  return localize(whyChooseUsData(), useLocale() === 'id' ? WHY_CHOOSE_US_ID : undefined)
 }

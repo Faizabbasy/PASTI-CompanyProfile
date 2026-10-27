@@ -18,6 +18,8 @@ if (import.meta.client) {
 // copy rendered, so legacy markup stays byte-identical.
 const { sectionLabel, eyebrow, title, cards: projects } = useTechnologyPage().work
 const { setState } = useCustomCursor()
+const t = useT()
+const lp = useLocalePath()
 
 const stageRef = ref<HTMLElement | null>(null)
 const trackRef = ref<HTMLElement | null>(null)
@@ -87,7 +89,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
       <BaseGridLines tone="light" />
 
       <BaseContainer class="relative z-10">
-        <BaseSectionMark surface="light" :label="sectionLabel" :meta="`${pad(projects.length)} projects`" />
+        <BaseSectionMark surface="light" :label="sectionLabel" :meta="t('{n} projects', { n: pad(projects.length) })" />
         <div class="m-center-row mt-10 flex items-end justify-between gap-8 desktop:mt-8">
           <div class="m-center">
             <div class="overflow-hidden">
@@ -114,7 +116,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
       <ul
         ref="trackRef"
         class="snap-rail relative z-10 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain scroll-px-gutter px-gutter pb-2 desktop:mt-12 desktop:gap-8 desktop:px-[max(4vw,calc((100vw-1440px)/2+4vw))]"
-        aria-label="Technology projects"
+        :aria-label="t('Technology projects')"
       >
         <li
           v-for="(p, i) in projects"
@@ -122,10 +124,10 @@ const pad = (n: number) => String(n).padStart(2, '0')
           class="w-[78vw] max-w-[340px] shrink-0 snap-start desktop:w-auto desktop:max-w-none"
         >
           <NuxtLink
-            :to="p.to"
+            :to="lp(p.to)"
             class="group/tw block rounded-[22px] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-slateNavy"
-            :aria-label="`${p.kind === 'case' ? 'Read the case study' : 'View project'}: ${p.title}`"
-            @mouseenter="setState('view', p.kind === 'case' ? 'Case study' : 'View')"
+            :aria-label="`${p.kind === 'case' ? t('Read the case study') : t('View project')}: ${p.title}`"
+            @mouseenter="setState('view', p.kind === 'case' ? t('Case study') : t('View'))"
             @mouseleave="setState('default')"
           >
             <div
@@ -142,7 +144,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
                 draggable="false"
               >
               <span class="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em]" :class="p.kind === 'case' ? 'bg-pastiYellow-500 text-slateNavy' : 'bg-[color:rgba(3,60,89,0.92)] text-pureWhite'">
-                {{ p.kind === 'case' ? 'Case study' : 'Project' }}
+                {{ p.kind === 'case' ? t('Case study') : t('Project') }}
               </span>
               <!-- Approved metrics, only with their own case. -->
               <div v-if="p.metrics.length" class="absolute inset-x-3 bottom-3 grid grid-cols-2 gap-px overflow-hidden rounded-[14px] bg-[color:rgba(3,60,89,0.15)]">
@@ -156,7 +158,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
               <span class="font-mono text-[11px] uppercase tracking-[0.16em] text-cobalt">{{ p.category }}</span>
               <h3 class="mt-1.5 font-display text-[22px] font-bold leading-[1.15] tracking-[-0.02em] text-slateNavy">{{ p.title }}</h3>
               <p class="mt-2 inline-flex items-center gap-2 text-[14px] font-semibold text-[color:rgba(3,60,89,0.7)] transition-colors duration-300 group-hover/tw:text-slateNavy">
-                {{ p.client ?? (p.kind === 'case' ? 'Read the case study' : 'View in Work') }}
+                {{ p.client ?? (p.kind === 'case' ? t('Read the case study') : t('View in Work')) }}
                 <svg viewBox="0 0 16 16" class="h-3.5 w-3.5 transition-transform duration-300 group-hover/tw:translate-x-1" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
               </p>
             </div>

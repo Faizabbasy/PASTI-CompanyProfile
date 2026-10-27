@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
 
   let page: Awaited<ReturnType<typeof getPublishedShared>>
   try {
-    page = await getPublishedShared('faqs')
+    page = await getPublishedShared('faqs', cmsLang(event))
   } catch (err) {
     console.error('[cms] public FAQs read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

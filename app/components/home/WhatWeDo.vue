@@ -42,10 +42,12 @@ const [primaryService, mediumAService, mediumBService, accentService] = services
 // invented — the section name (04-homepage-spec.md §2), the positioning line
 // and the brand promise (00-brand-guide.md §01), and the four service
 // titles/bodies from useServices().
-const headlineWords = ['What', 'We', 'Build'] as const
+const t = useT()
+// Three words either way — the decode/slice choreography is built per word.
+const headlineWords: readonly string[] = useLocale() === 'id' ? ['Yang', 'Kami', 'Bangun'] : ['What', 'We', 'Build']
 const headlineFinal = headlineWords.join(' ')
-const eyebrow = 'Technology × Creative Execution Partner'
-const supportLine = 'We turn complexity into certainty.'
+const eyebrow = t('Technology × Creative Execution Partner')
+const supportLine = t('We turn complexity into certainty.')
 
 type CardKey = 'primary' | 'mediumA' | 'mediumB' | 'accent'
 interface CardConfig {

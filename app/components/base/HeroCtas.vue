@@ -39,12 +39,13 @@ const tagFor = (href?: string) => ({ button: 'button', route: NuxtLink, 'same-ta
 const ext = (href?: string) => {
   switch (linkKind(href)) {
     case 'button': return { type: 'button' }
-    case 'route': return { to: href }
+    case 'route': return { to: lp(href!) }
     case 'same-tab': return { href }
     case 'external': return { href, target: '_blank', rel: 'noopener noreferrer' }
   }
 }
 void props
+const lp = useLocalePath()
 </script>
 
 <template>

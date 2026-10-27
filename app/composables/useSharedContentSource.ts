@@ -23,19 +23,23 @@ import {
 //   - Safe outside a Nuxt app (migration scripts load the code composables
 //     with jiti): read() then simply returns null.
 
-function defineSharedSource<P, T>(opts: { id: SharedId; flag: string; content: ZodType<P>; adapt: (content: P) => T }) {
-  const STATE_KEY = `shared-${opts.id}`
+// `perLocale`: one record per language (FAQs, Global CTAs); otherwise one
+// record for both languages (Clients: logos + names).
+function defineSharedSource<P, T>(opts: { id: SharedId; flag: string; content: ZodType<P>; adapt: (content: P) => T; perLocale?: boolean }) {
+  const stateKey = (locale: Locale) => (opts.perLocale ? `shared-${opts.id}-${locale}` : `shared-${opts.id}`)
   const PREVIEW_KEY: InjectionKey<T> = Symbol(`shared-${opts.id}-preview`)
   const responseSchema = publicSharedResponseSchema(opts.content)
 
   async function resolve() {
-    const state = useState<T | null | undefined>(STATE_KEY, () => undefined)
+    const locale = useLocale()
+    const key = stateKey(locale)
+    const state = useState<T | null | undefined>(key, () => undefined)
     if (state.value !== undefined) return
-    const { data } = await useAsyncData(`shared-${opts.id}-cms-source`, async () => {
+    const { data } = await useAsyncData(`${key}-cms-source`, async () => {
       // SSR: skip the call entirely when the server-side flag is off.
       if (import.meta.server && !enabledOnServer()) return null
       try {
-        const parsed = responseSchema.safeParse(await $fetch(`/api/public/shared/${opts.id}`, { timeout: 2500 }))
+        const parsed = responseSchema.safeParse(await $fetch(`/api/public/shared/${opts.id}`, { query: opts.perLocale ? { lang: locale } : undefined, timeout: 2500 }))
         if (!parsed.success) {
           if (import.meta.server) console.error(`[shared:${opts.id}] CMS response failed validation — using code content`)
           return null
@@ -66,7 +70,7 @@ function defineSharedSource<P, T>(opts: { id: SharedId; flag: string; content: Z
         const preview = inject(PREVIEW_KEY, null)
         if (preview) return preview
       }
-      return useState<T | null | undefined>(STATE_KEY).value ?? null
+      return useState<T | null | undefined>(stateKey(useLocale())).value ?? null
     } catch {
       return null
     }
@@ -89,6 +93,7 @@ export const clientsSource = defineSharedSource({
 export const faqsSource = defineSharedSource({
   id: 'faqs',
   flag: 'faqsPublicEnabled',
+  perLocale: true,
   content: PublicFaqsContentSchema,
   adapt: (c: PublicFaqsContent): SharedFaq[] => c.items.map((i, n) => ({ index: String(n + 1).padStart(2, '0'), question: i.question, answer: i.answer }))
 })
@@ -96,6 +101,7 @@ export const faqsSource = defineSharedSource({
 export const ctasSource = defineSharedSource({
   id: 'ctas',
   flag: 'ctasPublicEnabled',
+  perLocale: true,
   content: CtasContentSchema,
   adapt: (c: CtasContent): CtasContent => c
 })

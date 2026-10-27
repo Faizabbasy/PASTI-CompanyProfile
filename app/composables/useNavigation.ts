@@ -1,3 +1,4 @@
+import { NAVIGATION_ID } from '~/i18n/content/navigation'
 export interface NavItem {
   label: string
   to: string
@@ -44,7 +45,7 @@ export interface NavChild {
  * link). Child descriptions reuse existing copy: the service pages' hero
  * headlines and each product's SEO tagline.
  */
-export function useNavigation() {
+function navigationData() {
   const navItems: NavItem[] = [
     { label: 'Home', to: '/' },
     {
@@ -84,4 +85,10 @@ export function useNavigation() {
   const primaryCta = { label: "Let's Talk", to: '/contact' }
 
   return { navItems, primaryCta }
+}
+
+export type NavigationData = ReturnType<typeof navigationData>
+
+export function useNavigation() {
+  return localize(navigationData(), useLocale() === 'id' ? NAVIGATION_ID : undefined)
 }

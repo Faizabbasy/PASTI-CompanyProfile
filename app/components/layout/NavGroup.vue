@@ -17,7 +17,7 @@ const openGroup = useState<string | null>('nav-open-group', () => null)
 
 const id = `nav-${props.item.label.toLowerCase()}`
 const isOpen = computed(() => openGroup.value === id)
-const isCurrent = computed(() => !!props.item.children?.some((c) => route.path === c.to))
+const isCurrent = computed(() => !!props.item.children?.some((c) => stripLocale(route.path) === c.to))
 
 const rootRef = ref<HTMLElement | null>(null)
 const triggerRef = ref<HTMLButtonElement | null>(null)
@@ -52,6 +52,7 @@ const onEscape = () => {
 
 watch(() => route.path, close)
 onBeforeUnmount(() => clearTimeout(closeTimer))
+const lp = useLocalePath()
 </script>
 
 <template>
@@ -102,10 +103,10 @@ onBeforeUnmount(() => clearTimeout(closeTimer))
           <ul>
             <li v-for="c in item.children" :key="c.to">
               <NuxtLink
-                :to="c.to"
+                :to="lp(c.to)"
                 class="nav-panel-row group/row grid grid-cols-[3rem_1fr_auto] items-center gap-x-4 rounded-[16px] px-3 py-2.5 transition-colors duration-300 ease-editorial hover:bg-[color:rgba(3,60,89,0.045)] focus-visible:bg-[color:rgba(3,60,89,0.045)] focus-visible:outline-none"
-                :class="{ 'bg-[color:rgba(3,60,89,0.045)]': route.path === c.to }"
-                :aria-current="route.path === c.to ? 'page' : undefined"
+                :class="{ 'bg-[color:rgba(3,60,89,0.045)]': stripLocale(route.path) === c.to }"
+                :aria-current="stripLocale(route.path) === c.to ? 'page' : undefined"
                 @click="close"
                 @mouseenter="setState('link')"
                 @mouseleave="setState('default')"
@@ -113,7 +114,7 @@ onBeforeUnmount(() => clearTimeout(closeTimer))
                 <span
                   aria-hidden="true"
                   class="grid h-12 w-12 place-items-center rounded-[12px] transition-colors duration-300 ease-editorial"
-                  :class="route.path === c.to ? 'bg-pastiYellow-500 text-slateNavy' : 'bg-slateNavy text-pureWhite group-hover/row:bg-pastiYellow-500 group-hover/row:text-slateNavy'"
+                  :class="stripLocale(route.path) === c.to ? 'bg-pastiYellow-500 text-slateNavy' : 'bg-slateNavy text-pureWhite group-hover/row:bg-pastiYellow-500 group-hover/row:text-slateNavy'"
                 >
                   <LayoutNavIcon :name="c.icon" class="h-[22px] w-[22px]" />
                 </span>

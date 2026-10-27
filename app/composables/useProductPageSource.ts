@@ -31,7 +31,8 @@ export function defineProductPageSource<L extends ProductPageMeta>(opts: {
   schema: ZodType
   buildLegacy: () => L
 }) {
-  const STATE_KEY = `${opts.slug}-page-content`
+  // Per language: /fast and /en/fast must never share cached content.
+  const stateKey = (locale: Locale) => `${opts.slug}-page-content-${locale}`
   const PREVIEW_KEY: InjectionKey<L> = Symbol(`${opts.slug}-preview`)
   const responseSchema = publicProductResponseSchema(opts.schema)
 
@@ -51,13 +52,16 @@ export function defineProductPageSource<L extends ProductPageMeta>(opts: {
 
   // Called once by the public page.
   async function resolve() {
+    const locale = useLocale()
     const legacy = opts.buildLegacy()
-    const state = useState<L>(STATE_KEY, () => legacy)
-    const { data } = await useAsyncData(`${opts.slug}-cms-source`, async () => {
+    const state = useState<L>(stateKey(locale), () => legacy)
+    const { data } = await useAsyncData(`${opts.slug}-cms-source-${locale}`, async () => {
       // SSR: skip the call entirely when the server-side flag is off.
       if (import.meta.server && !enabledOnServer()) return { status: 'disabled' as const }
       try {
-        const parsed = responseSchema.safeParse(await $fetch(`/api/public/pages/${opts.slug}`, { timeout: 2500 }))
+        // The published record for this page's language (Indonesian / English);
+        // nothing published in that language → the code copy of that language.
+        const parsed = responseSchema.safeParse(await $fetch(`/api/public/pages/${opts.slug}`, { query: { lang: locale }, timeout: 2500 }))
         if (!parsed.success) {
           if (import.meta.server) console.error(`[${opts.slug}] CMS response failed validation — using legacy content`)
           return { status: 'invalid' as const }
@@ -89,7 +93,7 @@ export function defineProductPageSource<L extends ProductPageMeta>(opts: {
   function use(): L {
     const preview = inject(PREVIEW_KEY, null)
     if (preview) return preview
-    const state = useState<L | undefined>(STATE_KEY)
+    const state = useState<L | undefined>(stateKey(useLocale()))
     return state.value ?? opts.buildLegacy()
   }
 

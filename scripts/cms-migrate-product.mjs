@@ -3,7 +3,8 @@
 // unpublished draft.
 //   npm run cms:migrate-open | cms:migrate-shiftly | cms:migrate-e-corporate
 //           | cms:migrate-fast | cms:migrate-dora | cms:migrate-matrix
-//   (add -- --dry-run to only check, -- --force to replace an edited draft)
+//   (add -- --dry-run to only check, -- --force to replace an edited draft,
+//    -- --lang id to write the Indonesian record from the Indonesian code copy)
 //
 // - Source of truth: what the page renders today. The script runs the real
 //   legacy builder (buildLegacy<X>Content → the page composable + og image).
@@ -28,6 +29,8 @@ import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 
+// --lang id → build and write the Indonesian record (default: English, the original record).
+const LANG = process.argv.includes('--lang') && process.argv[process.argv.indexOf('--lang') + 1] === 'id' ? 'id' : 'en'
 const PRODUCTS = {
   open: { name: 'OPEN', Name: 'Open', UP: 'OPEN', composable: 'useOpen', schema: 'openSchema', server: 'openPage', action: 'open' },
   shiftly: { name: 'SHIFTLY', Name: 'Shiftly', UP: 'SHIFTLY', composable: 'useShiftly', schema: 'shiftlySchema', server: 'shiftlyPage', action: 'shiftly' },
@@ -48,7 +51,7 @@ if (!P) {
   process.exit(1)
 }
 const TAG = `[migrate-${slug}]`
-const VERSION = `${slug}-v1`
+const VERSION = LANG === 'id' ? `${slug}-id-v1` : `${slug}-v1`
 
 if (process.env.NODE_ENV === 'production') {
   console.error(`${TAG} Refusing to run with NODE_ENV=production.`)
@@ -60,6 +63,7 @@ const jiti = createJiti(import.meta.url, {
   interopDefault: true
 })
 const load = (p) => jiti.import(resolve(root, p))
+await (await import('./lib/nuxt-shims.mjs')).installNuxtShims(load, LANG)
 
 // The page composables are self-contained; expose what the page source files
 // reach through Nuxt auto-imports.
@@ -74,9 +78,11 @@ const sections = schemaMod[`${P.UP}_SECTIONS`]
 const schema = schemaMod[`${P.Name}ContentSchema`]
 const { pickSections } = await load('shared/cms/productFields.ts')
 const serverMod = await load(`server/utils/cms/${P.server}.ts`)
-const buildMigratedRecord = serverMod[`buildMigrated${P.Name}Record`]
-const RECORD_KEY = serverMod[`${P.UP}_RECORD_KEY`]
-const REVISION_PREFIX = serverMod[`${P.UP}_REVISION_PREFIX`]
+// The record for the chosen language (English = the original record).
+const engine = serverMod[`${P.Name[0].toLowerCase()}${P.Name.slice(1)}For`](LANG)
+const buildMigratedRecord = engine.buildMigratedRecord
+const RECORD_KEY = engine.RECORD_KEY
+const REVISION_PREFIX = engine.REVISION_PREFIX
 
 const siteUrl = (process.env.NUXT_PUBLIC_SITE_URL || 'https://www.pastipeople.id').replace(/\/+$/, '')
 const canonical = `${siteUrl}/${slug}`

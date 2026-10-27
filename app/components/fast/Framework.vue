@@ -4,6 +4,7 @@
 // organisation, then the six-step delivery principle. Visual: two stacked
 // plates — the navy core, the yellow-edged configuration layer on top.
 const { framework } = useFastPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
 useFastReveal(sectionRef)
@@ -28,7 +29,7 @@ useFastReveal(sectionRef)
         <!-- Stacked plates -->
         <div class="desktop:col-span-7">
           <div data-fr class="relative rounded-[24px] border-2 border-pastiYellow-500 bg-pureWhite p-6 shadow-[0_30px_60px_-40px_rgba(3,60,89,0.5)] tablet:p-8">
-            <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[#8A5A00]">Configured per organisation</p>
+            <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[#8A5A00]">{{ t('Configured per organisation') }}</p>
             <ul class="mt-4 flex flex-wrap gap-2">
               <li v-for="(a, i) in framework.adapt" :key="i" class="rounded-full bg-[color:rgba(251,186,0,0.14)] px-3 py-1.5 font-display text-[13px] font-semibold text-slateNavy">{{ a }}</li>
             </ul>
@@ -36,7 +37,7 @@ useFastReveal(sectionRef)
           <div aria-hidden="true" class="mx-auto h-6 w-px bg-[color:rgba(3,60,89,0.3)]" />
           <div data-fr class="relative rounded-[24px] bg-slateNavy p-6 text-pureWhite tablet:p-8">
             <div class="flex items-center justify-between gap-4">
-              <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">Reusable product core</p>
+              <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">{{ t('Reusable product core') }}</p>
               <FastMark surface="dark" :size="14" />
             </div>
             <ul class="mt-5 grid grid-cols-2 gap-x-4 gap-y-3 tablet:grid-cols-3">

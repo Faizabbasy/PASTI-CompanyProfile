@@ -15,6 +15,7 @@ if (import.meta.client && 'scrollRestoration' in window.history) {
 // load (nothing public links to it) and leaves via external navigation.
 const route = useRoute()
 const isAdmin = computed(() => isAdminPath(route.path))
+const locale = computed(() => localeOfPath(route.path))
 
 if (!isAdmin.value) useLenis()
 
@@ -143,8 +144,9 @@ if (!isAdmin.value) await ctasSource.resolve()
     <LayoutCustomCursor />
     <LayoutSectionCurtain />
     <LayoutRouteCurtain />
-    <LayoutHeader />
-    <LayoutMobileMenu />
+    <!-- Keyed by language: the chrome re-renders in the page's language. -->
+    <LayoutHeader :key="`h-${locale}`" />
+    <LayoutMobileMenu :key="`m-${locale}`" />
     <NuxtPage v-slot="{ Component }">
       <Transition name="page" mode="out-in" @after-enter="onPageAfterEnter">
         <div :key="$route.fullPath">
@@ -152,7 +154,7 @@ if (!isAdmin.value) await ctasSource.resolve()
         </div>
       </Transition>
     </NuxtPage>
-    <LayoutFooter />
-    <LayoutWhatsappFab />
+    <LayoutFooter :key="`f-${locale}`" />
+    <LayoutWhatsappFab :key="`w-${locale}`" />
   </div>
 </template>

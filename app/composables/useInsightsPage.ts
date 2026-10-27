@@ -1,4 +1,8 @@
 import type { InjectionKey } from 'vue'
+import { INSIGHTS_PAGE_ID } from '~/i18n/content/insightsPage'
+// Explicit (also auto-imported): the migration scripts load this file outside Nuxt.
+import { technologyData } from './useTechnology'
+import { translate } from './useT'
 import { isSafeLinkUrl } from '#shared/cms/fields'
 import type { PerspectiveRef } from '#shared/utils/insightsSchema'
 import {
@@ -26,7 +30,9 @@ const pad = (n: number) => String(n).padStart(2, '0')
 export function buildLegacyInsightsContent(): InsightsPageContent {
   const { articles } = useInsights()
   const { link: whatsappLink } = useWhatsapp()
-  return {
+  // English base; Indonesian wording overlaid on Indonesian pages
+  // (app/i18n/content/insightsPage.ts). Articles arrive translated.
+  return localize<InsightsPageContent>({
     source: 'legacy',
     cmsVersion: null,
     hero: {
@@ -42,8 +48,8 @@ export function buildLegacyInsightsContent(): InsightsPageContent {
       topics: Array.from(new Set(articles.map((a) => a.page?.topic).filter(Boolean) as string[])),
       articles: articles.map((a) => ({ index: a.index, title: a.title, alt: a.title, image: a.image, page: a.page }))
     },
-    seo: { ...pageSeo.insights }
-  }
+    seo: { ...localizedPageSeo('insights') }
+  }, useLocale() === 'id' ? INSIGHTS_PAGE_ID : undefined)
 }
 
 // PASTI perspective: the referenced sentence is read from the shared company
@@ -54,13 +60,17 @@ export function resolvePerspective(ref: PerspectiveRef): { label: string; text: 
   const [kind, key] = ref.split(':') as [string, string]
   if (kind === 'company') {
     const company = useCompany()
-    if (key === 'vision') return { label: 'Our vision', text: company.vision, source: 'useCompany().vision' }
+    if (key === 'vision') return { label: translate('Our vision', useLocale()), text: company.vision, source: 'useCompany().vision' }
     if (key === 'founder-quote') return { label: `${company.founder.name}, ${company.founder.role}`, text: company.founder.quote, source: 'useCompany().founder' }
     return null
   }
   const list = kind === 'technology' ? useTechnology().services : kind === 'creative' ? useCreative().services : []
-  const svc = list.find((x) => refKey(x.title) === key)
-  return svc ? { label: 'How PASTI approaches it', text: svc.body, source: `${kind} service: ${svc.title}` } : null
+  // Refs are English title slugs; on Indonesian pages the titles are
+  // translated, so technology refs are matched against the English base
+  // (same order) and the translated service at that position is used.
+  const baseIdx = kind === 'technology' ? technologyData().services.findIndex((x) => refKey(x.title) === key) : -1
+  const svc = baseIdx >= 0 ? list[baseIdx] : list.find((x) => refKey(x.title) === key)
+  return svc ? { label: translate('How PASTI approaches it', useLocale()), text: svc.body, source: `${kind} service: ${svc.title}` } : null
 }
 
 export function toInsightsArticleViews(list: PublicInsightsContent['contents']['articles']): InsightsArticleView[] {
@@ -117,9 +127,13 @@ export function adaptInsightsCms(legacy: InsightsPageContent, cms: { version: nu
 // Called once by pages/insights.vue.
 export async function resolveInsightsPageContent() {
   const legacy = buildLegacyInsightsContent()
-  const state = useState<InsightsPageContent>(STATE_KEY, () => legacy)
+  const locale = useLocale()
+  const state = useState<InsightsPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
 
-  const { data } = await useAsyncData('insights-cms-source', async () => {
+  const { data } = await useAsyncData(`insights-cms-source-${locale}`, async () => {
+    // The published CMS copy is English for now: Indonesian pages use the
+    // translated code copy until Indonesian CMS records exist.
+    if (locale === 'id') return { status: 'disabled' as const }
     // SSR: skip the call entirely when the server-side flag is off.
     if (import.meta.server && !insightsCmsEnabledOnServer()) return { status: 'disabled' as const }
     try {
@@ -154,6 +168,6 @@ export function provideInsightsPreview(content: InsightsPageContent) {
 export function useInsightsPage(): InsightsPageContent {
   const preview = inject(PREVIEW_KEY, null)
   if (preview) return preview
-  const state = useState<InsightsPageContent | undefined>(STATE_KEY)
+  const state = useState<InsightsPageContent | undefined>(`${STATE_KEY}-${useLocale()}`)
   return state.value ?? buildLegacyInsightsContent()
 }

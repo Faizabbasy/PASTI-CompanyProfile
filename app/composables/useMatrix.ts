@@ -1,3 +1,4 @@
+import { MATRIX_ID } from '~/i18n/content/matrix'
 /**
  * /matrix — MATRIX, Material Tracking, Inventory & Resource eXecution
  * (FCP by PASTI Technology). Brief + audit: docs/matrix/00-matrix-landing-page-brief.md.
@@ -32,7 +33,7 @@ export type StockKey = 'net' | 'reserved' | 'quarantine' | 'damaged'
 
 export const netAvailable = (m: StockMix) => Math.max(0, m.onHand - m.reserved - m.quarantine - m.damaged)
 
-export function useMatrix() {
+function matrixData() {
   const seo = {
     title: 'MATRIX — Inventory & Material Management | PASTI',
     description:
@@ -307,4 +308,12 @@ export function useMatrix() {
   }
 
   return { seo, register, subnav, sample, hero, problem, layers, intelligence, m360, availability, aging, execution, explorer, governance, integration, why, demo }
+}
+
+export type MatrixData = ReturnType<typeof matrixData>
+
+// Bilingual site: English base data + Indonesian overlay (text only — ids,
+// statuses and sample codes stay as above). Outside Nuxt → English.
+export function useMatrix() {
+  return localize(matrixData(), useLocale() === 'id' ? MATRIX_ID : undefined)
 }

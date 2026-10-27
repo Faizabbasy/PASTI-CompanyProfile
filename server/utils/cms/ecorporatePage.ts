@@ -23,3 +23,6 @@ export const saveEcorporateDraft = page.saveDraft
 export const publishEcorporate = page.publish
 export const setEcorporateStatus = page.setStatus
 export const getPublishedEcorporate = page.getPublished
+
+// Bilingual CMS: the record for one language (English = the original record).
+export const ecorporateFor = (lang: CmsLang) => page.forLocale(lang)

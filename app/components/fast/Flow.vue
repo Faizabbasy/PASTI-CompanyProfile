@@ -10,6 +10,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
 const { flow } = useFastPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const lit = ref(-1)
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -77,7 +78,7 @@ useGsapContext(() => {
         <!-- Loop back -->
         <p class="mt-10 inline-flex items-center gap-3 rounded-full border border-[color:rgba(255,255,255,0.16)] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.7)] max-desktop:ml-0">
           <svg viewBox="0 0 16 16" class="h-4 w-4 text-pastiYellow-500" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 5a5 5 0 1 0 1 4" /><path d="M13 1.5V5H9.5" /></svg>
-          09 → 04 · the loop that keeps the plan executable
+          {{ t('09 → 04 · the loop that keeps the plan executable') }}
         </p>
       </div>
     </BaseContainer>

@@ -9,6 +9,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // since the Board pin changes them) and the scroll handler is rAF-throttled
 // — no layout reads on the scroll path.
 const { subnav: items } = useFastPage()
+const t = useT()
 const scrollTo = useFastScroll()
 const visible = ref(false)
 const active = ref('')
@@ -55,7 +56,7 @@ onBeforeUnmount(() => {
 
 <template>
   <nav
-    aria-label="FAST page sections"
+    :aria-label="t('FAST page sections')"
     class="fixed bottom-6 left-1/2 z-40 hidden -translate-x-1/2 transition-[opacity,transform] duration-500 ease-editorial desktop:block"
     :class="visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-6 opacity-0'"
     :inert="!visible || undefined"

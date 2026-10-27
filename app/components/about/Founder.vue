@@ -11,6 +11,7 @@ if (import.meta.client) {
 // Portrait is the COMPRO photo. The pull-quote is a sentence from her own
 // text. Copy lives in useCompany().founder.
 const f = useAboutPage().founder
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 
 useGsapContext(() => {
@@ -32,7 +33,7 @@ useGsapContext(() => {
 <template>
   <section ref="sectionRef" class="relative overflow-hidden bg-pureWhite py-24 tablet:py-32">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" label="Leadership" :meta="f.meta" />
+      <BaseSectionMark surface="light" :label="t('Leadership')" :meta="f.meta" />
       <div class="mt-14 grid items-start gap-12 desktop:mt-20 desktop:grid-cols-12 desktop:gap-14">
         <figure class="mx-auto w-full max-w-[420px] desktop:col-span-5 desktop:mx-0 desktop:max-w-none">
           <div data-fd-frame class="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-surfaceNeutral">

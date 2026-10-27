@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
+const t = useT()
 
 // HERO — "Everything HR, Simplified." (deck slide 1). Copy left; the product
 // right with a segmented switch between the real web dashboard and the
@@ -86,17 +87,17 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10 w-full">
       <div class="grid items-center gap-14 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-5">
-          <div data-sh-fade><BaseHeroMarker surface="dark" :label="hero.eyebrow" meta="by PASTI" /></div>
+          <div data-sh-fade><BaseHeroMarker surface="dark" :label="hero.eyebrow" :meta="t('by PASTI')" /></div>
           <div data-sh-fade class="mt-7"><ShiftlyMark surface="dark" :size="22" /></div>
           <h1 data-sh-fade class="hero-title hero-title--dark mt-5">
-            Everything HR, <span class="sh-under text-pastiYellow-500">Simplified.</span>
+            {{ t('Everything HR,') }} <span class="sh-under text-pastiYellow-500">{{ t('Simplified.') }}</span>
           </h1>
           <p data-sh-fade class="hero-lede hero-lede--dark m-center mt-6">{{ hero.body }}</p>
           <div data-sh-fade class="mt-8">
             <BaseHeroCtas
               surface="dark"
-              :primary="{ label: 'Request a Demo' }"
-              :secondary="{ label: 'Explore Modules', down: true }"
+              :primary="{ label: t('Request a Demo') }"
+              :secondary="{ label: t('Explore Modules'), down: true }"
               @primary="scrollTo('demo')"
               @secondary="scrollTo('modules')"
             />
@@ -118,7 +119,7 @@ useGsapContext(() => {
 
         <!-- Product -->
         <div class="relative desktop:col-span-7">
-          <div data-sh-fade role="group" aria-label="Product preview" class="m-center-row relative z-20 mb-5 flex justify-end">
+          <div data-sh-fade role="group" :aria-label="t('Product preview')" class="m-center-row relative z-20 mb-5 flex justify-end">
             <div class="inline-flex rounded-full bg-[color:rgba(255,255,255,0.08)] p-1 ring-1 ring-[color:rgba(255,255,255,0.14)]">
               <button
                 v-for="v in (['web', 'mobile'] as const)"
@@ -129,7 +130,7 @@ useGsapContext(() => {
                 :class="view === v ? 'bg-pastiYellow-500 text-slateNavy' : 'text-[color:rgba(255,255,255,0.75)] hover:text-pureWhite'"
                 @click="view = v"
               >
-                <ShiftlyIcon :name="v" class="h-4 w-4" />{{ v === 'web' ? 'Web dashboard' : 'Mobile app' }}
+                <ShiftlyIcon :name="v" class="h-4 w-4" />{{ v === 'web' ? t('Web dashboard') : t('Mobile app') }}
               </button>
             </div>
           </div>
@@ -173,7 +174,7 @@ useGsapContext(() => {
           />
           <span class="absolute inset-y-0 w-[2px] bg-pureWhite" :style="{ left: `${nowPct}%` }" />
         </div>
-        <span class="absolute -top-7 -translate-x-1/2 whitespace-nowrap rounded-full bg-pureWhite px-2.5 py-0.5 font-mono text-[10px] font-semibold text-slateNavy" :style="{ left: `clamp(32px, ${nowPct}%, calc(100% - 32px))` }">Now · {{ nowLabel }}</span>
+        <span class="absolute -top-7 -translate-x-1/2 whitespace-nowrap rounded-full bg-pureWhite px-2.5 py-0.5 font-mono text-[10px] font-semibold text-slateNavy" :style="{ left: `clamp(32px, ${nowPct}%, calc(100% - 32px))` }">{{ t('Now') }} · {{ nowLabel }}</span>
         <div class="mt-2 flex justify-between font-mono text-[10px] text-[color:rgba(255,255,255,0.45)]">
           <span v-for="h in [0, 6, 12, 18, 24]" :key="h">{{ String(h).padStart(2, '0') }}:00</span>
         </div>

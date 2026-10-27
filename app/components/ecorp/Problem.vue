@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import gsap from 'gsap'
+const t = useT()
 
 if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
@@ -44,7 +45,7 @@ useGsapContext(() => {
       <span class="ep-num absolute inset-0 text-right font-display text-[length:clamp(160px,22vw,340px)] font-extrabold leading-[0.8] tracking-[-0.05em] text-[color:rgba(251,186,0,0.14)]" :class="{ 'ep-num--out': !connected }">01</span>
     </div>
     <BaseContainer class="relative z-10">
-      <BaseSectionMark label="Problem → Solution" meta="02 / 12" />
+      <BaseSectionMark :label="t('Problem → Solution')" meta="02 / 12" />
 
       <div class="mt-12 grid gap-8 desktop:grid-cols-12 desktop:items-end">
         <EcorpHeading class="desktop:col-span-7" surface="dark" eyebrow="From fragmented to connected" :before="head" :mark="mark" />
@@ -54,9 +55,9 @@ useGsapContext(() => {
       <div data-ep-table class="mt-14 border-t border-[color:rgba(255,255,255,0.16)]" :class="{ 'ep-on': connected }">
         <!-- Column heads (desktop) -->
         <div class="hidden grid-cols-12 gap-6 border-b border-[color:rgba(255,255,255,0.1)] py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)] desktop:grid">
-          <span class="col-span-5">Fragmented operations</span>
+          <span class="col-span-5">{{ t('Fragmented operations') }}</span>
           <span class="col-span-2" />
-          <span class="col-span-5">With e-CORPORATE</span>
+          <span class="col-span-5">{{ t('With e-CORPORATE') }}</span>
         </div>
         <ul>
           <li
@@ -78,7 +79,7 @@ useGsapContext(() => {
               <span aria-hidden="true" class="grid h-5 w-5 shrink-0 place-items-center bg-pastiYellow-500 text-slateNavy">
                 <svg viewBox="0 0 16 16" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M3 8.5l3 3 7-7" /></svg>
               </span>
-              <span class="sr-only">Answered by: </span>{{ p.answer }}
+              <span class="sr-only">{{ `${t('Answered by:')} ` }}</span>{{ p.answer }}
             </p>
           </li>
         </ul>

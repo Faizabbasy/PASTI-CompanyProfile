@@ -12,13 +12,15 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
 const { m360, sample } = useMatrixPage()
+// `tr`, not `t`: the template loops over tabs as `t`.
+const tr = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const step = ref(0)
 const pad = (n: number) => String(n).padStart(2, '0')
 const last = m360.steps.length - 1
 const go = (i: number) => (step.value = Math.max(0, Math.min(last, i)))
 const net = netAvailable(sample.mix)
-const tabs = ['Overview', 'Locations & serials', 'Stock', 'Planning', 'Movements']
+const tabs = ['Overview', 'Locations & serials', 'Stock', 'Planning', 'Movements'].map((x) => tr(x))
 const tabFor = (s: number) => [0, 1, 2, 2, 3, 4][s]
 useMatrixReveal(sectionRef)
 
@@ -51,12 +53,12 @@ useGsapContext(() => {
 })
 
 const identity = [
-  { l: 'Code', v: sample.code },
-  { l: 'Category', v: sample.category },
-  { l: 'Unit', v: sample.unit },
-  { l: 'Criticality', v: sample.criticality },
-  { l: 'Tracking', v: sample.tracking },
-  { l: 'Movement class', v: sample.movement }
+  { l: tr('Code'), v: sample.code },
+  { l: tr('Category'), v: sample.category },
+  { l: tr('Unit'), v: sample.unit },
+  { l: tr('Criticality'), v: sample.criticality },
+  { l: tr('Tracking'), v: sample.tracking },
+  { l: tr('Movement class'), v: sample.movement }
 ]
 const serialTone: Record<string, string> = {
   Available: 'bg-pastiYellow-500 text-slateNavy',
@@ -103,7 +105,7 @@ const serialTone: Record<string, string> = {
             <div class="overflow-hidden rounded-[20px] bg-pureWhite text-slateNavy shadow-[0_40px_90px_-50px_rgba(0,8,16,0.9)]">
               <!-- Identity header -->
               <div class="border-b border-[color:rgba(3,60,89,0.08)] p-5 transition-colors duration-500 tablet:p-6" :class="step === 0 ? 'bg-[color:rgba(251,186,0,0.1)]' : ''">
-                <p class="truncate font-mono text-[10.5px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">Inventory / {{ sample.category }} / {{ sample.code }}</p>
+                <p class="truncate font-mono text-[10.5px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.55)]">{{ tr('Inventory') }} / {{ sample.category }} / {{ sample.code }}</p>
                 <div class="mt-2 flex flex-wrap items-center justify-between gap-3">
                   <p class="font-display text-[22px] font-extrabold leading-tight tracking-[-0.02em] tablet:text-[26px]">{{ sample.name }}</p>
                   <ul class="flex flex-wrap gap-1.5">
@@ -140,7 +142,7 @@ const serialTone: Record<string, string> = {
                     <ul class="grid grid-cols-2 gap-2">
                       <li v-for="s in sample.serials" :key="s.id" class="rounded-[12px] bg-surfaceNeutral p-2.5">
                         <span class="block font-mono text-[11.5px]">{{ s.id }}</span>
-                        <span class="mt-1.5 inline-block rounded-full px-2 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.06em]" :class="serialTone[s.state]">{{ s.state }}</span>
+                        <span class="mt-1.5 inline-block rounded-full px-2 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.06em]" :class="serialTone[s.state]">{{ tr(s.state) }}</span>
                       </li>
                     </ul>
                   </div>
@@ -149,8 +151,8 @@ const serialTone: Record<string, string> = {
                     <MatrixStockBar :mix="sample.mix" :requirement="step === 3" />
                     <div class="mt-6 flex min-h-[60px] items-start gap-3 rounded-[14px] border-l-[3px] px-4 py-3 transition-colors duration-500" :class="step === 3 ? 'border-[#C2412D] bg-[color:rgba(194,65,45,0.08)]' : 'border-pastiYellow-500 bg-[color:rgba(251,186,0,0.1)]'">
                       <p class="text-[14px] leading-snug">
-                        <template v-if="step === 3"><strong>Net available is {{ (sample.mix.requirement ?? 0) - net }} {{ sample.unit }} short</strong> of the near-term requirement while units remain in quarantine. Review the shortage.</template>
-                        <template v-else><strong>{{ net }} {{ sample.unit }} net available</strong> = {{ sample.mix.onHand }} on hand − {{ sample.mix.reserved }} reserved − {{ sample.mix.quarantine }} quarantine − {{ sample.mix.damaged }} damaged.</template>
+                        <template v-if="step === 3"><strong>{{ tr('Net available is {n} {unit} short', { n: (sample.mix.requirement ?? 0) - net, unit: sample.unit }) }}</strong> {{ tr('of the near-term requirement while units remain in quarantine. Review the shortage.') }}</template>
+                        <template v-else><strong>{{ tr('{n} {unit} net available', { n: net, unit: sample.unit }) }}</strong> = {{ tr('{a} on hand − {b} reserved − {c} quarantine − {d} damaged.', { a: sample.mix.onHand, b: sample.mix.reserved, c: sample.mix.quarantine, d: sample.mix.damaged }) }}</template>
                       </p>
                     </div>
                   </div>
@@ -167,7 +169,7 @@ const serialTone: Record<string, string> = {
                     <table class="hidden w-full text-left text-[12px] tablet:table">
                       <thead>
                         <tr class="font-mono text-[10px] uppercase tracking-[0.1em] text-[color:rgba(3,60,89,0.55)]">
-                          <th class="pb-2 font-medium">Time</th><th class="pb-2 font-medium">Movement</th><th class="pb-2 font-medium">Qty</th><th class="pb-2 font-medium">Before → after</th><th class="pb-2 font-medium">Actor</th><th class="pb-2 font-medium">Ref</th>
+                          <th class="pb-2 font-medium">{{ tr('Time') }}</th><th class="pb-2 font-medium">{{ tr('Movement') }}</th><th class="pb-2 font-medium">{{ tr('Qty') }}</th><th class="pb-2 font-medium">{{ tr('Before → after') }}</th><th class="pb-2 font-medium">{{ tr('Actor') }}</th><th class="pb-2 font-medium">{{ tr('Ref') }}</th>
                         </tr>
                       </thead>
                       <tbody class="divide-y divide-[color:rgba(3,60,89,0.08)]">
@@ -194,18 +196,18 @@ const serialTone: Record<string, string> = {
 
             <!-- Below desktop: step controls -->
             <div class="mt-4 grid grid-cols-[2.75rem_1fr_2.75rem] items-center gap-3 desktop:hidden">
-              <button type="button" class="grid h-11 w-11 place-items-center rounded-full ring-1 ring-[color:rgba(255,255,255,0.25)] disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :disabled="step <= 0" aria-label="Previous view" @click="go(step - 1)">
+              <button type="button" class="grid h-11 w-11 place-items-center rounded-full ring-1 ring-[color:rgba(255,255,255,0.25)] disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :disabled="step <= 0" :aria-label="tr('Previous view')" @click="go(step - 1)">
                 <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 8H3M7 4 3 8l4 4" /></svg>
               </button>
               <p class="text-center">
                 <span class="block font-mono text-[10.5px] tabular-nums tracking-[0.12em] text-pastiYellow-400">{{ pad(step + 1) }} / {{ pad(last + 1) }}</span>
                 <span class="block font-display text-[15px] font-bold">{{ m360.steps[step]?.name }}</span>
               </p>
-              <button type="button" class="grid h-11 w-11 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pureWhite" :disabled="step >= last" aria-label="Next view" @click="go(step + 1)">
+              <button type="button" class="grid h-11 w-11 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pureWhite" :disabled="step >= last" :aria-label="tr('Next view')" @click="go(step + 1)">
                 <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
               </button>
             </div>
-            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.45)] max-desktop:text-center">Synthetic sample record · not a product screenshot</p>
+            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.45)] max-desktop:text-center">{{ tr('Synthetic sample record · not a product screenshot') }}</p>
           </div>
         </div>
       </BaseContainer>

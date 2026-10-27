@@ -16,6 +16,7 @@ if (import.meta.client) {
 // headline segments stay code-owned: the letter scatter and the two-word
 // marker tail are built around this exact phrase.
 const { hero } = useAboutPage()
+const t = useT()
 const { eyebrow, promise, essence, positioning, companyName } = hero
 
 // "We turn complexity into certainty." → lead / scrambled word / tail.
@@ -98,7 +99,7 @@ useGsapContext(() => {
 
     <BaseContainer class="pointer-events-none relative z-10 flex flex-1 flex-col">
       <div class="m-center flex flex-1 flex-col justify-center py-12">
-        <div data-ah-fade><BaseHeroMarker :label="eyebrow" meta="Brand foundation" /></div>
+        <div data-ah-fade><BaseHeroMarker :label="eyebrow" :meta="t('Brand foundation')" /></div>
         <h1 class="hero-title m-center mt-6 desktop:mt-[3svh]" :aria-label="promise">
           <span class="ah-mask block" aria-hidden="true"><span data-ah-word class="inline-block">{{ lead }}</span></span>
           <span class="block py-[0.06em]" aria-hidden="true">
@@ -125,15 +126,15 @@ useGsapContext(() => {
 
       <div class="m-center grid gap-6 border-t border-[color:rgba(3,60,89,0.16)] pt-6 tablet:grid-cols-3 desktop:grid-cols-12 desktop:items-end">
         <div data-ah-fade class="desktop:col-span-3">
-          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.5)]">Brand essence</p>
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.5)]">{{ t('Brand essence') }}</p>
           <p class="mt-1.5 font-display text-[16px] font-bold text-slateNavy">{{ essence }}</p>
         </div>
         <div data-ah-fade class="desktop:col-span-4">
-          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.5)]">Positioning</p>
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.5)]">{{ t('Positioning') }}</p>
           <p class="mt-1.5 font-display text-[16px] font-bold text-slateNavy">{{ positioning }}</p>
         </div>
         <div data-ah-fade class="desktop:col-span-3">
-          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.5)]">Company</p>
+          <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.5)]">{{ t('Company') }}</p>
           <p class="mt-1.5 flex items-center gap-2.5 font-display text-[16px] font-bold text-slateNavy"><LayoutBrandMark surface="light" :height="12" />{{ companyName }}</p>
         </div>
         <!-- Live readout of the order state -->
@@ -141,7 +142,7 @@ useGsapContext(() => {
           <span class="relative block h-[3px] w-20 overflow-hidden rounded-full bg-[color:rgba(3,60,89,0.12)]">
             <span class="absolute inset-0 origin-left bg-pastiYellow-500" :style="{ transform: `scaleX(${order})` }" />
           </span>
-          <span class="font-mono text-[11px] tabular-nums tracking-[0.12em] text-slateNavy">{{ String(pct).padStart(3, '0') }}% certain</span>
+          <span class="font-mono text-[11px] tabular-nums tracking-[0.12em] text-slateNavy">{{ t('{pct}% certain', { pct: String(pct).padStart(3, '0') }) }}</span>
         </div>
       </div>
     </BaseContainer>

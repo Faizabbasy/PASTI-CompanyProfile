@@ -6,6 +6,8 @@
 // path, search and export fields. The core strip underneath never changes.
 // Tabs follow the WAI-ARIA tabs pattern (arrow keys move between them).
 const { model } = useDoraPage()
+// `tr`, not `t`: the template loops over types as `t`.
+const tr = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const picked = ref(0)
 const type = computed(() => model.types[picked.value]!)
@@ -30,7 +32,7 @@ const onKey = (e: KeyboardEvent) => {
       <DoraHeading :eyebrow="model.eyebrow" :title="model.headline" :lede="model.lede" />
 
       <div data-fr class="mt-12">
-        <div role="tablist" aria-label="Sample document types" class="m-center-row flex flex-wrap gap-2" @keydown="onKey">
+        <div role="tablist" :aria-label="tr('Sample document types')" class="m-center-row flex flex-wrap gap-2" @keydown="onKey">
           <button
             v-for="(t, i) in model.types"
             :id="`dmo-tab-${t.id}`"
@@ -45,7 +47,7 @@ const onKey = (e: KeyboardEvent) => {
             :class="picked === i ? 'bg-slateNavy text-pureWhite' : 'bg-pureWhite text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.14)] hover:ring-slateNavy'"
             @click="picked = i"
           >
-            <span class="font-mono text-[10px] uppercase opacity-60">Type {{ t.id.toUpperCase() }}</span>{{ t.name }}
+            <span class="font-mono text-[10px] uppercase opacity-60">{{ tr('Type') }} {{ t.id.toUpperCase() }}</span>{{ t.name }}
           </button>
         </div>
 
@@ -54,19 +56,19 @@ const onKey = (e: KeyboardEvent) => {
             <div :key="type.id" class="grid gap-3 desktop:grid-cols-12">
               <!-- Field template -->
               <div class="rounded-[22px] bg-pureWhite p-5 ring-1 ring-[color:rgba(3,60,89,0.1)] tablet:p-6 desktop:col-span-7">
-                <p class="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]"><span>Field template</span><span>{{ type.fields.length }} fields</span></p>
+                <p class="flex items-center justify-between font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]"><span>{{ tr('Field template') }}</span><span>{{ tr('{n} fields', { n: type.fields.length }) }}</span></p>
                 <ul class="mt-4 divide-y divide-[color:rgba(3,60,89,0.08)]">
                   <li v-for="f in type.fields" :key="f.name" class="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1 py-3 tablet:grid-cols-[1fr_7rem_7rem]">
                     <span class="font-display text-[15.5px] font-bold text-slateNavy">{{ f.name }}</span>
-                    <span class="justify-self-end rounded-full px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] tablet:justify-self-start" :class="f.required ? 'bg-slateNavy text-pureWhite' : 'bg-[color:rgba(3,60,89,0.07)] text-[color:rgba(3,60,89,0.7)]'">{{ f.required ? 'Required' : 'Optional' }}</span>
-                    <span class="col-span-2 text-[13px] text-[color:rgba(3,60,89,0.65)] tablet:col-span-1">Rule · {{ f.rule }}</span>
+                    <span class="justify-self-end rounded-full px-2.5 py-1 font-mono text-[10px] font-semibold uppercase tracking-[0.08em] tablet:justify-self-start" :class="f.required ? 'bg-slateNavy text-pureWhite' : 'bg-[color:rgba(3,60,89,0.07)] text-[color:rgba(3,60,89,0.7)]'">{{ f.required ? tr('Required') : tr('Optional') }}</span>
+                    <span class="col-span-2 text-[13px] text-[color:rgba(3,60,89,0.65)] tablet:col-span-1">{{ tr('Rule') }} · {{ f.rule }}</span>
                   </li>
                 </ul>
               </div>
               <!-- Workflow + outputs -->
               <dl class="grid gap-3 desktop:col-span-5">
                 <div class="rounded-[22px] bg-slateNavy p-5 text-pureWhite tablet:p-6">
-                  <dt class="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">Statuses · {{ type.path }}</dt>
+                  <dt class="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.6)]">{{ tr('Statuses') }} · {{ type.path }}</dt>
                   <dd class="mt-3 flex flex-wrap items-center gap-1.5">
                     <template v-for="s in type.statuses" :key="s">
                       <span class="rounded-full bg-[color:rgba(255,255,255,0.08)] px-3 py-1.5 font-display text-[12.5px] font-semibold">{{ s }}</span>
@@ -75,13 +77,13 @@ const onKey = (e: KeyboardEvent) => {
                     <span class="inline-flex overflow-hidden rounded-full ring-1 ring-[color:rgba(255,255,255,0.22)]">
                       <span v-for="(o, i) in type.outcomes" :key="o" class="px-3 py-1.5 font-display text-[12.5px] font-semibold" :class="i ? 'border-l border-[color:rgba(255,255,255,0.22)]' : ''">{{ o }}</span>
                     </span>
-                    <span class="sr-only">— final status, as configured</span>
+                    <span class="sr-only">— {{ tr('final status, as configured') }}</span>
                   </dd>
                 </div>
                 <div class="rounded-[22px] bg-pureWhite p-5 ring-1 ring-[color:rgba(3,60,89,0.1)] tablet:p-6">
-                  <dt class="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">Search fields</dt>
+                  <dt class="font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">{{ tr('Search fields') }}</dt>
                   <dd class="mt-2.5 flex flex-wrap gap-1.5"><span v-for="s in type.search" :key="s" class="rounded-full bg-surfaceNeutral px-3 py-1 text-[13px] font-semibold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.1)]">{{ s }}</span></dd>
-                  <dt class="mt-5 font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">Export fields</dt>
+                  <dt class="mt-5 font-mono text-[10.5px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.6)]">{{ tr('Export fields') }}</dt>
                   <dd class="mt-2.5 flex flex-wrap gap-1.5"><span v-for="s in type.export" :key="s" class="rounded-full bg-surfaceNeutral px-3 py-1 text-[13px] font-semibold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.1)]">{{ s }}</span></dd>
                 </div>
               </dl>
@@ -91,8 +93,8 @@ const onKey = (e: KeyboardEvent) => {
 
         <!-- The constant -->
         <div class="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-[18px] border-2 border-slateNavy px-5 py-4">
-          <span class="inline-flex items-center gap-3 font-display text-[15px] font-bold text-slateNavy"><DoraMark :size="15" /> One core for every type</span>
-          <span class="text-[13px] text-[color:rgba(3,60,89,0.65)]">Intake · OCR · extraction · verification · search · export</span>
+          <span class="inline-flex items-center gap-3 font-display text-[15px] font-bold text-slateNavy"><DoraMark :size="15" /> {{ tr('One core for every type') }}</span>
+          <span class="text-[13px] text-[color:rgba(3,60,89,0.65)]">{{ tr('Intake · OCR · extraction · verification · search · export') }}</span>
         </div>
         <p class="m-center mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.5)]">{{ model.note }}</p>
       </div>

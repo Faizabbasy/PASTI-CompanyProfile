@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import gsap from 'gsap'
+const t = useT()
 
 // MODULE EXPLORER (deck slides 3 + 6). Not a wall of equal cards: four
 // module groups as tabs; inside a group, the modules are a list and the
@@ -51,17 +52,17 @@ watch([group, mod], async () => {
   <section id="modules" data-header-theme="dark" class="relative overflow-hidden bg-slateNavy py-24 text-pureWhite tablet:py-32">
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="Modules" :meta="`${total} modules · 4 groups`" />
+      <BaseSectionMark surface="dark" :label="t('Modules')" :meta="t('{n} modules · 4 groups', { n: total })" />
       <div class="mt-14 grid items-end gap-8 desktop:mt-20 desktop:grid-cols-12">
         <div class="desktop:col-span-7">
-          <ShiftlyHeading surface="dark" eyebrow="All-in-one HRIS platform" title="Complete modules, seamless experience." lede="SHIFTLY provides comprehensive HR modules to streamline every people process in one integrated platform." />
+          <ShiftlyHeading surface="dark" :eyebrow="t('All-in-one HRIS platform')" :title="t('Complete modules, seamless experience.')" :lede="t('SHIFTLY provides comprehensive HR modules to streamline every people process in one integrated platform.')" />
         </div>
         <p class="m-center font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.5)] desktop:col-span-5 desktop:text-right">{{ modulesMore }}</p>
       </div>
 
       <!-- DESKTOP explorer -->
       <div class="mt-14 hidden desktop:block">
-        <div role="tablist" aria-label="Module groups" class="grid grid-cols-4 border-b border-[color:rgba(255,255,255,0.14)]">
+        <div role="tablist" :aria-label="t('Module groups')" class="grid grid-cols-4 border-b border-[color:rgba(255,255,255,0.14)]">
           <button
             v-for="(g, i) in moduleGroups"
             :id="`md-tab-${g.id}`"
@@ -85,8 +86,8 @@ watch([group, mod], async () => {
         </div>
 
         <div :id="`md-panel-${current.id}`" role="tabpanel" :aria-labelledby="`md-tab-${current.id}`" class="mt-10 grid grid-cols-12 gap-10">
-          <ul class="col-span-4" aria-label="Modules">
-            <li class="mb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.45)]" aria-hidden="true">Click a module ↓</li>
+          <ul class="col-span-4" :aria-label="t('Modules')">
+            <li class="mb-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.45)]" aria-hidden="true">{{ t('Click a module ↓') }}</li>
             <li v-for="(m, i) in current.modules" :key="m.name">
               <button
                 :ref="(el) => { if (el) modRefs[i] = el as HTMLElement }"
@@ -111,7 +112,7 @@ watch([group, mod], async () => {
             <p data-md-anim class="mt-4 max-w-[40ch] text-token-body-large leading-relaxed text-[color:rgba(255,255,255,0.78)]">{{ active.body }}</p>
             <p data-md-anim class="mt-6 inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] ring-1" :class="active.standard ? 'text-pureWhite ring-[color:rgba(255,255,255,0.25)]' : 'text-pastiYellow-500 ring-pastiYellow-500'">
               <ShiftlyIcon :name="active.standard ? 'check' : 'plus'" class="h-3.5 w-3.5" />
-              {{ active.standard ? 'In SHIFTLY Standard' : 'Additional module' }}
+              {{ active.standard ? t('In SHIFTLY Standard') : t('Additional module') }}
             </p>
           </div>
 
@@ -119,7 +120,7 @@ watch([group, mod], async () => {
             <div class="w-[200px] overflow-hidden rounded-[26px] border-[5px] border-[#0b1620] bg-pureWhite shadow-[0_40px_70px_-30px_rgba(0,8,16,0.9)]">
               <img :src="hero.mobile.src" :alt="hero.mobile.alt" width="262" height="576" loading="lazy" class="block h-auto w-full" draggable="false">
             </div>
-            <figcaption class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">Employee mobile app</figcaption>
+            <figcaption class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.5)]">{{ t('Employee mobile app') }}</figcaption>
           </figure>
         </div>
       </div>
@@ -148,7 +149,7 @@ watch([group, mod], async () => {
             <ul class="min-w-0 overflow-hidden">
               <li v-for="m in g.modules" :key="m.name" class="border-t border-[color:rgba(255,255,255,0.08)] py-4 pl-8 last:mb-5">
                 <p class="flex flex-wrap items-center gap-2 font-display text-[17px] font-bold">{{ m.name }}
-                  <span v-if="!m.standard" class="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-pastiYellow-500 ring-1 ring-pastiYellow-500">Additional</span>
+                  <span v-if="!m.standard" class="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.12em] text-pastiYellow-500 ring-1 ring-pastiYellow-500">{{ t('Additional') }}</span>
                 </p>
                 <p class="mt-1 text-[14px] leading-relaxed text-[color:rgba(255,255,255,0.72)]">{{ m.body }}</p>
               </li>

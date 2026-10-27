@@ -41,11 +41,17 @@ const props = withDefaults(
     // Number of sections the public page has ("Bagian 05 / 06"); default =
     // the highest section number among the tabs.
     total?: number
+    // Bilingual pages: the language being edited (shows the ID / EN switch).
+    lang?: 'id' | 'en'
   }>(),
-  { crumbTo: undefined, publicPath: undefined, flag: undefined, previewPath: undefined, dummy: false, migratedVersion: null, dirty: false, errorCount: () => 0, howTo: () => [], ready: false, total: undefined }
+  { crumbTo: undefined, publicPath: undefined, flag: undefined, previewPath: undefined, dummy: false, migratedVersion: null, dirty: false, errorCount: () => 0, howTo: () => [], ready: false, total: undefined, lang: undefined }
 )
 const activeTab = defineModel<string>('activeTab', { required: true })
 
+const route = useRoute()
+const langHref = (l: 'id' | 'en') => `${route.path}?lang=${l}`
+// Preview link for a section, keeping ?lang= when the preview path has it.
+const previewHref = (index: number) => `${props.previewPath}${props.previewPath?.includes('?') ? '&' : '?'}s=${index}`
 const current = computed(() => props.tabs.find((t) => t.key === activeTab.value) ?? props.tabs[0]!)
 const total = computed(() => props.total ?? Math.max(0, ...props.tabs.map((t) => Number(t.no) || 0)))
 
@@ -90,6 +96,19 @@ function onTabKey(e: KeyboardEvent, index: number) {
         <li v-for="(h, i) in howTo" :key="i">{{ h }}</li>
       </ol>
       <p class="mt-1 text-xs text-navy-500">Hanya isi yang bisa diubah. Tampilan, warna dan susunan dikunci supaya halaman tidak rusak.</p>
+    </div>
+
+    <!-- Language being edited (bilingual pages). -->
+    <div v-if="lang" class="mt-4 flex max-w-3xl flex-wrap items-center gap-3 rounded-lg border border-navy-100 bg-white px-4 py-3">
+      <span class="text-sm font-semibold">Bahasa yang diedit:</span>
+      <div class="inline-flex rounded-full bg-navy-50 p-0.5 text-sm font-semibold" role="group" aria-label="Bahasa yang diedit">
+        <component :is="lang === 'id' ? 'span' : 'a'" :href="lang === 'id' ? undefined : langHref('id')" class="rounded-full px-3 py-1" :class="lang === 'id' ? 'bg-slateNavy text-white' : 'text-navy-600 hover:text-slateNavy'" :aria-current="lang === 'id' ? 'true' : undefined">Indonesia</component>
+        <component :is="lang === 'en' ? 'span' : 'a'" :href="lang === 'en' ? undefined : langHref('en')" class="rounded-full px-3 py-1" :class="lang === 'en' ? 'bg-slateNavy text-white' : 'text-navy-600 hover:text-slateNavy'" :aria-current="lang === 'en' ? 'true' : undefined">English</component>
+      </div>
+      <p class="w-full text-xs text-navy-500">
+        <template v-if="lang === 'id'">Versi utama — tampil di <code>{{ publicPath || '/' }}</code>. Versi English diedit dan di-publish terpisah.</template>
+        <template v-else>Versi English — tampil di <code>/en{{ publicPath && publicPath !== '/' ? publicPath : '' }}</code>. Versi Indonesia diedit dan di-publish terpisah.</template>
+      </p>
     </div>
 
     <slot name="status" />
@@ -148,7 +167,7 @@ function onTabKey(e: KeyboardEvent, index: number) {
                 </div>
                 <a
                   v-if="previewPath && current.previewIndex !== undefined"
-                  :href="`${previewPath}?s=${current.previewIndex}`"
+                  :href="previewHref(current.previewIndex)"
                   target="_blank"
                   rel="noopener"
                   class="shrink-0 rounded-md border border-navy-300 bg-white px-3 py-1.5 text-sm font-semibold text-slateNavy hover:bg-navy-50"

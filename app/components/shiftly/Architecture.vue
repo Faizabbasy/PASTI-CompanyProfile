@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+const t = useT()
 
 if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
@@ -34,7 +35,7 @@ useGsapContext(() => {
   <section id="architecture" ref="sectionRef" data-header-theme="dark" class="relative overflow-hidden bg-slateNavy py-24 text-pureWhite tablet:py-32">
     <BaseGridLines tone="dark" />
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" label="Architecture" meta="Integrations" />
+      <BaseSectionMark surface="dark" :label="t('Architecture')" :meta="t('Integrations')" />
       <div class="mt-14 desktop:mt-20">
         <ShiftlyHeading surface="dark" :eyebrow="architecture.eyebrow" :title="architecture.headline" :lede="architecture.body" />
       </div>
@@ -54,8 +55,8 @@ useGsapContext(() => {
 
         <div data-ar-node class="grid place-items-center rounded-[24px] bg-pureWhite px-10 py-10 text-slateNavy shadow-[0_40px_80px_-40px_rgba(0,8,16,0.9)] desktop:min-h-[220px]">
           <ShiftlyMark :size="28" />
-          <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">Workforce operating platform</p>
-          <p class="mt-1 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">Real-time sync</p>
+          <p class="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">{{ t('Workforce operating platform') }}</p>
+          <p class="mt-1 text-center font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">{{ t('Real-time sync') }}</p>
         </div>
 
         <div class="flex flex-col gap-3">
@@ -72,7 +73,7 @@ useGsapContext(() => {
       </div>
 
       <div class="mt-14 grid gap-3 tablet:grid-cols-[auto_1fr_1fr] tablet:items-stretch">
-        <p class="m-center self-center font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)] tablet:pr-6">Deployment</p>
+        <p class="m-center self-center font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)] tablet:pr-6">{{ t('Deployment') }}</p>
         <div v-for="d in architecture.deployment" :key="d.name" class="rounded-[16px] border border-[color:rgba(255,255,255,0.14)] px-5 py-4">
           <p class="font-display text-[17px] font-bold">{{ d.name }}</p>
           <p class="mt-1 text-[14px] text-[color:rgba(255,255,255,0.65)]">{{ d.body }}</p>

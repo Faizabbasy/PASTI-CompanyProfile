@@ -11,6 +11,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // aside at the footer. Offsets are cached (re-read on ScrollTrigger
 // refresh); the scroll handler is rAF-throttled. Skipped below desktop.
 type Bin = { code: string; name: string; el: HTMLElement; top: number }
+const t = useT()
 const bins = ref<Bin[]>([])
 const active = ref(-1)
 const visible = ref(false)
@@ -72,7 +73,7 @@ const current = computed(() => bins.value[active.value])
        never covers content; the LOC code reads under it and the bin's name
        shows beside it on hover / focus. -->
   <nav
-    aria-label="MATRIX page sections"
+    :aria-label="t('MATRIX page sections')"
     class="fixed left-1 top-1/2 z-40 hidden -translate-y-1/2 transition-[opacity,transform] duration-500 ease-editorial desktop:block"
     :class="visible ? 'translate-x-0 opacity-100' : 'pointer-events-none -translate-x-4 opacity-0'"
     :inert="!visible || undefined"
@@ -94,7 +95,7 @@ const current = computed(() => bins.value[active.value])
         </li>
       </ol>
       <p class="font-mono text-[8px] font-semibold tabular-nums leading-none text-pastiYellow-400" aria-live="polite">
-        <span class="sr-only">Current section: {{ current?.name }}, location </span>{{ current?.code ?? 'A-01' }}
+        <span class="sr-only">{{ `${t('Current section: {name}, location', { name: current?.name ?? '' })} ` }}</span>{{ current?.code ?? 'A-01' }}
       </p>
     </div>
   </nav>

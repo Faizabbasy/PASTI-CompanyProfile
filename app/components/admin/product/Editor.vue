@@ -20,8 +20,9 @@ const props = defineProps<{
   codeManaged: string[]
 }>()
 
+const lang = useEditorLang()
 const endpoint = `/api/admin/pages/${props.slug}`
-const previewPath = `/admin/preview/${props.slug}`
+const previewPath = `/admin/preview/${props.slug}?lang=${lang}`
 const toJson = <T,>(v: T) => JSON.parse(JSON.stringify(v)) as T
 
 const {
@@ -31,6 +32,7 @@ const {
   name: props.name,
   endpoint,
   asyncKey: `admin-${props.slug}`,
+  lang,
   tabs: props.tabs,
   toForm: toJson,
   toPayload: toJson,
@@ -47,6 +49,7 @@ const sectionModel = (k: string) => (form.value as unknown as Record<string, Rec
     :title="`Halaman ${name}`"
     crumb="Products"
     :public-path="publicPath"
+    :lang="lang"
     :flag="flag"
     :tabs="tabs"
     :preview-path="previewPath"

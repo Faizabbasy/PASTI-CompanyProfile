@@ -22,8 +22,8 @@ interface PreviewResponse {
 }
 
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData('admin-creative-preview', () =>
-  cmsFetch<PreviewResponse>('/api/admin/pages/creative/preview')
+const { data, error, refresh, status } = await useAsyncData(`admin-creative-preview-${useEditorLang()}`, () =>
+  cmsFetch<PreviewResponse>('/api/admin/pages/creative/preview', { query: { lang: useEditorLang() } })
 )
 
 const legacy = buildLegacyCreativeContent()

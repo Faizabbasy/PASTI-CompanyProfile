@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { OpenItem } from '~/composables/useOpen'
+const t = useT()
 
 // READY-TO-DEVELOP FRAMEWORK (slides 6, 7) — deep navy. What OPEN is,
 // structurally: a board of nine foundation pieces that lock into place on
@@ -33,8 +34,8 @@ const layersIn = useOpenInView(layersRef, 0.3)
         <div ref="boardRef" class="desktop:col-span-6 desktop:col-start-7" :class="{ 'is-in': boardIn }">
           <div class="rounded-[24px] border border-[color:rgba(255,255,255,0.14)] bg-[color:rgba(255,255,255,0.03)] p-3 tablet:p-4">
             <div class="flex items-center justify-between px-2 pb-3 pt-1">
-              <span class="flex items-center gap-2 font-display text-[14px] font-extrabold"><OpenMark :size="18" />OPEN Framework</span>
-              <span class="text-[12px] text-[color:rgba(255,255,255,0.5)]">Functional foundation</span>
+              <span class="flex items-center gap-2 font-display text-[14px] font-extrabold"><OpenMark :size="18" />{{ t('OPEN Framework') }}</span>
+              <span class="text-[12px] text-[color:rgba(255,255,255,0.5)]">{{ t('Functional foundation') }}</span>
             </div>
             <ul class="grid grid-cols-2 gap-2 tablet:grid-cols-3 tablet:gap-2.5">
               <li
@@ -58,7 +59,7 @@ const layersIn = useOpenInView(layersRef, 0.3)
       <!-- Framework → business → system -->
       <div ref="layersRef" class="mt-20 desktop:mt-28" :class="{ 'is-in': layersIn }">
         <div class="m-center flex flex-col gap-3 desktop:flex-row desktop:items-end desktop:justify-between">
-          <p class="font-display text-[length:clamp(22px,2.2vw,30px)] font-extrabold tracking-[-0.02em]">From framework to your system.</p>
+          <p class="font-display text-[length:clamp(22px,2.2vw,30px)] font-extrabold tracking-[-0.02em]">{{ t('From framework to your system.') }}</p>
           <p class="font-display text-[16px] font-bold text-[color:rgba(255,255,255,0.6)]">{{ framework.tagline.join(' ') }}</p>
         </div>
         <ol class="mt-8 grid gap-3 desktop:grid-cols-[1fr_auto_1.35fr_auto_1fr] desktop:items-stretch desktop:gap-4">
@@ -72,7 +73,7 @@ const layersIn = useOpenInView(layersRef, 0.3)
           <li class="op-fade rounded-[20px] border border-dashed border-[color:rgba(255,255,255,0.3)] p-6" style="--d: 250ms">
             <p class="font-display text-[20px] font-extrabold">{{ layers[1].label }}</p>
             <p class="mt-3 text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.7)]">{{ layers[1].body }}</p>
-            <ul class="mt-5 flex flex-wrap gap-2" aria-label="Customization">
+            <ul class="mt-5 flex flex-wrap gap-2" :aria-label="t('Customization')">
               <li v-for="a in framework.adaptedBy" :key="a" class="rounded-full border border-[color:rgba(255,255,255,0.2)] px-3 py-1 text-[13px] font-semibold">{{ a }}</li>
             </ul>
           </li>

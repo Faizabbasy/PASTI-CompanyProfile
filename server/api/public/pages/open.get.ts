@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   let page: Awaited<ReturnType<typeof getPublishedOpen>>
   try {
-    page = await getPublishedOpen()
+    page = await getPublishedOpen(cmsLang(event))
   } catch (err) {
     console.error('[cms] public OPEN read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

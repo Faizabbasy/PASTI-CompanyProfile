@@ -16,6 +16,7 @@ if (import.meta.client) gsap.registerPlugin(ScrollTrigger)
 
 type Key = DoraField['key']
 const { verify } = useDoraPage()
+const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const step = ref<VerifyStep>(0)
 const chosen = ref<Key | null>(null)
@@ -61,11 +62,11 @@ useGsapContext(() => {
 })
 
 const captions = [
-  'Opened from the verification queue. Every extracted field is listed with its confidence.',
-  'Select a field — its marker shows exactly where the value sits on the page.',
-  'Document No. has lower confidence: the scan read “OO01” for “0001”. It is flagged for a closer look.',
-  'The reviewer corrects the value. It is saved and shown when the document is reopened.',
-  'A person completes verification. The final status follows your configured workflow.'
+  t('Opened from the verification queue. Every extracted field is listed with its confidence.'),
+  t('Select a field — its marker shows exactly where the value sits on the page.'),
+  t('Document No. has lower confidence: the scan read “OO01” for “0001”. It is flagged for a closer look.'),
+  t('The reviewer corrects the value. It is saved and shown when the document is reopened.'),
+  t('A person completes verification. The final status follows your configured workflow.')
 ]
 </script>
 
@@ -105,14 +106,14 @@ const captions = [
                  the caption. Desktop: the caption alone (the story list and
                  the pin drive the steps). -->
             <div class="mt-4 grid grid-cols-[2.75rem_1fr_2.75rem] items-center gap-3 desktop:hidden">
-              <button type="button" class="grid h-11 w-11 place-items-center rounded-full ring-1 ring-[color:rgba(255,255,255,0.2)] disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-doraCyan" :disabled="step <= 0" aria-label="Previous step" @click="go(step - 1)">
+              <button type="button" class="grid h-11 w-11 place-items-center rounded-full ring-1 ring-[color:rgba(255,255,255,0.2)] disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-doraCyan" :disabled="step <= 0" :aria-label="t('Previous step')" @click="go(step - 1)">
                 <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 8H3M7 4 3 8l4 4" /></svg>
               </button>
               <p class="text-center">
                 <span class="block font-mono text-[10.5px] tabular-nums tracking-[0.12em] text-doraCyan">{{ pad(step + 1) }} / 05</span>
                 <span class="block font-display text-[15px] font-bold">{{ verify.steps[step]?.name }}</span>
               </p>
-              <button type="button" class="grid h-11 w-11 place-items-center rounded-full bg-doraCyan text-slateNavy disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pureWhite" :disabled="step >= 4" aria-label="Next step" @click="go(step + 1)">
+              <button type="button" class="grid h-11 w-11 place-items-center rounded-full bg-doraCyan text-slateNavy disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pureWhite" :disabled="step >= 4" :aria-label="t('Next step')" @click="go(step + 1)">
                 <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
               </button>
             </div>
@@ -121,7 +122,7 @@ const captions = [
             <div class="mt-4 grid max-w-[60ch] text-[13.5px] leading-snug text-[color:rgba(255,255,255,0.75)] max-desktop:text-center" aria-live="polite">
               <p v-for="(c, i) in captions" :key="i" class="[grid-area:1/1]" :class="step === i ? '' : 'invisible'">{{ c }}</p>
             </div>
-            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.45)]">{{ verify.note }} · Synthetic sample, not a product screenshot</p>
+            <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(255,255,255,0.45)]">{{ verify.note }} · {{ t('Synthetic sample, not a product screenshot') }}</p>
           </div>
         </div>
       </BaseContainer>

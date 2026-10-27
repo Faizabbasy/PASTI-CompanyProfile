@@ -13,6 +13,7 @@ import type { StockKey } from '~/composables/useMatrix'
 // Mobile: same bar, labels move under it. Reduced motion: final state.
 // Synthetic, illustrative data.
 const { hero, sample, intelligence } = useMatrixPage()
+const t = useT()
 const scrollTo = useFastScroll()
 const stageRef = ref<HTMLElement | null>(null)
 const step = ref(0)
@@ -27,10 +28,10 @@ const scale = Math.max(mix.onHand, req)
 const pct = (n: number) => (n / scale) * 100
 const segs: { key: StockKey; label: string; qty: number; left: number; width: number; i: number }[] = (() => {
   const order: { key: StockKey; label: string; qty: number }[] = [
-    { key: 'net', label: 'Net available', qty: net },
-    { key: 'reserved', label: 'Reserved', qty: mix.reserved },
-    { key: 'quarantine', label: 'Quarantine', qty: mix.quarantine },
-    { key: 'damaged', label: 'Damaged', qty: mix.damaged }
+    { key: 'net', label: t('Net available'), qty: net },
+    { key: 'reserved', label: t('Reserved'), qty: mix.reserved },
+    { key: 'quarantine', label: t('Quarantine'), qty: mix.quarantine },
+    { key: 'damaged', label: t('Damaged'), qty: mix.damaged }
   ]
   let left = 0
   return order.map((s, i) => {
@@ -71,9 +72,9 @@ useGsapContext(() => {
 
 const caption = computed(() => {
   if (hover.value) return `${segs.find((s) => s.key === hover.value)!.label} — ${defs[hover.value]}`
-  if (step.value >= 2) return `Net available is ${short} ${sample.unit} short of the near-term requirement. Review the shortage before issuing.`
-  if (step.value === 1) return 'Separating what is held from what can be used…'
-  return `${mix.onHand} ${sample.unit} on hand across ${sample.locations.length} locations.`
+  if (step.value >= 2) return t('Net available is {n} {unit} short of the near-term requirement. Review the shortage before issuing.', { n: short, unit: sample.unit })
+  if (step.value === 1) return t('Separating what is held from what can be used…')
+  return t('{n} {unit} on hand across {loc} locations.', { n: mix.onHand, unit: sample.unit, loc: sample.locations.length })
 })
 </script>
 
@@ -85,8 +86,8 @@ const caption = computed(() => {
     <BaseContainer class="relative z-10 w-full">
       <!-- Top meta row -->
       <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-4 max-desktop:justify-center">
-        <div data-mx-fade><BaseHeroMarker surface="light" :label="hero.eyebrow" meta="by PASTI Technology" /></div>
-        <p data-mx-fade data-mx-bin data-mx-code="A-01" data-mx-name="Overview" class="hidden items-center gap-3 font-mono text-[11px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.6)] tablet:inline-flex">
+        <div data-mx-fade><BaseHeroMarker surface="light" :label="hero.eyebrow" :meta="t('by PASTI Technology')" /></div>
+        <p data-mx-fade data-mx-bin data-mx-code="A-01" :data-mx-name="t('Overview')" class="hidden items-center gap-3 font-mono text-[11px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.6)] tablet:inline-flex">
           <span class="rounded-[6px] bg-pureWhite px-2 py-1 font-semibold text-slateNavy ring-1 ring-[color:rgba(3,60,89,0.14)]">A-01</span>
           {{ sample.code }} · {{ sample.warehouse }} / {{ sample.zone }} / {{ sample.bin }}
         </p>
@@ -100,30 +101,30 @@ const caption = computed(() => {
           </p>
           <!-- ≥1280: CTAs sit up here so they are visible above the fold. -->
           <div data-mx-fade class="hidden xl:block">
-            <BaseHeroCtas surface="light" :primary="{ label: 'Request a Demo' }" :secondary="{ label: 'Explore MATRIX', down: true }" @primary="scrollTo('demo')" @secondary="scrollTo('intelligence')" />
+            <BaseHeroCtas surface="light" :primary="{ label: t('Request a Demo') }" :secondary="{ label: t('Explore MATRIX'), down: true }" @primary="scrollTo('demo')" @secondary="scrollTo('intelligence')" />
           </div>
         </div>
-        <h1 class="mx-h1 mt-6 font-display font-extrabold text-slateNavy" aria-label="Material certainty is operational certainty.">
-          <span aria-hidden="true" class="block overflow-hidden pb-[0.06em]"><span data-mx-line class="block">Material certainty</span></span>
-          <span aria-hidden="true" class="block overflow-hidden pb-[0.06em]"><span data-mx-line class="block">is <span class="mx-hl">operational certainty</span><span class="text-pastiYellow-500">.</span></span></span>
+        <h1 class="mx-h1 mt-6 font-display font-extrabold text-slateNavy" :aria-label="`${t('Material certainty')} ${t('is')} ${t('operational certainty')}.`">
+          <span aria-hidden="true" class="block overflow-hidden pb-[0.06em]"><span data-mx-line class="block">{{ t('Material certainty') }}</span></span>
+          <span aria-hidden="true" class="block overflow-hidden pb-[0.06em]"><span data-mx-line class="block">{{ t('is') }} <span class="mx-hl">{{ t('operational certainty') }}</span><span class="text-pastiYellow-500">.</span></span></span>
         </h1>
       </div>
 
       <!-- The giant stock bar -->
       <figure class="mt-12 desktop:mt-10">
         <figcaption data-mx-fade class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 font-mono text-[11px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.6)]">
-          <span><strong class="text-slateNavy">{{ sample.name }}</strong> · stock balance in {{ sample.unit }}</span>
-          <span class="hidden tablet:inline">Synthetic sample · illustrative</span>
+          <span><strong class="text-slateNavy">{{ sample.name }}</strong> · {{ t('stock balance in {unit}', { unit: sample.unit }) }}</span>
+          <span class="hidden tablet:inline">{{ t('Synthetic sample · illustrative') }}</span>
         </figcaption>
         <div class="relative mt-14 tablet:mt-10">
           <!-- Requirement line + shortfall bracket -->
           <div aria-hidden="true" class="pointer-events-none absolute -bottom-3 -top-8 z-20 transition-opacity duration-500" :class="step >= 2 ? 'opacity-100' : 'opacity-0'" :style="{ left: `${pct(req)}%` }">
-            <span class="absolute bottom-full right-0 mb-1 whitespace-nowrap font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slateNavy">Requirement {{ req }}</span>
+            <span class="absolute bottom-full right-0 mb-1 whitespace-nowrap font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-slateNavy">{{ t('Requirement') }} {{ req }}</span>
             <span class="absolute inset-y-0 left-0 border-l-2 border-dashed border-slateNavy" />
           </div>
           <div aria-hidden="true" class="pointer-events-none absolute -bottom-9 z-20 flex h-4 items-end transition-[opacity,transform] duration-500" :class="step >= 2 ? 'translate-y-0 opacity-100' : 'translate-y-1 opacity-0'" :style="{ left: `${pct(net)}%`, width: `${pct(req) - pct(net)}%` }">
             <span class="absolute inset-x-0 bottom-0 h-2 rounded-b-[4px] border-x-2 border-b-2 border-[#C2412D]" />
-            <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap font-mono text-[11px] font-semibold text-[#9E3322]">−{{ short }} short</span>
+            <span class="absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap font-mono text-[11px] font-semibold text-[#9E3322]">−{{ short }} {{ t('short') }}</span>
           </div>
 
           <div data-mx-bar class="mx-bar relative overflow-hidden rounded-[18px] bg-[color:rgba(3,60,89,0.06)]">
@@ -150,7 +151,7 @@ const caption = computed(() => {
             <span aria-hidden="true" class="absolute inset-y-0 left-0 flex items-end bg-slateNavy p-3 text-pureWhite transition-opacity duration-500 desktop:p-4" :class="step >= 1 ? 'pointer-events-none opacity-0' : 'opacity-100'" :style="{ width: `${pct(mix.onHand)}%` }">
               <span>
                 <span class="mx-num block font-display font-extrabold leading-none tracking-[-0.04em]">{{ mix.onHand }}</span>
-                <span class="mt-1 block font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:rgba(255,255,255,0.7)]">On hand</span>
+                <span class="mt-1 block font-mono text-[10px] font-semibold uppercase tracking-[0.12em] text-[color:rgba(255,255,255,0.7)]">{{ t('On hand') }}</span>
               </span>
             </span>
           </div>
@@ -162,7 +163,7 @@ const caption = computed(() => {
         </ul>
         <!-- Live line: verdict, or the hovered segment's definition (fixed height). -->
         <p class="mt-2 min-h-[3em] max-w-[64ch] text-[15px] leading-snug text-slateNavy max-desktop:mx-auto max-desktop:text-center" aria-live="polite">{{ caption }}</p>
-        <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.45)] tablet:hidden max-desktop:text-center">Synthetic sample · illustrative</p>
+        <p class="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.45)] tablet:hidden max-desktop:text-center">{{ t('Synthetic sample · illustrative') }}</p>
       </figure>
 
       <!-- Bottom row -->
@@ -170,7 +171,7 @@ const caption = computed(() => {
         <div class="m-center desktop:col-span-7">
           <p data-mx-fade class="hero-lede m-center desktop:max-w-[40rem]">{{ hero.body }}</p>
           <div data-mx-fade class="mt-8 xl:hidden">
-            <BaseHeroCtas surface="light" :primary="{ label: 'Request a Demo' }" :secondary="{ label: 'Explore MATRIX', down: true }" @primary="scrollTo('demo')" @secondary="scrollTo('intelligence')" />
+            <BaseHeroCtas surface="light" :primary="{ label: t('Request a Demo') }" :secondary="{ label: t('Explore MATRIX'), down: true }" @primary="scrollTo('demo')" @secondary="scrollTo('intelligence')" />
           </div>
         </div>
         <ul data-mx-fade class="m-center-row flex flex-wrap gap-2 desktop:col-span-5 desktop:justify-end">

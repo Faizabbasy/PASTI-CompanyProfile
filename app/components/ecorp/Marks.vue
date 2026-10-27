@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // Blueprint registration marks — four "+" crosshairs pinned to the content
 // frame's corners, plus an optional mono coordinate label. The e-CORPORATE
 // page's recurring signature (precision, engineered), decorative only.
@@ -21,7 +22,7 @@ withDefaults(defineProps<{ surface?: 'light' | 'dark'; label?: string }>(), { su
         v-if="label"
         class="absolute bottom-[22px] right-0 mx-gutter hidden pr-6 font-mono text-[10px] uppercase tracking-[0.2em] tablet:block"
         :class="surface === 'dark' ? 'text-[color:rgba(255,255,255,0.4)]' : 'text-[color:rgba(3,60,89,0.4)]'"
-      >{{ label }}</span>
+      >{{ t(label) }}</span>
     </div>
   </div>
 </template>

@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   let page: Awaited<ReturnType<typeof getPublishedShiftly>>
   try {
-    page = await getPublishedShiftly()
+    page = await getPublishedShiftly(cmsLang(event))
   } catch (err) {
     console.error('[cms] public SHIFTLY read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

@@ -14,19 +14,20 @@ const props = withDefaults(
 )
 const emit = defineEmits<{ go: [index: number]; prev: []; next: [] }>()
 const pad = (n: number) => String(n).padStart(2, '0')
+const t = useT()
 </script>
 
 <template>
   <div class="flex items-center justify-between gap-4">
     <div class="flex min-w-0 flex-1 items-center gap-3">
-      <div class="flex flex-1 items-center gap-1" role="tablist" :aria-label="`${noun} navigation`">
+      <div class="flex flex-1 items-center gap-1" role="tablist" :aria-label="t('{noun} navigation', { noun: t(noun) })">
         <button
           v-for="n in props.count"
           :key="n"
           type="button"
           role="tab"
           :aria-selected="n - 1 === props.active"
-          :aria-label="`Go to ${noun} ${n}`"
+          :aria-label="t('Go to {noun} {n}', { noun: t(noun), n })"
           class="group/seg flex h-11 flex-1 items-center"
           @click="emit('go', n - 1)"
         >
@@ -47,12 +48,12 @@ const pad = (n: number) => String(n).padStart(2, '0')
         class="swipe-hint mr-1 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)] transition-opacity duration-500 ease-editorial"
         :class="props.touched ? 'opacity-0' : 'opacity-100'"
       >
-        Swipe
+        {{ t('Swipe') }}
         <svg viewBox="0 0 16 16" class="swipe-hint-arrow h-3 w-3" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
       </span>
       <button
         type="button"
-        :aria-label="`Previous ${noun}`"
+        :aria-label="t('Previous {noun}', { noun: t(noun) })"
         :disabled="props.active === 0"
         class="grid h-11 w-11 place-items-center rounded-full border border-[color:rgba(3,60,89,0.18)] text-slateNavy transition-[opacity,transform,background-color] duration-200 ease-editorial active:scale-90 disabled:opacity-30"
         @click="emit('prev')"
@@ -61,7 +62,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
       </button>
       <button
         type="button"
-        :aria-label="`Next ${noun}`"
+        :aria-label="t('Next {noun}', { noun: t(noun) })"
         :disabled="props.active === props.count - 1"
         class="grid h-11 w-11 place-items-center rounded-full bg-slateNavy text-pureWhite transition-[opacity,transform] duration-200 ease-editorial active:scale-90 disabled:opacity-30"
         @click="emit('next')"

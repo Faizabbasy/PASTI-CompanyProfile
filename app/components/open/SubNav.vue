@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+const t = useT()
 
 // Compact OPEN product sub-nav (brief: Overview · Ecosystem · Modules ·
 // Governance · Integration · Demo) — desktop only, a slim pill bottom-centre
@@ -43,7 +44,7 @@ onBeforeUnmount(() => st?.kill())
 
 <template>
   <nav
-    aria-label="Navigasi halaman OPEN"
+    :aria-label="t('OPEN page navigation')"
     class="fixed bottom-6 left-1/2 z-40 hidden -translate-x-1/2 transition-[opacity,transform] duration-500 ease-editorial desktop:block"
     :class="visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-6 opacity-0'"
   >
@@ -63,9 +64,9 @@ onBeforeUnmount(() => st?.kill())
         :class="active === it.id ? 'bg-[color:rgba(255,255,255,0.12)] text-pureWhite' : 'text-[color:rgba(255,255,255,0.65)] hover:text-pureWhite'"
         :aria-current="active === it.id ? 'location' : undefined"
         @click.prevent="scrollTo(it.id)"
-      >{{ it.label }}</a>
+      >{{ t(it.label) }}</a>
       <a href="#demo" class="ml-1 flex h-9 items-center rounded-full bg-pastiYellow-500 px-4 font-display text-[13px] font-bold text-slateNavy transition-transform duration-200 active:scale-[0.97]" @click.prevent="scrollTo('demo')">
-        Request a Demo
+        {{ t('Request a Demo') }}
       </a>
     </div>
   </nav>

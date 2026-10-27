@@ -10,6 +10,7 @@ import gsap from 'gsap'
 // Content: useTechnologyPage() (legacy code or published CMS, normalized).
 const { hero, capabilities } = useTechnologyPage()
 const { eyebrow, lede } = hero
+const t = useT()
 const services = capabilities.items
 
 // The headline's three editorial lines, each split into masked words.
@@ -104,7 +105,7 @@ useGsapContext(() => {
     <BaseContainer class="pointer-events-none relative z-10 flex flex-1 flex-col desktop:justify-center">
       <div class="grid items-center gap-12 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-7">
-          <div data-th-fade><BaseHeroMarker surface="dark" :label="eyebrow" :meta="`${String(services.length).padStart(2, '0')} capabilities`" /></div>
+          <div data-th-fade><BaseHeroMarker surface="dark" :label="eyebrow" :meta="t('{n} capabilities', { n: String(services.length).padStart(2, '0') })" /></div>
 
           <h1 class="hero-title hero-title--dark mt-6 desktop:mt-[3svh]">
             <span v-for="(line, li) in lines" :key="li" class="block">
@@ -131,19 +132,19 @@ useGsapContext(() => {
               <span class="inline-flex items-center gap-2.5">
                 <LayoutBrandMark surface="dark" :height="11" />
                 <span aria-hidden="true" class="h-3 w-px bg-[color:rgba(255,255,255,0.25)]" />
-                <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)]">Console</span>
+                <span class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.55)]">{{ t('Console') }}</span>
               </span>
               <span class="inline-flex gap-1.5" aria-hidden="true">
                 <span class="h-2 w-2 rounded-full bg-[color:rgba(255,255,255,0.18)]" /><span class="h-2 w-2 rounded-full bg-[color:rgba(255,255,255,0.18)]" /><span class="h-2 w-2 rounded-full bg-pastiYellow-500" />
               </span>
             </div>
             <p class="mt-4 min-h-[3.2em] font-mono text-[13px] leading-relaxed text-[color:rgba(255,255,255,0.7)]" aria-live="off">
-              <span class="font-bold text-pastiYellow-500">&gt;</span> building <span class="text-[color:rgba(255,255,255,0.4)]">▸</span>
+              <span class="font-bold text-pastiYellow-500">&gt;</span> {{ t('building') }} <span class="text-[color:rgba(255,255,255,0.4)]">▸</span>
               <span ref="typedRef" class="font-semibold text-pureWhite" /><span class="th-caret ml-0.5 inline-block h-[1.05em] w-[0.55em] translate-y-[0.18em] bg-pastiYellow-500" aria-hidden="true" />
             </p>
             <div class="mt-4 flex items-center justify-between border-t border-[color:rgba(255,255,255,0.12)] pt-3 font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">
-              <span>{{ String(services.length).padStart(2, '0') }} capabilities</span>
-              <span class="inline-flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />Live</span>
+              <span>{{ t('{n} capabilities', { n: String(services.length).padStart(2, '0') }) }}</span>
+              <span class="inline-flex items-center gap-1.5"><span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ t('Live') }}</span>
             </div>
           </div>
         </div>

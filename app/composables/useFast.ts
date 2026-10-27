@@ -1,3 +1,4 @@
+import { FAST_ID } from '~/i18n/content/fast'
 /**
  * /fast — FAST, Flexible Advanced Scheduling Technology (FCP by PASTI
  * Technology). Brief + audit: docs/fast/00-fast-landing-page-brief.md.
@@ -41,7 +42,7 @@ export interface GanttOp {
   locked?: boolean
 }
 
-export function useFast() {
+function fastData() {
   const seo = {
     title: 'FAST — Production Planning & Scheduling | PASTI',
     description:
@@ -350,6 +351,14 @@ export function useFast() {
   }
 
   return { seo, capabilities, subnav, hero, complexity, framework, flow, board, gantt, constraints, readiness, scenarios, execution, visibility, integration, why, demo }
+}
+
+export type FastData = ReturnType<typeof fastData>
+
+// Bilingual site: English base data + Indonesian overlay (text only — ids,
+// statuses and sample codes stay as above). Outside Nuxt → English.
+export function useFast() {
+  return localize(fastData(), useLocale() === 'id' ? FAST_ID : undefined)
 }
 
 export function useFastScroll() {

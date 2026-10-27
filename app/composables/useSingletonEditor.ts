@@ -57,6 +57,8 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
   name: string
   endpoint: string
   asyncKey: string
+  // Bilingual pages: which language record to edit (sent as ?lang=).
+  lang?: 'id' | 'en'
   tabs: readonly EditorTab[]
   toForm: (content: S['draft']['content']) => F
   toPayload: (form: F) => unknown
@@ -66,7 +68,8 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
 
   // Everything that needs the component instance (watchers, lifecycle and
   // route hooks) is registered before the first await.
-  const asyncData = useAsyncData(opts.asyncKey, () => cmsFetch<SingletonResponse<S>>(opts.endpoint))
+  const query = opts.lang ? { lang: opts.lang } : undefined
+  const asyncData = useAsyncData(opts.lang ? `${opts.asyncKey}-${opts.lang}` : opts.asyncKey, () => cmsFetch<SingletonResponse<S>>(opts.endpoint, { query }))
   const { data, status: loadStatus, error: loadError, refresh } = asyncData
 
   const server = ref(null) as Ref<SingletonResponse<S> | null>
@@ -149,6 +152,7 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
     try {
       await ensureSession()
       const res = await cmsFetch<SingletonResponse<S>>(opts.endpoint, {
+        query,
         method: 'PUT',
         body: { revision: server.value.revision, content: opts.toPayload(form.value) },
         keepOn401: true
@@ -180,6 +184,7 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
     try {
       await ensureSession()
       const res = await cmsFetch<SingletonResponse<S>>(`${opts.endpoint}/${kind}`, {
+        query,
         method: 'POST',
         body: kind === 'publish' ? { revision: server.value.revision } : {},
         keepOn401: true

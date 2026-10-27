@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const t = useT()
 // OPEN section tag — the page read as one closed loop. A small ring whose arc
 // is this section's position in the page (n of 12); at the CTA the ring is
 // complete and the check appears, i.e. the OPEN mark is "assembled" by the
@@ -40,7 +41,7 @@ const dark = computed(() => props.surface === 'dark')
         <path d="M8 12.5l3 3 5.5-6" stroke="#FBBA00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
       </svg>
     </span>
-    <p class="font-display text-[14px] font-bold tracking-[-0.01em]" :class="dark ? 'text-pureWhite' : 'text-slateNavy'">{{ label }}</p>
+    <p class="font-display text-[14px] font-bold tracking-[-0.01em]" :class="dark ? 'text-pureWhite' : 'text-slateNavy'">{{ t(label) }}</p>
     <span class="relative block h-px flex-1" :class="dark ? 'bg-[color:rgba(255,255,255,0.12)]' : 'bg-[color:rgba(3,60,89,0.12)]'">
       <span class="op-draw absolute inset-0 bg-pastiYellow-500/70" />
     </span>

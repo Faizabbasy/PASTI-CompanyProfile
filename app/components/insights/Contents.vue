@@ -16,6 +16,9 @@ const topics = ['All', ...contents.topics]
 // CMS articles may sit in several topics; legacy ones have exactly one.
 const inTopic = (a: (typeof articles)[number], t: string) => (a.page?.topics ?? [a.page?.topic]).includes(t)
 const topic = ref('All')
+// `tr` (not `t`): the topic tabs loop with `t`. Topic names are filter keys
+// (English) and are only translated for display.
+const tr = useT()
 const hovered = ref<number | null>(null)
 const reading = ref<number | null>(null)
 const listRef = ref<HTMLElement | null>(null)
@@ -52,10 +55,10 @@ useGsapContext(() => {
     <BaseContainer>
       <div class="flex flex-col gap-6 desktop:flex-row desktop:items-end desktop:justify-between">
         <div>
-          <BaseSectionMark surface="light" :label="contents.sectionLabel" :meta="`${String(articles.length).padStart(2, '0')} articles`" class="desktop:w-[34rem]" />
+          <BaseSectionMark surface="light" :label="contents.sectionLabel" :meta="tr('{n} articles', { n: String(articles.length).padStart(2, '0') })" class="desktop:w-[34rem]" />
           <h2 class="m-center mt-8 font-display text-[length:clamp(36px,4.6vw,72px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-slateNavy">{{ contents.title }}<span class="text-pastiYellow-500">.</span></h2>
         </div>
-        <div class="snap-rail -mx-gutter flex gap-2 overflow-x-auto px-gutter desktop:mx-0 desktop:px-0" role="tablist" aria-label="Filter by topic">
+        <div class="snap-rail -mx-gutter flex gap-2 overflow-x-auto px-gutter desktop:mx-0 desktop:px-0" role="tablist" :aria-label="tr('Filter by topic')">
           <button
             v-for="t in topics"
             :key="t"
@@ -66,7 +69,7 @@ useGsapContext(() => {
             :class="topic === t ? 'border-slateNavy bg-slateNavy text-pureWhite' : 'border-[color:rgba(3,60,89,0.18)] text-slateNavy hover:border-slateNavy'"
             @click="setTopic(t)"
           >
-            {{ t }}<span class="font-mono text-[10px]" :class="topic === t ? 'text-pastiYellow-500' : 'text-[color:rgba(3,60,89,0.45)]'">{{ String(countFor(t)).padStart(2, '0') }}</span>
+            {{ tr(t) }}<span class="font-mono text-[10px]" :class="topic === t ? 'text-pastiYellow-500' : 'text-[color:rgba(3,60,89,0.45)]'">{{ String(countFor(t)).padStart(2, '0') }}</span>
           </button>
         </div>
       </div>
@@ -76,8 +79,8 @@ useGsapContext(() => {
           <button
             type="button"
             class="group block w-full text-left"
-            :aria-label="`Read ${a.title}`"
-            @mouseenter="hovered = i; setState('view', 'Read')"
+            :aria-label="tr('Read {title}', { title: a.title })"
+            @mouseenter="hovered = i; setState('view', tr('Read'))"
             @mouseleave="setState('default')"
             @focus="hovered = i"
             @click="reading = i"
@@ -88,7 +91,7 @@ useGsapContext(() => {
                 <span class="block font-display text-[clamp(26px,4vw,64px)] font-extrabold leading-[1] tracking-[-0.04em] text-slateNavy transition-transform duration-500 ease-editorial" :class="hovered === i ? 'translate-x-3' : ''">
                   {{ a.page?.headline.text }} <span class="transition-colors duration-500" :class="hovered === i ? 'text-pastiYellow-500' : 'text-[color:rgba(3,60,89,0.35)]'">{{ a.page?.headline.accent }}</span>
                 </span>
-                <span class="mt-2 block font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)]">{{ a.page?.topic }} · {{ a.page?.category }}</span>
+                <span class="mt-2 block font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.5)]">{{ tr(a.page?.topic ?? '') }} · {{ a.page?.category }}</span>
               </span>
               <span class="grid h-12 w-12 place-items-center rounded-full border transition-[transform,background-color,border-color] duration-500 ease-editorial" :class="hovered === i ? '-rotate-45 border-pastiYellow-500 bg-pastiYellow-500 text-slateNavy' : 'border-[color:rgba(3,60,89,0.2)] text-slateNavy'">
                 <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
@@ -104,7 +107,7 @@ useGsapContext(() => {
                   <span class="block">
                     <span class="block max-w-[46ch] text-token-body-large text-[color:rgba(3,60,89,0.72)]">{{ a.page?.description }}</span>
                     <span class="mt-5 inline-flex items-center gap-2 font-display text-[13px] font-bold uppercase tracking-[0.1em] text-slateNavy">
-                      Read insight <span aria-hidden="true" class="h-px w-8 bg-pastiYellow-500" />
+                      {{ tr('Read insight') }} <span aria-hidden="true" class="h-px w-8 bg-pastiYellow-500" />
                     </span>
                   </span>
                 </span>

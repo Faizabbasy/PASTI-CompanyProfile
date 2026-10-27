@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+const t = useT()
 
 if (import.meta.client) {
   gsap.registerPlugin(ScrollTrigger)
@@ -51,13 +52,13 @@ useGsapContext(() => {
           <OpenHeading :lines="auction.title" surface="dark" size="xl" :lede="auction.body" />
           <p class="m-center mt-8 font-display text-[19px] font-bold leading-snug">{{ auction.line[0] }}<br><span class="text-pastiYellow-500">{{ auction.line[1] }}</span></p>
           <div class="mt-9">
-            <BaseHeroCtas surface="dark" :primary="{ label: 'Request a Demo' }" @primary="requestDemo('e-auction')" />
+            <BaseHeroCtas surface="dark" :primary="{ label: t('Request a Demo') }" @primary="requestDemo('e-auction')" />
           </div>
         </div>
 
         <!-- Process readout -->
         <div ref="railRef" class="desktop:col-span-7 desktop:pl-6">
-          <p class="m-center text-[14px] font-semibold text-[color:rgba(255,255,255,0.6)]">e-Auction process in OPEN</p>
+          <p class="m-center text-[14px] font-semibold text-[color:rgba(255,255,255,0.6)]">{{ t('e-Auction process in OPEN') }}</p>
           <div aria-hidden="true" class="relative mt-4 h-[148px] overflow-hidden tablet:h-[188px]">
             <Transition name="bid" mode="out-in">
               <div :key="active" class="m-center-col m-center absolute inset-0 flex flex-col justify-end">
@@ -87,7 +88,7 @@ useGsapContext(() => {
 
       <!-- Key capabilities -->
       <div class="mt-20 desktop:mt-24">
-        <p class="m-center font-display text-[20px] font-extrabold">Key capabilities</p>
+        <p class="m-center font-display text-[20px] font-extrabold">{{ t('Key capabilities') }}</p>
         <ul class="mt-6 grid border-t border-[color:rgba(255,255,255,0.14)] tablet:grid-cols-2 desktop:grid-cols-3">
           <li v-for="c in auction.capabilities" :key="c.label" class="border-b border-[color:rgba(255,255,255,0.14)] py-4 tablet:py-6 tablet:pr-8">
             <p class="font-display text-[19px] font-extrabold tracking-[-0.015em]">{{ c.label }}</p>

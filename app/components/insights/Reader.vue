@@ -19,6 +19,8 @@ const sheetRef = ref<HTMLElement | null>(null)
 const storyRef = ref<HTMLElement | null>(null)
 const article = computed(() => (props.index === null ? null : props.articles[props.index]!))
 const pad = (n: number) => String(n).padStart(2, '0')
+const t = useT()
+const lp = useLocalePath()
 const n = computed(() => props.articles.length)
 const nextArticle = computed(() => (props.index === null ? null : props.articles[(props.index + 1) % n.value]!))
 const fullPoster = ref(false)
@@ -142,12 +144,12 @@ onBeforeUnmount(() => {
                   :class="fullPoster ? 'opacity-0' : 'opacity-100'"
                 />
                 <!-- Phones/tablets: close sits on the cover so it never scrolls away. -->
-                <button type="button" aria-label="Close" class="absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy desktop:hidden" @click="emit('close')">
+                <button type="button" :aria-label="t('Close')" class="absolute right-4 top-4 z-10 grid h-11 w-11 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy desktop:hidden" @click="emit('close')">
                   <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" /></svg>
                 </button>
                 <!-- Top-left brand chip -->
                 <span class="absolute left-4 top-4 inline-flex items-center gap-2.5 rounded-full bg-[color:rgba(3,60,89,0.72)] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.8)] backdrop-blur-sm">
-                  <LayoutBrandMark surface="dark" :height="10" />Insight {{ article.index }} / {{ pad(n) }}
+                  <LayoutBrandMark surface="dark" :height="10" />{{ t('Insight') }} {{ article.index }} / {{ pad(n) }}
                 </span>
                 <!-- Bottom: category + poster toggle -->
                 <div class="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
@@ -165,7 +167,7 @@ onBeforeUnmount(() => {
                       <path v-if="!fullPoster" d="M6 2H2v4M10 2h4v4M6 14H2v-4M10 14h4v-4" />
                       <path v-else d="M2 6h4V2M14 6h-4V2M2 10h4v4M14 10h-4v4" />
                     </svg>
-                    {{ fullPoster ? 'Back to cover' : 'View full poster' }}
+                    {{ fullPoster ? t('Back to cover') : t('View full poster') }}
                   </button>
                 </div>
               </div>
@@ -176,9 +178,9 @@ onBeforeUnmount(() => {
               <!-- Top bar: close (prev/next live in the footer) -->
               <div class="flex min-h-11 items-center justify-between gap-4 px-5 pt-5 tablet:px-8 desktop:px-12 desktop:pt-7">
                 <p class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">
-                  <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ article.page?.topic }} · The PASTI Journal
+                  <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ t(article.page?.topic ?? '') }} · {{ t('The PASTI Journal') }}
                 </p>
-                <button type="button" aria-label="Close" class="hidden h-11 w-11 shrink-0 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy transition-transform duration-500 ease-editorial hover:rotate-90 desktop:grid" @click="emit('close')">
+                <button type="button" :aria-label="t('Close')" class="hidden h-11 w-11 shrink-0 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy transition-transform duration-500 ease-editorial hover:rotate-90 desktop:grid" @click="emit('close')">
                   <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" /></svg>
                 </button>
               </div>
@@ -195,7 +197,7 @@ onBeforeUnmount(() => {
 
                 <!-- Topic grid -->
                 <div v-if="article.page?.points.length" data-rd-part class="relative mt-10">
-                  <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">In this insight</p>
+                  <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">{{ t('In this insight') }}</p>
                   <ol class="mt-4 grid grid-cols-2 border-l border-t border-[color:rgba(255,255,255,0.12)] tablet:grid-cols-4" :class="{ 'tablet:!grid-cols-3': article.page.points.length === 3 }">
                     <li
                       v-for="(pt, i) in article.page.points"
@@ -218,7 +220,7 @@ onBeforeUnmount(() => {
                   </figcaption>
                   <ul class="mt-7 border-t border-[color:rgba(255,255,255,0.12)]">
                     <li v-for="l in article.page.pasti.links" :key="l.to + l.label" class="border-b border-[color:rgba(255,255,255,0.12)]">
-                      <NuxtLink :to="l.to" class="group flex min-h-[56px] items-center justify-between gap-4 py-3" @click="emit('close')">
+                      <NuxtLink :to="lp(l.to)" class="group flex min-h-[56px] items-center justify-between gap-4 py-3" @click="emit('close')">
                         <span class="font-display text-[16px] font-bold tracking-[-0.01em] text-pureWhite transition-colors duration-300 group-hover:text-pastiYellow-500">{{ l.label }}</span>
                         <span aria-hidden="true" class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[color:rgba(255,255,255,0.2)] transition-[background-color,border-color,color,transform] duration-500 ease-editorial group-hover:-rotate-45 group-hover:border-pastiYellow-500 group-hover:bg-pastiYellow-500 group-hover:text-slateNavy">
                           <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
@@ -232,7 +234,7 @@ onBeforeUnmount(() => {
               <!-- FOOTER: progress + next preview -->
               <div class="sticky bottom-0 border-t border-[color:rgba(255,255,255,0.1)] bg-slateNavy px-5 py-4 tablet:px-8 desktop:static desktop:px-12">
                 <div class="flex items-center gap-4">
-                  <button type="button" aria-label="Previous article" class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[color:rgba(255,255,255,0.2)] transition-colors hover:border-pastiYellow-500 hover:text-pastiYellow-500" @click="prev">
+                  <button type="button" :aria-label="t('Previous article')" class="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-[color:rgba(255,255,255,0.2)] transition-colors hover:border-pastiYellow-500 hover:text-pastiYellow-500" @click="prev">
                     <svg viewBox="0 0 16 16" class="h-4 w-4 rotate-180" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
                   </button>
                   <div class="hidden flex-1 items-center gap-1.5 tablet:flex" aria-hidden="true">
@@ -254,7 +256,7 @@ onBeforeUnmount(() => {
                     @click="next"
                   >
                     <span class="min-w-0">
-                      <span class="block font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">Next · {{ nextArticle.index }}</span>
+                      <span class="block font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">{{ t('Next') }} · {{ nextArticle.index }}</span>
                       <span class="block max-w-[14rem] truncate font-display text-[14px] font-bold text-pureWhite transition-colors duration-300 group-hover:text-pastiYellow-500">{{ nextArticle.title }}</span>
                     </span>
                     <span aria-hidden="true" class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-pureWhite text-slateNavy transition-[background-color,transform] duration-500 ease-editorial group-hover:-rotate-45 group-hover:bg-pastiYellow-500">

@@ -1,3 +1,4 @@
+import { FINAL_CTA_ID } from '~/i18n/content/finalCta'
 import { ctasSource } from './useSharedContentSource'
 
 export interface FinalCtaContent {
@@ -30,9 +31,10 @@ export interface FinalCtaContent {
  * (p.2 and p.42).
  */
 export function useFinalCta(): FinalCtaContent {
-  const code = codeFinalCta()
+  const code = localize(codeFinalCta(), useLocale() === 'id' ? FINAL_CTA_ID : undefined)
   // Shared Content CMS (Global CTAs), when its flag is on and it's published.
   const cms = ctasSource.read()
+  // The published Global CTAs record of this page's language.
   return cms ? { ...code, eyebrowLine: cms.eyebrow, headingLine: cms.headline, email: cms.email } : code
 }
 

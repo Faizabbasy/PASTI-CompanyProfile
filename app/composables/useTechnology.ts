@@ -1,3 +1,5 @@
+import { TECHNOLOGY_ID } from '~/i18n/content/technology'
+
 export interface TechnologyRelated {
   label: string
   /** Internal link (a /work case or project anchor); absent = plain label. */
@@ -52,6 +54,12 @@ export interface TechnologyCaseCard {
  *   the Creative page).
  */
 export function useTechnology() {
+  return localize(technologyData(), useLocale() === 'id' ? TECHNOLOGY_ID : undefined)
+}
+
+// The English base copy (Indonesian overlay: app/i18n/content/technology.ts).
+// Exported for code that must match on the English titles (perspective refs).
+export function technologyData() {
   const eyebrow = 'Technology'
   const heading = 'Technology built to move business forward.'
   const introBody =
@@ -164,3 +172,5 @@ export function useTechnology() {
 
   return { eyebrow, heading, introBody, servicesEyebrow, servicesHeading, services, cases, why }
 }
+
+export type TechnologyData = ReturnType<typeof technologyData>

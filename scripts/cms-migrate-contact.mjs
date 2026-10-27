@@ -33,6 +33,8 @@ import { fileURLToPath } from 'node:url'
 import { dirname, resolve } from 'node:path'
 import { isDeepStrictEqual } from 'node:util'
 
+// --lang id → build and write the Indonesian record (default: English, the original record).
+const LANG = process.argv.includes('--lang') && process.argv[process.argv.indexOf('--lang') + 1] === 'id' ? 'id' : 'en'
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const args = new Set(process.argv.slice(2))
 const DRY = args.has('--dry-run')
@@ -49,6 +51,7 @@ const jiti = createJiti(import.meta.url, {
   interopDefault: true
 })
 const load = (p) => jiti.import(resolve(root, p))
+await (await import('./lib/nuxt-shims.mjs')).installNuxtShims(load, LANG)
 
 // The legacy composables call each other through Nuxt auto-imports; provide
 // those names as globals so the real, unmodified files run as-is.
@@ -64,8 +67,14 @@ globalThis.useContact = useContact
 
 const { buildLegacyContactContent, adaptContactCms } = await load('app/composables/useContactPage.ts')
 const { legacyToContactContent, CONTACT_MIGRATION_VERSION, CONTACT_DUMMY_MARKERS } = await load('shared/utils/contactMigration.ts')
+const MIG_VERSION = LANG === 'id' ? CONTACT_MIGRATION_VERSION.replace('-v', '-id-v') : CONTACT_MIGRATION_VERSION
 const { ContactContentSchema } = await load('shared/utils/contactSchema.ts')
-const { buildMigratedContactRecord, CONTACT_RECORD_KEY, CONTACT_REVISION_PREFIX } = await load('server/utils/cms/contactPage.ts')
+// The record for the chosen language (--lang id → Indonesian; default English = the original record).
+const { contactFor } = await load('server/utils/cms/contactPage.ts')
+const _engine = contactFor(LANG)
+const buildMigratedContactRecord = _engine.buildMigratedRecord
+const CONTACT_RECORD_KEY = _engine.RECORD_KEY
+const CONTACT_REVISION_PREFIX = _engine.REVISION_PREFIX
 
 // Same origin usePageSeo() builds the canonical from (runtimeConfig.public.siteUrl).
 const siteUrl = (process.env.NUXT_PUBLIC_SITE_URL || 'https://www.pastipeople.id').replace(/\/+$/, '')
@@ -117,7 +126,7 @@ if (!isDeepStrictEqual(strip(adapted), strip(legacy))) {
 }
 
 const summary = {
-  version: CONTACT_MIGRATION_VERSION,
+  version: MIG_VERSION,
   headline: content.hero.headline,
   formTitle: content.form.title,
   fields: Object.fromEntries(Object.entries(content.form.fields).map(([k, f]) => [k, f.label])),
@@ -128,9 +137,9 @@ const summary = {
 const storage = await openCmsStore(root)
 const existing = await storage.getItem(CONTACT_RECORD_KEY)
 
-const sameMigration = existing?.source?.kind === 'migration' && existing.source.version === CONTACT_MIGRATION_VERSION
+const sameMigration = existing?.source?.kind === 'migration' && existing.source.version === MIG_VERSION
 if (sameMigration && JSON.stringify(existing.draft.content) === text) {
-  console.log(`${TAG} Already migrated (${CONTACT_MIGRATION_VERSION}); draft unchanged — nothing to do.`)
+  console.log(`${TAG} Already migrated (${MIG_VERSION}); draft unchanged — nothing to do.`)
   process.exit(0)
 }
 if (existing && existing.dummy === false) {
@@ -150,7 +159,7 @@ if (DRY) {
 }
 
 const now = new Date().toISOString()
-const record = buildMigratedContactRecord(content, CONTACT_MIGRATION_VERSION, now)
+const record = buildMigratedContactRecord(content, MIG_VERSION, now)
 
 // Remove the dev-seed snapshot history so no dummy version survives.
 const revisionKeys = await storage.getKeys(CONTACT_REVISION_PREFIX)
@@ -165,7 +174,7 @@ const entry = {
   entityId: 'contact',
   timestamp: now,
   metadata: {
-    version: CONTACT_MIGRATION_VERSION,
+    version: MIG_VERSION,
     source: 'legacy Contact (useContact hero copy + Hero/Form template wording) + pageSeo.contact',
     replaced: existing ? (existing.dummy ? 'dummy seed record' : 'real draft (--force)') : 'none',
     removedRevisions: revisionKeys.length,
@@ -174,5 +183,5 @@ const entry = {
 }
 await storage.setItem(`audit:${now.replace(/[:.]/g, '')}-${entry.id.slice(0, 8)}`, entry)
 
-console.log(`${TAG} Migrated ${CONTACT_MIGRATION_VERSION} into the Contact draft (status: draft, not published).`)
+console.log(`${TAG} Migrated ${MIG_VERSION} into the Contact draft (status: draft, not published).`)
 console.log(JSON.stringify({ ...summary, replaced: entry.metadata.replaced, removedRevisions: revisionKeys.length }, null, 2))

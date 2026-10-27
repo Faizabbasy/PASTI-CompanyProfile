@@ -9,5 +9,5 @@ export default defineEventHandler(async (event) => {
   await requirePermission(event, 'content.edit')
   const { user } = await requirePermission(event, 'content.saveDraft')
   const { revision, content } = await readZodBody(event, Body)
-  return saveAboutDraft(event, user, revision, content)
+  return aboutFor(cmsLang(event)).saveDraft(event, user, revision, content)
 })

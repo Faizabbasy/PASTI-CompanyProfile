@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   let page: Awaited<ReturnType<typeof getPublishedDora>>
   try {
-    page = await getPublishedDora()
+    page = await getPublishedDora(cmsLang(event))
   } catch (err) {
     console.error('[cms] public DORA read failed:', (err as Error).message)
     throw createError({ statusCode: 503, statusMessage: 'Unavailable' })

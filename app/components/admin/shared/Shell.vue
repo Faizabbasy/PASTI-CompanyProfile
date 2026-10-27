@@ -11,7 +11,10 @@ defineProps<{
   migratedVersion?: string | null
   dummy: boolean
   codeManaged: string[]
+  // Bilingual content: the language being edited (shows the ID / EN switch).
+  lang?: 'id' | 'en'
 }>()
+const route = useRoute()
 </script>
 
 <template>
@@ -44,6 +47,15 @@ defineProps<{
         </ol>
         <p class="mt-1 text-xs text-navy-500">Perubahan di sini berlaku di semua halaman yang memakainya. Tampilan, warna dan susunan dikunci supaya halaman tidak rusak.</p>
       </div>
+    </div>
+
+    <div v-if="lang" class="mt-3 flex max-w-3xl flex-wrap items-center gap-3 rounded-lg border border-navy-100 bg-white px-4 py-3">
+      <span class="text-sm font-semibold">Bahasa yang diedit:</span>
+      <div class="inline-flex rounded-full bg-navy-50 p-0.5 text-sm font-semibold" role="group" aria-label="Bahasa yang diedit">
+        <component :is="lang === 'id' ? 'span' : 'a'" :href="lang === 'id' ? undefined : `${route.path}?lang=id`" class="rounded-full px-3 py-1" :class="lang === 'id' ? 'bg-slateNavy text-white' : 'text-navy-600 hover:text-slateNavy'">Indonesia</component>
+        <component :is="lang === 'en' ? 'span' : 'a'" :href="lang === 'en' ? undefined : `${route.path}?lang=en`" class="rounded-full px-3 py-1" :class="lang === 'en' ? 'bg-slateNavy text-white' : 'text-navy-600 hover:text-slateNavy'">English</component>
+      </div>
+      <p class="w-full text-xs text-navy-500">{{ lang === 'id' ? 'Versi utama (halaman Indonesia). Versi English diedit dan di-publish terpisah.' : 'Versi English (halaman /en/…). Versi Indonesia diedit dan di-publish terpisah.' }}</p>
     </div>
 
     <slot name="status" />
