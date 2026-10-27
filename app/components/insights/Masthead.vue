@@ -70,8 +70,9 @@ useGsapContext(() => {
                 :key="a.index"
                 class="im-fill absolute inset-0 block transition-opacity duration-1000 ease-editorial"
                 :class="i === shown ? 'opacity-100' : 'opacity-0'"
+                :data-text="hero.headline"
                 :style="{ backgroundImage: `linear-gradient(rgba(3,60,89,0.42),rgba(3,60,89,0.42)), url(${imgAt(a.image, 1024)})`, backgroundPosition: `0 0, ${55 + pan.x * 0.4}% ${pan.y}%` }"
-              >{{ hero.headline }}</span>
+              />
             </span>
           </h1>
 
@@ -122,6 +123,11 @@ useGsapContext(() => {
 }
 .im-outline {
   color: #033c59;
+}
+/* The headline comes from data-text (one readable copy in the h1 for search
+   engines); background-clip: text clips the poster to this pseudo text too. */
+.im-fill::before {
+  content: attr(data-text);
 }
 .im-fill {
   color: transparent;

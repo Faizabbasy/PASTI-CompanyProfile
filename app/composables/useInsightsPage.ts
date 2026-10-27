@@ -127,6 +127,7 @@ export function adaptInsightsCms(legacy: InsightsPageContent, cms: { version: nu
 
 // Called once by pages/insights.vue.
 export async function resolveInsightsPageContent() {
+  const nuxtApp = useNuxtApp()
   const legacy = buildLegacyInsightsContent()
   const locale = useLocale()
   const state = useState<InsightsPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
@@ -148,7 +149,10 @@ export async function resolveInsightsPageContent() {
     }
   })
 
-  state.value = data.value?.status === 'published' ? adaptInsightsCms(legacy, data.value) : legacy
+  // The adapter can call composables (testimonials, perspectives, locale);
+  // after the await above the Nuxt context is gone, so restore it.
+  const published = data.value?.status === 'published' ? data.value : null
+  state.value = published ? await nuxtApp.runWithContext(() => adaptInsightsCms(legacy, published)) : legacy
   return state
 }
 

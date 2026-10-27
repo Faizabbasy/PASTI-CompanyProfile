@@ -29,15 +29,15 @@ const go = computed(() => mounted.value && pageReady.value)
           </p>
 
           <h1 class="mt-7">
-            <span class="sr-only">{{ hero.name }} — {{ hero.expansion }}</span>
+            <span class="sr-only">{{ hero.name }} — </span>
             <span aria-hidden="true" class="m-center-row flex items-center text-[length:clamp(84px,24vw,128px)] leading-[0.8] desktop:text-[length:clamp(120px,min(12vw,22svh),200px)]">
               <svg viewBox="0 0 100 100" class="op-hero-o mr-[0.02em] h-[0.86em] w-[0.86em] shrink-0" fill="none">
                 <circle cx="50" cy="50" r="38" stroke="#FBBA00" stroke-width="18" class="op-hero-ring" pathLength="100" transform="rotate(-90 50 50)" />
                 <path d="M33 51l12 12 23-25" stroke="#033C59" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" class="op-hero-check" pathLength="100" />
               </svg>
-              <span class="op-line"><span class="op-display !leading-[0.8] text-slateNavy" style="--d: 260ms">PEN</span></span>
+              <span class="op-line"><span class="op-display !leading-[0.8] text-slateNavy before:content-[attr(data-text)]" data-text="PEN" style="--d: 260ms" /></span>
             </span>
-            <span aria-hidden="true" class="op-line mt-5"><span class="font-display text-[length:clamp(19px,4.6vw,26px)] font-extrabold tracking-[-0.02em] text-slateNavy desktop:text-[length:clamp(22px,1.9vw,30px)]" style="--d: 380ms">{{ hero.expansion }}</span></span>
+            <span class="op-line mt-5"><span class="font-display text-[length:clamp(19px,4.6vw,26px)] font-extrabold tracking-[-0.02em] text-slateNavy desktop:text-[length:clamp(22px,1.9vw,30px)]" style="--d: 380ms">{{ hero.expansion }}</span></span>
           </h1>
 
           <p class="op-fade m-center mt-7 max-w-[30rem] font-display text-[length:clamp(20px,2vw,26px)] font-semibold leading-[1.25] tracking-[-0.015em] text-slateNavy" style="--d: 520ms">

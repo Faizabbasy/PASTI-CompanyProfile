@@ -175,6 +175,7 @@ export function adaptWorkCms(legacy: WorkPageContent, cms: { version: number; co
 
 // Called once by pages/work.vue.
 export async function resolveWorkPageContent() {
+  const nuxtApp = useNuxtApp()
   const legacy = buildLegacyWorkContent()
   const locale = useLocale()
   const state = useState<WorkPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
@@ -196,7 +197,10 @@ export async function resolveWorkPageContent() {
     }
   })
 
-  state.value = data.value?.status === 'published' ? adaptWorkCms(legacy, data.value) : legacy
+  // The adapter can call composables (testimonials, perspectives, locale);
+  // after the await above the Nuxt context is gone, so restore it.
+  const published = data.value?.status === 'published' ? data.value : null
+  state.value = published ? await nuxtApp.runWithContext(() => adaptWorkCms(legacy, published)) : legacy
   return state
 }
 

@@ -1,4 +1,5 @@
 import { PAGE_SEO_ID } from '~/i18n/content/seo'
+import { CANONICAL_HOSTS } from '#shared/cms/fields'
 
 /**
  * Search + share metadata for every page (2026-10-16). One place to edit the
@@ -27,45 +28,45 @@ export interface PageSeo {
 
 export const pageSeo = {
   home: {
-    title: 'PASTI — Technology & Creative Agency in Indonesia',
+    title: 'PASTI People — Software House & Creative Agency in Jakarta',
     description:
-      'We build technology and creative solutions for businesses ready to move forward — from enterprise platforms and AI to brand communication.',
+      'PASTI builds apps, custom software, enterprise platforms, AI and creative campaigns for businesses in Indonesia. 70+ projects for 50+ clients since 2020.',
     image: '/images/og/home.jpg'
   },
   about: {
-    title: 'About PASTI — We Turn Complexity into Certainty',
+    title: 'About PASTI — Technology & Creative Partner Since 2020',
     description:
-      'PASTI merges technology and creativity into one unified service. Since 2020: 70+ projects for 50+ clients, from state-owned enterprises to leading brands.',
+      'PASTI merges technology and creativity into one service. Since 2020: 70+ projects for 50+ clients, from state-owned enterprises to leading brands.',
     image: '/images/og/about.jpg'
   },
   work: {
-    title: 'Selected Work — Projects & Case Studies | PASTI',
+    title: 'Portfolio — PASTI Projects & Case Studies',
     description:
-      'A closer look at how we work with our clients — real projects, from the brief to the result that’s running today.',
+      'PASTI’s portfolio: technology and creative projects for IKEA Indonesia, Jasa Marga, Pertamina, CIMB Niaga and more — from the brief to results running today.',
     image: '/images/og/work.jpg'
   },
   creative: {
-    title: 'Creative — Brand, Campaign & Video | PASTI',
+    title: 'Creative Agency in Jakarta — Brand, Campaign & Video | PASTI',
     description:
-      'Creative that gets business results. We combine creativity, strategy, and execution to build brands that stand out, win attention, and earn trust.',
+      'PASTI creative: brand identity & UI/UX, integrated campaigns, social media, vertical video and production house — creativity that gets business results.',
     image: '/images/og/creative.jpg'
   },
   technology: {
-    title: 'Technology — Enterprise Platforms, AI & Apps | PASTI',
+    title: 'Custom Software & App Development Company | PASTI',
     description:
-      'Technology built to move business forward. PASTI builds customized systems that are secure, scalable, and aligned with real business needs.',
+      'PASTI builds custom software, enterprise platforms, mobile apps and MVPs, AI solutions and cybersecurity — secure, scalable and built for real business needs.',
     image: '/images/og/technology.jpg'
   },
   insights: {
-    title: 'Insights — The PASTI Journal',
+    title: 'Insights — Technology, Business & Creative | PASTI',
     description:
-      'Perspectives on technology, creative, and business — from the work we do with our clients every day.',
+      'The PASTI Journal: perspectives on cybersecurity, enterprise technology, AI, the future of business, brands and digital products — from our client work.',
     image: '/images/og/insights.jpg'
   },
   contact: {
-    title: 'Contact PASTI — Let’s Build What Matters',
+    title: 'Contact PASTI — Discuss Your Software or Creative Project',
     description:
-      'Have a challenge? Talk to PASTI on WhatsApp or email, or send us a brief. We build technology and creative solutions for businesses ready to move forward.',
+      'Talk to PASTI about your app, software or creative project on WhatsApp or email, or send us a brief. Our office is in South Jakarta, Indonesia.',
     image: '/images/og/contact.jpg'
   }
 } satisfies Record<string, PageSeo>
@@ -78,19 +79,35 @@ export function useSiteUrl(path = '/') {
   return base + (path.startsWith('/') ? path : `/${path}`)
 }
 
+/** A URL on one of our hosts, rewritten onto the canonical origin (siteUrl). */
+function onOwnOrigin(href: string): string {
+  try {
+    const u = new URL(href)
+    if (!CANONICAL_HOSTS.includes(u.hostname)) return href
+    return useSiteUrl(`${u.pathname.replace(/\/+$/, '') || '/'}${u.search}`)
+  } catch {
+    return href
+  }
+}
+
 /** Title, description, share card and canonical URL for the current page. */
 export function usePageSeo(seo: PageSeo) {
   const route = useRoute()
-  const locale = localeOfPath(route.path)
-  const own = useSiteUrl(route.path)
-  // A CMS canonical that is just the page's default address (…/fast) is
+  // One address per page: never a trailing slash (server/middleware 301s them).
+  const path = route.path.replace(/\/+$/, '') || '/'
+  const locale = localeOfPath(path)
+  const own = useSiteUrl(path)
+  // A CMS canonical on our own domain (with or without www — records
+  // migrated before the apex switch say www) is moved onto the canonical
+  // origin. One that is just the page's default address (…/fast) is
   // per-page, not per-language: on /en/fast it would declare the English
   // page a duplicate of the Indonesian one. Only a genuinely different
   // canonical overrides the page's own URL.
-  const url = seo.canonical && seo.canonical !== useSiteUrl(stripLocale(route.path)) ? seo.canonical : own
+  const cms = seo.canonical ? onOwnOrigin(seo.canonical) : ''
+  const url = cms && cms !== useSiteUrl(stripLocale(path)) ? cms : own
   const image = useSiteUrl(seo.image)
-  const idUrl = useSiteUrl(localePath(route.path, 'id'))
-  const enUrl = useSiteUrl(localePath(route.path, 'en'))
+  const idUrl = useSiteUrl(localePath(path, 'id'))
+  const enUrl = useSiteUrl(localePath(path, 'en'))
 
   if (seo.noIndex) useHead({ meta: [{ name: 'robots', content: 'noindex' }] })
 
@@ -121,8 +138,8 @@ export function usePageSeo(seo: PageSeo) {
     twitterDescription: seo.description,
     twitterImage: image
   })
-  // Who publishes the page (schema.org Organization, see useStructuredData).
-  useOrganizationLd()
+  // Who publishes the page and what it is (schema.org graph, useStructuredData).
+  usePageLd({ url, title: seo.title, description: seo.description, image })
 }
 
 /**

@@ -93,7 +93,11 @@ export default defineNuxtConfig({
       testimonialsPublicEnabled: false
     },
     public: {
-      siteUrl: 'https://www.pastipeople.id'
+      // Canonical origin (2026-10-27 SEO pass): the apex host — www.pastipeople.id
+      // 301s to it and Google already indexes the apex. Canonicals, hreflang,
+      // sitemap and share cards all use this; keep the Vercel primary domain
+      // the same (NUXT_PUBLIC_SITE_URL overrides).
+      siteUrl: 'https://pastipeople.id'
     }
   },
 
@@ -119,7 +123,33 @@ export default defineNuxtConfig({
         'cache-control': 'no-store',
         'x-robots-tag': 'noindex, nofollow'
       }
-    }
+    },
+    // Exploration concept page (not part of the site): never indexed.
+    '/preview-clou-hero': { headers: { 'x-robots-tag': 'noindex, nofollow' } },
+    '/en/preview-clou-hero': { headers: { 'x-robots-tag': 'noindex, nofollow' } },
+    // Launch over the old WordPress site (SEO pass 2026-10-27): its indexed
+    // URLs move permanently to their new pages, so links and rankings carry
+    // over. About Us was /elementor-279; the two forms were client intake.
+    '/service': { redirect: { to: '/', statusCode: 301 } },
+    '/service/': { redirect: { to: '/', statusCode: 301 } },
+    '/portfolio': { redirect: { to: '/work', statusCode: 301 } },
+    '/portfolio/': { redirect: { to: '/work', statusCode: 301 } },
+    '/contact-us': { redirect: { to: '/contact', statusCode: 301 } },
+    '/contact-us/': { redirect: { to: '/contact', statusCode: 301 } },
+    '/elementor-279': { redirect: { to: '/about', statusCode: 301 } },
+    '/elementor-279/': { redirect: { to: '/about', statusCode: 301 } },
+    '/home-sample': { redirect: { to: '/', statusCode: 301 } },
+    '/home-sample/': { redirect: { to: '/', statusCode: 301 } },
+    '/sample-page': { redirect: { to: '/', statusCode: 301 } },
+    '/sample-page/': { redirect: { to: '/', statusCode: 301 } },
+    '/form-app': { redirect: { to: '/contact', statusCode: 301 } },
+    '/form-app/': { redirect: { to: '/contact', statusCode: 301 } },
+    '/form-credential-request': { redirect: { to: '/contact', statusCode: 301 } },
+    '/form-credential-request/': { redirect: { to: '/contact', statusCode: 301 } },
+    '/2025/03/25/hello-world': { redirect: { to: '/insights', statusCode: 301 } },
+    '/2025/03/25/hello-world/': { redirect: { to: '/insights', statusCode: 301 } },
+    '/category/uncategorized': { redirect: { to: '/insights', statusCode: 301 } },
+    '/category/uncategorized/': { redirect: { to: '/insights', statusCode: 301 } }
   },
 
   // Bundle GSAP's ESM build into the server output instead of letting Node

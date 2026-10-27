@@ -92,6 +92,7 @@ export function adaptContactCms(legacy: ContactPageContent, cms: Pick<PublicCont
 
 // Called once by pages/contact.vue.
 export async function resolveContactPageContent() {
+  const nuxtApp = useNuxtApp()
   const legacy = buildLegacyContactContent()
   const locale = useLocale()
   const state = useState<ContactPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
@@ -114,7 +115,10 @@ export async function resolveContactPageContent() {
     }
   })
 
-  state.value = data.value?.status === 'published' ? adaptContactCms(legacy, data.value) : legacy
+  // The adapter can call composables (testimonials, perspectives, locale);
+  // after the await above the Nuxt context is gone, so restore it.
+  const published = data.value?.status === 'published' ? data.value : null
+  state.value = published ? await nuxtApp.runWithContext(() => adaptContactCms(legacy, published)) : legacy
   return state
 }
 

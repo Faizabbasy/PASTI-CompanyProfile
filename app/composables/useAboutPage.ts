@@ -111,6 +111,7 @@ export function adaptAboutCms(legacy: AboutPageContent, cms: PublicAboutPublishe
 
 // Called once by pages/about.vue.
 export async function resolveAboutPageContent() {
+  const nuxtApp = useNuxtApp()
   const legacy = buildLegacyAboutContent()
   const locale = useLocale()
   const state = useState<AboutPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
@@ -133,7 +134,10 @@ export async function resolveAboutPageContent() {
     }
   })
 
-  state.value = data.value?.status === 'published' ? adaptAboutCms(legacy, data.value) : legacy
+  // The adapter can call composables (testimonials, perspectives, locale);
+  // after the await above the Nuxt context is gone, so restore it.
+  const published = data.value?.status === 'published' ? data.value : null
+  state.value = published ? await nuxtApp.runWithContext(() => adaptAboutCms(legacy, published)) : legacy
   return state
 }
 

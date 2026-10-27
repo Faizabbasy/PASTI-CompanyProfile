@@ -623,19 +623,21 @@ function scrambleWords(targets: HTMLElement[], progress: number) {
             class="flex items-baseline justify-center gap-x-[0.26em] whitespace-nowrap font-display text-[length:clamp(56px,8vw,150px)] font-bold leading-[0.92] tracking-[-0.04em] text-slateNavy"
           >
             <span v-for="word in headlineWords" :key="word" data-word aria-hidden="true" class="relative inline-block text-left">
-              <span data-word-main>{{ word }}</span>
+              <span data-word-main>{{ word }}</span><span class="sr-only">{{ ' ' }}</span>
+              <!-- Slice copies draw the word from data-text (CSS), not a text
+                   node, so the heading reads once to search engines. -->
               <span
                 data-slice="top"
-                class="pointer-events-none absolute inset-0 opacity-0"
+                :data-text="word"
+                class="pointer-events-none absolute inset-0 opacity-0 before:content-[attr(data-text)]"
                 style="clip-path: inset(0 0 50% 0)"
-                >{{ word }}</span
-              >
+              />
               <span
                 data-slice="bottom"
-                class="pointer-events-none absolute inset-0 opacity-0"
+                :data-text="word"
+                class="pointer-events-none absolute inset-0 opacity-0 before:content-[attr(data-text)]"
                 style="clip-path: inset(50% 0 0 0)"
-                >{{ word }}</span
-              >
+              />
             </span>
             <span data-dot aria-hidden="true" class="-ml-[0.24em] text-pastiYellow-500">.</span>
           </h2>

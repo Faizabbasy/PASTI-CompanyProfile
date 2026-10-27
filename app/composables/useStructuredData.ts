@@ -3,6 +3,11 @@
 // Built only from facts the site already shows (useFooter contact facts,
 // useCompany, page SEO copy) — nothing invented: no ratings, prices or
 // reviews. Social profiles appear only once they are filled in (Global CTAs).
+//
+// Graph (SEO pass 2026-10-27): every page carries the Organization, the
+// WebSite and its own WebPage (language, breadcrumb), linked by @id so Google
+// reads them as one entity. "PASTI People" is the name the old site was
+// indexed under — kept as an alternate name so brand searches carry over.
 
 type Ld = Record<string, unknown>
 
@@ -10,13 +15,17 @@ function ldScript(key: string, data: Ld) {
   useHead({ script: [{ key: `ld-${key}`, type: 'application/ld+json', innerHTML: JSON.stringify(data) }] })
 }
 
+const ALTERNATE_NAMES = ['PASTI People', 'Pasti People']
+
 function organization(): Ld {
-  const { contact, socials } = useFooter()
+  const { contact, socials, serviceLinks } = useFooter()
+  const locale = useLocale()
   const url = useSiteUrl('/')
   return {
     '@type': 'ProfessionalService',
     '@id': `${url}#organization`,
     name: 'PASTI',
+    alternateName: ALTERNATE_NAMES,
     legalName: contact.entity,
     description: contact.positioning,
     url,
@@ -26,22 +35,86 @@ function organization(): Ld {
     email: contact.email ?? undefined,
     telephone: contact.whatsappDisplay,
     address: contact.address
-      ? { '@type': 'PostalAddress', streetAddress: contact.address, addressLocality: 'Jakarta Selatan', postalCode: '12430', addressCountry: 'ID' }
+      ? { '@type': 'PostalAddress', streetAddress: contact.address, addressLocality: 'Jakarta Selatan', addressRegion: 'DKI Jakarta', postalCode: '12430', addressCountry: 'ID' }
       : undefined,
-    areaServed: 'ID',
+    hasMap: contact.mapsUrl ?? undefined,
+    areaServed: { '@type': 'Country', name: 'Indonesia' },
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer service',
+      telephone: contact.whatsappDisplay,
+      email: contact.email ?? undefined,
+      areaServed: 'ID',
+      availableLanguage: ['Indonesian', 'English']
+    },
+    // The services the site lists (footer / homepage), each on its pillar page.
+    knowsAbout: serviceLinks.map((s) => s.label),
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: locale === 'id' ? 'Layanan PASTI' : 'PASTI services',
+      itemListElement: serviceLinks.map((s) => ({
+        '@type': 'Offer',
+        itemOffered: { '@type': 'Service', name: s.label, url: useSiteUrl(localePath(s.to, locale)) }
+      }))
+    },
     sameAs: socials.filter((s) => s.url && s.key !== 'whatsapp').map((s) => s.url)
   }
 }
 
-/** Every public page: the organisation (once per page, via usePageSeo). */
-export function useOrganizationLd() {
-  ldScript('org', { '@context': 'https://schema.org', ...organization() })
+function website(): Ld {
+  const url = useSiteUrl('/')
+  return {
+    '@type': 'WebSite',
+    '@id': `${url}#website`,
+    name: 'PASTI',
+    alternateName: ALTERNATE_NAMES,
+    url,
+    inLanguage: ['id-ID', 'en-US'],
+    publisher: { '@id': `${url}#organization` }
+  }
 }
 
-/** Homepage: the website itself + its FAQ. */
+/** Every public page (via usePageSeo): Organization + WebSite + this WebPage. */
+export function usePageLd(page: { url: string; title: string; description: string; image: string }) {
+  const route = useRoute()
+  const locale = localeOfPath(route.path)
+  const site = useSiteUrl('/')
+  const home = useSiteUrl(localePath('/', locale))
+  const isHome = page.url === home || page.url === `${home}/`
+  // Breadcrumb label = the page name before the title's tagline ("Karya
+  // Pilihan — Proyek & Studi Kasus | PASTI" → "Karya Pilihan").
+  const name = page.title.split(/\s[—|–]\s/)[0]!.trim()
+  const graph: Ld[] = [
+    organization(),
+    website(),
+    {
+      '@type': 'WebPage',
+      '@id': `${page.url}#webpage`,
+      url: page.url,
+      name: page.title,
+      description: page.description,
+      inLanguage: locale === 'id' ? 'id-ID' : 'en-US',
+      isPartOf: { '@id': `${site}#website` },
+      about: { '@id': `${site}#organization` },
+      primaryImageOfPage: { '@type': 'ImageObject', url: page.image },
+      ...(isHome ? {} : { breadcrumb: { '@id': `${page.url}#breadcrumb` } })
+    }
+  ]
+  if (!isHome) {
+    graph.push({
+      '@type': 'BreadcrumbList',
+      '@id': `${page.url}#breadcrumb`,
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: locale === 'id' ? 'Beranda' : 'Home', item: home },
+        { '@type': 'ListItem', position: 2, name, item: page.url }
+      ]
+    })
+  }
+  ldScript('graph', { '@context': 'https://schema.org', '@graph': graph })
+}
+
+/** Homepage: its FAQ (the site graph comes from usePageSeo). */
 export function useHomeLd(faq: { question: string; answer: string }[]) {
-  const url = useSiteUrl('/')
-  ldScript('website', { '@context': 'https://schema.org', '@type': 'WebSite', '@id': `${url}#website`, name: 'PASTI', url, publisher: { '@id': `${url}#organization` } })
   if (faq.length) {
     ldScript('faq', {
       '@context': 'https://schema.org',
@@ -63,6 +136,8 @@ export function useProductLd(p: { name: string; description: string; image: stri
     image: useSiteUrl(p.image),
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
-    publisher: { '@id': `${useSiteUrl('/')}#organization` }
+    inLanguage: localeOfPath(route.path) === 'id' ? 'id-ID' : 'en-US',
+    publisher: { '@id': `${useSiteUrl('/')}#organization` },
+    provider: { '@id': `${useSiteUrl('/')}#organization` }
   })
 }

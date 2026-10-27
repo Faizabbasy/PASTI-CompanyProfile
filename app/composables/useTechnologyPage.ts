@@ -142,6 +142,7 @@ export function adaptTechnologyCms(legacy: TechnologyPageContent, cms: Pick<Publ
 
 // Called once by pages/technology.vue.
 export async function resolveTechnologyPageContent() {
+  const nuxtApp = useNuxtApp()
   const legacy = buildLegacyTechnologyContent()
   const locale = useLocale()
   const state = useState<TechnologyPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
@@ -163,7 +164,10 @@ export async function resolveTechnologyPageContent() {
     }
   })
 
-  state.value = data.value?.status === 'published' ? adaptTechnologyCms(legacy, data.value) : legacy
+  // The adapter can call composables (testimonials, perspectives, locale);
+  // after the await above the Nuxt context is gone, so restore it.
+  const published = data.value?.status === 'published' ? data.value : null
+  state.value = published ? await nuxtApp.runWithContext(() => adaptTechnologyCms(legacy, published)) : legacy
   return state
 }
 

@@ -249,6 +249,7 @@ export function adaptCreativeCms(legacy: CreativePageContent, cms: Pick<PublicCr
 
 // Called once by pages/creative.vue.
 export async function resolveCreativePageContent() {
+  const nuxtApp = useNuxtApp()
   const legacy = buildLegacyCreativeContent()
   const locale = useLocale()
   const state = useState<CreativePageContent>(`${STATE_KEY}-${locale}`, () => legacy)
@@ -271,7 +272,10 @@ export async function resolveCreativePageContent() {
     }
   })
 
-  state.value = data.value?.status === 'published' ? adaptCreativeCms(legacy, data.value) : legacy
+  // The adapter can call composables (testimonials, perspectives, locale);
+  // after the await above the Nuxt context is gone, so restore it.
+  const published = data.value?.status === 'published' ? data.value : null
+  state.value = published ? await nuxtApp.runWithContext(() => adaptCreativeCms(legacy, published)) : legacy
   return state
 }
 
