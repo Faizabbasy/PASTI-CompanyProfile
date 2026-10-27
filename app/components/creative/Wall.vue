@@ -17,6 +17,7 @@ if (import.meta.client) {
 // rendered, so legacy markup stays byte-identical.
 const wall = useCreativePage().wall
 const t = useT()
+const mark = useCmsMark()
 const visuals = wall.visuals
 const COLS = 4
 const ROWS = 4 // 4 rows so the wrapped board always overfills the frame (no empty bands on phones)
@@ -155,11 +156,11 @@ useGsapContext(() => {
 <template>
   <section data-header-theme="dark" class="relative overflow-hidden bg-slateNavy pt-24 text-pureWhite tablet:pt-32">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" :label="wall.sectionLabel" :meta="t('{n} visuals', { n: String(visuals.length).padStart(2, '0') })" />
+      <BaseSectionMark v-bind="mark('wall.sectionLabel', 'Label kecil bagian')" surface="dark" :label="wall.sectionLabel" :meta="t('{n} visuals', { n: String(visuals.length).padStart(2, '0') })" />
       <div class="m-stack mt-12 flex flex-wrap items-end justify-between gap-6 desktop:mt-16">
         <div class="overflow-hidden pb-2">
           <h2 data-cw-head class="hero-title hero-title--dark">
-            {{ ` ${wall.titleLead} ` }}<span class="text-pastiYellow-500">{{ wall.titleAccent }}.</span>
+            <span v-bind="mark('wall.titleLead', 'Judul Studio Wall')">{{ ` ${wall.titleLead} ` }}</span><span v-bind="mark('wall.titleAccent', 'Judul Studio Wall — bagian kuning')" class="text-pastiYellow-500">{{ wall.titleAccent }}.</span>
           </h2>
         </div>
         <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">{{ t('← Drag to explore →') }}</p>
@@ -180,10 +181,10 @@ useGsapContext(() => {
         @mouseenter="hovered = i"
       >
         <div class="overflow-hidden rounded-[20px] ring-1 ring-[color:rgba(255,255,255,0.12)] shadow-[0_40px_80px_-40px_rgba(0,8,16,0.9)]">
-          <img :src="t.src" :srcset="imgSet(t.src)" sizes="(max-width: 639px) 46vw, (max-width: 1023px) 30vw, 20vw" :alt="t.label" draggable="false" loading="lazy" class="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-editorial" :class="[hovered === i ? 'scale-105' : '', t.src.includes('/insights/') ? 'object-left' : 'object-top']">
+          <img v-bind="mark('image', 'Gambar Studio Wall', `wall.visuals#${i % visuals.length}`)" :src="t.src" :srcset="imgSet(t.src)" sizes="(max-width: 639px) 46vw, (max-width: 1023px) 30vw, 20vw" :alt="t.label" draggable="false" loading="lazy" class="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-editorial" :class="[hovered === i ? 'scale-105' : '', t.src.includes('/insights/') ? 'object-left' : 'object-top']">
         </div>
         <figcaption class="mt-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] transition-colors duration-300" :class="hovered === i ? 'text-pastiYellow-500' : 'text-[color:rgba(255,255,255,0.5)]'">
-          <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ t.label }}
+          <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" /><span v-bind="mark('label', 'Label gambar', `wall.visuals#${i % visuals.length}`)">{{ t.label }}</span>
         </figcaption>
       </figure>
       <!-- Edge fades -->

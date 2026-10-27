@@ -19,6 +19,8 @@ const { cmsFetch } = useCmsSession()
 const { data, error, refresh, status } = await useAsyncData(`admin-work-project-preview-${id}-${lang}`, () => cmsFetch<PreviewResponse>(`/api/admin/work/projects/${id}/preview`, { query: { lang } }))
 const legacy = buildLegacyWorkContent()
 
+// Klik teks untuk edit: this project's editor.
+provideWorkCmsMarks(lang, () => ({ projects: data.value ? [data.value.record] : [], cases: [] }))
 const preview = computed<WorkPageContent | null>(() => {
   const d = data.value
   if (!d) return null
@@ -40,7 +42,8 @@ const preview = computed<WorkPageContent | null>(() => {
         <strong>Preview draft — belum tampil di website</strong>
         <span v-if="data">Proyek · draft v{{ data.record.version }} · disimpan {{ fmtCmsTime(data.record.updatedAt) }} · status: {{ data.record.status }}</span>
         <span class="text-xs">Ditampilkan sendiri; tanda studi kasus muncul di /work hanya kalau studi kasusnya ikut ditampilkan.</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Matikan tombol ✎ untuk mencoba halaman seperti biasa.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
     <p v-if="status === 'pending'" class="p-8 text-sm" role="status">Memuat draft…</p>

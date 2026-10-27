@@ -712,3 +712,16 @@ html[data-reduced-motion='false'] .op-fade.is-in {
 .ec-outline--dark {
   -webkit-text-stroke-color: rgba(255, 255, 255, 0.1);
 }
+
+/* ---- CMS admin: the field a preview "klik untuk edit" link jumped to
+   flashes once (useSingletonEditor jumpToField). */
+[data-cms-jump] {
+  outline: 3px solid #f59e0b;
+  outline-offset: 6px;
+  border-radius: 8px;
+  animation: cms-jump 2.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes cms-jump {
+  0%, 60% { outline-color: #f59e0b; }
+  100% { outline-color: transparent; }
+}

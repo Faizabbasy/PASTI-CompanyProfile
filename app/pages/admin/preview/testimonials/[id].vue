@@ -24,6 +24,8 @@ const { cmsFetch } = useCmsSession()
 const { data, error, refresh, status } = await useAsyncData(`admin-testimonial-preview-${id}`, () => cmsFetch<PreviewResponse>(`/api/admin/shared/testimonials/${id}/preview`))
 
 const legacy = buildLegacyCreativeContent()
+// Klik teks untuk edit: the card's texts open this testimonial's editor.
+provideCmsMarks({ href: (record, path) => (record === 'testimonial' ? cmsFieldHref(`/admin/shared/testimonials/${id}`, 'id', path) : null) })
 const preview = computed<CreativePageContent | null>(() => {
   const c = data.value?.record.content
   if (!c) return null
@@ -41,7 +43,8 @@ usePreviewJump(mainRef)
         <span v-if="data">Testimoni · draft v{{ data.record.version }} · disimpan {{ fmtCmsTime(data.record.updatedAt) }} · status: {{ data.record.status }}</span>
         <span v-if="data" class="text-xs">Persetujuan: {{ CLAIM_LABELS[data.approval.value].label }} · {{ data.publicEligible ? 'boleh tampil' : 'belum tampil' }}{{ data.record.content.active ? '' : ' · tidak dicentang “Tampilkan”' }}</span>
         <span class="text-xs">Ditampilkan memakai kartu testimoni di halaman Creative.</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Matikan tombol ✎ untuk mencoba halaman seperti biasa.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
     <p v-if="status === 'pending'" class="p-8 text-sm" role="status">Memuat draft…</p>

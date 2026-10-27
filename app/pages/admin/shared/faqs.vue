@@ -78,6 +78,7 @@ function addFaq() {
       </div>
 
       <AdminFormRepeater
+        path="items"
         legend="Pertanyaan"
         locale="id"
         :items="form.items"

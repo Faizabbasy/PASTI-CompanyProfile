@@ -14,8 +14,8 @@ const form = ref<ArticleForm>(emptyArticle())
 const { errors, err, notice, busy, submit } = useCollectionCreate()
 
 // Only the groups needed to create; the full body comes later in the editor.
-const TABS = ARTICLE_TABS.filter((t) => t.key === 'basics' || t.key === 'content' || t.key === 'media')
-const activeTab = ref<string>('basics')
+const TABS = ARTICLE_TABS.filter((t) => t.key === 'header' || t.key === 'content' || t.key === 'media' || t.key === 'settings')
+const activeTab = ref<string>('header')
 const errorCount = (key: string) => Object.keys(errors.value).filter((p) => tabForPathIn(TABS, p) === key).length
 // Open the group holding the first error before it gets focused.
 watch(errors, (e) => {
@@ -56,7 +56,7 @@ async function create() {
     </template>
 
     <form novalidate @submit.prevent="create">
-      <div v-for="t in (['basics', 'content', 'media'] as const)" v-show="activeTab === t" :key="t">
+      <div v-for="t in (['header', 'content', 'media', 'settings'] as const)" v-show="activeTab === t" :key="t">
         <AdminInsightsArticleFields :form="form" :err="err" :categories="categories ?? []" :tab="t" />
       </div>
     </form>

@@ -88,6 +88,7 @@ function measure(item: ClientForm['items'][number]) {
       </div>
 
       <AdminFormRepeater
+        path="items"
         legend="Klien"
         locale="id"
         :items="form.items"

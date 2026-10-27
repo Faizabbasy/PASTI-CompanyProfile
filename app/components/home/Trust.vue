@@ -4,6 +4,7 @@ import gsap from 'gsap'
 // Owner decision 2026-10-07: "Our Beloved Client" (the COMPRO 2025 client-wall
 // title, p.7) replaces the mapping doc's "Trusted by leading organizations".
 const t = useT()
+const mark = useCmsMark()
 const heading = t('Our Beloved Client')
 // Client-sector line condensed from COMPRO 2025 p.25 (same source as useWhoWeAre).
 const lede = t('State-owned enterprises, multinational corporations and leading brands across Indonesia.')
@@ -254,6 +255,7 @@ useGsapContext(() => {
             @mouseleave="setState('default')"
           >
             <img
+              v-bind="mark('logo', `Logo klien: ${client.name}`, `clients@${client.name}`)"
               :src="client.logo"
               :alt="i >= row.length ? '' : client.name"
               :style="size(client.ratio)"

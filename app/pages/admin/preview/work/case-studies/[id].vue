@@ -34,6 +34,8 @@ const resolved = computed(() => {
   }
   return resolveWorkView(work, [d.project], [d.record])
 })
+// Klik teks untuk edit: this case study's editor (name, client, year → its project).
+provideWorkCmsMarks(lang, () => ({ projects: data.value?.project ? [data.value.project] : [], cases: data.value ? [data.value.record] : [] }))
 const preview = computed<WorkPageContent | null>(() => {
   const r = resolved.value
   if (!r || !r.featuredCases.cases.length) return null
@@ -50,7 +52,8 @@ const preview = computed<WorkPageContent | null>(() => {
         <span v-if="resolved?.counts.claimsWithheld || resolved?.counts.mediaWithheld" class="text-xs">
           Tidak ditampilkan (belum disetujui / disembunyikan): {{ resolved.counts.claimsWithheld }} angka, {{ resolved.counts.mediaWithheld }} gambar
         </span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Matikan tombol ✎ untuk mencoba halaman seperti biasa.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
     <p v-if="status === 'pending'" class="bg-paper p-8 text-sm" role="status">Memuat draft…</p>

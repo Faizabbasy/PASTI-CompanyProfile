@@ -17,6 +17,7 @@ if (import.meta.client) {
 // image and description (first row open), 44px+ targets throughout.
 const { eyebrow: servicesEyebrow, title: servicesHeading, items: services } = useTechnologyPage().capabilities
 const t = useT()
+const mark = useCmsMark()
 const lp = useLocalePath()
 
 const sectionRef = ref<HTMLElement | null>(null)
@@ -103,11 +104,11 @@ useGsapContext(() => {
         <div class="m-center desktop:col-span-7">
           <div class="overflow-hidden">
             <p data-cap-head class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
-              <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ servicesEyebrow }}
+              <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" /><span v-bind="mark('capabilities.eyebrow', 'Label kecil di atas judul bagian')">{{ servicesEyebrow }}</span>
             </p>
           </div>
           <div class="mt-4 overflow-hidden pb-2">
-            <h2 data-cap-head class="hero-title">
+            <h2 v-bind="mark('capabilities.title', 'Judul bagian Kemampuan')" data-cap-head class="hero-title">
               {{ servicesHeading }}<span class="text-pastiYellow-500">.</span>
             </h2>
           </div>
@@ -130,19 +131,19 @@ useGsapContext(() => {
             <span aria-hidden="true" class="absolute inset-0 origin-bottom scale-y-0 bg-slateNavy transition-transform duration-500 ease-editorial group-hover/row:scale-y-100" />
             <span class="relative z-10 col-span-1 pl-4 font-mono text-[13px] tabular-nums text-[color:rgba(3,60,89,0.5)] transition-colors duration-300 group-hover/row:text-pastiYellow-500">{{ s.index }}</span>
             <div class="relative z-10 col-span-6 transition-transform duration-500 ease-editorial group-hover/row:translate-x-3">
-              <h3 class="font-display text-[length:clamp(26px,2.4vw,38px)] font-bold leading-[1.08] tracking-[-0.03em] text-slateNavy transition-colors duration-500 group-hover/row:text-pureWhite">
+              <h3 v-bind="mark('title', 'Nama kemampuan', `capabilities.items#${i}`)" class="font-display text-[length:clamp(26px,2.4vw,38px)] font-bold leading-[1.08] tracking-[-0.03em] text-slateNavy transition-colors duration-500 group-hover/row:text-pureWhite">
                 {{ s.title }}
               </h3>
               <ul class="mt-4 flex flex-wrap gap-1.5" :aria-label="t('{title} — key areas', { title: s.title })">
-                <li v-for="k in s.keywords" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.75)] group-hover/row:ring-[color:rgba(255,255,255,0.22)]">{{ k }}</li>
+                <li v-for="(k, ki) in s.keywords" v-bind="mark(`keywords.${ki}`, 'Label area', `capabilities.items#${i}`)" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.75)] group-hover/row:ring-[color:rgba(255,255,255,0.22)]">{{ k }}</li>
               </ul>
             </div>
             <div class="relative z-10 col-span-5 pr-4">
-              <p class="text-token-body text-[color:rgba(3,60,89,0.72)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.78)]">{{ s.body }}</p>
+              <p v-bind="mark('body', 'Deskripsi kemampuan', `capabilities.items#${i}`)" class="text-token-body text-[color:rgba(3,60,89,0.72)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.78)]">{{ s.body }}</p>
               <div v-if="s.related.length" class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
                 <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)] transition-colors duration-300 group-hover/row:text-pastiYellow-500">{{ t('Related work') }}</span>
-                <template v-for="w in s.related" :key="w.label">
-                  <NuxtLink v-if="w.to" :to="lp(w.to)" class="cap-link text-[14px] font-semibold text-slateNavy transition-colors duration-300 group-hover/row:text-pureWhite">{{ w.label }} <span aria-hidden="true">↗</span></NuxtLink>
+                <template v-for="(w, wi) in s.related" :key="w.label">
+                  <NuxtLink v-if="w.to" v-bind="mark(`related.${wi}.label`, 'Link karya terkait', `capabilities.items#${i}`)" :to="lp(w.to)" class="cap-link text-[14px] font-semibold text-slateNavy transition-colors duration-300 group-hover/row:text-pureWhite">{{ w.label }} <span aria-hidden="true">↗</span></NuxtLink>
                   <span v-else class="text-[14px] font-semibold text-[color:rgba(3,60,89,0.72)] transition-colors duration-300 group-hover/row:text-[color:rgba(255,255,255,0.72)]">{{ w.label }}</span>
                 </template>
               </div>
@@ -159,7 +160,7 @@ useGsapContext(() => {
               @click="toggle(i)"
             >
               <span class="mt-2 font-mono text-[12px] tabular-nums" :class="open === i ? 'text-cobalt' : 'text-[color:rgba(3,60,89,0.5)]'">{{ s.index }}</span>
-              <span class="flex-1 font-display text-[24px] font-bold leading-[1.1] tracking-[-0.02em] text-slateNavy tablet:text-[30px]">{{ s.title }}</span>
+              <span v-bind="mark('title', 'Nama kemampuan', `capabilities.items#${i}`)" class="flex-1 font-display text-[24px] font-bold leading-[1.1] tracking-[-0.02em] text-slateNavy tablet:text-[30px]">{{ s.title }}</span>
               <span
                 class="mt-1 grid h-11 w-11 shrink-0 place-items-center rounded-full transition-[transform,background-color,color] duration-300 ease-editorial"
                 :class="open === i ? 'rotate-45 bg-pastiYellow-500 text-slateNavy' : 'bg-slateNavy text-pureWhite'"
@@ -175,15 +176,15 @@ useGsapContext(() => {
               <div class="overflow-hidden">
                 <div class="pb-8">
                   <div class="relative aspect-[4/5] overflow-hidden rounded-[18px] border border-[color:rgba(3,60,89,0.12)] bg-slateNavy tablet:aspect-[16/10]">
-                    <img :src="s.image" :srcset="imgSet(s.image)" sizes="(max-width: 1023px) 92vw, 30vw" :alt="s.imageAlt" loading="lazy" class="h-full w-full object-cover object-top">
+                    <img v-bind="mark('image', 'Gambar kemampuan', `capabilities.items#${i}`)" :src="s.image" :srcset="imgSet(s.image)" sizes="(max-width: 1023px) 92vw, 30vw" :alt="s.imageAlt" loading="lazy" class="h-full w-full object-cover object-top">
                     <span class="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
                       <LayoutBrandMark surface="dark" :height="9" />
                       <span class="font-mono text-[10px] tracking-[0.14em] text-pureWhite">{{ s.index }}</span>
                     </span>
                   </div>
-                  <p class="mt-4 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.75)]">{{ s.body }}</p>
+                  <p v-bind="mark('body', 'Deskripsi kemampuan', `capabilities.items#${i}`)" class="mt-4 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.75)]">{{ s.body }}</p>
                   <ul class="mt-4 flex flex-wrap gap-1.5">
-                    <li v-for="k in s.keywords" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)]">{{ k }}</li>
+                    <li v-for="(k, ki) in s.keywords" v-bind="mark(`keywords.${ki}`, 'Label area', `capabilities.items#${i}`)" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)]">{{ k }}</li>
                   </ul>
                   <div v-if="s.related.length" class="mt-5 border-t border-[color:rgba(3,60,89,0.12)] pt-4">
                     <p class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">{{ t('Related work') }}</p>

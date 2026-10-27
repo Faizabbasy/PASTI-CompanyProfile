@@ -1,12 +1,16 @@
 import type { InjectionKey } from 'vue'
 import { WORK_PAGE_ID } from '~/i18n/content/workPage'
 import { isSafeLinkUrl } from '#shared/cms/fields'
+import type { CaseStudyContent } from '#shared/utils/caseStudySchema'
+import type { ProjectContent } from '#shared/utils/projectSchema'
 import {
   PublicWorkResponseSchema,
+  projectAnchor,
   type PublicWorkContent,
   type WorkCaseView,
   type WorkPageContent,
-  type WorkProjectCard
+  type WorkProjectCard,
+  type WorkSourceRecord
 } from '#shared/utils/workPublic'
 
 // Public /work content source. The page resolves content ONCE and the Work
@@ -204,6 +208,29 @@ function workCmsEnabledOnServer(): boolean {
 
 // Admin draft preview: renders the real Work components with draft content
 // provided to that subtree only (never written to public state).
+// Admin previews ("klik teks untuk edit"): where each Work text is edited.
+// Records: undefined = the Work page, `project:<anchor>`, `case:<slug>`. A
+// case path starting `project.` is a field of the case's project (name,
+// client, year come from it); the case category falls back to the project's.
+export function provideWorkCmsMarks(lang: string, records: () => { projects: WorkSourceRecord<ProjectContent>[]; cases: WorkSourceRecord<CaseStudyContent>[] }) {
+  provideCmsMarks({
+    href: (record, path) => {
+      if (!record) return cmsFieldHref('/admin/work', lang, path)
+      const { projects, cases } = records()
+      const projectHref = (id: string, p: string) => cmsFieldHref(`/admin/work/projects/${id}`, lang, p)
+      if (record.startsWith('project:')) {
+        const p = projects.find((x) => projectAnchor(x) === record.slice('project:'.length))
+        return p ? projectHref(p.id, path) : null
+      }
+      const c = cases.find((x) => x.content.slug === record.slice('case:'.length))
+      if (!c) return null
+      if (path.startsWith('project.')) return projectHref(c.content.projectId, path.slice('project.'.length))
+      if (path === 'categoryOverride' && !c.content.categoryOverride) return projectHref(c.content.projectId, 'category')
+      return cmsFieldHref(`/admin/work/case-studies/${c.id}`, lang, path)
+    }
+  })
+}
+
 export function provideWorkPreview(content: WorkPageContent) {
   provide(PREVIEW_KEY, content)
 }

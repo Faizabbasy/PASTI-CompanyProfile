@@ -169,7 +169,7 @@ const codeManaged = [
         <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900" role="note">
           <strong>Hanya angka berstatus Disetujui yang tampil di website.</strong> Angka “Perlu persetujuan” dan “Disembunyikan” tidak pernah tampil, walaupun studi kasusnya sudah di-publish.
         </p>
-        <AdminFormRepeater legend="Angka / metrik" :items="form.metrics" :max="LIM.metrics" :published-ids="publishedIds" :item-title="(m) => `${m.value} ${m.label}`.trim()" add-label="Tambah angka" :error="err('metrics')" collapsible :has-error="hasErr('metrics')" @add="addMetric">
+        <AdminFormRepeater legend="Angka / metrik" path="metrics" :items="form.metrics" :max="LIM.metrics" :published-ids="publishedIds" :item-title="(m) => `${m.value} ${m.label}`.trim()" add-label="Tambah angka" :error="err('metrics')" collapsible :has-error="hasErr('metrics')" @add="addMetric">
           <template #summary="{ item }">
             <span class="rounded-full border px-1.5 text-[10px] font-semibold" :class="CLAIM_LABELS[item.claimStatus].cls">{{ CLAIM_LABELS[item.claimStatus].mark }} {{ CLAIM_LABELS[item.claimStatus].label }}</span>
           </template>
@@ -190,7 +190,7 @@ const codeManaged = [
         <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900" role="note">
           Screenshot bisa berisi data sensitif klien (nama, harga, sistem internal). Tiap gambar harus <strong>Disetujui</strong> admin sebelum bisa tampil. Gambar Disetujui yang pertama jadi gambar utama di strip studi kasus.
         </p>
-        <AdminFormRepeater legend="Galeri gambar" :items="form.gallery" :max="LIM.gallery" :published-ids="publishedIds" :item-title="(g) => g.alt || g.src" add-label="Tambah gambar" :error="err('gallery')" collapsible :has-error="hasErr('gallery')" @add="addImage">
+        <AdminFormRepeater legend="Galeri gambar" path="gallery" :items="form.gallery" :max="LIM.gallery" :published-ids="publishedIds" :item-title="(g) => g.alt || g.src" add-label="Tambah gambar" :error="err('gallery')" collapsible :has-error="hasErr('gallery')" @add="addImage">
           <template #summary="{ item }">
             <span class="flex h-8 w-12 shrink-0 items-center justify-center overflow-hidden rounded border border-navy-100 bg-white">
               <img v-if="item.src" :src="item.src" alt="" class="h-full w-full object-cover">

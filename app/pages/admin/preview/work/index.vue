@@ -28,6 +28,8 @@ const { data, error, refresh, status } = await useAsyncData(`admin-work-preview-
 const legacy = buildLegacyWorkContent()
 
 const resolved = computed(() => (data.value ? resolveWorkView(data.value.work.content, data.value.projects, data.value.caseStudies) : null))
+// Klik teks untuk edit: Work page / project / case study editors.
+provideWorkCmsMarks(lang, () => ({ projects: data.value?.projects ?? [], cases: data.value?.caseStudies ?? [] }))
 const preview = computed<WorkPageContent | null>(() => {
   const d = data.value
   const r = resolved.value
@@ -57,7 +59,8 @@ const notLive = computed(() => {
           Tidak ditampilkan (belum disetujui / disembunyikan): {{ resolved.counts.claimsWithheld }} angka, {{ resolved.counts.mediaWithheld }} gambar
         </span>
         <span v-if="preview?.source === 'legacy'" class="text-xs font-semibold">Tidak ada proyek yang bisa tampil — halaman publik akan tetap memakai konten bawaan.</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Matikan tombol ✎ untuk mencoba halaman seperti biasa.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
 

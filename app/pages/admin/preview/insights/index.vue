@@ -33,6 +33,17 @@ const preview = computed<InsightsPageContent | null>(() => {
 })
 const mainRef = ref<HTMLElement | null>(null)
 usePreviewJump(mainRef)
+
+// Klik teks untuk edit: landing texts open the Insights page editor, article
+// texts open that article's editor (found by slug among the drafts).
+provideCmsMarks({
+  href: (record, path) => {
+    if (!record) return cmsFieldHref('/admin/insights', lang, path)
+    const slug = record.replace(/^article:/, '')
+    const a = data.value?.articles.find((x) => x.content.slug === slug)
+    return a ? cmsFieldHref(`/admin/insights/articles/${a.id}`, lang, path) : null
+  }
+})
 const notLive = computed(() => {
   const d = data.value
   if (!d) return 0
@@ -48,8 +59,9 @@ const notLive = computed(() => {
         <strong>Preview draft — belum tampil di website</strong>
         <span v-if="data">Insights · draft v{{ data.insights.version }} · disimpan {{ fmtCmsTime(data.insights.updatedAt) }} · status: {{ data.insights.status }}</span>
         <span v-if="notLive" class="text-xs">{{ notLive }} artikel/topik yang dipilih belum di-publish</span>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Klik panah bulat di ujung baris untuk membuka pembaca artikel; matikan tombol ✎ untuk mencoba halaman seperti biasa.</span>
         <span v-if="preview?.source === 'legacy'" class="text-xs font-semibold">Tidak ada artikel yang bisa ditampilkan — halaman publik akan tetap memakai konten bawaan.</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
     <p v-if="status === 'pending'" class="p-8 text-sm" role="status">Memuat draft…</p>

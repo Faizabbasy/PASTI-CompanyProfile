@@ -78,6 +78,7 @@ export function toInsightsArticleViews(list: PublicInsightsContent['contents']['
     const p = a.perspective ? resolvePerspective(a.perspective.sourceRef) : null
     return {
       index: pad(i + 1),
+      slug: a.slug,
       title: a.title,
       alt: a.coverImageAlt,
       image: a.coverImage,

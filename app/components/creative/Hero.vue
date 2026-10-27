@@ -13,6 +13,7 @@ const { hero, wall } = useCreativePage()
 const { eyebrow, lede: introBody } = hero
 const visuals = wall.visuals
 const t = useT()
+const mark = useCmsMark()
 
 // Balanced two-line break (owner 2026-10-08): line two starts a new line —
 // "Creative that gets / business results." — and its last word is outlined.
@@ -145,16 +146,17 @@ useGsapContext(() => {
     <BaseContainer class="relative z-20 flex flex-1 flex-col desktop:justify-center">
       <div class="grid items-center gap-14 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-7">
-          <div data-ch-fade><BaseHeroMarker surface="yellow" :label="t('{eyebrow} studio', { eyebrow })" :meta="hero.markerMeta" /></div>
+          <div data-ch-fade><BaseHeroMarker v-bind="mark('hero.eyebrow', 'Label kecil di atas judul (teks kecil di sebelahnya: kolom “teks penanda”)')" surface="yellow" :label="t('{eyebrow} studio', { eyebrow })" :meta="hero.markerMeta" /></div>
 
           <h1 class="hero-title pointer-events-none mt-6 desktop:mt-[3svh]">
-            <template v-for="(w, i) in words" :key="i"><br v-if="i === breakAt"><span class="ch-mask"><span data-ch-word class="inline-block will-change-transform" :class="i === words.length - 1 ? 'ch-outline' : ''">{{ w }}</span><span v-if="i === words.length - 1">.</span></span>{{ ' ' }}</template>
+            <template v-for="(w, i) in words" :key="i"><br v-if="i === breakAt"><span class="ch-mask"><span v-bind="mark(i < breakAt ? 'hero.headlineLine1' : 'hero.headlineLine2', i < breakAt ? 'Judul baris 1' : 'Judul baris 2 (kata terakhir bergaris tepi)')" data-ch-word class="inline-block will-change-transform" :class="i === words.length - 1 ? 'ch-outline' : ''">{{ w }}</span><span v-if="i === words.length - 1">.</span></span>{{ ' ' }}</template>
           </h1>
 
-          <p data-ch-fade class="hero-lede hero-lede--strong m-center mt-6 desktop:mt-[3svh]">{{ introBody }}</p>
+          <p v-bind="mark('hero.lede', 'Paragraf di bawah judul')" data-ch-fade class="hero-lede hero-lede--strong m-center mt-6 desktop:mt-[3svh]">{{ introBody }}</p>
 
           <div data-ch-fade class="mt-8 desktop:mt-[4svh]">
             <BaseHeroCtas
+              v-bind="mark('hero.primaryCtaLabel', 'Teks & link tombol')"
               surface="yellow"
               :primary="hero.primaryCta"
               :secondary="{ label: hero.secondaryCtaLabel, down: true }"
@@ -167,6 +169,7 @@ useGsapContext(() => {
         <div data-ch-fade aria-hidden="true" class="pointer-events-none relative mx-auto h-[300px] w-full max-w-[420px] desktop:col-span-5 desktop:h-[min(54svh,480px)] desktop:max-w-none">
           <img
             v-for="(v, i) in visuals.slice(0, 3)"
+            v-bind="mark('image', 'Gambar (dari Studio Wall)', `wall.visuals#${i}`)"
             :key="v.src"
             :src="v.src" :srcset="imgSet(v.src)" sizes="(max-width: 1023px) 50vw, 24vw"
             alt=""

@@ -17,6 +17,9 @@ const props = defineProps<{
   collapsible?: boolean
   // Item has a validation error (keeps a collapsible item open).
   hasError?: (index: number) => boolean
+  // Content path of the list (e.g. 'gallery'): lets a "klik teks untuk
+  // edit" jump find and open a collapsed item (useSingletonEditor).
+  path?: string
 }>()
 const L = computed(() =>
   props.locale !== 'en'
@@ -53,7 +56,7 @@ function toggle(item: T) {
 
 <template>
   <!-- min-w-0: a fieldset defaults to min-content width and would overflow phones. -->
-  <fieldset class="min-w-0">
+  <fieldset class="min-w-0" :data-repeater="path">
     <legend class="sr-only">{{ legend }}</legend>
     <p v-if="error" class="mb-3 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800" role="alert">{{ error }}</p>
 

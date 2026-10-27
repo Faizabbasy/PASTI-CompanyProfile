@@ -34,6 +34,15 @@ const preview = computed<InsightsPageContent | null>(() => {
 })
 const mainRef = ref<HTMLElement | null>(null)
 usePreviewJump(mainRef)
+
+// Klik teks untuk edit: article texts open this article's editor; list
+// heading / filters open the Insights page editor.
+provideCmsMarks({
+  href: (record, path) => {
+    if (!record) return cmsFieldHref('/admin/insights', lang, path)
+    return data.value && record === `article:${data.value.record.content.slug}` ? cmsFieldHref(`/admin/insights/articles/${id}`, lang, path) : null
+  }
+})
 </script>
 
 <template>
@@ -42,8 +51,8 @@ usePreviewJump(mainRef)
       <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-1">
         <strong>Preview draft — belum tampil di website</strong>
         <span v-if="data">Artikel · draft v{{ data.record.version }} · disimpan {{ fmtCmsTime(data.record.updatedAt) }} · status: {{ data.record.status }}</span>
-        <span class="text-xs">Klik baris artikel untuk membuka pembaca layar penuh. Isi lengkap (blok-blok) belum ditampilkan karena halaman artikel belum ada.</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Untuk membuka pembaca artikel, klik tombol panah bulat di ujung baris artikel.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
     <p v-if="status === 'pending'" class="p-8 text-sm" role="status">Memuat draft…</p>

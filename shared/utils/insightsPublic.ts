@@ -14,6 +14,8 @@ import { PERSPECTIVE_REFS, type ArticleContent, type CategoryContent, type Insig
 export interface InsightsAccentLine { text: string; accent: string }
 export interface InsightsArticleView {
   index: string
+  // CMS only: the article's slug (admin preview edit links, article pages).
+  slug?: string
   title: string
   // Cover alt text (legacy: the title).
   alt: string

@@ -6,6 +6,7 @@ import gsap from 'gsap'
 // directions and speed up with scroll velocity. Static under reduced motion.
 const names = useCreativePage().services.items.map((s) => s.title)
 const t = useT()
+const mark = useCmsMark()
 const rowRefs = ref<HTMLElement[]>([])
 
 useGsapContext(() => {
@@ -40,6 +41,7 @@ useGsapContext(() => {
         <template v-for="copy in 2" :key="copy">
           <span
             v-for="(n, i) in names"
+            v-bind="mark('title', 'Nama layanan', `services.items#${i}`)"
             :key="`${copy}-${i}`"
             class="flex shrink-0 items-center font-display text-[clamp(22px,3vw,42px)] font-extrabold uppercase tracking-[-0.02em]"
             :aria-hidden="copy === 2 || r === 2 ? 'true' : undefined"

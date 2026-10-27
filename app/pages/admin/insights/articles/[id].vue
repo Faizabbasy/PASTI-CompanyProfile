@@ -85,7 +85,7 @@ const codeManaged = [
       </template>
 
       <template v-if="form && state" #default>
-        <div v-for="t in (['basics', 'content', 'media', 'body'] as const)" v-show="activeTab === t" :key="t">
+        <div v-for="t in (['header', 'content', 'media', 'perspective', 'body', 'settings'] as const)" v-show="activeTab === t" :key="t">
           <AdminInsightsArticleFields :form="form" :err="err" :categories="categories ?? []" :tab="t" :published-slug="state.extra.publishedSlug" />
         </div>
         <div v-show="activeTab === 'relations'" class="grid gap-4 text-sm">

@@ -24,6 +24,7 @@ const lp = useLocalePath()
 const n = computed(() => props.articles.length)
 const nextArticle = computed(() => (props.index === null ? null : props.articles[(props.index + 1) % n.value]!))
 const fullPoster = ref(false)
+const mark = useCmsMark()
 
 // Cover crop: every poster carries its own headline on the left half and its
 // visual on the right, so the cover zooms (origin right) until only the
@@ -131,6 +132,7 @@ onBeforeUnmount(() => {
                 :class="fullPoster ? 'bg-pureWhite' : 'bg-navyDeep-800'"
               >
                 <img
+                  v-bind="mark('coverImage', 'Gambar sampul', `article:${article.slug}`)"
                   data-rd-img
                   :src="article.image" :srcset="imgSet(article.image)" sizes="(max-width: 1023px) 100vw, 60vw"
                   :alt="article.alt"
@@ -155,7 +157,7 @@ onBeforeUnmount(() => {
                 <div class="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
                   <div v-show="!fullPoster" class="min-w-0">
                     <span data-rd-numeral aria-hidden="true" class="rd-numeral block select-none font-display font-extrabold leading-[0.8]">{{ article.index }}</span>
-                    <p class="mt-2 font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.85)]">{{ article.page?.category }}</p>
+                    <p v-bind="mark('kicker', 'Label kecil (kicker)', `article:${article.slug}`)" class="mt-2 font-display text-[12px] font-semibold uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.85)]">{{ article.page?.category }}</p>
                   </div>
                   <button
                     type="button"
@@ -178,7 +180,7 @@ onBeforeUnmount(() => {
               <!-- Top bar: close (prev/next live in the footer) -->
               <div class="flex min-h-11 items-center justify-between gap-4 px-5 pt-5 tablet:px-8 desktop:px-12 desktop:pt-7">
                 <p class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">
-                  <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ t(article.page?.topic ?? '') }} · {{ t('The PASTI Journal') }}
+                  <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" /><span v-bind="mark('categoryIds', 'Topik (nama topik diubah di menu Categories)', `article:${article.slug}`)">{{ t(article.page?.topic ?? '') }}</span> · {{ t('The PASTI Journal') }}
                 </p>
                 <button type="button" :aria-label="t('Close')" class="hidden h-11 w-11 shrink-0 place-items-center rounded-full bg-pastiYellow-500 text-slateNavy transition-transform duration-500 ease-editorial hover:rotate-90 desktop:grid" @click="emit('close')">
                   <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13" /></svg>
@@ -186,20 +188,21 @@ onBeforeUnmount(() => {
               </div>
 
               <div ref="storyRef" class="relative flex-1 px-5 pb-8 pt-6 tablet:px-8 desktop:min-h-0 desktop:overflow-y-auto desktop:overscroll-contain desktop:px-12 desktop:pt-8">
-                <h2 data-rd-part class="relative max-w-[16ch] font-display text-[length:clamp(40px,4.4vw,72px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-pureWhite">
-                  {{ article.page?.headline.text }}{{ article.page?.headline.accent ? ' ' : '' }}<span v-if="article.page?.headline.accent" class="text-pastiYellow-500">{{ article.page.headline.accent }}</span>
+                <h2 v-bind="mark('headline.text', 'Judul besar', `article:${article.slug}`)" data-rd-part class="relative max-w-[16ch] font-display text-[length:clamp(40px,4.4vw,72px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-pureWhite">
+                  {{ article.page?.headline.text }}{{ article.page?.headline.accent ? ' ' : '' }}<span v-if="article.page?.headline.accent" v-bind="mark('headline.accent', 'Judul besar — bagian kuning', `article:${article.slug}`)" class="text-pastiYellow-500">{{ article.page.headline.accent }}</span>
                 </h2>
-                <p v-if="article.page?.tagline" data-rd-part class="relative mt-4 font-display text-[clamp(18px,1.6vw,24px)] font-semibold tracking-[-0.01em] text-[color:rgba(255,255,255,0.92)]">
-                  {{ article.page.tagline.text }} <span class="text-pastiYellow-500">{{ article.page.tagline.accent }}</span>
+                <p v-if="article.page?.tagline" v-bind="mark('tagline.text', 'Tagline', `article:${article.slug}`)" data-rd-part class="relative mt-4 font-display text-[clamp(18px,1.6vw,24px)] font-semibold tracking-[-0.01em] text-[color:rgba(255,255,255,0.92)]">
+                  {{ article.page.tagline.text }} <span v-bind="mark('tagline.accent', 'Tagline — bagian kuning', `article:${article.slug}`)" class="text-pastiYellow-500">{{ article.page.tagline.accent }}</span>
                 </p>
 
-                <p data-rd-part class="relative mt-7 max-w-[38rem] border-l-2 border-pastiYellow-500 pl-5 text-[clamp(17px,1.35vw,21px)] leading-[1.55] text-[color:rgba(255,255,255,0.82)]">{{ article.page?.description }}</p>
+                <p v-bind="mark('excerpt', 'Ringkasan (paragraf pembuka)', `article:${article.slug}`)" data-rd-part class="relative mt-7 max-w-[38rem] border-l-2 border-pastiYellow-500 pl-5 text-[clamp(17px,1.35vw,21px)] leading-[1.55] text-[color:rgba(255,255,255,0.82)]">{{ article.page?.description }}</p>
 
                 <!-- Topic grid -->
                 <div v-if="article.page?.points.length" data-rd-part class="relative mt-10">
                   <p class="font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">{{ t('In this insight') }}</p>
                   <ol class="mt-4 grid grid-cols-2 border-l border-t border-[color:rgba(255,255,255,0.12)] tablet:grid-cols-4" :class="{ 'tablet:!grid-cols-3': article.page.points.length === 3 }">
                     <li
+                      v-bind="mark(`points.${i}`, `Poin ${i + 1} “Dalam insight ini”`, `article:${article.slug}`)"
                       v-for="(pt, i) in article.page.points"
                       :key="pt"
                       class="rd-cell group relative border-b border-r border-[color:rgba(255,255,255,0.12)] p-4 transition-colors duration-300"
@@ -213,13 +216,13 @@ onBeforeUnmount(() => {
                 <!-- PASTI perspective as a pull quote -->
                 <figure v-if="article.page?.pasti" data-rd-part class="relative mt-12">
                   <span aria-hidden="true" class="block font-display text-[80px] font-extrabold leading-[0.5] text-pastiYellow-500">“</span>
-                  <blockquote class="mt-2 max-w-[40rem] font-display text-[clamp(19px,1.6vw,25px)] font-semibold leading-[1.4] tracking-[-0.015em] text-pureWhite">{{ article.page.pasti.text }}</blockquote>
+                  <blockquote v-bind="mark('perspective.sourceRef', 'Kutipan PASTI — pilih sumbernya (isi kutipan dari data perusahaan)', `article:${article.slug}`)" class="mt-2 max-w-[40rem] font-display text-[clamp(19px,1.6vw,25px)] font-semibold leading-[1.4] tracking-[-0.015em] text-pureWhite">{{ article.page.pasti.text }}</blockquote>
                   <figcaption class="mt-5 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.55)]">
                     <span aria-hidden="true" class="h-px w-8 bg-pastiYellow-500" />
                     <LayoutBrandMark surface="dark" :height="10" />{{ article.page.pasti.label }}
                   </figcaption>
                   <ul class="mt-7 border-t border-[color:rgba(255,255,255,0.12)]">
-                    <li v-for="l in article.page.pasti.links" :key="l.to + l.label" class="border-b border-[color:rgba(255,255,255,0.12)]">
+                    <li v-for="(l, li) in article.page.pasti.links" v-bind="mark(`perspective.links.${li}.label`, 'Link di bawah kutipan', `article:${article.slug}`)" :key="l.to + l.label" class="border-b border-[color:rgba(255,255,255,0.12)]">
                       <NuxtLink :to="lp(l.to)" class="group flex min-h-[56px] items-center justify-between gap-4 py-3" @click="emit('close')">
                         <span class="font-display text-[16px] font-bold tracking-[-0.01em] text-pureWhite transition-colors duration-300 group-hover:text-pastiYellow-500">{{ l.label }}</span>
                         <span aria-hidden="true" class="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-[color:rgba(255,255,255,0.2)] transition-[background-color,border-color,color,transform] duration-500 ease-editorial group-hover:-rotate-45 group-hover:border-pastiYellow-500 group-hover:bg-pastiYellow-500 group-hover:text-slateNavy">
@@ -257,7 +260,7 @@ onBeforeUnmount(() => {
                   >
                     <span class="min-w-0">
                       <span class="block font-mono text-[10px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">{{ t('Next') }} · {{ nextArticle.index }}</span>
-                      <span class="block max-w-[14rem] truncate font-display text-[14px] font-bold text-pureWhite transition-colors duration-300 group-hover:text-pastiYellow-500">{{ nextArticle.title }}</span>
+                      <span v-bind="mark('title', 'Judul pendek (dipakai di “Berikutnya”)', `article:${nextArticle.slug}`)" class="block max-w-[14rem] truncate font-display text-[14px] font-bold text-pureWhite transition-colors duration-300 group-hover:text-pastiYellow-500">{{ nextArticle.title }}</span>
                     </span>
                     <span aria-hidden="true" class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-pureWhite text-slateNavy transition-[background-color,transform] duration-500 ease-editorial group-hover:-rotate-45 group-hover:bg-pastiYellow-500">
                       <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8h11M9 4l4 4-4 4" /></svg>

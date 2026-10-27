@@ -111,6 +111,46 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
     nextTick(() => document.getElementById(fieldId(first))?.focus())
   }
 
+  // "Klik teks untuk edit" in the admin previews links here with
+  // ?field=<path>: open that field's section, scroll to it and flash it.
+  // A path may name a group (`points`, `body`) — the first input in it wins.
+  // A collapsed repeater item (AdminFormRepeater `path`) is opened first.
+  function jumpToField(path: string) {
+    const tab = tabForPath(path)
+    if (tab) activeTab.value = tab
+    nextTick(() => setTimeout(async () => {
+      const id = fieldId(path)
+      const find = () => document.getElementById(id) ?? document.querySelector<HTMLElement>(`[id^="${id}-"]`)
+      let el = find()
+      if (!el) {
+        // The repeater whose path the field sits under (`capabilities.items`
+        // for `capabilities.items.2.title`); open that item (or the first).
+        const lists = [...document.querySelectorAll<HTMLElement>('[data-repeater]')].filter((r) => path === r.dataset.repeater || path.startsWith(`${r.dataset.repeater}.`))
+        const list = lists.sort((a, b) => b.dataset.repeater!.length - a.dataset.repeater!.length)[0]
+        if (list) {
+          const index = Number(path.slice(list.dataset.repeater!.length + 1).split('.')[0]) || 0
+          const items = [...list.querySelectorAll<HTMLElement>('[aria-expanded]')]
+          const toggle = items[index] ?? items[0]
+          if (toggle?.getAttribute('aria-expanded') === 'false') toggle.click()
+          await nextTick()
+          el = find()
+        }
+      }
+      if (!el) return
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      el.focus({ preventScroll: true })
+      const box = el.closest<HTMLElement>('fieldset') ?? el.parentElement ?? el
+      // An attribute, not a class: Vue rewrites `class` when the form block
+      // re-renders (e.g. a repeater item opening) and would drop the flash.
+      box.setAttribute('data-cms-jump', '')
+      setTimeout(() => box.removeAttribute('data-cms-jump'), 2600)
+    }, 200))
+  }
+  const fieldQuery = useRoute().query.field
+  onMounted(() => {
+    if (typeof fieldQuery === 'string' && fieldQuery) jumpToField(fieldQuery)
+  })
+
   function describeError(e: unknown, action: string): string {
     const er = e as { statusCode?: number; statusMessage?: string; data?: { data?: { fields?: { path: string; message: string }[] }; statusMessage?: string } }
     const code = er.statusCode

@@ -11,6 +11,7 @@ import type { WorkCaseView } from '#shared/utils/workPublic'
 const props = defineProps<{ item: WorkCaseView }>()
 // `tr` (not `t`): the chapter lists below loop with `t` as the item name.
 const tr = useT()
+const mark = useCmsMark()
 
 const gallery = computed(() => props.item.visuals.slice(1))
 const metrics = computed(() => props.item.metrics)
@@ -48,14 +49,14 @@ const secondItems = computed(() => props.item.solution ?? props.item.request ?? 
 
       <!-- Challenge -->
       <ol v-if="ch.key === 'challenge'" class="space-y-5">
-        <li v-for="(t, i) in item.challenge" :key="i" class="grid grid-cols-[36px_1fr] font-display text-[length:clamp(18px,1.6vw,22px)] font-semibold leading-[1.35] tracking-[-0.01em] text-pureWhite">
+        <li v-for="(t, i) in item.challenge" v-bind="mark(`challenge.points.${i}`, `Tantangan ${i + 1}`, `case:${item.id}`)" :key="i" class="grid grid-cols-[36px_1fr] font-display text-[length:clamp(18px,1.6vw,22px)] font-semibold leading-[1.35] tracking-[-0.01em] text-pureWhite">
           <span class="pt-1 font-mono text-[11px] font-normal text-pastiYellow-500">{{ String(i + 1).padStart(2, '0') }}</span>{{ t }}
         </li>
       </ol>
 
       <!-- What we built / requested -->
       <ul v-else-if="ch.key === 'second'" class="grid gap-x-8 gap-y-4 tablet:grid-cols-2">
-        <li v-for="(t, i) in secondItems" :key="i" class="grid grid-cols-[22px_1fr] text-[16px] leading-relaxed text-[color:rgba(255,255,255,0.85)]">
+        <li v-for="(t, i) in secondItems" v-bind="mark(`approach.points.${i}`, `Poin pendekatan ${i + 1}`, `case:${item.id}`)" :key="i" class="grid grid-cols-[22px_1fr] text-[16px] leading-relaxed text-[color:rgba(255,255,255,0.85)]">
           <svg viewBox="0 0 16 16" class="mt-[5px] h-3.5 w-3.5 text-pastiYellow-500" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3 8.5l3 3 7-7" /></svg>{{ t }}
         </li>
       </ul>
@@ -63,34 +64,34 @@ const secondItems = computed(() => props.item.solution ?? props.item.request ?? 
       <!-- Outcome -->
       <div v-else-if="ch.key === 'outcome'">
         <dl v-if="metrics.length" class="grid gap-6 tablet:grid-cols-2">
-          <div v-for="m in metrics" :key="m.label" class="flex flex-col-reverse border-l-2 border-pastiYellow-500 pl-5">
+          <div v-for="m in metrics" v-bind="mark('metrics', 'Angka hasil (hanya yang Disetujui tampil)', `case:${item.id}`)" :key="m.label" class="flex flex-col-reverse border-l-2 border-pastiYellow-500 pl-5">
             <dt class="mt-2 max-w-[22ch] text-[15px] font-semibold leading-snug text-[color:rgba(255,255,255,0.8)]">{{ m.label }}</dt>
             <dd class="font-display text-[length:clamp(64px,7vw,104px)] font-extrabold leading-[0.85] tracking-[-0.05em] text-pastiYellow-500">{{ m.value }}</dd>
           </div>
         </dl>
         <ul v-if="item.outcome?.length" class="space-y-3" :class="metrics.length ? 'mt-8' : ''">
-          <li v-for="(o, i) in item.outcome" :key="i" class="grid grid-cols-[22px_1fr] text-[17px] font-semibold leading-snug text-pureWhite">
+          <li v-for="(o, i) in item.outcome" v-bind="mark(`outcome.points.${i}`, `Hasil ${i + 1}`, `case:${item.id}`)" :key="i" class="grid grid-cols-[22px_1fr] text-[17px] font-semibold leading-snug text-pureWhite">
             <span aria-hidden="true" class="mt-[9px] h-2 w-2 rounded-full bg-pastiYellow-500" />{{ o }}
           </li>
         </ul>
       </div>
 
       <!-- Insight -->
-      <blockquote v-else-if="ch.key === 'insight'" class="relative font-display text-[length:clamp(20px,2vw,28px)] font-bold leading-[1.3] tracking-[-0.02em] text-pureWhite">
+      <blockquote v-else-if="ch.key === 'insight'" v-bind="mark('insight', 'Insight (kutipan penutup)', `case:${item.id}`)" class="relative font-display text-[length:clamp(20px,2vw,28px)] font-bold leading-[1.3] tracking-[-0.02em] text-pureWhite">
         <span aria-hidden="true" class="mr-1 text-pastiYellow-500">“</span>{{ item.insight }}<span aria-hidden="true" class="text-pastiYellow-500">”</span>
       </blockquote>
 
       <!-- Timeline -->
       <div v-else-if="ch.key === 'timeline' && item.timeline">
-        <p class="font-display text-[length:clamp(36px,4vw,56px)] font-extrabold leading-none tracking-[-0.04em] text-pureWhite">{{ item.timeline.total }}</p>
+        <p v-bind="mark('timeline.total', 'Total durasi', `case:${item.id}`)" class="font-display text-[length:clamp(36px,4vw,56px)] font-extrabold leading-none tracking-[-0.04em] text-pureWhite">{{ item.timeline.total }}</p>
         <ol class="mt-6 flex gap-1.5" :aria-label="tr('Delivery timeline, {total} in total', { total: item.timeline.total })">
-          <li v-for="(s, i) in item.timeline.steps" :key="s.label" class="min-w-0" :style="{ flexGrow: s.weeks, flexBasis: 0 }">
+          <li v-for="(s, i) in item.timeline.steps" v-bind="mark(`timeline.steps.${i}.weeks`, `Tahap ${i + 1} — jumlah minggu`, `case:${item.id}`)" :key="s.label" class="min-w-0" :style="{ flexGrow: s.weeks, flexBasis: 0 }">
             <span aria-hidden="true" class="block h-3 rounded-full" :class="i === 2 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(255,255,255,0.25)]'" />
             <span class="mt-2 block font-mono text-[10px] text-[color:rgba(255,255,255,0.5)]">{{ tr('{n}w', { n: s.weeks }) }}</span>
           </li>
         </ol>
         <ul class="mt-5 grid gap-x-6 gap-y-2 tablet:grid-cols-2">
-          <li v-for="(s, i) in item.timeline.steps" :key="s.label" class="flex items-center gap-2.5 text-[14px] text-[color:rgba(255,255,255,0.8)]">
+          <li v-for="(s, i) in item.timeline.steps" v-bind="mark(`timeline.steps.${i}.label`, `Tahap ${i + 1}`, `case:${item.id}`)" :key="s.label" class="flex items-center gap-2.5 text-[14px] text-[color:rgba(255,255,255,0.8)]">
             <span aria-hidden="true" class="h-2 w-2 shrink-0 rounded-full" :class="i === 2 ? 'bg-pastiYellow-500' : 'bg-[color:rgba(255,255,255,0.35)]'" />{{ s.label }} <span class="text-[color:rgba(255,255,255,0.45)]">· {{ tr('{n} wk', { n: s.weeks }) }}</span>
           </li>
         </ul>
@@ -99,12 +100,12 @@ const secondItems = computed(() => props.item.solution ?? props.item.request ?? 
 
       <!-- Stack -->
       <ul v-else-if="ch.key === 'stack'" class="m-center-row flex flex-wrap gap-2">
-        <li v-for="t in item.technologyStack" :key="t" class="rounded-full px-4 py-2 text-[14px] font-semibold text-pureWhite ring-1 ring-[color:rgba(255,255,255,0.22)]">{{ t }}</li>
+        <li v-for="(t, ti) in item.technologyStack" v-bind="mark(`technologyLabels.${ti}`, 'Label teknologi', `case:${item.id}`)" :key="t" class="rounded-full px-4 py-2 text-[14px] font-semibold text-pureWhite ring-1 ring-[color:rgba(255,255,255,0.22)]">{{ t }}</li>
       </ul>
 
       <!-- Gallery -->
       <ul v-else-if="ch.key === 'gallery'" class="grid gap-3" :class="gallery.length > 1 ? 'tablet:grid-cols-2' : ''">
-        <li v-for="v in gallery" :key="v.src" class="overflow-hidden rounded-[16px] bg-pureWhite ring-1 ring-[color:rgba(255,255,255,0.12)]">
+        <li v-for="v in gallery" v-bind="mark('gallery', 'Gambar studi kasus (hanya yang Disetujui tampil)', `case:${item.id}`)" :key="v.src" class="overflow-hidden rounded-[16px] bg-pureWhite ring-1 ring-[color:rgba(255,255,255,0.12)]">
           <img :src="v.src" :srcset="imgSet(v.src)" sizes="(max-width: 1023px) 92vw, 50vw" :alt="v.alt" loading="lazy" decoding="async" draggable="false" class="h-auto w-full">
         </li>
       </ul>

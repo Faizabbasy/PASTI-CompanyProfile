@@ -28,6 +28,11 @@ const { data, error, refresh, status } = await useAsyncData(`admin-creative-prev
 
 const legacy = buildLegacyCreativeContent()
 
+// Klik teks untuk edit: every text opens its field in the Creative editor;
+// the testimonial card opens the testimonial picker of this page.
+provideSingletonCmsMarks('/admin/pages/creative', useEditorLang(), () => data.value?.content, (record) =>
+  record === 'testimonial' ? cmsFieldHref('/admin/pages/creative', useEditorLang(), 'work.testimonialRef') : null
+)
 const preview = computed(() => {
   const d = data.value
   if (!d) return null
@@ -57,7 +62,8 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
         <span v-if="data">Creative · draft v{{ data.version }} · disimpan {{ fmt(data.updatedAt) }} · status: {{ data.status }}</span>
         <span v-if="hidden" class="text-xs">{{ hidden }} item disembunyikan</span>
         <span class="text-xs">SEO: {{ preview?.seo.title }}{{ preview?.seo.noIndex ? ' · noindex' : '' }}</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Matikan tombol ✎ untuk mencoba halaman seperti biasa.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
 

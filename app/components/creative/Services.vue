@@ -16,6 +16,7 @@ if (import.meta.client) {
 // sentence's key terms and "Related work" where COMPRO has a matching case.
 const { sectionLabel, eyebrow: servicesEyebrow, title: servicesHeading, items: services } = useCreativePage().services
 const t = useT()
+const mark = useCmsMark()
 const lp = useLocalePath()
 const active = ref(0)
 const sectionRef = ref<HTMLElement | null>(null)
@@ -61,16 +62,16 @@ useGsapContext(() => {
 <template>
   <section id="creative-services" ref="sectionRef" class="surface-light relative py-24 tablet:py-32" style="--lift-x: 10%; --lift-y: 10%">
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="light" :label="sectionLabel" :meta="t('{n} disciplines', { n: pad(services.length) })" />
+      <BaseSectionMark v-bind="mark('services.sectionLabel', 'Label kecil bagian')" surface="light" :label="sectionLabel" :meta="t('{n} disciplines', { n: pad(services.length) })" />
 
       <div class="mt-14 grid gap-12 desktop:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <!-- Sticky index -->
         <div class="desktop:col-span-5">
           <div class="m-center desktop:sticky desktop:top-28">
             <p class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
-              <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ servicesEyebrow }}
+              <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" /><span v-bind="mark('services.eyebrow', 'Label kecil di atas judul bagian')">{{ servicesEyebrow }}</span>
             </p>
-            <h2 class="hero-title mt-4">
+            <h2 v-bind="mark('services.title', 'Judul bagian Layanan')" class="hero-title mt-4">
               {{ servicesHeading }}<span class="text-pastiYellow-500">.</span>
             </h2>
 
@@ -89,7 +90,7 @@ useGsapContext(() => {
                 >
                   <span class="font-mono text-[11px] tabular-nums transition-colors" :class="active === i ? 'text-slateNavy' : 'text-[color:rgba(3,60,89,0.4)]'">{{ s.index }}</span>
                   <span class="relative font-display text-[19px] font-bold tracking-[-0.01em] transition-[transform,color] duration-500 ease-editorial" :class="active === i ? 'translate-x-2 text-slateNavy' : 'text-[color:rgba(3,60,89,0.42)] group-hover:text-slateNavy'">
-                    <span aria-hidden="true" class="absolute -inset-x-1 bottom-0.5 -z-10 h-[0.42em] origin-left rounded-[3px] bg-pastiYellow-500 transition-transform duration-500 ease-editorial" :class="active === i ? 'scale-x-100' : 'scale-x-0'" />
+                    <span v-bind="mark('title', 'Nama layanan', `services.items#${i}`)" aria-hidden="true" class="absolute -inset-x-1 bottom-0.5 -z-10 h-[0.42em] origin-left rounded-[3px] bg-pastiYellow-500 transition-transform duration-500 ease-editorial" :class="active === i ? 'scale-x-100' : 'scale-x-0'" />
                     {{ s.title }}
                   </span>
                 </button>
@@ -103,7 +104,7 @@ useGsapContext(() => {
           <article v-for="(s, i) in services" :key="s.key" :ref="(el) => { if (el) cardRefs[i] = el as HTMLElement }" class="group/cs">
             <div data-cs-frame class="relative overflow-hidden rounded-[24px] bg-slateNavy desktop:rounded-[28px]" :class="s.image ? '' : 'aspect-[4/5] tablet:aspect-[4/3]'" :style="s.image ? { aspectRatio: `${s.image.w} / ${s.image.h}` } : undefined">
               <!-- Owner visual: shown whole (title + logo are baked in). -->
-              <img v-if="s.image" :src="s.image.src" :srcset="imgSet(s.image.src)" sizes="(max-width: 1023px) 92vw, 45vw" :alt="s.imageAlt || `${s.title} — PASTI`" :width="s.image.w" :height="s.image.h" loading="lazy" decoding="async" draggable="false" class="absolute inset-0 h-full w-full object-cover">
+              <img v-if="s.image" v-bind="mark('image', 'Gambar layanan', `services.items#${i}`)" :src="s.image.src" :srcset="imgSet(s.image.src)" sizes="(max-width: 1023px) 92vw, 45vw" :alt="s.imageAlt || `${s.title} — PASTI`" :width="s.image.w" :height="s.image.h" loading="lazy" decoding="async" draggable="false" class="absolute inset-0 h-full w-full object-cover">
               <div v-else data-cs-img class="absolute inset-0 desktop:-top-[8%] desktop:h-[116%]">
                 <CreativeCapArt :art="s.art" :label="s.title" />
               </div>
@@ -114,15 +115,15 @@ useGsapContext(() => {
               </span>
             </div>
             <div class="m-center mt-5 grid gap-3 tablet:grid-cols-[1fr_1.2fr] tablet:gap-8">
-              <h3 class="font-display text-[length:clamp(26px,2.6vw,38px)] font-extrabold leading-[1.05] tracking-[-0.03em] text-slateNavy">{{ s.title }}</h3>
+              <h3 v-bind="mark('title', 'Nama layanan', `services.items#${i}`)" class="font-display text-[length:clamp(26px,2.6vw,38px)] font-extrabold leading-[1.05] tracking-[-0.03em] text-slateNavy">{{ s.title }}</h3>
               <div>
-                <p class="text-token-body text-[color:rgba(3,60,89,0.72)]">{{ s.body }}</p>
+                <p v-bind="mark('body', 'Deskripsi layanan', `services.items#${i}`)" class="text-token-body text-[color:rgba(3,60,89,0.72)]">{{ s.body }}</p>
                 <ul class="m-center-row mt-4 flex flex-wrap gap-1.5" :aria-label="t('{title} — key areas', { title: s.title })">
-                  <li v-for="k in s.keywords" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)]">{{ k }}</li>
+                  <li v-for="(k, ki) in s.keywords" v-bind="mark(`keywords.${ki}`, 'Label area', `services.items#${i}`)" :key="k" class="rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-[color:rgba(3,60,89,0.62)] ring-1 ring-[color:rgba(3,60,89,0.16)]">{{ k }}</li>
                 </ul>
                 <div v-if="s.related.length" class="m-center-row mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
                   <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.45)]">{{ t('Related work') }}</span>
-                  <NuxtLink v-for="w in s.related" :key="w.label" :to="lp(w.to ?? '#')" class="inline-flex min-h-11 items-center text-[14px] font-semibold text-slateNavy underline decoration-pastiYellow-500 decoration-2 underline-offset-4 hover:decoration-slateNavy">{{ w.label }} <span aria-hidden="true" class="ml-1">↗</span></NuxtLink>
+                  <NuxtLink v-for="(w, wi) in s.related" v-bind="mark(`related.${wi}.label`, 'Link karya terkait', `services.items#${i}`)" :key="w.label" :to="lp(w.to ?? '#')" class="inline-flex min-h-11 items-center text-[14px] font-semibold text-slateNavy underline decoration-pastiYellow-500 decoration-2 underline-offset-4 hover:decoration-slateNavy">{{ w.label }} <span aria-hidden="true" class="ml-1">↗</span></NuxtLink>
                 </div>
               </div>
             </div>

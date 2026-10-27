@@ -13,6 +13,7 @@ const { hero, channels: copy } = useContactPage()
 const { contact, socials, whatsappLink } = useContact()
 const { setState } = useCustomCursor()
 const t = useT()
+const mark = useCmsMark()
 
 const stageRef = ref<HTMLElement | null>(null)
 const headingWords = hero.headline.replace(/\.$/, '').split(/\s+/)
@@ -62,13 +63,13 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10">
       <div class="grid gap-14 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-5">
-          <div data-ct-fade><BaseHeroMarker :label="t('Contact')" :meta="hero.eyebrow" /></div>
-          <h1 class="hero-title mt-6 desktop:mt-8" :aria-label="hero.headline">
+          <div data-ct-fade><BaseHeroMarker v-bind="mark('hero.eyebrow', 'Label kecil di atas judul (halaman Contact)', 'page:contact')" :label="t('Contact')" :meta="hero.eyebrow" /></div>
+          <h1 v-bind="mark('hero.headline', 'Judul halaman Contact', 'page:contact')" class="hero-title mt-6 desktop:mt-8" :aria-label="hero.headline">
             <span aria-hidden="true">
               <span v-for="(w, i) in headingWords" :key="i" class="ct-mask mr-[0.22em] inline-block last:mr-0"><span data-ct-word class="inline-block">{{ w }}<span v-if="i === headingWords.length - 1" class="text-pastiYellow-500">.</span></span></span>
             </span>
           </h1>
-          <p data-ct-fade class="hero-lede m-center mt-6">{{ hero.body }}</p>
+          <p v-bind="mark('hero.supportingCopy', 'Paragraf di bawah judul (halaman Contact)', 'page:contact')" data-ct-fade class="hero-lede m-center mt-6">{{ hero.body }}</p>
 
           <!-- Direct channels. -->
           <ul class="mt-12 border-t border-[color:rgba(3,60,89,0.14)] text-left">
@@ -83,11 +84,11 @@ useGsapContext(() => {
               >
                 <span class="font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] text-[color:rgba(3,60,89,0.55)]">{{ String(i + 1).padStart(2, '0') }}</span>
                 <span class="min-w-0">
-                  <span class="flex items-center gap-2 font-display text-[12px] font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.6)]">
+                  <span v-bind="mark(`channels.${c.key}.label`, 'Label kontak (halaman Contact)', 'page:contact')" class="flex items-center gap-2 font-display text-[12px] font-semibold uppercase tracking-[0.14em] text-[color:rgba(3,60,89,0.6)]">
                     <span aria-hidden="true" class="ct-dot h-1.5 w-1.5 rounded-full bg-[color:rgba(3,60,89,0.25)] transition-colors duration-300" />{{ c.label }}
                   </span>
-                  <span class="mt-1 block font-display font-bold tracking-[-0.01em] text-slateNavy" :class="c.key === 'office' ? 'text-[16px] leading-snug' : 'break-all text-[19px] tablet:text-[22px]'">{{ c.value }}</span>
-                  <span v-if="c.href" class="mt-1 block text-[13px] font-semibold text-[color:rgba(3,60,89,0.6)] transition-colors duration-300 group-hover:text-slateNavy">{{ c.action }}</span>
+                  <span v-bind="c.key === 'email' ? mark('email', 'Email', 'ctas') : c.key === 'office' ? mark('address', 'Alamat kantor', 'ctas') : {}" class="mt-1 block font-display font-bold tracking-[-0.01em] text-slateNavy" :class="c.key === 'office' ? 'text-[16px] leading-snug' : 'break-all text-[19px] tablet:text-[22px]'">{{ c.value }}</span>
+                  <span v-if="c.href" v-bind="mark(`channels.${c.key}.action`, 'Teks aksi kontak (halaman Contact)', 'page:contact')" class="mt-1 block text-[13px] font-semibold text-[color:rgba(3,60,89,0.6)] transition-colors duration-300 group-hover:text-slateNavy">{{ c.action }}</span>
                 </span>
                 <span v-if="c.href" aria-hidden="true" class="grid h-11 w-11 place-items-center rounded-full border border-[color:rgba(3,60,89,0.18)] text-slateNavy transition-[background-color,border-color,transform] duration-500 ease-editorial group-hover:-rotate-45 group-hover:border-pastiYellow-500 group-hover:bg-pastiYellow-500">
                   <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 8h11M9 4l4 4-4 4" /></svg>
@@ -99,6 +100,7 @@ useGsapContext(() => {
           <div v-if="socials.length" data-ct-fade class="m-center-row mt-6 flex items-center gap-3">
             <a
               v-for="s in socials"
+              v-bind="s.key === 'whatsapp' ? {} : mark(`socials.${s.key}`, `Link ${s.label}`, 'ctas')"
               :key="s.key"
               :href="s.url!"
               target="_blank"

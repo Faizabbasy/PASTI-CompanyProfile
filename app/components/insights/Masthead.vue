@@ -12,6 +12,7 @@ const { hero, contents: { articles, topics } } = useInsightsPage()
 const count = articles.length
 const pad = (n: number) => String(n).padStart(2, '0')
 const t = useT()
+const mark = useCmsMark()
 
 const toContents = () => {
   const el = document.getElementById('insights-contents')
@@ -59,10 +60,10 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10 w-full">
       <div class="grid items-center gap-14 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-7">
-          <div data-im-fade><BaseHeroMarker :label="hero.eyebrow" :meta="t('{a} articles · {n} topics', { a: pad(count), n: pad(topics.length) })" /></div>
+          <div data-im-fade><BaseHeroMarker v-bind="mark('hero.eyebrow', 'Label kecil di atas judul')" :label="hero.eyebrow" :meta="t('{a} articles · {n} topics', { a: pad(count), n: pad(topics.length) })" /></div>
 
           <h1 class="hero-title hero-title--word im-mask relative mt-6 select-none desktop:mt-[3svh]" :aria-label="hero.headline">
-            <span data-im-word class="relative inline-block" aria-hidden="true">
+            <span v-bind="mark('hero.headline', 'Judul besar halaman (huruf berisi gambar sampul artikel)')" data-im-word class="relative inline-block" aria-hidden="true">
               <span class="im-outline block">{{ hero.headline }}<span class="text-pastiYellow-500">.</span></span>
               <span
                 v-for="(a, i) in articles"
@@ -74,11 +75,11 @@ useGsapContext(() => {
             </span>
           </h1>
 
-          <p data-im-fade class="hero-lede m-center mt-6 desktop:mt-[3svh]">
+          <p v-bind="mark('hero.lede', 'Paragraf di bawah judul')" data-im-fade class="hero-lede m-center mt-6 desktop:mt-[3svh]">
             {{ hero.lede }}
           </p>
 
-          <div data-im-fade class="mt-8 desktop:mt-[4svh]">
+          <div v-bind="mark('hero.primaryCtaLabel', 'Teks kedua tombol (dan link tombol kedua)')" data-im-fade class="mt-8 desktop:mt-[4svh]">
             <BaseHeroCtas
               :primary="{ label: hero.primaryCtaLabel }"
               :secondary="{ label: hero.secondaryCta.label, href: hero.secondaryCta.href }"
@@ -92,6 +93,7 @@ useGsapContext(() => {
           <div class="relative aspect-[4/5]">
             <img
               v-for="(a, i) in articles"
+              v-bind="mark('coverImage', 'Gambar sampul artikel', `article:${a.slug}`)"
               :key="a.index"
               :src="a.image" :srcset="imgSet(a.image)" sizes="(max-width: 1023px) 60vw, 25vw"
               :alt="i === shown ? a.alt : ''"
@@ -104,7 +106,7 @@ useGsapContext(() => {
           </div>
           <p class="m-center-row mt-8 flex items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(3,60,89,0.55)]">
             <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-pastiYellow-500" />
-            <span class="min-w-0 truncate">{{ t('Now showing') }} · <span class="text-slateNavy">{{ articles[shown]?.title }}</span></span>
+            <span class="min-w-0 truncate">{{ t('Now showing') }} · <span v-bind="mark('title', 'Judul pendek artikel (dipakai di “Sedang tampil”)', `article:${articles[shown]?.slug}`)" class="text-slateNavy">{{ articles[shown]?.title }}</span></span>
           </p>
         </div>
       </div>

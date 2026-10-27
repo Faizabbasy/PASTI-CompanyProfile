@@ -30,6 +30,7 @@ const { active, openCase } = useActiveCase()
 if (!publicCases.some((c) => c.id === active.value) && publicCases[0]) active.value = publicCases[0].id
 const pad = (n: number) => String(n).padStart(2, '0')
 const t = useT()
+const mark = useCmsMark()
 
 const sectionRef = ref<HTMLElement | null>(null)
 const headingRef = ref<HTMLElement | null>(null)
@@ -115,14 +116,14 @@ useGsapContext(() => {
     <span v-for="c in publicCases" :id="`case-${c.id}`" :key="c.id" aria-hidden="true" class="pointer-events-none absolute left-0 top-0" />
 
     <BaseContainer class="relative z-10">
-      <BaseSectionMark surface="dark" :label="cases.sectionLabel" :meta="t('{n} featured', { n: pad(publicCases.length) })" />
+      <BaseSectionMark v-bind="mark('featuredCases.sectionLabel', 'Label kecil bagian studi kasus')" surface="dark" :label="cases.sectionLabel" :meta="t('{n} featured', { n: pad(publicCases.length) })" />
 
       <div class="mt-12 grid gap-6 desktop:mt-16 desktop:grid-cols-12 desktop:items-end desktop:gap-10">
         <h2 ref="headingRef" class="m-center font-display text-[length:clamp(40px,6vw,96px)] font-extrabold leading-[0.95] tracking-[-0.045em] text-pureWhite desktop:col-span-8">
-          {{ cases.titleLead }} <span class="text-pastiYellow-500">{{ cases.titleAccent }}</span>
+          <span v-bind="mark('featuredCases.titleLead', 'Judul bagian studi kasus')">{{ cases.titleLead }}</span> <span v-bind="mark('featuredCases.titleAccent', 'Judul bagian — bagian kuning')" class="text-pastiYellow-500">{{ cases.titleAccent }}</span>
         </h2>
         <div class="m-center desktop:col-span-4 desktop:pb-3">
-          <p class="text-token-body-large text-[color:rgba(255,255,255,0.7)]">{{ cases.supportingCopy }}</p>
+          <p v-bind="mark('featuredCases.supportingCopy', 'Kalimat pendukung di samping judul')" class="text-token-body-large text-[color:rgba(255,255,255,0.7)]">{{ cases.supportingCopy }}</p>
           <p class="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">
             <span class="hidden desktop:inline">{{ t('Select a case') }}</span><span class="desktop:hidden">{{ t('Swipe & tap a case') }}</span>
           </p>
@@ -158,7 +159,7 @@ useGsapContext(() => {
             <template v-if="lead(c)">
               <img
                 v-if="lead(c)!.kind === 'poster'"
-                :src="lead(c)!.src" :srcset="imgSet(lead(c)!.src)" sizes="(max-width: 1023px) 92vw, 50vw"
+                v-bind="mark('gallery', 'Gambar studi kasus (hanya yang Disetujui tampil)', `case:${c.id}`)" :src="lead(c)!.src" :srcset="imgSet(lead(c)!.src)" sizes="(max-width: 1023px) 92vw, 50vw"
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -169,7 +170,7 @@ useGsapContext(() => {
               <div v-else class="absolute inset-0 bg-[linear-gradient(160deg,#0a4b6c_0%,#022f47_70%)]">
                 <div aria-hidden="true" class="absolute -bottom-[30%] -right-[20%] h-[80%] w-[80%] rounded-full" style="background: radial-gradient(closest-side, rgba(251, 186, 0, 0.28), transparent)" />
                 <img
-                  :src="lead(c)!.src" :srcset="imgSet(lead(c)!.src)" sizes="(max-width: 1023px) 92vw, 50vw"
+                  v-bind="mark('gallery', 'Gambar studi kasus (hanya yang Disetujui tampil)', `case:${c.id}`)" :src="lead(c)!.src" :srcset="imgSet(lead(c)!.src)" sizes="(max-width: 1023px) 92vw, 50vw"
                   alt=""
                   loading="lazy"
                   decoding="async"
@@ -194,6 +195,7 @@ useGsapContext(() => {
               aria-hidden="true"
               class="fc-vtitle absolute bottom-6 left-1/2 hidden -translate-x-1/2 whitespace-nowrap font-display text-[22px] font-extrabold tracking-[-0.02em] text-pureWhite transition-opacity duration-500 desktop:block"
               :class="active === c.id ? 'opacity-0' : 'opacity-100 delay-200'"
+              v-bind="mark('project.name', 'Nama proyek (diubah di Projects)', `case:${c.id}`)"
             >{{ c.title }}</span>
 
             <!-- Open: caption -->
@@ -201,9 +203,9 @@ useGsapContext(() => {
               class="absolute inset-x-5 bottom-5 block transition-[opacity,transform] duration-500 desktop:inset-x-8 desktop:bottom-8"
               :class="active === c.id ? 'translate-y-0 opacity-100 delay-300' : 'desktop:translate-y-4 desktop:opacity-0'"
             >
-              <span class="block font-mono text-[10px] uppercase tracking-[0.18em] text-pastiYellow-500">{{ c.category }}</span>
-              <span class="mt-2 block font-display text-[length:clamp(22px,2.6vw,40px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-pureWhite">{{ c.title }}</span>
-              <span v-if="c.client || c.year" class="mt-2 block text-[13px] text-[color:rgba(255,255,255,0.7)]">{{ [c.client, c.year].filter(Boolean).join(' · ') }}</span>
+              <span v-bind="mark('categoryOverride', 'Kategori', `case:${c.id}`)" class="block font-mono text-[10px] uppercase tracking-[0.18em] text-pastiYellow-500">{{ c.category }}</span>
+              <span v-bind="mark('project.name', 'Nama proyek (diubah di Projects)', `case:${c.id}`)" class="mt-2 block font-display text-[length:clamp(22px,2.6vw,40px)] font-extrabold leading-[1.02] tracking-[-0.035em] text-pureWhite">{{ c.title }}</span>
+              <span v-if="c.client || c.year" v-bind="mark('project.clientDisplayName', 'Klien & tahun (diubah di Projects)', `case:${c.id}`)" class="mt-2 block text-[13px] text-[color:rgba(255,255,255,0.7)]">{{ [c.client, c.year].filter(Boolean).join(' · ') }}</span>
             </span>
           </button>
         </div>
@@ -229,20 +231,20 @@ useGsapContext(() => {
               <span data-fd-rise class="fc-outline block font-display text-[length:clamp(120px,16vw,220px)] font-extrabold leading-[0.82] tracking-[-0.06em]">{{ c.index }}</span>
             </div>
             <div class="mt-6 overflow-hidden pb-1">
-              <h3 data-fd-rise class="font-display text-[length:clamp(30px,3vw,46px)] font-extrabold leading-[1.02] tracking-[-0.04em] text-pureWhite">{{ c.title }}</h3>
+              <h3 v-bind="mark('project.name', 'Nama proyek (diubah di Projects)', `case:${c.id}`)" data-fd-rise class="font-display text-[length:clamp(30px,3vw,46px)] font-extrabold leading-[1.02] tracking-[-0.04em] text-pureWhite">{{ c.title }}</h3>
             </div>
-            <p class="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-pastiYellow-500">{{ c.category }}</p>
+            <p v-bind="mark('categoryOverride', 'Kategori', `case:${c.id}`)" class="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-pastiYellow-500">{{ c.category }}</p>
             <dl v-if="c.client || c.year" class="m-center-row mt-6 flex flex-wrap gap-x-8 gap-y-3 border-t border-[color:rgba(255,255,255,0.14)] pt-5">
               <div v-if="c.client">
                 <dt class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">{{ t('Client') }}</dt>
-                <dd class="mt-1 text-[15px] font-semibold text-pureWhite">{{ c.client }}</dd>
+                <dd v-bind="mark('project.clientDisplayName', 'Nama klien (diubah di Projects)', `case:${c.id}`)" class="mt-1 text-[15px] font-semibold text-pureWhite">{{ c.client }}</dd>
               </div>
               <div v-if="c.year">
                 <dt class="font-mono text-[10px] uppercase tracking-[0.18em] text-[color:rgba(255,255,255,0.45)]">{{ t('Year') }}</dt>
-                <dd class="mt-1 text-[15px] font-semibold text-pureWhite">{{ c.year }}</dd>
+                <dd v-bind="mark('project.year', 'Tahun (diubah di Projects)', `case:${c.id}`)" class="mt-1 text-[15px] font-semibold text-pureWhite">{{ c.year }}</dd>
               </div>
             </dl>
-            <p v-if="c.businessContext" class="mt-6 text-[17px] leading-relaxed text-[color:rgba(255,255,255,0.8)]">{{ c.businessContext }}</p>
+            <p v-if="c.businessContext" v-bind="mark('context.body', 'Konteks bisnis', `case:${c.id}`)" class="mt-6 text-[17px] leading-relaxed text-[color:rgba(255,255,255,0.8)]">{{ c.businessContext }}</p>
 
             <div class="m-center-row mt-8 flex items-center gap-3">
               <button type="button" class="grid h-12 w-12 place-items-center rounded-full ring-1 ring-[color:rgba(255,255,255,0.25)] transition-colors duration-300 hover:bg-pureWhite hover:text-slateNavy focus-visible:outline focus-visible:outline-2 focus-visible:outline-pastiYellow-500" :aria-label="`${t('Previous case')}: ${publicCases[(i - 1 + publicCases.length) % publicCases.length]!.title}`" @click="step(-1)">

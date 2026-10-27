@@ -2,16 +2,19 @@
 import { ARTICLE_LIMITS as LIM, PERSPECTIVE_REFS } from '#shared/utils/insightsSchema'
 import type { CategoryListRow } from '#shared/utils/insightsSchema'
 
-// Article fields grouped by editor tab (Info dasar / Ringkasan / Gambar / Isi lengkap).
+// Article fields grouped by editor tab, in the order they appear on the
+// article (Judul & label / Paragraf pembuka / Gambar / Kutipan / Isi lengkap /
+// Judul pendek & alamat). Labels name what the reader sees.
 // Shared by the create page (all groups) and the edit page (one per tab).
 const props = defineProps<{
   form: ArticleForm
   err: (path: string) => string | undefined
   categories: CategoryListRow[]
-  tab?: 'basics' | 'content' | 'media' | 'body'
+  tab?: Tab
   publishedSlug?: string | null
 }>()
-const show = (t: 'basics' | 'content' | 'media' | 'body') => !props.tab || props.tab === t
+type Tab = 'header' | 'content' | 'media' | 'perspective' | 'body' | 'settings'
+const show = (t: Tab) => !props.tab || props.tab === t
 const slugChanged = computed(() => !!props.publishedSlug && props.form.slug !== props.publishedSlug)
 const usable = computed(() => props.categories.filter((c) => c.status !== 'archived'))
 const catLabel = (id: string) => props.categories.find((c) => c.id === id)?.name ?? `Tidak ditemukan (${id})`
@@ -34,33 +37,10 @@ function moveCategory(i: number, d: number) {
 
 <template>
   <div class="grid gap-5">
-    <template v-if="show('basics')">
-      <AdminFormField :id="fieldId('title')" v-model="form.title" label="Judul" :maxlength="LIM.title" required hint="Judul polos — dipakai di label pembaca artikel, “Now showing” dan “Next”." :error="err('title')" />
-      <div>
-        <AdminFormField :id="fieldId('slug')" v-model="form.slug" label="Slug (alamat)" :maxlength="60" required hint="Unik, huruf kecil-dengan-tanda-hubung. Disiapkan untuk alamat artikel di masa depan (/insights/<slug>). Kalau kosong, terisi otomatis dari judul saat kolom ini diklik." :error="err('slug')" @focus="suggestSlug" />
-        <p v-if="slugChanged" class="mt-1 rounded border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-900" role="alert">
-          Slug yang sudah tayang: “{{ publishedSlug }}”. Kalau diubah, alamat publik artikel nanti ikut berubah setelah di-publish.
-        </p>
-      </div>
-      <fieldset class="grid gap-3">
-        <legend class="text-sm font-medium">Judul besar di daftar artikel</legend>
-        <p class="text-xs text-navy-500">Bagian “aksen” tampil kuning setelah teks utama.</p>
-        <div class="grid gap-4 tablet:grid-cols-2">
-          <AdminFormField :id="fieldId('headline.text')" v-model="form.headline.text" label="Teks utama" :maxlength="LIM.headline" required :error="err('headline.text')" />
-          <AdminFormField :id="fieldId('headline.accent')" v-model="form.headline.accent" label="Aksen kuning (opsional)" :maxlength="LIM.accent" :error="err('headline.accent')" />
-        </div>
-      </fieldset>
-      <fieldset class="grid gap-3">
-        <legend class="text-sm font-medium">Tagline (opsional)</legend>
-        <div class="grid gap-4 tablet:grid-cols-2">
-          <AdminFormField :id="fieldId('tagline.text')" v-model="form.tagline.text" label="Teks tagline" :maxlength="LIM.tagline" :error="err('tagline.text')" />
-          <AdminFormField :id="fieldId('tagline.accent')" v-model="form.tagline.accent" label="Aksen kuning" :maxlength="LIM.tagline" :error="err('tagline.accent')" />
-        </div>
-      </fieldset>
-      <AdminFormField :id="fieldId('kicker')" v-model="form.kicker" label="Label kecil (kicker)" :maxlength="LIM.kicker" required hint="Label kecil di sebelah topik, mis. Security." :error="err('kicker')" />
+    <template v-if="show('header')">
       <fieldset :id="fieldId('categoryIds')" tabindex="-1" class="grid gap-2">
-        <legend class="text-sm font-medium">Topik<span class="text-red-700" aria-hidden="true"> *</span></legend>
-        <p class="text-xs text-navy-500">Maksimal {{ LIM.categories }}. Topik pertama tampil di artikel; semuanya dipakai filter.</p>
+        <legend class="text-sm font-medium">Topik — label kecil bertitik kuning di atas judul<span class="text-red-700" aria-hidden="true"> *</span></legend>
+        <p class="text-xs text-navy-500">Maksimal {{ LIM.categories }}. Topik pertama yang tampil di artikel; semuanya dipakai tombol filter di /insights. Nama topik diubah di menu Categories.</p>
         <p v-if="err('categoryIds')" class="text-xs font-medium text-red-700" role="alert">{{ err('categoryIds') }}</p>
         <div class="flex flex-wrap gap-3">
           <label v-for="c in usable" :key="c.id" class="inline-flex items-center gap-2 rounded-md border border-navy-100 bg-white px-3 py-1.5 text-sm">
@@ -76,13 +56,35 @@ function moveCategory(i: number, d: number) {
         </ol>
         <p v-for="(id, i) in form.categoryIds" v-show="err(`categoryIds.${i}`)" :key="`e-${id}`" class="text-xs text-red-700" role="alert">{{ catLabel(id) }}: {{ err(`categoryIds.${i}`) }}</p>
       </fieldset>
+      <fieldset class="grid gap-3">
+        <legend class="text-sm font-medium">Judul besar</legend>
+        <p class="text-xs text-navy-500">Teks paling besar di pembaca artikel dan di daftar artikel. Bagian “aksen” tampil kuning setelah teks utama.</p>
+        <div class="grid gap-4 tablet:grid-cols-2">
+          <AdminFormField :id="fieldId('headline.text')" v-model="form.headline.text" label="Teks utama" :maxlength="LIM.headline" required :error="err('headline.text')" />
+          <AdminFormField :id="fieldId('headline.accent')" v-model="form.headline.accent" label="Aksen kuning (opsional)" :maxlength="LIM.accent" :error="err('headline.accent')" />
+        </div>
+      </fieldset>
+      <fieldset class="grid gap-3">
+        <legend class="text-sm font-medium">Tagline (opsional)</legend>
+        <p class="text-xs text-navy-500">Kalimat di bawah judul besar; bagian aksen tampil kuning.</p>
+        <div class="grid gap-4 tablet:grid-cols-2">
+          <AdminFormField :id="fieldId('tagline.text')" v-model="form.tagline.text" label="Teks tagline" :maxlength="LIM.tagline" :error="err('tagline.text')" />
+          <AdminFormField :id="fieldId('tagline.accent')" v-model="form.tagline.accent" label="Aksen kuning" :maxlength="LIM.tagline" :error="err('tagline.accent')" />
+        </div>
+      </fieldset>
+      <AdminFormField :id="fieldId('kicker')" v-model="form.kicker" label="Label kecil (kicker)" :maxlength="LIM.kicker" required hint="Huruf kapital kecil di pojok kiri bawah gambar sampul, dan di daftar artikel setelah topik. Mis. Keamanan." :error="err('kicker')" />
     </template>
 
     <template v-if="show('content')">
-      <AdminFormField :id="fieldId('excerpt')" v-model="form.excerpt" label="Ringkasan" multiline :maxlength="LIM.excerpt" required hint="Tampil saat baris artikel dibuka dan sebagai paragraf pembuka di pembaca artikel." :error="err('excerpt')" />
-      <AdminFormStringList legend="Poin “In this insight”" path="points" :items="form.points" :max="LIM.points" :maxlength="LIM.point" item-label="Poin" add-label="Tambah poin" :err="err" hint="2–4 topik singkat, atau kosongkan untuk menyembunyikan kotaknya." />
+
+      <AdminFormField :id="fieldId('excerpt')" v-model="form.excerpt" label="Paragraf pembuka (ringkasan)" multiline :maxlength="LIM.excerpt" required hint="Paragraf bergaris kuning di bawah judul, juga teks pratinjau saat baris artikel disorot di /insights. Isi artikel yang panjang ditulis di bagian 05 · Isi lengkap, bukan di sini." :error="err('excerpt')" />
+      <AdminFormStringList legend="Poin “Dalam insight ini”" path="points" :items="form.points" :max="LIM.points" :maxlength="LIM.point" item-label="Poin" add-label="Tambah poin" :err="err" hint="Kotak bernomor 01–04 di bawah paragraf pembuka. Isi 2–4 poin singkat, atau kosongkan untuk menyembunyikan kotaknya." />
+    </template>
+
+    <template v-if="show('perspective')">
       <fieldset class="grid gap-3 rounded-lg border border-navy-100 bg-white p-4">
-        <legend class="px-1 text-sm font-medium">Kutipan “PASTI perspective” (opsional)</legend>
+        <legend class="px-1 text-sm font-medium">Kutipan PASTI (opsional)</legend>
+        <p class="text-xs text-navy-500">Kalimat besar dengan tanda kutip kuning di bawah poin, lalu baris link berpanah.</p>
         <div>
           <label :for="fieldId('perspective.sourceRef')" class="text-sm font-medium">Sumber kutipan</label>
           <select :id="fieldId('perspective.sourceRef')" v-model="form.perspective.sourceRef" class="mt-1 block w-full rounded-md border border-navy-200 bg-white px-3 py-2 text-sm">
@@ -114,13 +116,23 @@ function moveCategory(i: number, d: number) {
 
     <template v-if="show('body')">
       <p class="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900" role="note">
-        Disiapkan untuk halaman artikel di masa depan (/insights/&lt;slug&gt;). Isi tab ini belum tampil di website. Jangan mengarang nama penulis atau tanggal.
+        Tulis isi artikel yang panjang di sini, blok demi blok (paragraf, subjudul, kutipan, daftar, gambar). Belum tampil di website — nanti muncul di halaman artikel /insights/&lt;slug&gt;. Jangan mengulang paragraf pembuka; jangan mengarang nama penulis atau tanggal.
       </p>
       <div class="grid gap-5 tablet:grid-cols-2">
         <AdminFormField :id="fieldId('authorName')" v-model="form.authorName" label="Penulis (opsional)" :maxlength="LIM.author" :error="err('authorName')" />
         <AdminFormField :id="fieldId('publishDate')" v-model="form.publishDate" label="Tanggal tulisan (opsional)" :maxlength="10" placeholder="YYYY-MM-DD" hint="Hanya tanggal yang ditampilkan — publish tetap dilakukan admin; tidak ada penjadwalan." :error="err('publishDate')" />
       </div>
       <AdminInsightsBodyEditor :blocks="form.body" :err="err" />
+    </template>
+
+    <template v-if="show('settings')">
+      <AdminFormField :id="fieldId('title')" v-model="form.title" label="Judul pendek" :maxlength="LIM.title" required hint="Tidak tampil sebagai judul besar. Dipakai di tombol “Berikutnya” pembaca artikel, “Sedang tampil” di hero /insights, dan judul tab browser. Biasanya judul besar + tagline dalam satu kalimat." :error="err('title')" />
+      <div>
+        <AdminFormField :id="fieldId('slug')" v-model="form.slug" label="Slug (alamat)" :maxlength="60" required hint="Unik, huruf kecil-dengan-tanda-hubung. Disiapkan untuk alamat artikel di masa depan (/insights/<slug>). Kalau kosong, terisi otomatis dari judul saat kolom ini diklik." :error="err('slug')" @focus="suggestSlug" />
+        <p v-if="slugChanged" class="mt-1 rounded border border-amber-200 bg-amber-50 px-2 py-1 text-xs text-amber-900" role="alert">
+          Slug yang sudah tayang: “{{ publishedSlug }}”. Kalau diubah, alamat publik artikel nanti ikut berubah setelah di-publish.
+        </p>
+      </div>
     </template>
   </div>
 </template>

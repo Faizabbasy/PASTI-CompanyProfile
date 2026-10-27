@@ -11,6 +11,7 @@ import gsap from 'gsap'
 const { hero, capabilities } = useTechnologyPage()
 const { eyebrow, lede } = hero
 const t = useT()
+const mark = useCmsMark()
 const services = capabilities.items
 
 // The headline's three editorial lines, each split into masked words.
@@ -105,18 +106,19 @@ useGsapContext(() => {
     <BaseContainer class="pointer-events-none relative z-10 flex flex-1 flex-col desktop:justify-center">
       <div class="grid items-center gap-12 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-7">
-          <div data-th-fade><BaseHeroMarker surface="dark" :label="eyebrow" :meta="t('{n} capabilities', { n: String(services.length).padStart(2, '0') })" /></div>
+          <div data-th-fade><BaseHeroMarker v-bind="mark('hero.eyebrow', 'Label kecil di atas judul')" surface="dark" :label="eyebrow" :meta="t('{n} capabilities', { n: String(services.length).padStart(2, '0') })" /></div>
 
           <h1 class="hero-title hero-title--dark mt-6 desktop:mt-[3svh]">
-            <span v-for="(line, li) in lines" :key="li" class="block">
+            <span v-for="(line, li) in lines" v-bind="mark(`hero.headlineLine${li + 1}`, `Judul baris ${li + 1}`)" :key="li" class="block">
               <template v-for="(w, wi) in line" :key="wi"><span class="th-mask"><span data-th-word class="relative inline-block"><span v-if="li === lines.length - 1" data-th-marker aria-hidden="true" class="absolute -inset-x-[0.04em] bottom-[0.1em] -z-10 h-[0.36em] origin-left rounded-[4px] bg-pastiYellow-500" />{{ w }}<template v-if="li === lines.length - 1 && wi === line.length - 1"><span class="text-pastiYellow-500">.</span></template></span></span>{{ ' ' }}</template>
             </span>
           </h1>
 
-          <p data-th-fade class="hero-lede hero-lede--dark m-center mt-6 desktop:mt-[3svh]">{{ lede }}</p>
+          <p v-bind="mark('hero.lede', 'Paragraf di bawah judul')" data-th-fade class="hero-lede hero-lede--dark m-center mt-6 desktop:mt-[3svh]">{{ lede }}</p>
 
           <div data-th-fade class="pointer-events-auto mt-8 desktop:mt-[4svh]">
             <BaseHeroCtas
+              v-bind="mark('hero.primaryCtaLabel', 'Teks & link tombol')"
               surface="dark"
               :primary="hero.primaryCta"
               :secondary="{ label: hero.secondaryCtaLabel, down: true }"

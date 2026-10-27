@@ -19,6 +19,7 @@ const { index: { sectionLabel, projects, groups } } = useWorkPage()
 const filter = ref('All')
 // Group names are filter keys (English); shown through t().
 const t = useT()
+const mark = useCmsMark()
 const view = ref<'grid' | 'list'>('grid')
 const listRef = ref<HTMLElement | null>(null)
 const { setState } = useCustomCursor()
@@ -95,7 +96,7 @@ useGsapContext(() => {
 <template>
   <section id="work-index" class="relative bg-pureWhite py-24 tablet:py-32">
     <BaseContainer>
-      <BaseSectionMark surface="light" :label="sectionLabel" :meta="t('Filter · Grid / List')" />
+      <BaseSectionMark v-bind="mark('projectIndex.sectionLabel', 'Label kecil di atas daftar proyek')" surface="light" :label="sectionLabel" :meta="t('Filter · Grid / List')" />
 
       <!-- Controls -->
       <div class="mt-12 flex flex-col gap-6 desktop:flex-row desktop:items-center desktop:justify-between">
@@ -151,7 +152,7 @@ useGsapContext(() => {
             class="relative overflow-hidden bg-surfaceNeutral"
             :class="view === 'grid' ? 'aspect-[4/5] rounded-[22px] shadow-[0_40px_70px_-45px_rgba(3,60,89,0.6)]' : 'aspect-[4/5] rounded-[12px] tablet:aspect-[16/10]'"
           >
-            <img :src="p.image" :srcset="imgSet(p.image)" sizes="(max-width: 1023px) 92vw, 34vw" :alt="p.alt" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover/wi:scale-[1.04]">
+            <img v-bind="mark('poster', 'Poster proyek', `project:${p.anchor}`)" :src="p.image" :srcset="imgSet(p.image)" sizes="(max-width: 1023px) 92vw, 34vw" :alt="p.alt" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover/wi:scale-[1.04]">
             <span v-if="view === 'grid'" class="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-[color:rgba(3,60,89,0.9)] px-3 py-1.5">
               <LayoutBrandMark :height="9" />
               <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.25)]" />
@@ -163,12 +164,12 @@ useGsapContext(() => {
           </div>
           <div :class="view === 'grid' ? 'mt-5 px-1' : 'min-w-0'">
             <p class="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(3,60,89,0.55)]">
-              <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ p.category }}
+              <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" /><span v-bind="mark('category', 'Kategori proyek', `project:${p.anchor}`)">{{ p.category }}</span>
             </p>
-            <h3 class="mt-2 font-display font-extrabold leading-[1.08] tracking-[-0.03em] text-slateNavy" :class="view === 'grid' ? 'text-[26px]' : 'text-[clamp(22px,3vw,44px)]'">
+            <h3 v-bind="mark('name', 'Nama proyek', `project:${p.anchor}`)" class="mt-2 font-display font-extrabold leading-[1.08] tracking-[-0.03em] text-slateNavy" :class="view === 'grid' ? 'text-[26px]' : 'text-[clamp(22px,3vw,44px)]'">
               {{ p.title }}
             </h3>
-            <p class="mt-2 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.7)]" :class="view === 'grid' ? 'line-clamp-2' : 'line-clamp-2 max-w-[60ch] tablet:line-clamp-none'">{{ p.description }}</p>
+            <p v-bind="mark('shortDescription', 'Deskripsi singkat proyek', `project:${p.anchor}`)" class="mt-2 text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.7)]" :class="view === 'grid' ? 'line-clamp-2' : 'line-clamp-2 max-w-[60ch] tablet:line-clamp-none'">{{ p.description }}</p>
           </div>
           <span v-if="view === 'list' && p.caseId" aria-hidden="true" class="hidden h-12 w-12 place-items-center rounded-full border border-[color:rgba(3,60,89,0.2)] text-slateNavy transition-[transform,background-color,border-color] duration-500 ease-editorial group-hover/wi:-rotate-45 group-hover/wi:border-pastiYellow-500 group-hover/wi:bg-pastiYellow-500 tablet:grid">
             <svg viewBox="0 0 16 16" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>

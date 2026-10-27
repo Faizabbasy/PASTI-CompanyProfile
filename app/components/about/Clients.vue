@@ -13,6 +13,7 @@ if (import.meta.client) {
 const clients = useClients().clients.filter((c) => c.trusted && c.logo)
 const { company } = useAbout()
 const t = useT()
+const mark = useCmsMark()
 const sectionRef = ref<HTMLElement | null>(null)
 
 const size = (r: number) => {
@@ -56,7 +57,7 @@ useGsapContext(() => {
           data-cl-tile
           class="group grid h-28 place-items-center border-b border-r border-[color:rgba(3,60,89,0.1)] px-4 transition-colors duration-300 hover:bg-surfaceNeutral tablet:h-32"
         >
-          <img :src="c.logo!" :alt="c.name" :style="size(c.ratio)" loading="lazy" decoding="async" draggable="false" class="max-w-full object-contain transition-transform duration-500 ease-editorial group-hover:scale-110">
+          <img v-bind="mark('logo', `Logo klien: ${c.name}`, `clients@${c.name}`)" :src="c.logo!" :alt="c.name" :style="size(c.ratio)" loading="lazy" decoding="async" draggable="false" class="max-w-full object-contain transition-transform duration-500 ease-editorial group-hover:scale-110">
         </li>
       </ul>
     </BaseContainer>

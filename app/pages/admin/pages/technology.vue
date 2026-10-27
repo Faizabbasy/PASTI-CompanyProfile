@@ -135,7 +135,7 @@ const hasErr = (prefix: string) => (i: number) => Object.keys(errors.value).some
         <p class="rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">
           Maksimal <strong>{{ LIM.capabilitiesActive }}</strong> kemampuan yang tampil. Judulnya juga dipakai di konsol hero dan pita teks berjalan; nomor (01, 02 …) mengikuti urutan.
         </p>
-        <AdminFormRepeater legend="Kemampuan" :items="form.capabilities.items" :max="12" :published-ids="publishedIds" :item-title="(c) => c.title" add-label="Tambah kemampuan" :error="err('capabilities.items')" collapsible :has-error="hasErr('capabilities.items')" @add="addCapability">
+        <AdminFormRepeater legend="Kemampuan" path="capabilities.items" :items="form.capabilities.items" :max="12" :published-ids="publishedIds" :item-title="(c) => c.title" add-label="Tambah kemampuan" :error="err('capabilities.items')" collapsible :has-error="hasErr('capabilities.items')" @add="addCapability">
           <template #default="{ item, index }">
             <AdminFormField :id="fieldId(`capabilities.items.${index}.title`)" v-model="item.title" label="Judul" :maxlength="LIM.capabilityTitle" required :error="err(`capabilities.items.${index}.title`)" />
             <AdminFormField :id="fieldId(`capabilities.items.${index}.body`)" v-model="item.body" label="Deskripsi" multiline :maxlength="LIM.capabilityBody" required :error="err(`capabilities.items.${index}.body`)" />
@@ -191,7 +191,7 @@ const hasErr = (prefix: string) => (i: number) => Object.keys(errors.value).some
         <p class="rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">
           Pilih proyek yang sudah ada. Judul, gambar dan metriknya diambil dari data proyek di menu <strong>Work</strong> — tidak diubah di sini.
         </p>
-        <AdminFormRepeater legend="Studi kasus" :items="form.work.items" :max="TECHNOLOGY_WORK_REFS.length" :published-ids="publishedIds" :item-title="(w) => refLabel(w.ref)" add-label="Tambah proyek" :error="err('work.items')" @add="addWorkItem">
+        <AdminFormRepeater legend="Studi kasus" path="work.items" :items="form.work.items" :max="TECHNOLOGY_WORK_REFS.length" :published-ids="publishedIds" :item-title="(w) => refLabel(w.ref)" add-label="Tambah proyek" :error="err('work.items')" @add="addWorkItem">
           <template #default="{ item, index }">
             <div>
               <label :for="fieldId(`work.items.${index}.ref`)" class="text-sm font-medium">Proyek<span class="text-red-700" aria-hidden="true"> *</span></label>

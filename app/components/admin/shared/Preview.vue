@@ -31,6 +31,29 @@ const publicContent = computed(() => {
   return { items }
 })
 const provider = (content: never) => sources[props.id].providePreview(content)
+
+// Klik teks untuk edit. Records: `ctas`, `faqs#<n>` (n-th question shown),
+// `clients@<name>`, `page:contact` (the Contact page's own wording). The
+// site skips hidden items, so a shown position is mapped back to the item's
+// place in the full draft list.
+const lang = useEditorLang()
+provideCmsMarks({
+  href: (record, path) => {
+    if (record === 'page:contact') return cmsFieldHref('/admin/pages/contact', lang, path)
+    const items = (data.value?.content.items ?? []) as { active: boolean; name?: string }[]
+    const at = (k: number) => (k >= 0 ? cmsFieldHref(`/admin/shared/${props.id}`, lang, `items.${k}.${path}`) : null)
+    // Contact facts (email, address, maps, socials) are entered once, on the
+    // Indonesian record — the English editor has no such fields.
+    const fact = ['email', 'address', 'mapsUrl'].includes(path) || path.startsWith('socials.')
+    if (record === 'ctas' && props.id === 'ctas') return cmsFieldHref('/admin/shared/ctas', fact ? 'id' : lang, path)
+    if (record?.startsWith('faqs#') && props.id === 'faqs') {
+      const shown = items.map((it, k) => (it.active ? k : -1)).filter((k) => k >= 0)
+      return at(shown[Number(record.slice(5))] ?? -1)
+    }
+    if (record?.startsWith('clients@') && props.id === 'clients') return at(items.findIndex((it) => it.name === record.slice(8)))
+    return null
+  }
+})
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }) + ' WIB'
 </script>
 
@@ -40,7 +63,8 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
       <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-1">
         <strong>Preview draft — belum tampil di website</strong>
         <span v-if="data">{{ name }} · draft v{{ data.version }} · disimpan {{ fmt(data.updatedAt) }} · status: {{ data.status }}</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Matikan tombol ✎ untuk mencoba halaman seperti biasa.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="publicContent" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
 

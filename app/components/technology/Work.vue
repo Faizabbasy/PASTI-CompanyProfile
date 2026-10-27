@@ -19,6 +19,7 @@ if (import.meta.client) {
 const { sectionLabel, eyebrow, title, cards: projects } = useTechnologyPage().work
 const { setState } = useCustomCursor()
 const t = useT()
+const mark = useCmsMark()
 const lp = useLocalePath()
 
 const stageRef = ref<HTMLElement | null>(null)
@@ -89,16 +90,16 @@ const pad = (n: number) => String(n).padStart(2, '0')
       <BaseGridLines tone="light" />
 
       <BaseContainer class="relative z-10">
-        <BaseSectionMark surface="light" :label="sectionLabel" :meta="t('{n} projects', { n: pad(projects.length) })" />
+        <BaseSectionMark v-bind="mark('work.sectionLabel', 'Label kecil bagian')" surface="light" :label="sectionLabel" :meta="t('{n} projects', { n: pad(projects.length) })" />
         <div class="m-center-row mt-10 flex items-end justify-between gap-8 desktop:mt-8">
           <div class="m-center">
             <div class="overflow-hidden">
               <p data-tw-head class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(3,60,89,0.6)]">
-                <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ `${eyebrow} ` }}
+                <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" /><span v-bind="mark('work.eyebrow', 'Label kecil di atas judul bagian')">{{ `${eyebrow} ` }}</span>
               </p>
             </div>
             <div class="mt-3 overflow-hidden pb-1">
-              <h2 data-tw-head class="hero-title">
+              <h2 v-bind="mark('work.title', 'Judul bagian Studi kasus')" data-tw-head class="hero-title">
                 {{ ` ${title}` }}<span class="text-pastiYellow-500">.</span>
               </h2>
             </div>
@@ -135,6 +136,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
               :class="p.imageKind === 'screen' ? 'bg-pureWhite' : 'bg-slateNavy'"
             >
               <img
+                v-bind="mark('ref', 'Kartu proyek (pilih & urutkan di sini; isi kartu dari data Work)', `work.items#${i}`)"
                 data-tw-img
                 :src="p.image" :srcset="imgSet(p.image)" sizes="(max-width: 1023px) 80vw, 32vw"
                 :alt="p.title"
@@ -156,7 +158,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
             </div>
             <div class="mt-4 max-w-[340px] px-1">
               <span class="font-mono text-[11px] uppercase tracking-[0.16em] text-cobalt">{{ p.category }}</span>
-              <h3 class="mt-1.5 font-display text-[22px] font-bold leading-[1.15] tracking-[-0.02em] text-slateNavy">{{ p.title }}</h3>
+              <h3 v-bind="mark('ref', 'Kartu proyek (pilih & urutkan di sini; isi kartu dari data Work)', `work.items#${i}`)" class="mt-1.5 font-display text-[22px] font-bold leading-[1.15] tracking-[-0.02em] text-slateNavy">{{ p.title }}</h3>
               <p class="mt-2 inline-flex items-center gap-2 text-[14px] font-semibold text-[color:rgba(3,60,89,0.7)] transition-colors duration-300 group-hover/tw:text-slateNavy">
                 {{ p.client ?? (p.kind === 'case' ? t('Read the case study') : t('View in Work')) }}
                 <svg viewBox="0 0 16 16" class="h-3.5 w-3.5 transition-transform duration-300 group-hover/tw:translate-x-1" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" /></svg>

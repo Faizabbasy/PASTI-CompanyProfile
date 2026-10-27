@@ -45,10 +45,12 @@ export type ArticleForm = ArticleContent
 // Article editor groups (AdminEditorFrame). `previewIndex` 0 = the article's
 // row in the preview (the only section the article preview renders).
 export const ARTICLE_TABS = [
-  { key: 'basics', no: '01', label: 'Info dasar', where: 'Judul & topik artikel: tampil sebagai baris besar di daftar artikel /insights, di label pembaca layar penuh (“Now showing”, “Next”), dan dipakai filter topik.', sections: ['title', 'slug', 'kicker', 'categoryIds', 'headline', 'tagline'], previewIndex: 0 },
-  { key: 'content', no: '02', label: 'Ringkasan & poin', where: 'Ringkasan tampil saat baris artikel dibuka dan sebagai paragraf pembuka di pembaca layar penuh; poin-poin tampil di kotak “In this insight”.', sections: ['excerpt', 'points', 'perspective'], previewIndex: 0 },
-  { key: 'media', no: '03', label: 'Gambar sampul', where: 'Poster artikel: muncul di pratinjau baris, di sampul pembaca layar penuh, dan mengisi huruf “Insights.” di hero.', sections: ['coverImage', 'coverImageAlt', 'coverFocus'], previewIndex: 0 },
-  { key: 'body', no: '04', label: 'Isi lengkap (belum tampil)', where: 'Disiapkan untuk halaman artikel di masa depan (/insights/<slug>). Belum tampil di website.', sections: ['body', 'authorName', 'publishDate'] },
+  { key: 'header', no: '01', label: 'Judul & label', where: 'Bagian atas artikel, urut dari atas: topik (label kecil bertitik kuning), judul besar dengan bagian kuning, tagline, dan label kecil di pojok sampul. Judul besar juga jadi baris besar di daftar artikel /insights.', sections: ['categoryIds', 'headline', 'tagline', 'kicker'], previewIndex: 0 },
+  { key: 'content', no: '02', label: 'Paragraf pembuka & poin', where: 'Paragraf bergaris kuning di bawah judul (juga teks pratinjau saat baris artikel disorot di daftar), lalu kotak bernomor “Dalam insight ini”.', sections: ['excerpt', 'points'], previewIndex: 0 },
+  { key: 'media', no: '03', label: 'Gambar sampul', where: 'Poster di kiri pembaca artikel, di daftar artikel, dan di hero /insights (mengisi huruf “Insights.” dan tumpukan poster).', sections: ['coverImage', 'coverImageAlt', 'coverFocus'], previewIndex: 0 },
+  { key: 'perspective', no: '04', label: 'Kutipan PASTI & link', where: 'Kutipan dengan tanda kutip kuning besar di bawah poin, lalu baris-baris link berpanah. Opsional.', sections: ['perspective'], previewIndex: 0 },
+  { key: 'body', no: '05', label: 'Isi lengkap (belum tampil)', where: 'Isi artikel yang panjang, penulis dan tanggal. Disiapkan untuk halaman artikel /insights/<slug> — belum tampil di website.', sections: ['body', 'authorName', 'publishDate'] },
+  { key: 'settings', no: '06', label: 'Judul pendek & alamat', where: 'Tidak tampil sebagai teks besar: judul pendek dipakai di “Berikutnya”, “Sedang tampil” di hero /insights dan judul tab browser; slug = alamat artikel.', sections: ['title', 'slug'], previewIndex: 0 },
   { key: 'relations', no: '', label: 'Pemakaian & hapus', where: 'Apakah artikel ini dipilih di halaman Insights, dan tombol hapus untuk draft yang belum pernah tayang.', sections: [] }
 ] as const
 

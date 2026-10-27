@@ -10,6 +10,7 @@ import gsap from 'gsap'
 const { hero, index: { projects }, cases: { items: publicCases } } = useWorkPage()
 const pad = (n: number) => String(n).padStart(2, '0')
 const t = useT()
+const mark = useCmsMark()
 
 const stageRef = ref<HTMLElement | null>(null)
 const cardRefs = ref<HTMLElement[]>([])
@@ -110,16 +111,17 @@ useGsapContext(() => {
     <BaseContainer class="relative z-10 flex flex-1 flex-col desktop:justify-center">
       <div class="grid items-center gap-6 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-6">
-          <div data-wh-fade><BaseHeroMarker :label="hero.eyebrow" :meta="t('{p} projects · {c} case studies', { p: pad(projects.length), c: pad(publicCases.length) })" /></div>
+          <div data-wh-fade><BaseHeroMarker v-bind="mark('hero.eyebrow', 'Label kecil di atas judul')" :label="hero.eyebrow" :meta="t('{p} projects · {c} case studies', { p: pad(projects.length), c: pad(publicCases.length) })" /></div>
           <h1 class="hero-title mt-6 desktop:mt-[3svh]">
-            <span class="wh-mask block"><span data-wh-word class="inline-block">{{ hero.headlineLines[0] }}</span></span>
-            <span class="wh-mask block"><span data-wh-word class="inline-block">{{ hero.headlineLines[1] }}<span class="text-pastiYellow-500">.</span></span></span>
+            <span class="wh-mask block"><span v-bind="mark('hero.headlineLine1', 'Judul baris 1')" data-wh-word class="inline-block">{{ hero.headlineLines[0] }}</span></span>
+            <span class="wh-mask block"><span v-bind="mark('hero.headlineLine2', 'Judul baris 2')" data-wh-word class="inline-block">{{ hero.headlineLines[1] }}<span class="text-pastiYellow-500">.</span></span></span>
           </h1>
-          <p data-wh-fade class="hero-lede m-center mt-6 desktop:mt-[3svh]">
+          <p v-bind="mark('hero.lede', 'Paragraf di bawah judul')" data-wh-fade class="hero-lede m-center mt-6 desktop:mt-[3svh]">
             {{ hero.lede }}
           </p>
           <div data-wh-fade class="mt-8 desktop:mt-[4svh]">
             <BaseHeroCtas
+              v-bind="mark('hero.primaryCtaLabel', 'Teks kedua tombol (dan link tombol kedua)')"
               :primary="{ label: hero.primaryCtaLabel }"
               :secondary="{ label: hero.secondaryCta.label, href: hero.secondaryCta.href }"
               @primary="toIndex"
@@ -141,7 +143,7 @@ useGsapContext(() => {
               @mouseleave="setState('default')"
               @click="jump(i)"
             >
-              <img :src="p.image" :srcset="imgSet(p.image)" sizes="(max-width: 1023px) 50vw, 24vw" :alt="p.alt" draggable="false" class="aspect-[4/5] w-full object-cover object-top">
+              <img v-bind="mark('poster', 'Poster proyek', `project:${p.anchor}`)" :src="p.image" :srcset="imgSet(p.image)" sizes="(max-width: 1023px) 50vw, 24vw" :alt="p.alt" draggable="false" class="aspect-[4/5] w-full object-cover object-top">
               <span class="absolute right-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-full bg-[color:rgba(3,60,89,0.88)] px-2 py-1">
                 <LayoutBrandMark :height="8" />
                 <span class="font-mono text-[9px] text-pureWhite">{{ p.index }}</span>

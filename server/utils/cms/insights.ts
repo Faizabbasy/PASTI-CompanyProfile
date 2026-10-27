@@ -83,7 +83,7 @@ export const articlesCollection = defineCollection<ArticleContent>({
   lists: [],
   actions: { create: 'article.create', update: 'article.update', publish: 'article.publish', unpublish: 'article.unpublish', archive: 'article.archive', delete: 'article.delete' },
   dummyRecords: INSIGHTS_DUMMY_ARTICLES,
-  sharedPaths: ['slug', 'categoryIds', 'coverFocus', 'perspective.sourceRef'],
+  sharedPaths: ['slug', 'categoryIds', 'coverFocus', 'perspective.sourceRef', 'publishDate', 'authorName'],
   async validate(content, { id, lang }) {
     const all = await articlesCollection.forLocale(lang).readAll()
     if (all.some((r) => r.id !== id && r.draft.content.slug === content.slug)) fieldError(400, 'slug', 'Another article already uses this slug.')

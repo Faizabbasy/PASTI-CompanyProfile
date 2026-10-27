@@ -29,6 +29,8 @@ const { data, error, refresh, status } = await useAsyncData(`admin-technology-pr
 const { why } = useTechnology()
 const legacy = buildLegacyTechnologyContent()
 
+// Klik teks untuk edit: every text opens its field in the Technology editor.
+provideSingletonCmsMarks('/admin/pages/technology', useEditorLang(), () => data.value?.content)
 const preview = computed(() => {
   const d = data.value
   if (!d) return null
@@ -57,7 +59,8 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
         <span v-if="data">Technology · draft v{{ data.version }} · disimpan {{ fmt(data.updatedAt) }} · status: {{ data.status }}</span>
         <span v-if="hidden" class="text-xs">{{ hidden }} item disembunyikan</span>
         <span class="text-xs">SEO: {{ preview?.seo.title }}{{ preview?.seo.noIndex ? ' · noindex' : '' }}</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Matikan tombol ✎ untuk mencoba halaman seperti biasa.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
 

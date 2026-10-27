@@ -23,6 +23,7 @@ const { eyebrowLine, headingLine } = useFinalCta()
 const { link: whatsappLink } = useWhatsapp()
 const { playTo } = useSectionCurtain()
 const t = useT()
+const mark = useCmsMark()
 const lp = useLocalePath()
 
 const year = new Date().getFullYear()
@@ -130,11 +131,11 @@ useGsapContext(() => {
       <div class="grid grid-cols-1 items-end gap-12 desktop:grid-cols-12 desktop:gap-8">
         <div class="m-center desktop:col-span-7">
           <p class="footer-reveal inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">
-            <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ eyebrowLine }}
+            <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" /><span v-bind="mark('eyebrow', 'Label kecil di atas ajakan', 'ctas')">{{ eyebrowLine }}</span>
           </p>
           <h2 class="mt-5 font-display text-[length:clamp(44px,6.4vw,104px)] font-extrabold leading-[0.95] tracking-[-0.04em] text-pureWhite">
-            <template v-for="(w, i) in headingLead.split(' ')" :key="`w-${i}`"><span class="foot-mask"><span data-foot-word class="inline-block">{{ w }}</span></span>{{ ' ' }}</template>
-            <span class="foot-mask"><span data-foot-word class="inline-block text-pastiYellow-500">{{ headingAccent }}.</span></span>
+            <template v-for="(w, i) in headingLead.split(' ')" :key="`w-${i}`"><span v-bind="mark('headline', 'Kalimat ajakan besar (kata terakhir kuning)', 'ctas')" class="foot-mask"><span data-foot-word class="inline-block">{{ w }}</span></span>{{ ' ' }}</template>
+            <span v-bind="mark('headline', 'Kalimat ajakan besar (kata terakhir kuning)', 'ctas')" class="foot-mask"><span data-foot-word class="inline-block text-pastiYellow-500">{{ headingAccent }}.</span></span>
           </h2>
         </div>
 
@@ -157,6 +158,7 @@ useGsapContext(() => {
             <a
               v-if="contact.email"
               :href="`mailto:${contact.email}`"
+              v-bind="mark('email', 'Email', 'ctas')"
               class="max-w-full break-all rounded-[14px] border border-[color:rgba(255,255,255,0.2)] px-6 py-[18px] font-display text-[15px] font-bold text-pureWhite transition-colors duration-300 ease-editorial hover:border-pureWhite"
               @mouseenter="setState('contact')"
               @mouseleave="setState('default')"
@@ -168,7 +170,7 @@ useGsapContext(() => {
           <div class="m-center-col flex flex-col gap-3 desktop:items-end">
             <p class="font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.5)]">{{ t('Follow PASTI') }}</p>
             <ul class="m-center-row flex flex-wrap items-center gap-2.5">
-              <li v-for="(s, i) in socials" :key="s.key">
+              <li v-for="(s, i) in socials" v-bind="s.key === 'whatsapp' ? {} : mark(`socials.${s.key}`, `Link ${s.label}`, 'ctas')" :key="s.key">
                 <div :ref="(el) => { socialRefs[i]!.value = s.url ? (el as HTMLElement | null) : null }" data-foot-social class="inline-block">
                   <a
                     v-if="s.url"
@@ -207,7 +209,7 @@ useGsapContext(() => {
           <div class="w-fit origin-left scale-[1.5]">
             <LayoutLogo inverted />
           </div>
-          <p class="mt-3 max-w-[16rem] font-display text-body-lg font-medium leading-snug text-navy-200">{{ contact.positioning }}</p>
+          <p v-bind="mark('positioning', 'Kalimat posisi perusahaan', 'ctas')" class="mt-3 max-w-[16rem] font-display text-body-lg font-medium leading-snug text-navy-200">{{ contact.positioning }}</p>
           <p class="flex items-center gap-3 text-body-sm text-navy-400">
             <LayoutBrandMark :height="11" />
             <span aria-hidden="true" class="h-3.5 w-px bg-navy-700" />
@@ -280,13 +282,14 @@ useGsapContext(() => {
           </div>
           <div v-if="contact.email">
             <p class="foot-meta">Email</p>
-            <a :href="`mailto:${contact.email}`" class="mt-1 inline-block break-all font-display text-body-md font-semibold text-paper hover:text-pastiYellow-500">{{ contact.email }}</a>
+            <a v-bind="mark('email', 'Email', 'ctas')" :href="`mailto:${contact.email}`" class="mt-1 inline-block break-all font-display text-body-md font-semibold text-paper hover:text-pastiYellow-500">{{ contact.email }}</a>
           </div>
           <div v-if="contact.address">
             <p class="foot-meta">{{ t('Office') }}</p>
             <component
               :is="contact.mapsUrl ? 'a' : 'p'"
               :href="contact.mapsUrl ?? undefined"
+              v-bind="mark('address', 'Alamat kantor (dan link Google Maps)', 'ctas')"
               :target="contact.mapsUrl ? '_blank' : undefined"
               :rel="contact.mapsUrl ? 'noopener noreferrer' : undefined"
               class="mt-1 block text-body-sm leading-relaxed text-navy-200"
@@ -295,7 +298,7 @@ useGsapContext(() => {
           </div>
           <div v-if="contact.hours">
             <p class="foot-meta">{{ t('Hours') }}</p>
-            <p class="mt-1 text-body-sm text-navy-200">{{ contact.hours }}</p>
+            <p v-bind="mark('hours', 'Jam kerja', 'ctas')" class="mt-1 text-body-sm text-navy-200">{{ contact.hours }}</p>
           </div>
         </div>
       </div>

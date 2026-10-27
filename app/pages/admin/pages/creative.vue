@@ -159,7 +159,7 @@ const hasErr = (prefix: string) => (i: number) => Object.keys(errors.value).some
         <p class="rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">
           Maksimal <strong>{{ LIM.servicesActive }}</strong> layanan yang tampil. Judulnya juga berjalan di pita (bagian 02); nomor (01, 02 …) mengikuti urutan.
         </p>
-        <AdminFormRepeater legend="Layanan" :items="form.services.items" :max="12" :published-ids="publishedIds" :item-title="(s) => s.title" add-label="Tambah layanan" :error="err('services.items')" collapsible :has-error="hasErr('services.items')" @add="addService">
+        <AdminFormRepeater legend="Layanan" path="services.items" :items="form.services.items" :max="12" :published-ids="publishedIds" :item-title="(s) => s.title" add-label="Tambah layanan" :error="err('services.items')" collapsible :has-error="hasErr('services.items')" @add="addService">
           <template #default="{ item, index }">
             <AdminFormField :id="fieldId(`services.items.${index}.title`)" v-model="item.title" label="Judul" :maxlength="LIM.serviceTitle" required :error="err(`services.items.${index}.title`)" />
             <AdminFormField :id="fieldId(`services.items.${index}.body`)" v-model="item.body" label="Deskripsi" multiline :maxlength="LIM.serviceBody" required :error="err(`services.items.${index}.body`)" />
@@ -211,7 +211,7 @@ const hasErr = (prefix: string) => (i: number) => Object.keys(errors.value).some
         <p class="rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">
           Perlu <strong>{{ LIM.visualsMin }}–{{ LIM.visualsActive }}</strong> gambar yang tampil. Gambar-gambar ini mengisi papan yang bisa digeser dan jejak gambar di hero; tiga yang pertama jadi kipas di hero. Gambar dipotong ke rasio 4:5.
         </p>
-        <AdminFormRepeater legend="Gambar Studio Wall" :items="form.wall.visuals" :max="24" :published-ids="publishedIds" :item-title="(v) => v.label" add-label="Tambah gambar" :error="err('wall.visuals')" collapsible :has-error="hasErr('wall.visuals')" @add="addVisual">
+        <AdminFormRepeater legend="Gambar Studio Wall" path="wall.visuals" :items="form.wall.visuals" :max="24" :published-ids="publishedIds" :item-title="(v) => v.label" add-label="Tambah gambar" :error="err('wall.visuals')" collapsible :has-error="hasErr('wall.visuals')" @add="addVisual">
           <template #summary="{ item }">
             <span class="flex h-10 w-8 shrink-0 items-center justify-center overflow-hidden rounded border border-navy-100 bg-white">
               <img v-if="item.image" :src="item.image" alt="" class="h-full w-full object-cover">
@@ -282,7 +282,7 @@ const hasErr = (prefix: string) => (i: number) => Object.keys(errors.value).some
             <AdminFormField :id="fieldId('work.uiux.label')" v-model="form.work.uiux.label" label="Label samping (opsional)" :maxlength="LIM.uiuxTitle" :error="err('work.uiux.label')" />
           </div>
           <p class="text-xs text-navy-500">Maksimal {{ LIM.uiux }} proyek yang tampil (satu baris di desktop).</p>
-          <AdminFormRepeater legend="Proyek UI/UX" :items="form.work.uiux.items" :max="CREATIVE_WORK_REFS.length" :published-ids="publishedIds" :item-title="(u) => workLabel(u.ref)" add-label="Tambah proyek" :error="err('work.uiux.items')" @add="addUiux">
+          <AdminFormRepeater legend="Proyek UI/UX" path="work.uiux.items" :items="form.work.uiux.items" :max="CREATIVE_WORK_REFS.length" :published-ids="publishedIds" :item-title="(u) => workLabel(u.ref)" add-label="Tambah proyek" :error="err('work.uiux.items')" @add="addUiux">
             <template #default="{ item, index }">
               <div>
                 <label :for="fieldId(`work.uiux.items.${index}.ref`)" class="text-sm font-medium">Proyek</label>

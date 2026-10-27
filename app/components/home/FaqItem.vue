@@ -19,6 +19,7 @@ const emit = defineEmits<{ toggle: []; hover: [] }>()
 const bodyRef = ref<HTMLElement | null>(null)
 const words = computed(() => props.item.answer.split(/\s+/))
 const { setState } = useCustomCursor()
+const mark = useCmsMark()
 
 // Keep <details> open until the collapse has finished, otherwise the
 // browser hides the content instantly and the height transition snaps.
@@ -66,7 +67,7 @@ function onSummary(event: MouseEvent) {
         @click="onSummary"
       >
         <span class="faq-row__index w-8 shrink-0 pl-4 font-display text-token-metadata font-semibold tabular-nums tracking-[0.08em] md:w-14 md:pl-6">{{ item.index }}</span>
-        <span class="faq-row__q flex-1 font-display text-[length:clamp(19px,1.9vw,30px)] font-semibold leading-[1.2] tracking-[-0.015em] text-slateNavy">
+        <span v-bind="mark('question', 'Pertanyaan', `faqs#${Number(item.index) - 1}`)" class="faq-row__q flex-1 font-display text-[length:clamp(19px,1.9vw,30px)] font-semibold leading-[1.2] tracking-[-0.015em] text-slateNavy">
           {{ item.question }}
         </span>
         <span aria-hidden="true" class="faq-row__icon relative mr-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] border md:mr-4">
@@ -79,7 +80,7 @@ function onSummary(event: MouseEvent) {
         <div class="overflow-hidden">
           <div ref="bodyRef" class="flex items-start gap-5 pb-9 md:gap-8">
             <span aria-hidden="true" class="w-8 shrink-0 md:w-14" />
-            <p class="max-w-2xl text-[length:clamp(16px,1.25vw,19px)] leading-[1.65] text-[color:rgba(3,60,89,0.78)]">
+            <p v-bind="mark('answer', 'Jawaban', `faqs#${Number(item.index) - 1}`)" class="max-w-2xl text-[length:clamp(16px,1.25vw,19px)] leading-[1.65] text-[color:rgba(3,60,89,0.78)]">
               <template v-for="(w, i) in words" :key="i"
                 ><span class="inline-block overflow-hidden align-top"><span data-w class="inline-block">{{ w }}</span></span
                 >{{ ' ' }}</template
