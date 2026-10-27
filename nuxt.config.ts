@@ -130,26 +130,19 @@ export default defineNuxtConfig({
     // Launch over the old WordPress site (SEO pass 2026-10-27): its indexed
     // URLs move permanently to their new pages, so links and rankings carry
     // over. About Us was /elementor-279; the two forms were client intake.
+    // One rule per URL: the trailing-slash form (/service/) is first 301'd to
+    // /service by server/middleware/trailing-slash.ts. Listing both breaks
+    // the Vercel build (both map to the same function name).
     '/service': { redirect: { to: '/', statusCode: 301 } },
-    '/service/': { redirect: { to: '/', statusCode: 301 } },
     '/portfolio': { redirect: { to: '/work', statusCode: 301 } },
-    '/portfolio/': { redirect: { to: '/work', statusCode: 301 } },
     '/contact-us': { redirect: { to: '/contact', statusCode: 301 } },
-    '/contact-us/': { redirect: { to: '/contact', statusCode: 301 } },
     '/elementor-279': { redirect: { to: '/about', statusCode: 301 } },
-    '/elementor-279/': { redirect: { to: '/about', statusCode: 301 } },
     '/home-sample': { redirect: { to: '/', statusCode: 301 } },
-    '/home-sample/': { redirect: { to: '/', statusCode: 301 } },
     '/sample-page': { redirect: { to: '/', statusCode: 301 } },
-    '/sample-page/': { redirect: { to: '/', statusCode: 301 } },
     '/form-app': { redirect: { to: '/contact', statusCode: 301 } },
-    '/form-app/': { redirect: { to: '/contact', statusCode: 301 } },
     '/form-credential-request': { redirect: { to: '/contact', statusCode: 301 } },
-    '/form-credential-request/': { redirect: { to: '/contact', statusCode: 301 } },
     '/2025/03/25/hello-world': { redirect: { to: '/insights', statusCode: 301 } },
-    '/2025/03/25/hello-world/': { redirect: { to: '/insights', statusCode: 301 } },
-    '/category/uncategorized': { redirect: { to: '/insights', statusCode: 301 } },
-    '/category/uncategorized/': { redirect: { to: '/insights', statusCode: 301 } }
+    '/category/uncategorized': { redirect: { to: '/insights', statusCode: 301 } }
   },
 
   // Bundle GSAP's ESM build into the server output instead of letting Node
