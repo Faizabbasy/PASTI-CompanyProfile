@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { OPEN_SECTIONS, OPEN_TABS } from '#shared/utils/openSchema'
+
 // Authenticated draft preview of OPEN (shared product preview frame).
 // Sections are listed in page order; the editor's "Lihat bagian ini" links
 // scroll to them by position (?s=<index>).
@@ -10,7 +12,7 @@ useHead({
 </script>
 
 <template>
-  <AdminProductPreview slug="open" name="OPEN" :build-legacy="buildLegacyOpenContent" :adapt="adaptOpenCms" :provider="provideOpenPreview">
+  <AdminProductPreview slug="open" :sections="OPEN_SECTIONS" :tabs="OPEN_TABS" name="OPEN" :build-legacy="buildLegacyOpenContent" :adapt="adaptOpenCms" :provider="provideOpenPreview">
     <OpenHero />
     <OpenProblem />
     <OpenNotSaas />

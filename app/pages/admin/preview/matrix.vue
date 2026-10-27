@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { MATRIX_SECTIONS, MATRIX_TABS } from '#shared/utils/matrixSchema'
+
 // Authenticated draft preview of MATRIX (shared product preview frame).
 // Sections are listed in page order; the editor's "Lihat bagian ini" links
 // scroll to them by position (?s=<index>). The rack locator is navigation,
@@ -11,7 +13,7 @@ useHead({
 </script>
 
 <template>
-  <AdminProductPreview slug="matrix" name="MATRIX" :build-legacy="buildLegacyMatrixContent" :adapt="adaptMatrixCms" :provider="provideMatrixPreview">
+  <AdminProductPreview slug="matrix" :sections="MATRIX_SECTIONS" :tabs="MATRIX_TABS" name="MATRIX" :build-legacy="buildLegacyMatrixContent" :adapt="adaptMatrixCms" :provider="provideMatrixPreview">
     <MatrixHero />
     <MatrixProblem />
     <MatrixLayers />

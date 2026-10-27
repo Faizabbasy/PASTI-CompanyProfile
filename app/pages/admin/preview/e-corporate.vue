@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ECORPORATE_SECTIONS, ECORPORATE_TABS } from '#shared/utils/ecorporateSchema'
+
 // Authenticated draft preview of e-CORPORATE (shared product preview frame).
 // Sections are listed in page order; the editor's "Lihat bagian ini" links
 // scroll to them by position (?s=<index>).
@@ -10,7 +12,7 @@ useHead({
 </script>
 
 <template>
-  <AdminProductPreview slug="e-corporate" name="e-CORPORATE" :build-legacy="buildLegacyEcorporateContent" :adapt="adaptEcorporateCms" :provider="provideEcorporatePreview">
+  <AdminProductPreview slug="e-corporate" :sections="ECORPORATE_SECTIONS" :tabs="ECORPORATE_TABS" name="e-CORPORATE" :build-legacy="buildLegacyEcorporateContent" :adapt="adaptEcorporateCms" :provider="provideEcorporatePreview">
     <EcorpHero />
     <EcorpTicker />
     <EcorpProblem />

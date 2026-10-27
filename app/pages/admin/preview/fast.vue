@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { FAST_SECTIONS, FAST_TABS } from '#shared/utils/fastSchema'
+
 // Authenticated draft preview of FAST (shared product preview frame).
 // Sections are listed in page order; the editor's "Lihat bagian ini" links
 // scroll to them by position (?s=<index>).
@@ -10,7 +12,7 @@ useHead({
 </script>
 
 <template>
-  <AdminProductPreview slug="fast" name="FAST" :build-legacy="buildLegacyFastContent" :adapt="adaptFastCms" :provider="provideFastPreview">
+  <AdminProductPreview slug="fast" :sections="FAST_SECTIONS" :tabs="FAST_TABS" name="FAST" :build-legacy="buildLegacyFastContent" :adapt="adaptFastCms" :provider="provideFastPreview">
     <FastHero />
     <FastComplexity />
     <FastTicker />

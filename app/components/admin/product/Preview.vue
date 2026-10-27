@@ -1,17 +1,21 @@
 <script setup lang="ts">
 import type { PageStatus } from '#shared/cms/fields'
-import type { AnyProductContent } from '#shared/cms/productFields'
+import type { AnyProductContent, ProductTab, SectionMap } from '#shared/cms/productFields'
 
 // Authenticated draft preview frame for a product page (ADMIN + EDITOR).
 // Loads /api/admin/pages/<slug>/preview, runs it through the same adapter
 // the public page uses, and renders the REAL section components (slot) with
 // it. `?s=<n>` scrolls to the n-th section — the editor's "Lihat bagian ini".
+// Klik teks untuk edit: the field map (`sections`) marks every text the CMS
+// supplies (useProductCmsMarks); the rest of the page is code copy.
 const props = defineProps<{
   slug: string
   name: string
   buildLegacy: () => unknown
   adapt: (legacy: never, cms: { version: number; content: AnyProductContent }) => unknown
   provider: (content: never) => void
+  sections: SectionMap
+  tabs: readonly ProductTab[]
 }>()
 
 interface PreviewResponse {
@@ -36,16 +40,25 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
 
 const mainRef = ref<HTMLElement | null>(null)
 usePreviewJump(mainRef)
+const lang = useEditorLang()
+const { refresh: remark } = useProductCmsMarks({
+  root: () => mainRef.value,
+  entries: () => (data.value ? productMarkEntries(props.sections, data.value.content, props.tabs) : []),
+  editor: `/admin/products/${props.slug}`,
+  lang
+})
+watch(data, remark)
 </script>
 
 <template>
   <div class="min-h-screen bg-paper">
-    <div class="sticky top-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 tablet:px-8" role="note">
+    <div data-no-cms-mark class="sticky top-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 tablet:px-8" role="note">
       <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-1">
         <strong>Preview draft — belum tampil di website</strong>
         <span v-if="data">{{ name }} · draft v{{ data.version }} · disimpan {{ fmt(data.updatedAt) }} · status: {{ data.status }}</span>
         <span class="text-xs">SEO: {{ preview?.seo.title }}{{ preview?.seo.noIndex ? ' · noindex' : '' }}</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Teks tanpa garis diatur di kode. Matikan tombol ✎ untuk mencoba halaman seperti biasa.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
 
@@ -55,7 +68,7 @@ usePreviewJump(mainRef)
       <p class="mt-1 text-sm text-navy-600">
         {{ error.statusCode === 403 ? 'Role kamu tidak bisa membuka preview ini.' : 'Draft gagal dimuat. Mungkin sesi login sudah habis.' }}
       </p>
-      <a :href="`/admin/products/${slug}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
+      <a :href="`/admin/products/${slug}?lang=${lang}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
     </div>
 
     <main v-else-if="preview" ref="mainRef">
