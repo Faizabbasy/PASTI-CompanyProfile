@@ -1,4 +1,5 @@
 import gsap from 'gsap'
+import { scheduleMotion } from './motionQueue'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Ref } from 'vue'
 
@@ -24,7 +25,16 @@ export function useScrollReveal(target: Ref<HTMLElement | null>, options: Scroll
 
   const { y = 32, scale, stagger = motionStagger.loose, children } = options
 
-  onMounted(() => {
+  // Queued (motionQueue.ts) with the rest of the page's motion setup;
+  // cleanup is registered here, in setup scope.
+  let mm: gsap.MatchMedia | undefined
+  let cancel: (() => void) | undefined
+  onBeforeUnmount(() => {
+    cancel?.()
+    mm?.revert()
+  })
+
+  onMounted(() => cancel = scheduleMotion(() => {
     const el = target.value
     if (!el) return
 
@@ -36,9 +46,9 @@ export function useScrollReveal(target: Ref<HTMLElement | null>, options: Scroll
       item.dataset.revealKind = 'scroll'
     }
 
-    const mm = gsap.matchMedia()
+    mm = gsap.matchMedia()
 
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
+    mm!.add('(prefers-reduced-motion: no-preference)', () => {
       const fromVars: gsap.TweenVars = { opacity: 0, y }
       const toVars: gsap.TweenVars = { opacity: 1, y: 0, duration: motionDuration.editorial, ease: motionEase.standard, stagger }
 
@@ -57,10 +67,9 @@ export function useScrollReveal(target: Ref<HTMLElement | null>, options: Scroll
       return () => anim.kill()
     })
 
-    mm.add('(prefers-reduced-motion: reduce)', () => {
+    mm!.add('(prefers-reduced-motion: reduce)', () => {
       gsap.set(items, { opacity: 1, y: 0, scale: 1 })
     })
 
-    onBeforeUnmount(() => mm.revert())
-  })
+  }))
 }

@@ -11,6 +11,7 @@
 // by the OPEN sections through useOpenPage().
 const content = await resolveOpenPageContent()
 usePageSeo(content.value.seo)
+useProductLd({ name: 'OPEN', description: content.value.seo.description, image: content.value.seo.image })
 </script>
 
 <template>

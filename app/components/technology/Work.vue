@@ -134,7 +134,7 @@ const pad = (n: number) => String(n).padStart(2, '0')
             >
               <img
                 data-tw-img
-                :src="p.image"
+                :src="p.image" :srcset="imgSet(p.image)" sizes="(max-width: 1023px) 80vw, 32vw"
                 :alt="p.title"
                 :loading="i < 2 ? 'eager' : 'lazy'"
                 class="h-full w-full origin-top transition-transform duration-700 ease-editorial"

@@ -101,7 +101,7 @@ useGsapContext(() => {
           <article v-for="(s, i) in services" :key="s.key" :ref="(el) => { if (el) cardRefs[i] = el as HTMLElement }" class="group/cs">
             <div data-cs-frame class="relative overflow-hidden rounded-[24px] bg-slateNavy desktop:rounded-[28px]" :class="s.image ? '' : 'aspect-[4/5] tablet:aspect-[4/3]'" :style="s.image ? { aspectRatio: `${s.image.w} / ${s.image.h}` } : undefined">
               <!-- Owner visual: shown whole (title + logo are baked in). -->
-              <img v-if="s.image" :src="s.image.src" :alt="s.imageAlt || `${s.title} — PASTI`" :width="s.image.w" :height="s.image.h" loading="lazy" decoding="async" draggable="false" class="absolute inset-0 h-full w-full object-cover">
+              <img v-if="s.image" :src="s.image.src" :srcset="imgSet(s.image.src)" sizes="(max-width: 1023px) 92vw, 45vw" :alt="s.imageAlt || `${s.title} — PASTI`" :width="s.image.w" :height="s.image.h" loading="lazy" decoding="async" draggable="false" class="absolute inset-0 h-full w-full object-cover">
               <div v-else data-cs-img class="absolute inset-0 desktop:-top-[8%] desktop:h-[116%]">
                 <CreativeCapArt :art="s.art" :label="s.title" />
               </div>

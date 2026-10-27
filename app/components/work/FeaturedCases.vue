@@ -157,7 +157,7 @@ useGsapContext(() => {
             <template v-if="lead(c)">
               <img
                 v-if="lead(c)!.kind === 'poster'"
-                :src="lead(c)!.src"
+                :src="lead(c)!.src" :srcset="imgSet(lead(c)!.src)" sizes="(max-width: 1023px) 92vw, 50vw"
                 alt=""
                 loading="lazy"
                 decoding="async"
@@ -168,7 +168,7 @@ useGsapContext(() => {
               <div v-else class="absolute inset-0 bg-[linear-gradient(160deg,#0a4b6c_0%,#022f47_70%)]">
                 <div aria-hidden="true" class="absolute -bottom-[30%] -right-[20%] h-[80%] w-[80%] rounded-full" style="background: radial-gradient(closest-side, rgba(251, 186, 0, 0.28), transparent)" />
                 <img
-                  :src="lead(c)!.src"
+                  :src="lead(c)!.src" :srcset="imgSet(lead(c)!.src)" sizes="(max-width: 1023px) 92vw, 50vw"
                   alt=""
                   loading="lazy"
                   decoding="async"

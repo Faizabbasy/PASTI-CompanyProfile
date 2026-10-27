@@ -475,7 +475,7 @@ useGsapContext(() => {
                 class="absolute left-[21%] right-[21%] top-1/2 aspect-[16/10] overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.14)] shadow-[0_60px_120px_-50px_rgba(0,0,0,0.9)]"
               >
                 <div data-pan class="h-full w-full">
-                  <img :src="open.image" :alt="open.name" loading="lazy" class="h-full w-full scale-[1.06] object-cover object-left-top">
+                  <img :src="open.image" :srcset="imgSet(open.image)" sizes="(max-width: 1023px) 92vw, 50vw" :alt="open.name" loading="lazy" class="h-full w-full scale-[1.06] object-cover object-left-top">
                 </div>
                 <HomePlatformChip :name="open.name" class="absolute bottom-3 right-3" />
               </div>
@@ -576,7 +576,7 @@ useGsapContext(() => {
                 <!-- The product, on top. -->
                 <div data-corp-plate data-pan-host class="corp-plate absolute inset-0 overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.22)] shadow-[0_40px_80px_-30px_rgba(0,0,0,0.8)]">
                   <div data-pan class="h-full w-full">
-                    <img :src="corporate.image" :alt="corporate.name" loading="lazy" class="h-full w-full scale-[1.06] object-cover object-left-top">
+                    <img :src="corporate.image" :srcset="imgSet(corporate.image)" sizes="(max-width: 1023px) 92vw, 50vw" :alt="corporate.name" loading="lazy" class="h-full w-full scale-[1.06] object-cover object-left-top">
                   </div>
                   <HomePlatformChip :name="corporate.name" class="absolute bottom-3 left-3" />
                 </div>
@@ -617,7 +617,7 @@ useGsapContext(() => {
             {{ platform.name }}
           </h3>
           <div class="relative mt-6 aspect-[4/3] w-full overflow-hidden rounded-card border border-[color:rgba(255,255,255,0.08)]">
-            <img :src="platform.image" :alt="platform.name" loading="lazy" class="h-full w-full object-cover">
+            <img :src="platform.image" :srcset="imgSet(platform.image)" sizes="(max-width: 1023px) 92vw, 50vw" :alt="platform.name" loading="lazy" class="h-full w-full object-cover">
             <HomePlatformChip :name="platform.name" class="absolute bottom-3 left-3" />
           </div>
           <p class="relative mt-4 max-w-md text-token-body text-[color:rgba(255,255,255,0.64)]">

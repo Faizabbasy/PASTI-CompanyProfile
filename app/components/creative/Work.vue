@@ -49,7 +49,7 @@ useGsapContext(() => {
       <article class="mt-14 grid gap-10 desktop:mt-20 desktop:grid-cols-12 desktop:gap-12">
         <div data-cwk-item class="desktop:col-span-5">
           <div class="relative mx-auto aspect-[4/5] max-w-[420px] overflow-hidden rounded-[24px] bg-slateNavy shadow-[0_40px_80px_-40px_rgba(3,60,89,0.6)] desktop:sticky desktop:top-28 desktop:max-w-none">
-            <img :src="f.image" :alt="f.title" loading="lazy" draggable="false" class="h-full w-full object-cover object-top">
+            <img :src="f.image" :srcset="imgSet(f.image)" sizes="(max-width: 1023px) 92vw, 40vw" :alt="f.title" loading="lazy" draggable="false" class="h-full w-full object-cover object-top">
             <span class="absolute left-3 top-3 rounded-full bg-pastiYellow-500 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-slateNavy">Case study</span>
           </div>
         </div>
@@ -105,7 +105,7 @@ useGsapContext(() => {
           @mouseleave="setState('default')"
         >
           <div class="aspect-[4/5] overflow-hidden bg-slateNavy tablet:aspect-auto">
-            <img :src="work.campaign.image" :alt="work.campaign.title" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover:scale-[1.04]">
+            <img :src="work.campaign.image" :srcset="imgSet(work.campaign.image)" sizes="(max-width: 1023px) 92vw, 40vw" :alt="work.campaign.title" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover:scale-[1.04]">
           </div>
           <div class="flex flex-col justify-between gap-6 p-6 tablet:p-8">
             <div class="m-center">
@@ -127,7 +127,7 @@ useGsapContext(() => {
           <figcaption class="mt-8 flex items-center gap-4 border-t border-[color:rgba(255,255,255,0.14)] pt-5">
             <img
               v-if="work.testimonial.photo"
-              :src="work.testimonial.photo"
+              :src="work.testimonial.photo" :srcset="imgSet(work.testimonial.photo)" sizes="(max-width: 1023px) 92vw, 40vw"
               alt=""
               width="160"
               height="160"
@@ -157,7 +157,7 @@ useGsapContext(() => {
               @mouseleave="setState('default')"
             >
               <div class="aspect-[4/5] overflow-hidden rounded-[18px] bg-slateNavy">
-                <img :src="u.image" :alt="u.title" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover:scale-[1.05]">
+                <img :src="u.image" :srcset="imgSet(u.image)" sizes="(max-width: 1023px) 92vw, 40vw" :alt="u.title" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover:scale-[1.05]">
               </div>
               <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-cobalt">{{ u.category }}</p>
               <p class="mt-1 font-display text-[17px] font-bold leading-snug text-slateNavy">{{ u.title }} <span aria-hidden="true">↗</span></p>

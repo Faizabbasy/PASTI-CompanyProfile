@@ -149,7 +149,7 @@ useGsapContext(() => {
             class="relative overflow-hidden bg-surfaceNeutral"
             :class="view === 'grid' ? 'aspect-[4/5] rounded-[22px] shadow-[0_40px_70px_-45px_rgba(3,60,89,0.6)]' : 'aspect-[4/5] rounded-[12px] tablet:aspect-[16/10]'"
           >
-            <img :src="p.image" :alt="p.alt" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover/wi:scale-[1.04]">
+            <img :src="p.image" :srcset="imgSet(p.image)" sizes="(max-width: 1023px) 92vw, 34vw" :alt="p.alt" loading="lazy" draggable="false" class="h-full w-full object-cover object-top transition-transform duration-700 ease-editorial group-hover/wi:scale-[1.04]">
             <span v-if="view === 'grid'" class="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-[color:rgba(3,60,89,0.9)] px-3 py-1.5">
               <LayoutBrandMark :height="9" />
               <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.25)]" />

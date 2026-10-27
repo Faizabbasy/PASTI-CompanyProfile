@@ -179,7 +179,7 @@ useGsapContext(() => {
         @mouseenter="hovered = i"
       >
         <div class="overflow-hidden rounded-[20px] ring-1 ring-[color:rgba(255,255,255,0.12)] shadow-[0_40px_80px_-40px_rgba(0,8,16,0.9)]">
-          <img :src="t.src" :alt="t.label" draggable="false" loading="lazy" class="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-editorial" :class="[hovered === i ? 'scale-105' : '', t.src.includes('/insights/') ? 'object-left' : 'object-top']">
+          <img :src="t.src" :srcset="imgSet(t.src)" sizes="(max-width: 639px) 46vw, (max-width: 1023px) 30vw, 20vw" :alt="t.label" draggable="false" loading="lazy" class="aspect-[4/5] w-full object-cover transition-transform duration-700 ease-editorial" :class="[hovered === i ? 'scale-105' : '', t.src.includes('/insights/') ? 'object-left' : 'object-top']">
         </div>
         <figcaption class="mt-3 flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] transition-colors duration-300" :class="hovered === i ? 'text-pastiYellow-500' : 'text-[color:rgba(255,255,255,0.5)]'">
           <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ t.label }}

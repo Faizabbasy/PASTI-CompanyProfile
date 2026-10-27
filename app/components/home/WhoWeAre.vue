@@ -215,7 +215,7 @@ useGsapContext(() => {
                   ]"
                   @mouseenter="hovered = i"
                 >
-                  <span class="block h-full w-full transition-transform duration-700 ease-editorial group-hover/frame:scale-[1.06]"><img :src="portrait.src" :alt="portrait.alt" class="h-full w-full object-cover" loading="lazy" draggable="false" /></span>
+                  <span class="block h-full w-full transition-transform duration-700 ease-editorial group-hover/frame:scale-[1.06]"><img :src="portrait.src" :srcset="imgSet(portrait.src)" sizes="(max-width: 1023px) 92vw, 40vw" :alt="portrait.alt" class="h-full w-full object-cover" loading="lazy" draggable="false" /></span>
                 </figure>
                 <span
                   data-tag

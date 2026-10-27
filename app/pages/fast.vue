@@ -9,6 +9,7 @@
 // by the FAST sections through useFastPage().
 const content = await resolveFastPageContent()
 usePageSeo(content.value.seo)
+useProductLd({ name: 'FAST', description: content.value.seo.description, image: content.value.seo.image })
 </script>
 
 <template>

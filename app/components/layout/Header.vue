@@ -203,7 +203,7 @@ useGsapContext(() => {
     hideTrigger.kill()
     progressTrigger?.kill()
   }
-})
+}, { defer: false })
 </script>
 
 <template>

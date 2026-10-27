@@ -137,7 +137,7 @@ useGsapContext(() => {
     <!-- Trail pool -->
     <div ref="poolRef" aria-hidden="true" class="pointer-events-none absolute inset-0 z-10">
       <div v-for="(v, i) in [...visuals, ...visuals.slice(0, 5)]" :key="i" class="absolute left-0 top-0 w-[clamp(110px,12vw,190px)] opacity-0">
-        <img :src="v.src" alt="" loading="lazy" draggable="false" :class="v.src.includes('/insights/') ? 'object-left' : 'object-top'" class="aspect-[4/5] w-full rounded-[14px] object-cover shadow-[0_24px_50px_-20px_rgba(3,40,60,0.55)] ring-4 ring-pureWhite">
+        <img :src="v.src" :srcset="imgSet(v.src)" sizes="(max-width: 1023px) 50vw, 24vw" alt="" loading="lazy" draggable="false" :class="v.src.includes('/insights/') ? 'object-left' : 'object-top'" class="aspect-[4/5] w-full rounded-[14px] object-cover shadow-[0_24px_50px_-20px_rgba(3,40,60,0.55)] ring-4 ring-pureWhite">
       </div>
     </div>
 
@@ -167,7 +167,7 @@ useGsapContext(() => {
           <img
             v-for="(v, i) in visuals.slice(0, 3)"
             :key="v.src"
-            :src="v.src"
+            :src="v.src" :srcset="imgSet(v.src)" sizes="(max-width: 1023px) 50vw, 24vw"
             alt=""
             draggable="false"
             :class="v.src.includes('/insights/') ? 'object-left' : 'object-top'"

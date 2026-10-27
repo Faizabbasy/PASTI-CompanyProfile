@@ -99,7 +99,7 @@ useGsapContext(() => {
               <span class="block overflow-hidden">
                 <span class="grid gap-6 pb-8 tablet:grid-cols-[minmax(0,420px)_1fr] tablet:items-center tablet:pl-12">
                   <span class="block aspect-[4/3] overflow-hidden rounded-[18px] bg-surfaceNeutral">
-                    <img :src="a.image" :alt="''" loading="lazy" class="h-full w-full object-cover transition-transform duration-1000 ease-editorial" :class="hovered === i ? 'scale-105' : 'scale-100'">
+                    <img :src="a.image" :srcset="imgSet(a.image)" sizes="(max-width: 1023px) 92vw, 40vw" :alt="''" loading="lazy" class="h-full w-full object-cover transition-transform duration-1000 ease-editorial" :class="hovered === i ? 'scale-105' : 'scale-100'">
                   </span>
                   <span class="block">
                     <span class="block max-w-[46ch] text-token-body-large text-[color:rgba(3,60,89,0.72)]">{{ a.page?.description }}</span>

@@ -130,7 +130,7 @@ onBeforeUnmount(() => {
               >
                 <img
                   data-rd-img
-                  :src="article.image"
+                  :src="article.image" :srcset="imgSet(article.image)" sizes="(max-width: 1023px) 100vw, 60vw"
                   :alt="article.alt"
                   class="h-full w-full"
                   :class="fullPoster ? 'object-contain' : 'object-cover'"

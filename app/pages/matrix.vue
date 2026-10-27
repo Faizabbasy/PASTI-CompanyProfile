@@ -10,6 +10,7 @@
 // by the MATRIX sections through useMatrixPage().
 const content = await resolveMatrixPageContent()
 usePageSeo(content.value.seo)
+useProductLd({ name: 'MATRIX', description: content.value.seo.description, image: content.value.seo.image })
 </script>
 
 <template>

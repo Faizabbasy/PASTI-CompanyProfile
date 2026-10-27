@@ -99,6 +99,12 @@ export default defineNuxtConfig({
 
   // Admin CMS surfaces are never cached, indexed or framed.
   routeRules: {
+    // Static assets (performance pass 2026-10-27): fonts never change name →
+    // cache for a year; images can be replaced under the same filename
+    // (client logos) → one day, then revalidate in the background.
+    '/fonts/**': { headers: { 'cache-control': 'public, max-age=31536000, immutable' } },
+    '/images/**': { headers: { 'cache-control': 'public, max-age=86400, stale-while-revalidate=604800' } },
+    '/logos/**': { headers: { 'cache-control': 'public, max-age=86400, stale-while-revalidate=604800' } },
     '/admin/**': {
       prerender: false,
       headers: {
@@ -135,12 +141,10 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/png', href: '/favicon.png' },
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        {
-          rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap'
-        }
+        // Self-hosted interim fonts (see main.css): preload the two Latin
+        // files so text renders in the right face without a swap.
+        { rel: 'preload', href: '/fonts/manrope-latin.woff2', as: 'font', type: 'font/woff2', crossorigin: '' },
+        { rel: 'preload', href: '/fonts/inter-latin.woff2', as: 'font', type: 'font/woff2', crossorigin: '' }
       ]
     }
   },

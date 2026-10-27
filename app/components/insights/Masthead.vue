@@ -68,7 +68,7 @@ useGsapContext(() => {
                 :key="a.index"
                 class="im-fill absolute inset-0 block transition-opacity duration-1000 ease-editorial"
                 :class="i === shown ? 'opacity-100' : 'opacity-0'"
-                :style="{ backgroundImage: `linear-gradient(rgba(3,60,89,0.42),rgba(3,60,89,0.42)), url(${a.image})`, backgroundPosition: `0 0, ${55 + pan.x * 0.4}% ${pan.y}%` }"
+                :style="{ backgroundImage: `linear-gradient(rgba(3,60,89,0.42),rgba(3,60,89,0.42)), url(${imgAt(a.image, 1024)})`, backgroundPosition: `0 0, ${55 + pan.x * 0.4}% ${pan.y}%` }"
               >{{ hero.headline }}</span>
             </span>
           </h1>
@@ -92,7 +92,7 @@ useGsapContext(() => {
             <img
               v-for="(a, i) in articles"
               :key="a.index"
-              :src="a.image"
+              :src="a.image" :srcset="imgSet(a.image)" sizes="(max-width: 1023px) 60vw, 25vw"
               :alt="i === shown ? a.alt : ''"
               draggable="false"
               loading="lazy"

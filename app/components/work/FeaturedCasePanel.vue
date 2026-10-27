@@ -103,7 +103,7 @@ const secondItems = computed(() => props.item.solution ?? props.item.request ?? 
       <!-- Gallery -->
       <ul v-else-if="ch.key === 'gallery'" class="grid gap-3" :class="gallery.length > 1 ? 'tablet:grid-cols-2' : ''">
         <li v-for="v in gallery" :key="v.src" class="overflow-hidden rounded-[16px] bg-pureWhite ring-1 ring-[color:rgba(255,255,255,0.12)]">
-          <img :src="v.src" :alt="v.alt" loading="lazy" decoding="async" draggable="false" class="h-auto w-full">
+          <img :src="v.src" :srcset="imgSet(v.src)" sizes="(max-width: 1023px) 92vw, 50vw" :alt="v.alt" loading="lazy" decoding="async" draggable="false" class="h-auto w-full">
         </li>
       </ul>
     </li>

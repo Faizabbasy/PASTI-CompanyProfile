@@ -5,7 +5,7 @@ import gsap from 'gsap'
 // the PASTI wordmark is uncovered left-to-right, the logo's Yellow dot drops
 // into its measured place, one Signal ring confirms it, the brand essence
 // line appears, then the panel lifts away and the page's own entrance
-// (usePageReady) starts underneath. ~2.3s. Only approved eases
+// (usePageReady) starts underneath. ~2.3s (phones ~1.6s). Only approved eases
 // (expo.out / power4.out / power3.out) — no bounce on the dot.
 //
 // Not shown under reduced motion (CSS media query, so it never flashes on
@@ -55,9 +55,10 @@ onMounted(() => {
   document.documentElement.style.overflow = 'hidden'
   getLenisInstance()?.stop()
 
-  // Paused until the page has loaded and the main thread is free: the
-  // panel doubles as the loading cover, so the sequence never plays into
-  // dropped frames while hydration / WebGL setup are still running.
+  // Starts once the app has hydrated and the main thread has a gap — NOT on
+  // window `load`, which waits for every image on the page and kept phones
+  // on the cover for seconds (performance pass 2026-10-27). Phones / lite
+  // devices play the same sequence 1.5× faster (~1.3s + lift).
   tl = gsap.timeline({ paused: true, defaults: { ease: approvedEase.gsapCinematic } })
   tl.fromTo(wordRef.value, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 0.9 }, 0.15)
     .fromTo(barRef.value, { scaleX: 0 }, { scaleX: 1, duration: 1.7, ease: 'power3.out' }, 0.15)
@@ -68,15 +69,17 @@ onMounted(() => {
     .to(rootRef.value, { yPercent: -100, duration: 1, ease: approvedEase.gsapCinematic }, 2.0)
     .call(finish)
 
+  if (isLiteDevice()) tl.timeScale(1.5)
+
   let started = false
   const start = () => {
     if (started) return
     started = true
     requestAnimationFrame(() => requestAnimationFrame(() => tl?.play()))
   }
-  if (document.readyState === 'complete') start()
-  else window.addEventListener('load', start, { once: true })
-  window.setTimeout(start, 4000)
+  if ('requestIdleCallback' in window) window.requestIdleCallback(start, { timeout: 700 })
+  else window.setTimeout(start, 120)
+  window.setTimeout(start, 1200)
 })
 </script>
 

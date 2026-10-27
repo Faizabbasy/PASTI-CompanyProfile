@@ -42,7 +42,7 @@ useGsapContext(() => {
       .call(() => scrollToImmediate(target))
       .to(panelRef.value, { yPercent: -100, duration: 0.55, ease: 'power3.inOut' }, '+=0.05')
   })
-})
+}, { defer: false })
 </script>
 
 <template>

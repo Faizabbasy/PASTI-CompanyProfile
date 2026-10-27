@@ -173,7 +173,7 @@ useGsapContext(() => {
               <div class="overflow-hidden">
                 <div class="pb-8">
                   <div class="relative aspect-[4/5] overflow-hidden rounded-[18px] border border-[color:rgba(3,60,89,0.12)] bg-slateNavy tablet:aspect-[16/10]">
-                    <img :src="s.image" :alt="s.imageAlt" loading="lazy" class="h-full w-full object-cover object-top">
+                    <img :src="s.image" :srcset="imgSet(s.image)" sizes="(max-width: 1023px) 92vw, 30vw" :alt="s.imageAlt" loading="lazy" class="h-full w-full object-cover object-top">
                     <span class="absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
                       <LayoutBrandMark surface="dark" :height="9" />
                       <span class="font-mono text-[10px] tracking-[0.14em] text-pureWhite">{{ s.index }}</span>
@@ -215,7 +215,7 @@ useGsapContext(() => {
         <img
           v-for="(s, i) in services"
           :key="s.key"
-          :src="s.image"
+          :src="s.image" :srcset="imgSet(s.image)" sizes="(max-width: 1023px) 92vw, 30vw"
           alt=""
           loading="lazy"
           class="absolute inset-0 h-full w-full object-cover transition-[opacity,transform] duration-500 ease-editorial"

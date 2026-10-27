@@ -28,6 +28,8 @@ await resolveTestimonials()
 // Shared Content CMS: Trusted logos and FAQ (code content unless their
 // server flags are on and a version is published).
 await Promise.all([clientsSource.resolve(), faqsSource.resolve()])
+// Structured data: the website + the FAQ shown on this page (same source).
+useHomeLd(useFaq().items)
 </script>
 
 <template>

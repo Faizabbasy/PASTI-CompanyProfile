@@ -10,6 +10,7 @@
 // by the SHIFTLY sections through useShiftlyPage().
 const content = await resolveShiftlyPageContent()
 usePageSeo(content.value.seo)
+useProductLd({ name: 'SHIFTLY', description: content.value.seo.description, image: content.value.seo.image })
 </script>
 
 <template>

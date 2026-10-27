@@ -1,4 +1,6 @@
 import gsap from 'gsap'
+import { getCurrentScope } from 'vue'
+import { scheduleMotion } from './motionQueue'
 
 /**
  * Scopes a GSAP setup function to a gsap.context() tied to the calling
@@ -16,16 +18,34 @@ import gsap from 'gsap'
  * here. Most existing callers return nothing (undefined), which GSAP
  * simply ignores.
  */
-export function useGsapContext(setup: (ctx: gsap.Context) => void | (() => void)) {
+export function useGsapContext(setup: (ctx: gsap.Context) => void | (() => void), opts: { defer?: boolean } = {}) {
   if (!import.meta.client) return
 
   let ctx: gsap.Context | undefined
+  let cancel: (() => void) | undefined
+  // The component's effect scope: a deferred setup runs inside it, so any
+  // watch() it creates is still stopped when the component unmounts.
+  const scope = getCurrentScope()
 
   onMounted(() => {
-    ctx = gsap.context(setup)
+    // Default: queued (motionQueue.ts) so the page's motion setup is spread
+    // over short tasks. `defer: false` for app-shell pieces that must be
+    // ready immediately (header, route curtains).
+    if (opts.defer === false) {
+      ctx = gsap.context(setup)
+      return
+    }
+    cancel = scheduleMotion(() => {
+      const run = () => {
+        ctx = gsap.context(setup)
+      }
+      if (scope?.active) scope.run(run)
+      else run()
+    })
   })
 
   onBeforeUnmount(() => {
+    cancel?.()
     ctx?.revert()
   })
 }

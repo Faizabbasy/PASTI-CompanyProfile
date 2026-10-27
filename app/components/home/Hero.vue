@@ -777,7 +777,7 @@ useGsapContext(() => {
                  16:9 card (2026-10-09; replaces the portrait poster +
                  blurred side bands). -->
             <img
-              :src="project.landscape"
+              :src="project.landscape" :srcset="imgSet(project.landscape)" sizes="(max-width: 1023px) 90vw, 46vw"
               :alt="project.title"
               width="1024"
               height="572"

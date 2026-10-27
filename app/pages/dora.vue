@@ -9,6 +9,7 @@
 // by the DORA sections through useDoraPage().
 const content = await resolveDoraPageContent()
 usePageSeo(content.value.seo)
+useProductLd({ name: 'DORA', description: content.value.seo.description, image: content.value.seo.image })
 </script>
 
 <template>

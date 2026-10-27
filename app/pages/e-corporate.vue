@@ -9,6 +9,7 @@
 // by the e-CORPORATE sections through useEcorporatePage().
 const content = await resolveEcorporatePageContent()
 usePageSeo(content.value.seo)
+useProductLd({ name: 'e-CORPORATE', description: content.value.seo.description, image: content.value.seo.image })
 </script>
 
 <template>

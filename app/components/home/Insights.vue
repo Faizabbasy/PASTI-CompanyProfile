@@ -402,7 +402,7 @@ watch(activeIndex, (next, prev) => {
             >
               <img
                 data-card-img
-                :src="article.image"
+                :src="article.image" :srcset="imgSet(article.image)" sizes="(max-width: 1023px) 90vw, 40vw"
                 :alt="article.title"
                 :loading="i < 2 ? 'eager' : 'lazy'"
                 class="h-full w-full object-cover transition-transform duration-700 ease-editorial group-hover/card:scale-[1.03]"
@@ -525,7 +525,7 @@ watch(activeIndex, (next, prev) => {
           :class="i === mobileActive ? 'scale-100 opacity-100' : 'scale-[0.94] opacity-60'"
         >
           <div class="relative aspect-[4/3] w-full overflow-hidden rounded-[20px] border border-[color:rgba(3,60,89,0.12)] bg-pureWhite shadow-[0_30px_60px_-36px_rgba(3,60,89,0.5)]">
-            <img :src="article.image" :alt="article.title" :loading="i < 2 ? 'eager' : 'lazy'" class="h-full w-full object-cover" draggable="false">
+            <img :src="article.image" :srcset="imgSet(article.image)" sizes="(max-width: 1023px) 90vw, 40vw" :alt="article.title" :loading="i < 2 ? 'eager' : 'lazy'" class="h-full w-full object-cover" draggable="false">
             <span class="pointer-events-none absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-full bg-[color:rgba(255,255,255,0.94)] px-3 py-1.5">
               <LayoutBrandMark surface="light" :height="10" />
               <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(3,60,89,0.2)]" />

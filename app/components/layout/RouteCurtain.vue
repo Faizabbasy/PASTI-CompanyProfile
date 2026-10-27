@@ -46,7 +46,7 @@ useGsapContext(() => {
       }
     })
   })
-})
+}, { defer: false })
 </script>
 
 <template>

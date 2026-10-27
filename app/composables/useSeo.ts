@@ -100,4 +100,6 @@ export function usePageSeo(seo: PageSeo) {
     twitterDescription: seo.description,
     twitterImage: image
   })
+  // Who publishes the page (schema.org Organization, see useStructuredData).
+  useOrganizationLd()
 }

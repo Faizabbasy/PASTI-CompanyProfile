@@ -140,7 +140,7 @@ useGsapContext(() => {
               @mouseleave="setState('default')"
               @click="jump(i)"
             >
-              <img :src="p.image" :alt="p.alt" draggable="false" class="aspect-[4/5] w-full object-cover object-top">
+              <img :src="p.image" :srcset="imgSet(p.image)" sizes="(max-width: 1023px) 50vw, 24vw" :alt="p.alt" draggable="false" class="aspect-[4/5] w-full object-cover object-top">
               <span class="absolute right-2.5 top-2.5 inline-flex items-center gap-1.5 rounded-full bg-[color:rgba(3,60,89,0.88)] px-2 py-1">
                 <LayoutBrandMark :height="8" />
                 <span class="font-mono text-[9px] text-pureWhite">{{ p.index }}</span>

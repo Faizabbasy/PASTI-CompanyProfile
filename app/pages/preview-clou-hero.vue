@@ -118,6 +118,9 @@ onBeforeUnmount(() => {
   hoverCleanups.forEach((cleanup) => cleanup())
   if (mouseMoveHandler) window.removeEventListener('mousemove', mouseMoveHandler)
 })
+
+// Dev preview only — keep it out of search results.
+useHead({ meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 </script>
 
 <template>

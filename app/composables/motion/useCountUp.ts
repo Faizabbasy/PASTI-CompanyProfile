@@ -1,4 +1,5 @@
 import gsap from 'gsap'
+import { scheduleMotion } from './motionQueue'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Ref } from 'vue'
 
@@ -25,13 +26,22 @@ export function useCountUp(target: Ref<HTMLElement | null>, options: CountUpOpti
 
   const { value, duration = 3.2, format = (n: number) => Math.round(n).toString() } = options
 
-  onMounted(() => {
+  // Queued (motionQueue.ts) with the rest of the page's motion setup;
+  // cleanup is registered here, in setup scope.
+  let mm: gsap.MatchMedia | undefined
+  let cancel: (() => void) | undefined
+  onBeforeUnmount(() => {
+    cancel?.()
+    mm?.revert()
+  })
+
+  onMounted(() => cancel = scheduleMotion(() => {
     const el = target.value
     if (!el) return
 
-    const mm = gsap.matchMedia()
+    mm = gsap.matchMedia()
 
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
+    mm!.add('(prefers-reduced-motion: no-preference)', () => {
       const counter = { n: 0 }
       el.textContent = format(0)
 
@@ -51,10 +61,9 @@ export function useCountUp(target: Ref<HTMLElement | null>, options: CountUpOpti
       return () => anim.kill()
     })
 
-    mm.add('(prefers-reduced-motion: reduce)', () => {
+    mm!.add('(prefers-reduced-motion: reduce)', () => {
       el.textContent = format(value)
     })
 
-    onBeforeUnmount(() => mm.revert())
-  })
+  }))
 }

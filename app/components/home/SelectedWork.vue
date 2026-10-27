@@ -87,7 +87,7 @@ useGsapContext(() => {
             :class="i === active ? 'scale-100 opacity-100' : 'scale-[0.94] opacity-60'"
           >
             <div class="relative aspect-[4/5] w-full overflow-hidden rounded-[22px] border border-[color:rgba(3,60,89,0.12)] bg-surfaceNeutral shadow-[0_30px_60px_-36px_rgba(3,60,89,0.55)]">
-              <img :src="project.image" :alt="project.title" :loading="i < 2 ? 'eager' : 'lazy'" class="h-full w-full object-cover" draggable="false">
+              <img :src="project.image" :srcset="imgSet(project.image)" sizes="(max-width: 1023px) 82vw, 34vw" :alt="project.title" :loading="i < 2 ? 'eager' : 'lazy'" class="h-full w-full object-cover" draggable="false">
               <span class="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-2 rounded-full border border-[color:rgba(255,255,255,0.14)] bg-[color:rgba(3,60,89,0.9)] px-3 py-1.5">
                 <LayoutBrandMark :height="10" />
                 <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.22)]" />
