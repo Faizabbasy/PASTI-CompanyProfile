@@ -166,7 +166,7 @@ const anyErr = (...prefixes: string[]) => Object.keys(errors.value).some((k) => 
         <details class="rounded-lg border border-dashed border-navy-200 bg-white px-4 py-3" :open="anyErr('mission.points')">
           <summary class="cursor-pointer text-sm font-semibold text-navy-600">Poin-poin misi — belum tampil di website</summary>
           <div class="mt-4">
-            <AdminFormRepeater legend="Poin misi" :items="form.mission.points" :max="10" :published-ids="publishedIds" :item-title="(p) => p.text" add-label="Tambah poin misi" :error="err('mission.points')" @add="addMissionPoint">
+            <AdminFormRepeater legend="Poin misi" path="mission.points" :items="form.mission.points" :max="10" :published-ids="publishedIds" :item-title="(p) => p.text" add-label="Tambah poin misi" :error="err('mission.points')" @add="addMissionPoint">
               <template #default="{ item, index }">
                 <AdminFormField :id="fieldId(`mission.points.${index}.text`)" v-model="item.text" label="Poin" :maxlength="240" required :error="err(`mission.points.${index}.text`)" />
               </template>
@@ -178,7 +178,7 @@ const anyErr = (...prefixes: string[]) => Object.keys(errors.value).some((k) => 
       <!-- 04 VALUES -->
       <div v-show="activeTab === 'values'" class="grid gap-5">
         <p class="rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">Maksimal <strong>{{ LIM.valuesActive }}</strong> standar yang tampil. Kalau semua disembunyikan, website memakai standar bawaan.</p>
-        <AdminFormRepeater legend="Standar" :items="form.values" :max="12" :published-ids="publishedIds" :item-title="(v) => v.title" add-label="Tambah standar" :error="err('values')" collapsible :has-error="hasErr('values')" @add="addValue">
+        <AdminFormRepeater legend="Standar" path="values" :items="form.values" :max="12" :published-ids="publishedIds" :item-title="(v) => v.title" add-label="Tambah standar" :error="err('values')" collapsible :has-error="hasErr('values')" @add="addValue">
           <template #default="{ item, index }">
             <AdminFormField :id="fieldId(`values.${index}.title`)" v-model="item.title" label="Nama standar" :maxlength="LIM.valueTitle" required :error="err(`values.${index}.title`)" />
             <AdminFormField :id="fieldId(`values.${index}.description`)" v-model="item.description" label="Penjelasan" multiline :maxlength="LIM.valueBody" :error="err(`values.${index}.description`)" />
@@ -196,7 +196,7 @@ const anyErr = (...prefixes: string[]) => Object.keys(errors.value).some((k) => 
       <!-- 05 MILESTONES -->
       <div v-show="activeTab === 'milestones'" class="grid gap-5">
         <p class="rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">Garis waktu memuat maksimal <strong>{{ LIM.milestonesActive }}</strong> tahun yang tampil (satu baris). Kalau semua disembunyikan, website memakai perjalanan bawaan.</p>
-        <AdminFormRepeater legend="Perjalanan" :items="form.milestones" :max="30" :published-ids="publishedIds" :item-title="(m) => [m.yearOrPeriod, m.title].filter(Boolean).join(' — ')" add-label="Tambah tahun" :error="err('milestones')" collapsible :has-error="hasErr('milestones')" @add="addMilestone">
+        <AdminFormRepeater legend="Perjalanan" path="milestones" :items="form.milestones" :max="30" :published-ids="publishedIds" :item-title="(m) => [m.yearOrPeriod, m.title].filter(Boolean).join(' — ')" add-label="Tambah tahun" :error="err('milestones')" collapsible :has-error="hasErr('milestones')" @add="addMilestone">
           <template #default="{ item, index }">
             <div class="grid gap-4 tablet:grid-cols-[10rem_1fr]">
               <AdminFormField :id="fieldId(`milestones.${index}.yearOrPeriod`)" v-model="item.yearOrPeriod" label="Tahun / periode" :maxlength="LIM.milestoneYear" required :error="err(`milestones.${index}.yearOrPeriod`)" />
@@ -217,7 +217,7 @@ const anyErr = (...prefixes: string[]) => Object.keys(errors.value).some((k) => 
       <!-- 06 LEADERSHIP -->
       <div v-show="activeTab === 'leadership'" class="grid gap-5">
         <p class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">Website hanya memakai <strong>orang pertama</strong> di daftar, dan hanya jika namanya sama persis dengan pemimpin yang sekarang tampil — karena kutipan dan sambutannya adalah kata-kata orang itu sendiri (dikunci di kode). Yang ikut berubah: jabatan dan foto.</p>
-        <AdminFormRepeater legend="Kepemimpinan" :items="form.leadership" :max="12" :published-ids="publishedIds" :item-title="(p) => [p.name, p.role].filter(Boolean).join(' · ')" add-label="Tambah orang" :error="err('leadership')" collapsible :has-error="hasErr('leadership')" @add="addLeader">
+        <AdminFormRepeater legend="Kepemimpinan" path="leadership" :items="form.leadership" :max="12" :published-ids="publishedIds" :item-title="(p) => [p.name, p.role].filter(Boolean).join(' · ')" add-label="Tambah orang" :error="err('leadership')" collapsible :has-error="hasErr('leadership')" @add="addLeader">
           <template #default="{ item, index }">
             <div class="grid gap-4 tablet:grid-cols-2">
               <AdminFormField :id="fieldId(`leadership.${index}.name`)" v-model="item.name" label="Nama" :maxlength="80" required :error="err(`leadership.${index}.name`)" />
@@ -234,7 +234,7 @@ const anyErr = (...prefixes: string[]) => Object.keys(errors.value).some((k) => 
       <div v-show="activeTab === 'proof'" class="grid gap-5">
         <p class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">Angka ini hanya tampil kalau flag server <code>NUXT_CMS_ABOUT_PUBLIC_PROOF_ENABLED</code> juga menyala. Isi hanya angka yang sudah benar dan disetujui.</p>
         <p class="rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">Maksimal <strong>{{ LIM.proofActive }}</strong> angka yang tampil. Format angka: contoh <code>70+</code>, <code>4.3</code>, <code>100%</code> — kalau satu saja formatnya tidak cocok, website memakai angka bawaan.</p>
-        <AdminFormRepeater legend="Angka bukti" :items="form.proof" :max="12" :published-ids="publishedIds" :item-title="(p) => [p.value, p.label].filter(Boolean).join(' ')" add-label="Tambah angka" :error="err('proof')" @add="addProof">
+        <AdminFormRepeater legend="Angka bukti" path="proof" :items="form.proof" :max="12" :published-ids="publishedIds" :item-title="(p) => [p.value, p.label].filter(Boolean).join(' ')" add-label="Tambah angka" :error="err('proof')" @add="addProof">
           <template #default="{ item, index }">
             <div class="grid gap-4 tablet:grid-cols-[10rem_1fr]">
               <AdminFormField :id="fieldId(`proof.${index}.value`)" v-model="item.value" label="Angka" :maxlength="6" hint="Contoh: 70+, 4.3, 100%" required :error="err(`proof.${index}.value`)" />

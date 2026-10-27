@@ -10,6 +10,7 @@ if (import.meta.client) {
 // horizontal Signal rail that fills with the scroll and lights each year as
 // it passes. Below desktop: a vertical rail. Reduced motion: fully lit.
 const items = useAboutPage().milestones
+const mark = useCmsMark()
 const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const lit = ref(-1)
@@ -61,8 +62,8 @@ useGsapContext(() => {
             :class="i <= lit ? 'scale-110 border-pastiYellow-500 bg-pastiYellow-500' : 'border-[color:rgba(255,255,255,0.3)] bg-slateNavy'"
           />
           <div class="desktop:mt-8">
-            <p class="font-display text-[clamp(26px,2.2vw,36px)] font-extrabold leading-none tracking-[-0.04em] transition-colors duration-500" :class="i <= lit ? 'text-pureWhite' : 'text-[color:rgba(255,255,255,0.4)]'">{{ m.year }}</p>
-            <p class="mt-3 max-w-[30ch] text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.72)]">{{ m.text }}</p>
+            <p class="font-display text-[clamp(26px,2.2vw,36px)] font-extrabold leading-none tracking-[-0.04em] transition-colors duration-500" :class="i <= lit ? 'text-pureWhite' : 'text-[color:rgba(255,255,255,0.4)]'" v-bind="mark('yearOrPeriod', `Perjalanan ${i + 1} — tahun`, `milestones#${i}`)">{{ m.year }}</p>
+            <p class="mt-3 max-w-[30ch] text-[15px] leading-relaxed text-[color:rgba(255,255,255,0.72)]" v-bind="mark('title', `Perjalanan ${i + 1} — kejadian`, `milestones#${i}`)">{{ m.text }}</p>
           </div>
         </li>
       </ol>

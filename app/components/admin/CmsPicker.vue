@@ -27,15 +27,23 @@ function click(e: MouseEvent) {
   e.stopPropagation()
   window.location.href = el.dataset.cmsHref
 }
-watch(on, place)
+// While picking, marked text must be hoverable even where the design turns
+// pointer events off (e.g. hero copy laid over an interactive background).
+const flag = () => (on.value ? document.documentElement.setAttribute('data-cms-picking', '') : document.documentElement.removeAttribute('data-cms-picking'))
+watch(on, () => {
+  flag()
+  place()
+})
 
 onMounted(() => {
+  flag()
   document.addEventListener('mouseover', over, true)
   document.addEventListener('click', click, true)
   window.addEventListener('scroll', place, true)
   window.addEventListener('resize', place)
 })
 onBeforeUnmount(() => {
+  document.documentElement.removeAttribute('data-cms-picking')
   document.removeEventListener('mouseover', over, true)
   document.removeEventListener('click', click, true)
   window.removeEventListener('scroll', place, true)
@@ -59,3 +67,9 @@ onBeforeUnmount(() => {
     ✎ Klik teks untuk edit: {{ on ? 'ON' : 'OFF' }}
   </button>
 </template>
+
+<style>
+html[data-cms-picking] [data-cms-href] {
+  pointer-events: auto !important;
+}
+</style>

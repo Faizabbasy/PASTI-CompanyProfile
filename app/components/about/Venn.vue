@@ -13,6 +13,7 @@ if (import.meta.client) {
 // The rings lean toward the pointer on desktop. Proof numbers (owner-verified,
 // shared with the homepage) count up beside it.
 const { positioning, stats, coreEmotion } = useAboutPage().venn
+const mark = useCmsMark()
 const t = useT()
 
 const sectionRef = ref<HTMLElement | null>(null)
@@ -119,8 +120,8 @@ useGsapContext(() => {
 
           <dl class="mt-10 grid grid-cols-2 gap-6 border-t border-[color:rgba(255,255,255,0.14)] pt-8">
             <div v-for="(s, i) in stats" :key="s.key" class="m-center-col flex flex-col-reverse">
-              <dt class="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">{{ s.label }}</dt>
-              <dd class="m-center-row flex items-start font-display text-[clamp(48px,5vw,80px)] font-extrabold leading-none tracking-[-0.05em] text-pureWhite">
+              <dt v-bind="mark('label', `Angka bukti ${i + 1} — keterangan`, `proof#${i}`)" class="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[color:rgba(255,255,255,0.55)]">{{ s.label }}</dt>
+              <dd v-bind="mark('value', `Angka bukti ${i + 1} — angka`, `proof#${i}`)" class="m-center-row flex items-start font-display text-[clamp(48px,5vw,80px)] font-extrabold leading-none tracking-[-0.05em] text-pureWhite">
                 <span :ref="(el) => { statEls[i]!.value = el as HTMLElement | null }">{{ s.value }}</span><span class="text-[0.5em] text-pastiYellow-500">{{ s.suffix }}</span>
               </dd>
             </div>

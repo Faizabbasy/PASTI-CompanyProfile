@@ -33,6 +33,20 @@ const preview = computed(() => {
   const d = data.value
   return d ? adaptContactCms(legacy, { version: d.version, content: d.content }) : null
 })
+// Klik teks untuk edit: the page's own wording opens the Contact editor;
+// contact facts (email, address, socials) open Global CTAs — entered once,
+// on the Indonesian record.
+const lang = useEditorLang()
+provideCmsMarks({
+  href: (record, path) => {
+    if (record === 'page:contact') return cmsFieldHref('/admin/pages/contact', lang, path)
+    if (record === 'ctas') {
+      const fact = ['email', 'address', 'mapsUrl'].includes(path) || path.startsWith('socials.')
+      return cmsFieldHref('/admin/shared/ctas', fact ? 'id' : lang, path)
+    }
+    return null
+  }
+})
 const mainRef = ref<HTMLElement | null>(null)
 usePreviewJump(mainRef)
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }) + ' WIB'
@@ -45,7 +59,8 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
         <strong>Preview draft — belum tampil di website</strong>
         <span v-if="data">Contact · draft v{{ data.version }} · disimpan {{ fmt(data.updatedAt) }} · status: {{ data.status }}</span>
         <span class="text-xs">SEO: {{ preview?.seo.title }}{{ preview?.seo.noIndex ? ' · noindex' : '' }}</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Email, alamat dan media sosial diedit di Shared Content → Global CTAs. Matikan tombol ✎ untuk mencoba form.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
 

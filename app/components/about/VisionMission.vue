@@ -9,6 +9,7 @@ if (import.meta.client) {
 // VISION & MISSION (COMPRO 2025 p.27). Two statements on navy: Vision large,
 // Mission as the supporting paragraph; a yellow rule draws between them.
 const { visionMission: vm } = useAboutPage()
+const mark = useCmsMark()
 const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 
@@ -37,16 +38,16 @@ useGsapContext(() => {
       <div class="mt-14 grid gap-12 desktop:mt-20 desktop:grid-cols-12 desktop:gap-10">
         <div class="m-center desktop:col-span-7">
           <p data-vm-item class="inline-flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">
-            <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" />{{ vm.visionLabel }}{{ ' ' }}
+            <span class="h-1.5 w-1.5 rounded-full bg-pastiYellow-500" /><span v-bind="mark('vision.title', 'Label visi')">{{ vm.visionLabel }}</span>{{ ' ' }}
           </p>
-          <p data-vm-item class="mt-6 font-display text-[clamp(28px,3.2vw,48px)] font-bold leading-[1.1] tracking-[-0.035em]">
+          <p v-bind="mark('vision.description', 'Kalimat visi')" data-vm-item class="mt-6 font-display text-[clamp(28px,3.2vw,48px)] font-bold leading-[1.1] tracking-[-0.035em]">
             {{ vm.vision.replace(/\.$/, '') }}<span class="text-pastiYellow-500">.</span>
           </p>
         </div>
         <div class="desktop:col-span-4 desktop:col-start-9 desktop:self-end">
           <span data-vm-rule aria-hidden="true" class="block h-[2px] w-16 bg-pastiYellow-500 max-desktop:mx-auto" />
-          <p data-vm-item class="m-center mt-6 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]">{{ vm.missionLabel }}</p>
-          <p data-vm-item class="m-center mt-4 text-token-body-large leading-relaxed text-[color:rgba(255,255,255,0.8)]">{{ vm.mission }}</p>
+          <p data-vm-item class="m-center mt-6 font-mono text-[11px] uppercase tracking-[0.2em] text-[color:rgba(255,255,255,0.6)]"><span v-bind="mark('mission.title', 'Label misi')">{{ vm.missionLabel }}</span></p>
+          <p v-bind="mark('mission.description', 'Paragraf misi')" data-vm-item class="m-center mt-4 text-token-body-large leading-relaxed text-[color:rgba(255,255,255,0.8)]">{{ vm.mission }}</p>
         </div>
       </div>
     </BaseContainer>

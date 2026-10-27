@@ -10,6 +10,7 @@ if (import.meta.client) {
 // These are PASTI's public values; the brand-guide pillars further down are
 // framed as working principles ("How we work") so the two don't compete.
 const { standards } = useAboutPage()
+const mark = useCmsMark()
 const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -48,8 +49,8 @@ useGsapContext(() => {
         >
           <span aria-hidden="true" class="st-num pointer-events-none absolute -right-2 -top-6 font-display text-[140px] font-extrabold leading-none tracking-[-0.06em]">{{ pad(i + 1) }}</span>
           <span aria-hidden="true" class="block h-[3px] w-10 origin-left bg-pastiYellow-500 transition-transform duration-500 ease-editorial group-hover:scale-x-150" />
-          <h3 class="relative mt-6 font-display text-[clamp(26px,2.4vw,34px)] font-extrabold tracking-[-0.03em] text-slateNavy">{{ s.name }}</h3>
-          <p class="relative mt-3 max-w-[48ch] text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.75)]">{{ s.body }}</p>
+          <h3 class="relative mt-6 font-display text-[clamp(26px,2.4vw,34px)] font-extrabold tracking-[-0.03em] text-slateNavy" v-bind="mark('title', `Standar ${i + 1} — nama`, `values#${i}`)">{{ s.name }}</h3>
+          <p class="relative mt-3 max-w-[48ch] text-[15px] leading-relaxed text-[color:rgba(3,60,89,0.75)]" v-bind="mark('description', `Standar ${i + 1} — penjelasan`, `values#${i}`)">{{ s.body }}</p>
         </li>
       </ol>
     </BaseContainer>

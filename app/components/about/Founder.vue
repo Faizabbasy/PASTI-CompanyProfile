@@ -11,6 +11,7 @@ if (import.meta.client) {
 // Portrait is the COMPRO photo. The pull-quote is a sentence from her own
 // text. Copy lives in useCompany().founder.
 const f = useAboutPage().founder
+const mark = useCmsMark()
 const t = useT()
 const sectionRef = ref<HTMLElement | null>(null)
 
@@ -37,11 +38,11 @@ useGsapContext(() => {
       <div class="mt-14 grid items-start gap-12 desktop:mt-20 desktop:grid-cols-12 desktop:gap-14">
         <figure class="mx-auto w-full max-w-[420px] desktop:col-span-5 desktop:mx-0 desktop:max-w-none">
           <div data-fd-frame class="relative aspect-[4/5] overflow-hidden rounded-[28px] bg-surfaceNeutral">
-            <img :src="f.photo" :alt="f.photoAlt" loading="lazy" draggable="false" class="h-full w-full object-cover object-top">
+            <img v-bind="mark('portrait', 'Foto (Kepemimpinan, orang pertama)', 'leadership#0')" :src="f.photo" :alt="f.photoAlt" loading="lazy" draggable="false" class="h-full w-full object-cover object-top">
             <span class="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-slateNavy px-3 py-1.5">
               <LayoutBrandMark surface="dark" :height="10" />
               <span aria-hidden="true" class="h-2.5 w-px bg-[color:rgba(255,255,255,0.25)]" />
-              <span class="font-mono text-[10px] tracking-[0.14em] text-pureWhite">{{ f.role }}</span>
+              <span v-bind="mark('role', 'Jabatan (Kepemimpinan, orang pertama)', 'leadership#0')" class="font-mono text-[10px] tracking-[0.14em] text-pureWhite">{{ f.role }}</span>
             </span>
           </div>
           <figcaption class="sr-only">{{ f.name }}, {{ f.role }}</figcaption>

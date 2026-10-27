@@ -3,10 +3,11 @@ import type { AboutContent, PageStatus } from '#shared/utils/aboutSchema'
 
 // Authenticated draft preview (ADMIN + EDITOR). Lives under /admin, so the
 // session gate, no-store and noindex headers apply; data comes from
-// /api/admin/pages/about/preview — never from /api/public. Shows the saved
-// draft's content in page order with active items only — a content preview,
-// not a pixel replica. Sections are always rendered (even when empty) and
-// ordered like ABOUT_TABS.previewIndex, so ?s=<n> jumps to the right one.
+// /api/admin/pages/about/preview — never from /api/public. Renders the REAL
+// About sections with the saved draft (active items only) through the same
+// adapter the public page uses, so layout and motion match. Klik teks untuk
+// edit: every text the CMS supplies opens its field in the About editor;
+// the rest of the page is code copy.
 definePageMeta({ layout: false })
 useHead({
   title: 'Preview · About (draft) · PASTI CMS',
@@ -19,33 +20,63 @@ interface PreviewResponse {
   status: PageStatus
   updatedAt: string
   content: AboutContent
+  // The website shows the CMS proof numbers only when this server flag is on.
+  proofLive: boolean
 }
 
+const lang = useEditorLang()
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData(`admin-about-preview-${useEditorLang()}`, () =>
-  cmsFetch<PreviewResponse>('/api/admin/pages/about/preview', { query: { lang: useEditorLang() } })
+const { data, error, refresh, status } = await useAsyncData(`admin-about-preview-${lang}`, () =>
+  cmsFetch<PreviewResponse>('/api/admin/pages/about/preview', { query: { lang } })
 )
 
-const c = computed(() => data.value?.content)
+const legacy = buildLegacyAboutContent()
 const active = <T extends { active: boolean }>(list: T[]) => list.filter((i) => i.active)
-const hidden = computed(() => {
-  if (!c.value) return 0
-  return [c.value.mission.points, c.value.values, c.value.milestones, c.value.proof, c.value.leadership].reduce((n, l) => n + l.filter((i) => !i.active).length, 0)
+// Same shape the public API sends (getPublishedAbout): active items only,
+// proof only when the website shows it.
+const preview = computed(() => {
+  const d = data.value
+  if (!d) return null
+  const c = d.content
+  const { proof, ...rest } = c
+  const content = {
+    ...rest,
+    mission: { ...c.mission, points: active(c.mission.points) },
+    values: active(c.values),
+    milestones: active(c.milestones),
+    ...(d.proofLive ? { proof: active(proof) } : {}),
+    leadership: active(c.leadership)
+  }
+  return adaptAboutCms(legacy, { status: 'published', version: d.version, publishedAt: d.updatedAt, content })
 })
+const hidden = computed(() => {
+  const c = data.value?.content
+  return c ? [c.mission.points, c.values, c.milestones, c.proof, c.leadership].reduce((n, l) => n + l.filter((i) => !i.active).length, 0) : 0
+})
+// Leadership only updates the founder card for the SAME person (the quote
+// and foreword are her own words) — say so when the first name differs.
+const leadMismatch = computed(() => {
+  const lead = data.value ? active(data.value.content.leadership)[0] : undefined
+  return !!lead && lead.name !== legacy.founder.name
+})
+
+provideSingletonCmsMarks('/admin/pages/about', lang, () => data.value?.content)
 const mainRef = ref<HTMLElement | null>(null)
 usePreviewJump(mainRef)
 const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }) + ' WIB'
 </script>
 
 <template>
-  <div class="min-h-screen bg-paper text-slateNavy">
-    <div class="sticky top-0 z-10 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 tablet:px-8" role="note">
+  <div class="min-h-screen bg-paper">
+    <div class="sticky top-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950 tablet:px-8" role="note">
       <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-x-4 gap-y-1">
         <strong>Preview draft — belum tampil di website</strong>
         <span v-if="data">About · draft v{{ data.version }} · disimpan {{ fmt(data.updatedAt) }} · status: {{ data.status }}</span>
         <span v-if="hidden" class="text-xs">{{ hidden }} item disembunyikan</span>
-        <span class="text-xs">Preview isi — desain dan animasi akhir diatur di kode.</span>
-        <button type="button" class="ml-auto rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button>
+        <span v-if="data && !data.proofLive" class="text-xs">Angka bukti dari CMS belum dinyalakan di website — angka di bawah dari kode.</span>
+        <span v-if="leadMismatch" class="text-xs font-semibold">Kepemimpinan: nama orang pertama beda dengan {{ legacy.founder.name }} — kartu pendiri tetap memakai data bawaan.</span>
+        <span class="text-xs">Arahkan kursor ke teks untuk melihat kolomnya, klik untuk langsung mengeditnya. Teks tanpa garis diatur di kode. Matikan tombol ✎ untuk mencoba halaman seperti biasa.</span>
+        <span class="ml-auto inline-flex items-center gap-2"><AdminCmsPicker v-if="preview" /><button type="button" class="rounded border border-amber-400 px-2 py-0.5 text-xs font-semibold hover:bg-amber-100" @click="refresh()">Muat ulang draft</button></span>
       </div>
     </div>
 
@@ -55,131 +86,22 @@ const fmt = (iso: string) => new Date(iso).toLocaleString('en-GB', { day: '2-dig
       <p class="mt-1 text-sm text-navy-600">
         {{ error.statusCode === 403 ? 'Role kamu tidak bisa membuka preview ini.' : 'Draft gagal dimuat. Mungkin sesi login sudah habis.' }}
       </p>
-      <a href="/admin/pages/about" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
+      <a :href="`/admin/pages/about?lang=${lang}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
     </div>
 
-    <main v-else-if="c" ref="mainRef" class="mx-auto max-w-5xl px-4 pb-24 tablet:px-8">
-      <!-- Hero -->
-      <section class="grid gap-8 py-16 desktop:grid-cols-[1.3fr_1fr] desktop:items-center">
-        <div>
-          <p v-if="c.hero.eyebrow" class="font-mono text-xs uppercase tracking-[0.2em] text-navy-500">{{ c.hero.eyebrow }}</p>
-          <h1 class="mt-3 font-display text-4xl font-bold leading-tight tablet:text-5xl">{{ c.hero.headline }}</h1>
-          <p v-if="c.hero.supportingCopy" class="mt-5 max-w-xl text-lg leading-relaxed text-navy-600">{{ c.hero.supportingCopy }}</p>
-          <div class="mt-7 flex flex-wrap gap-3">
-            <span v-if="c.hero.primaryCtaLabel" class="rounded-full bg-slateNavy px-5 py-2.5 text-sm font-semibold text-white">{{ c.hero.primaryCtaLabel }} <span class="font-normal opacity-70">→ {{ c.hero.primaryCtaUrl }}</span></span>
-            <span v-if="c.hero.secondaryCtaLabel" class="rounded-full border border-slateNavy px-5 py-2.5 text-sm font-semibold">{{ c.hero.secondaryCtaLabel }} <span class="font-normal opacity-70">→ {{ c.hero.secondaryCtaUrl }}</span></span>
-          </div>
-        </div>
-        <img v-if="c.hero.heroMedia" :src="c.hero.heroMedia" :alt="c.hero.heroMediaAlt" class="mx-auto max-h-80 w-auto">
-      </section>
-
-      <!-- Story -->
-      <section class="border-t border-navy-100 py-14">
-        <p v-if="c.story.sectionLabel" class="font-mono text-xs uppercase tracking-[0.2em] text-navy-500">{{ c.story.sectionLabel }}</p>
-        <h2 class="mt-2 font-display text-3xl font-bold">{{ c.story.title }}</h2>
-        <div class="mt-6 grid gap-8 desktop:grid-cols-[1.4fr_1fr]">
-          <div class="space-y-4 text-base leading-relaxed text-navy-700">
-            <p v-for="(p, i) in c.story.paragraphs" :key="i">{{ p }}</p>
-          </div>
-          <img v-if="c.story.supportingMedia" :src="c.story.supportingMedia" :alt="c.story.supportingMediaAlt" class="w-full rounded-lg object-cover">
-        </div>
-      </section>
-
-      <!-- Vision & Mission -->
-      <section class="grid gap-6 rounded-2xl bg-slateNavy p-8 text-white tablet:grid-cols-2 tablet:p-12">
-        <div>
-          <p class="font-mono text-xs uppercase tracking-[0.2em] text-white/60">{{ c.vision.title }}</p>
-          <p class="mt-3 text-xl leading-snug">{{ c.vision.description }}</p>
-        </div>
-        <div>
-          <p class="font-mono text-xs uppercase tracking-[0.2em] text-white/60">{{ c.mission.title }}</p>
-          <p class="mt-3 leading-relaxed text-white/90">{{ c.mission.description }}</p>
-          <ul v-if="active(c.mission.points).length" class="mt-4 list-disc space-y-1 pl-5 text-sm text-white/85">
-            <li v-for="p in active(c.mission.points)" :key="p.id">{{ p.text }}</li>
-          </ul>
-        </div>
-      </section>
-
-      <!-- Values -->
-      <section class="py-14">
-        <h2 class="font-display text-2xl font-bold">Standar PASTI</h2>
-        <p v-if="!active(c.values).length" class="mt-4 text-sm text-navy-500">Tidak ada yang tampil — website memakai standar bawaan.</p>
-        <ol v-else class="mt-6 grid gap-4 tablet:grid-cols-2">
-          <li v-for="(v, i) in active(c.values)" :key="v.id" class="rounded-lg border border-navy-100 p-5">
-            <p class="font-mono text-xs text-navy-500">{{ String(i + 1).padStart(2, '0') }}<template v-if="v.iconOrVisual !== 'none'"> · icon: {{ v.iconOrVisual }}</template></p>
-            <h3 class="mt-1 text-lg font-semibold">{{ v.title }}</h3>
-            <p v-if="v.description" class="mt-2 text-sm leading-relaxed text-navy-600">{{ v.description }}</p>
-          </li>
-        </ol>
-      </section>
-
-      <!-- Milestones -->
-      <section class="border-t border-navy-100 py-14">
-        <h2 class="font-display text-2xl font-bold">Perjalanan</h2>
-        <p v-if="!active(c.milestones).length" class="mt-4 text-sm text-navy-500">Tidak ada yang tampil — website memakai perjalanan bawaan.</p>
-        <ol v-else class="mt-6 space-y-5 border-l-2 border-navy-100 pl-6">
-          <li v-for="m in active(c.milestones)" :key="m.id">
-            <p class="font-mono text-xs uppercase tracking-wider text-navy-500">{{ m.yearOrPeriod }}</p>
-            <h3 class="font-semibold">{{ m.title }}</h3>
-            <p v-if="m.description" class="mt-1 text-sm text-navy-600">{{ m.description }}</p>
-            <img v-if="m.optionalMedia" :src="m.optionalMedia" :alt="m.optionalMediaAlt" class="mt-2 max-h-40 rounded">
-          </li>
-        </ol>
-      </section>
-
-      <!-- Leadership -->
-      <section class="border-t border-navy-100 py-14">
-        <h2 class="font-display text-2xl font-bold">Kepemimpinan</h2>
-        <p v-if="!active(c.leadership).length" class="mt-4 text-sm text-navy-500">Tidak ada yang tampil.</p>
-        <ul v-else class="mt-6 grid gap-6 tablet:grid-cols-2">
-          <li v-for="p in active(c.leadership)" :key="p.id" class="flex gap-4">
-            <img v-if="p.portrait" :src="p.portrait" :alt="p.portraitAlt" class="h-20 w-20 rounded-full object-cover">
-            <div v-else class="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-navy-50 text-xs text-navy-500" aria-hidden="true">Tanpa foto</div>
-            <div>
-              <h3 class="font-semibold">{{ p.name }}</h3>
-              <p class="text-sm text-navy-500">{{ p.role }}</p>
-              <p v-if="p.shortBio" class="mt-2 text-sm leading-relaxed text-navy-600">{{ p.shortBio }}</p>
-            </div>
-          </li>
-        </ul>
-      </section>
-
-      <!-- Proof -->
-      <section class="border-t border-navy-100 py-14">
-        <h2 class="font-display text-2xl font-bold">Angka bukti</h2>
-        <p v-if="!active(c.proof).length" class="mt-4 text-sm text-navy-500">Tidak ada yang tampil.</p>
-        <dl v-else class="mt-6 grid gap-6 tablet:grid-cols-3">
-          <div v-for="p in active(c.proof)" :key="p.id" class="flex flex-col-reverse">
-            <dt class="text-sm font-semibold">{{ p.label }}<span v-if="p.supportingText" class="block text-xs font-normal text-navy-500">{{ p.supportingText }}</span></dt>
-            <dd class="font-display text-4xl font-bold">{{ p.value }}</dd>
-          </div>
-        </dl>
-      </section>
-
-      <!-- CTA -->
-      <section class="rounded-2xl border border-navy-100 p-8 text-center tablet:p-12">
-        <p v-if="c.cta.eyebrow" class="font-mono text-xs uppercase tracking-[0.2em] text-navy-500">{{ c.cta.eyebrow }}</p>
-        <h2 v-if="c.cta.title" class="mt-2 font-display text-3xl font-bold">{{ c.cta.title }}</h2>
-        <p v-else class="text-sm text-navy-500">Ajakan belum diisi — bagian ini memang belum tampil di website.</p>
-        <p v-if="c.cta.supportingCopy" class="mx-auto mt-3 max-w-xl text-navy-600">{{ c.cta.supportingCopy }}</p>
-        <div class="mt-6 flex flex-wrap justify-center gap-3 text-sm">
-          <span v-if="c.cta.primaryCtaLabel" class="rounded-full bg-slateNavy px-5 py-2.5 font-semibold text-white">{{ c.cta.primaryCtaLabel }} <span class="font-normal opacity-70">→ {{ c.cta.primaryCtaUrl }}</span></span>
-          <span v-if="c.cta.secondaryCtaLabel" class="rounded-full border border-slateNavy px-5 py-2.5 font-semibold">{{ c.cta.secondaryCtaLabel }} <span class="font-normal opacity-70">→ {{ c.cta.secondaryCtaUrl }}</span></span>
-        </div>
-      </section>
-
-      <!-- SEO -->
-      <section class="mt-10 rounded-lg border border-dashed border-navy-200 p-5 text-sm">
-        <h2 class="font-semibold">SEO (draft)</h2>
-        <p class="text-xs text-navy-500">Belum dipakai di website — SEO About masih dari kode.</p>
-        <dl class="mt-2 grid gap-1 text-navy-600">
-          <div><dt class="inline font-medium">Judul:</dt> <dd class="inline">{{ c.seo.metaTitle }}</dd></div>
-          <div><dt class="inline font-medium">Deskripsi:</dt> <dd class="inline">{{ c.seo.metaDescription }}</dd></div>
-          <div><dt class="inline font-medium">Canonical:</dt> <dd class="inline">{{ c.seo.canonicalUrl || '—' }}</dd></div>
-          <div><dt class="inline font-medium">Gambar share:</dt> <dd class="inline">{{ c.seo.ogImage || '—' }}</dd></div>
-          <div><dt class="inline font-medium">Indexing:</dt> <dd class="inline">{{ c.seo.noIndex ? 'noindex' : 'index' }}</dd></div>
-        </dl>
-      </section>
+    <main v-else-if="preview" ref="mainRef">
+      <!-- Remount on reload so the sections re-read the new draft. -->
+      <AdminAboutPreviewScope :key="`${data?.version}-${data?.revision}-${data?.updatedAt}`" :content="preview">
+        <AboutHero />
+        <AboutManifesto />
+        <AboutVisionMission />
+        <AboutStandards />
+        <AboutJourney />
+        <AboutFounder />
+        <AboutPillars />
+        <AboutVenn />
+        <AboutClients />
+      </AdminAboutPreviewScope>
     </main>
   </div>
 </template>

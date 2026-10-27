@@ -1,3 +1,4 @@
+import type { InjectionKey } from 'vue'
 import { PROOF_VALUE_PATTERN } from '#shared/utils/aboutSchema'
 import { ABOUT_PAGE_ID } from '~/i18n/content/about'
 import { PublicAboutResponseSchema, type AboutPageContent, type PublicAboutPublished } from '#shared/utils/aboutPublic'
@@ -14,6 +15,7 @@ import { PublicAboutResponseSchema, type AboutPageContent, type PublicAboutPubli
 // no published snapshot or an unexpected response → legacy content.
 
 const STATE_KEY = 'about-page-content'
+const PREVIEW_KEY: InjectionKey<AboutPageContent> = Symbol('about-preview')
 
 export function buildLegacyAboutContent(): AboutPageContent {
   const about = useAbout()
@@ -147,8 +149,16 @@ function aboutCmsEnabledOnServer(): boolean {
   return String(cms?.aboutPublicEnabled) === 'true'
 }
 
+// Admin draft preview: the real sections inside AdminAboutPreviewScope read
+// the draft instead of the public page state.
+export function provideAboutPreview(content: AboutPageContent) {
+  provide(PREVIEW_KEY, content)
+}
+
 // Every About section reads content through this.
 export function useAboutPage(): AboutPageContent {
+  const preview = inject(PREVIEW_KEY, null)
+  if (preview) return preview
   const state = useState<AboutPageContent | undefined>(`${STATE_KEY}-${useLocale()}`)
   return state.value ?? buildLegacyAboutContent()
 }

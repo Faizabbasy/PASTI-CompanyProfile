@@ -16,6 +16,7 @@ if (import.meta.client) {
 // headline segments stay code-owned: the letter scatter and the two-word
 // marker tail are built around this exact phrase.
 const { hero } = useAboutPage()
+const mark = useCmsMark()
 const t = useT()
 const { eyebrow, promise, essence, positioning, companyName } = hero
 
@@ -99,7 +100,7 @@ useGsapContext(() => {
 
     <BaseContainer class="pointer-events-none relative z-10 flex flex-1 flex-col">
       <div class="m-center flex flex-1 flex-col justify-center py-12">
-        <div data-ah-fade><BaseHeroMarker :label="eyebrow" :meta="t('Brand foundation')" /></div>
+        <div v-bind="mark('hero.eyebrow', 'Label kecil di atas judul')" data-ah-fade><BaseHeroMarker :label="eyebrow" :meta="t('Brand foundation')" /></div>
         <h1 class="hero-title m-center mt-6 desktop:mt-[3svh]" :aria-label="promise">
           <span class="ah-mask block" aria-hidden="true"><span data-ah-word class="inline-block">{{ lead }}</span></span>
           <span class="block py-[0.06em]" aria-hidden="true">
@@ -115,7 +116,7 @@ useGsapContext(() => {
             </span>
           </span>
         </h1>
-        <div data-ah-fade class="pointer-events-auto mt-8 desktop:mt-[4.5svh]">
+        <div v-bind="mark('hero.primaryCtaLabel', 'Tombol hero — teks & link (tombol kedua: “Tombol kedua — teks”)')" data-ah-fade class="pointer-events-auto mt-8 desktop:mt-[4.5svh]">
           <BaseHeroCtas
             :primary="hero.primaryCta"
             :secondary="{ label: hero.secondaryCtaLabel, down: true }"
