@@ -7,16 +7,19 @@ import type { ProjectListRow } from '#shared/utils/projectSchema'
 // comes from the linked project. Metrics and gallery images carry their own
 // claim status; publishing the case never approves them.
 definePageMeta({ layout: 'admin' })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 
 type CaseState = CollectionAdminState<CaseStudyContent, CaseStudyExtra>
 const id = useRoute().params.id as string
 const { cmsFetch, can } = useCmsSession()
-const { data: projects } = await useAsyncData(`admin-work-case-${id}-projects`, () => cmsFetch<ProjectListRow[]>('/api/admin/work/projects'))
+const { data: projects } = await useAsyncData(`admin-work-case-${id}-projects-${lang}`, () => cmsFetch<ProjectListRow[]>('/api/admin/work/projects', { query: { lang } }))
 
 const {
   loadStatus, loadError, refresh, form, state, dirty, activeTab, errors, errorCount, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, publishedIds, canPublish, canUnpublish, canArchive, publishDisabledReason
 } = await useSingletonEditor<CaseState, CaseStudyForm>({
+  lang,
   name: 'this case study',
   endpoint: `/api/admin/work/case-studies/${id}`,
   asyncKey: `admin-work-case-${id}`,
@@ -49,7 +52,7 @@ const move = <T>(list: T[], i: number, d: number) => {
   list.splice(t, 0, list.splice(i, 1)[0]!)
 }
 
-const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin/work/case-studies/${id}`, '/admin/work/case-studies', () => title.value)
+const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin/work/case-studies/${id}?lang=${lang}`, `/admin/work/case-studies?lang=${lang}`, () => title.value)
 
 const STATUS_ID: Record<string, string> = { draft: 'draft', published: 'sudah tayang', archived: 'diarsipkan' }
 // Keeps a collapsed list item open while it has a validation error.
@@ -64,12 +67,13 @@ const codeManaged = [
 
 <template>
   <AdminEditorFrame
+    :lang="lang"
     v-model:active-tab="activeTab"
     :title="`${title} · studi kasus`"
     crumb="Case Studies"
-    crumb-to="/admin/work/case-studies"
+    :crumb-to="`/admin/work/case-studies?lang=${lang}`"
     :tabs="CASE_TABS"
-    :preview-path="`/admin/preview/work/case-studies/${id}`"
+    :preview-path="`/admin/preview/work/case-studies/${id}?lang=${lang}`"
     :code-managed="codeManaged"
     :dummy="!!state?.dummy"
     :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
@@ -92,7 +96,7 @@ const codeManaged = [
           :state="state"
           :dirty="dirty"
           :busy="busy"
-          :preview-href="`/admin/preview/work/case-studies/${id}`"
+          :preview-href="`/admin/preview/work/case-studies/${id}?lang=${lang}`"
           :can-publish="canPublish"
           :can-unpublish="canUnpublish"
           :can-archive="canArchive"
@@ -119,7 +123,7 @@ const codeManaged = [
           <p v-if="err('projectId')" class="mt-1 text-xs font-medium text-red-700" role="alert">{{ err('projectId') }}</p>
           <p v-if="project" class="mt-1 text-xs text-navy-500">
             Dari proyek: {{ project.name }} · {{ project.category }} —
-            <NuxtLink :to="`/admin/work/projects/${project.id}`" class="underline">nama, klien, tahun dan poster diubah di sana</NuxtLink>.
+            <NuxtLink :to="`/admin/work/projects/${project.id}?lang=${lang}`" class="underline">nama, klien, tahun dan poster diubah di sana</NuxtLink>.
           </p>
         </div>
         <div>

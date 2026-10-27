@@ -5,8 +5,8 @@ import { resolveWorkView, type WorkSourceRecord } from '#shared/utils/workPublic
 import { WorkContentSchema, type WorkContent, type WorkContentInput } from '#shared/utils/workSchema'
 import type { ClaimStatus } from '#shared/cms/fields'
 import { WORK_DUMMY_CASES, WORK_DUMMY_CONTENT, WORK_DUMMY_PROJECTS } from '../../data/workDummy'
-import { defineCollection, type CollectionRecord } from './collection'
-import { defineSingletonPage } from './singletonPage'
+import { byCreated, collectionLangStates, defineCollection, readBothLangs, type CollectionRecord } from './collection'
+import { defineSingletonPage, type CmsLang } from './singletonPage'
 
 // Work CMS = three layers on the shared engines:
 //
@@ -17,6 +17,12 @@ import { defineSingletonPage } from './singletonPage'
 // Relations are references only and are checked here, server-side, on every
 // save / publish / archive / delete. Claim approval (metrics + media) is
 // enforced in the case-study save path.
+//
+// Bilingual: every layer has an Indonesian and an English record (same ids).
+// Relations are checked within one language — the Indonesian Work page needs
+// the Indonesian project / case-study records published. Slugs, years,
+// relations, which items the Work page shows and their order are shared
+// (they follow the other language on save, like images).
 
 type ProjectRec = CollectionRecord<ProjectContent>
 type CaseRec = CollectionRecord<CaseStudyContent>
@@ -40,20 +46,21 @@ export const projectsCollection = defineCollection<ProjectContent>({
   lists: [],
   actions: { create: 'project.create', update: 'project.update', publish: 'project.publish', unpublish: 'project.unpublish', archive: 'project.archive', delete: 'project.delete' },
   dummyRecords: WORK_DUMMY_PROJECTS,
-  async validate(content, { id }) {
-    const all = await projectsCollection.readAll()
+  sharedPaths: ['slug', 'year'],
+  async validate(content, { id, lang }) {
+    const all = await projectsCollection.forLocale(lang).readAll()
     if (all.some((r) => r.id !== id && r.draft.content.slug === content.slug)) fieldError(400, 'slug', 'Another project already uses this slug.')
   },
-  async beforeArchive(rec) {
-    const cases = (await casesCollection.readAll()).filter((c) => c.draft.content.projectId === rec.id && c.status !== 'archived')
+  async beforeArchive(rec, lang) {
+    const cases = (await casesCollection.forLocale(lang).readAll()).filter((c) => c.draft.content.projectId === rec.id && c.status !== 'archived')
     if (cases.length) conflict('This project has a case study. Archive the case study first.')
-    const use = await workUsage()
+    const use = await workUsage(lang)
     if (use.projects.draftActive.has(rec.id) || use.projects.publishedActive.has(rec.id)) conflict('This project is selected on the Work page. Remove or deactivate it there first.')
   },
-  async beforeDelete(rec) {
-    const cases = (await casesCollection.readAll()).filter((c) => c.draft.content.projectId === rec.id || c.published?.content.projectId === rec.id)
+  async beforeDelete(rec, lang) {
+    const cases = (await casesCollection.forLocale(lang).readAll()).filter((c) => c.draft.content.projectId === rec.id || c.published?.content.projectId === rec.id)
     if (cases.length) conflict('A case study references this project. Remove that link first.')
-    const use = await workUsage()
+    const use = await workUsage(lang)
     if (use.projects.any.has(rec.id)) conflict('This project is referenced by the Work page. Remove it there first.')
   }
 })
@@ -115,6 +122,7 @@ export const casesCollection = defineCollection<CaseStudyContent, CaseStudyConte
   ],
   actions: { create: 'caseStudy.create', update: 'caseStudy.update', publish: 'caseStudy.publish', unpublish: 'caseStudy.unpublish', archive: 'caseStudy.archive', delete: 'caseStudy.delete' },
   dummyRecords: WORK_DUMMY_CASES,
+  sharedPaths: ['projectId', 'slug', 'approach.mode'],
   async beforeSave(content, { event, user, id, current }) {
     const changes = enforceApprovals(content, current, roleCan(user.role, 'claims.approve'))
     return {
@@ -127,26 +135,26 @@ export const casesCollection = defineCollection<CaseStudyContent, CaseStudyConte
       }
     }
   },
-  async validate(content, { id }) {
-    const all = await casesCollection.readAll()
+  async validate(content, { id, lang }) {
+    const all = await casesCollection.forLocale(lang).readAll()
     if (all.some((r) => r.id !== id && r.draft.content.slug === content.slug)) fieldError(400, 'slug', 'Another case study already uses this slug.')
-    const project = await projectsCollection.peek(content.projectId)
+    const project = await projectsCollection.forLocale(lang).peek(content.projectId)
     if (!project) fieldError(400, 'projectId', 'This project does not exist.')
     if (project.status === 'archived') fieldError(400, 'projectId', 'This project is archived.')
     if (all.some((r) => r.id !== id && r.status !== 'archived' && r.draft.content.projectId === content.projectId)) {
       fieldError(400, 'projectId', 'This project already has a case study.')
     }
   },
-  async beforePublish(rec) {
-    const project = await projectsCollection.peek(rec.draft.content.projectId)
+  async beforePublish(rec, lang) {
+    const project = await projectsCollection.forLocale(lang).peek(rec.draft.content.projectId)
     if (project?.status !== 'published') fieldError(422, 'projectId', 'Publish the linked project first — the case study takes its name, client and year from it.')
   },
-  async beforeArchive(rec) {
-    const use = await workUsage()
+  async beforeArchive(rec, lang) {
+    const use = await workUsage(lang)
     if (use.cases.draftActive.has(rec.id) || use.cases.publishedActive.has(rec.id)) conflict('This case study is featured on the Work page. Remove or deactivate it there first.')
   },
-  async beforeDelete(rec) {
-    const use = await workUsage()
+  async beforeDelete(rec, lang) {
+    const use = await workUsage(lang)
     if (use.cases.any.has(rec.id)) conflict('This case study is referenced by the Work page. Remove it there first.')
   }
 })
@@ -155,9 +163,9 @@ export const casesCollection = defineCollection<CaseStudyContent, CaseStudyConte
 // Work page (singleton)
 // ---------------------------------------------------------------------------
 
-async function validateWorkRefs(content: WorkContent | WorkContentInput) {
-  const projects = new Map((await projectsCollection.readAll()).map((r) => [r.id, r]))
-  const cases = new Map((await casesCollection.readAll()).map((r) => [r.id, r]))
+async function validateWorkRefs(content: WorkContent | WorkContentInput, lang: CmsLang) {
+  const projects = new Map((await projectsCollection.forLocale(lang).readAll()).map((r) => [r.id, r]))
+  const cases = new Map((await casesCollection.forLocale(lang).readAll()).map((r) => [r.id, r]))
   content.projectIndex.items.forEach((i, n) => {
     const p = projects.get(i.projectId)
     if (!p) fieldError(400, `projectIndex.items.${n}.projectId`, 'This project does not exist.')
@@ -170,9 +178,9 @@ async function validateWorkRefs(content: WorkContent | WorkContentInput) {
   })
 }
 
-async function assertWorkRefsPublished(content: WorkContent) {
-  const projects = new Map((await projectsCollection.readAll()).map((r) => [r.id, r]))
-  const cases = new Map((await casesCollection.readAll()).map((r) => [r.id, r]))
+async function assertWorkRefsPublished(content: WorkContent, lang: CmsLang) {
+  const projects = new Map((await projectsCollection.forLocale(lang).readAll()).map((r) => [r.id, r]))
+  const cases = new Map((await casesCollection.forLocale(lang).readAll()).map((r) => [r.id, r]))
   content.projectIndex.items.forEach((i, n) => {
     if (i.active && projects.get(i.projectId)?.status !== 'published') {
       fieldError(422, `projectIndex.items.${n}.projectId`, 'Publish this project first, or set it inactive.')
@@ -195,13 +203,15 @@ export const workPage = defineSingletonPage<'work', WorkContent, WorkContentInpu
     { path: 'featuredCases.items', prefix: 'wc' }
   ],
   actions: { update: 'work.update', publish: 'work.publish', unpublish: 'work.unpublish', archive: 'work.archive' },
+  sharedPaths: ['projectIndex.items', 'featuredCases.items'],
   validate: validateWorkRefs,
   beforePublish: assertWorkRefsPublished
 })
 
-// Which records the Work page references (draft and live published snapshot).
-async function workUsage() {
-  const r = await workPage.peekRecord()
+// Which records the Work page of one language references (draft and live
+// published snapshot).
+async function workUsage(lang: CmsLang) {
+  const r = await workPage.forLocale(lang).peekRecord()
   const sets = () => ({ any: new Set<string>(), draftActive: new Set<string>(), publishedActive: new Set<string>() })
   const out = { projects: sets(), cases: sets() }
   if (!r) return out
@@ -230,9 +240,11 @@ export async function ensureWorkSeeded() {
 // Admin views
 // ---------------------------------------------------------------------------
 
-export async function listProjectRows(): Promise<ProjectListRow[]> {
+export async function listProjectRows(lang: CmsLang): Promise<ProjectListRow[]> {
   await ensureWorkSeeded()
-  const [projects, cases, use] = await Promise.all([projectsCollection.readAll(), casesCollection.readAll(), workUsage()])
+  const [all, caseLangs, use] = await Promise.all([readBothLangs(projectsCollection), readBothLangs(casesCollection), workUsage(lang)])
+  const projects = [...all[lang].values()].sort(byCreated)
+  const cases = [...caseLangs[lang].values()]
   return projects.map((p) => {
     const cs = cases.find((c) => c.draft.content.projectId === p.id && c.status !== 'archived')
     return {
@@ -247,15 +259,18 @@ export async function listProjectRows(): Promise<ProjectListRow[]> {
       publishedVersion: p.published?.version ?? null,
       caseStudy: cs ? { id: cs.id, slug: cs.draft.content.slug, status: cs.status } : null,
       selectedInWork: use.projects.draftActive.has(p.id) || use.projects.publishedActive.has(p.id),
+      languages: collectionLangStates(all, p.id),
       updatedAt: p.updatedAt,
       updatedBy: p.updatedBy
     }
   })
 }
 
-export async function listCaseRows(): Promise<CaseStudyListRow[]> {
+export async function listCaseRows(lang: CmsLang): Promise<CaseStudyListRow[]> {
   await ensureWorkSeeded()
-  const [projects, cases, use] = await Promise.all([projectsCollection.readAll(), casesCollection.readAll(), workUsage()])
+  const [projectLangs, all, use] = await Promise.all([readBothLangs(projectsCollection), readBothLangs(casesCollection), workUsage(lang)])
+  const projects = [...projectLangs[lang].values()]
+  const cases = [...all[lang].values()].sort(byCreated)
   return cases.map((c) => {
     const count = (s: ClaimStatus) => c.draft.content.metrics.filter((m) => m.claimStatus === s).length + c.draft.content.gallery.filter((g) => g.approvalStatus === s).length
     return {
@@ -270,14 +285,15 @@ export async function listCaseRows(): Promise<CaseStudyListRow[]> {
       publishedVersion: c.published?.version ?? null,
       featuredInWork: use.cases.draftActive.has(c.id) || use.cases.publishedActive.has(c.id),
       claims: { confirmed: count('confirmed'), needsApproval: count('needs_approval'), hidden: count('hidden') },
+      languages: collectionLangStates(all, c.id),
       updatedAt: c.updatedAt,
       updatedBy: c.updatedBy
     }
   })
 }
 
-export async function projectAdminResponse(rec: ProjectRec) {
-  const [cases, use] = await Promise.all([casesCollection.readAll(), workUsage()])
+export async function projectAdminResponse(rec: ProjectRec, lang: CmsLang) {
+  const [cases, use] = await Promise.all([casesCollection.forLocale(lang).readAll(), workUsage(lang)])
   const cs = cases.find((c) => c.draft.content.projectId === rec.id && c.status !== 'archived')
   const extra: ProjectExtra = {
     caseStudy: cs ? { id: cs.id, slug: cs.draft.content.slug, status: cs.status } : null,
@@ -287,8 +303,8 @@ export async function projectAdminResponse(rec: ProjectRec) {
   return { state: projectsCollection.toAdminState(rec, extra), revision: rec.draft.revision }
 }
 
-export async function caseAdminResponse(rec: CaseRec) {
-  const [project, use] = await Promise.all([projectsCollection.peek(rec.draft.content.projectId), workUsage()])
+export async function caseAdminResponse(rec: CaseRec, lang: CmsLang) {
+  const [project, use] = await Promise.all([projectsCollection.forLocale(lang).peek(rec.draft.content.projectId), workUsage(lang)])
   const extra: CaseStudyExtra = {
     project: project ? { id: project.id, name: project.draft.content.name, status: project.status } : null,
     publishedSlug: rec.published?.content.slug ?? null,
@@ -298,11 +314,12 @@ export async function caseAdminResponse(rec: CaseRec) {
 }
 
 // Draft preview data: the Work draft + drafts of every non-archived record.
-export async function getWorkPreviewData() {
+export async function getWorkPreviewData(lang: CmsLang) {
   await ensureWorkSeeded()
-  const draft = await workPage.getDraftContent()
+  const draft = await workPage.forLocale(lang).getDraftContent()
   const src = <C>(r: CollectionRecord<C>) => ({ id: r.id, meta: r.meta, status: r.status, content: r.draft.content })
-  const [projects, cases] = await Promise.all([projectsCollection.readAll(), casesCollection.readAll()])
+  await Promise.all([projectsCollection.forLocale(lang).ensureSiblings(), casesCollection.forLocale(lang).ensureSiblings()])
+  const [projects, cases] = await Promise.all([projectsCollection.forLocale(lang).readAll(), casesCollection.forLocale(lang).readAll()])
   return {
     work: draft,
     projects: projects.filter((r) => r.status !== 'archived').map(src),
@@ -310,13 +327,13 @@ export async function getWorkPreviewData() {
   }
 }
 
-export async function getRecordPreviewData(kind: 'project' | 'caseStudy', id: string) {
+export async function getRecordPreviewData(kind: 'project' | 'caseStudy', id: string, lang: CmsLang) {
   if (kind === 'project') {
-    const r = await projectsCollection.read(id)
+    const r = await projectsCollection.forLocale(lang).read(id)
     return { record: { id: r.id, meta: r.meta, status: r.status, version: r.draft.version, updatedAt: r.draft.updatedAt, content: r.draft.content }, project: null }
   }
-  const r = await casesCollection.read(id)
-  const p = await projectsCollection.peek(r.draft.content.projectId)
+  const r = await casesCollection.forLocale(lang).read(id)
+  const p = await projectsCollection.forLocale(lang).peek(r.draft.content.projectId)
   return {
     record: { id: r.id, meta: r.meta, status: r.status, version: r.draft.version, updatedAt: r.draft.updatedAt, content: r.draft.content },
     project: p ? { id: p.id, meta: p.meta, status: p.status, content: p.draft.content } : null
@@ -333,7 +350,7 @@ export async function getRecordPreviewData(kind: 'project' | 'caseStudy', id: st
 export async function getPublishedWork(lang: CmsLang = 'en') {
   const snap = await workPage.forLocale(lang).getPublishedSnapshot()
   if (!snap) return null
-  const [projects, cases] = await Promise.all([projectsCollection.getPublishedAll(), casesCollection.getPublishedAll()])
+  const [projects, cases] = await Promise.all([projectsCollection.forLocale(lang).getPublishedAll(), casesCollection.forLocale(lang).getPublishedAll()])
   const publishedProjectIds = new Set(projects.map((p) => p.id))
   const usableCases = cases.filter((c) => publishedProjectIds.has(c.content.projectId))
   const toSrc = <C>(r: { id: string; meta: Record<string, string>; content: C }): WorkSourceRecord<C> => ({ id: r.id, meta: r.meta, content: r.content })

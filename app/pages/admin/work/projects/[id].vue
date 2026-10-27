@@ -6,6 +6,8 @@ import type { ProjectContent, ProjectExtra } from '#shared/utils/projectSchema'
 // /work are chosen on the Work page; the case study link is owned by the
 // case study (projectId) and shown here read-only.
 definePageMeta({ layout: 'admin' })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 
 type ProjectState = CollectionAdminState<ProjectContent, ProjectExtra>
 const id = useRoute().params.id as string
@@ -14,6 +16,7 @@ const {
   loadStatus, loadError, refresh, form, state, dirty, activeTab, errorCount, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, canPublish, canUnpublish, canArchive, publishDisabledReason
 } = await useSingletonEditor<ProjectState, ProjectForm>({
+  lang,
   name: 'this project',
   endpoint: `/api/admin/work/projects/${id}`,
   asyncKey: `admin-work-project-${id}`,
@@ -24,7 +27,7 @@ const {
 })
 useHead({ title: computed(() => `${state.value?.draft.content.name ?? 'Project'} · Projects`) })
 
-const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin/work/projects/${id}`, '/admin/work/projects', () => state.value?.draft.content.name ?? id)
+const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin/work/projects/${id}?lang=${lang}`, `/admin/work/projects?lang=${lang}`, () => state.value?.draft.content.name ?? id)
 
 const codeManaged = [
   'Desain kartu proyek, animasi, dan tumpukan poster di hero /work.',
@@ -35,12 +38,13 @@ const codeManaged = [
 
 <template>
   <AdminEditorFrame
+    :lang="lang"
     v-model:active-tab="activeTab"
     :title="state?.draft.content.name || 'Proyek'"
     crumb="Projects"
-    crumb-to="/admin/work/projects"
+    :crumb-to="`/admin/work/projects?lang=${lang}`"
     :tabs="PROJECT_TABS"
-    :preview-path="`/admin/preview/work/projects/${id}`"
+    :preview-path="`/admin/preview/work/projects/${id}?lang=${lang}`"
     :code-managed="codeManaged"
     :dummy="!!state?.dummy"
     :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
@@ -63,7 +67,7 @@ const codeManaged = [
         :state="state"
         :dirty="dirty"
         :busy="busy"
-        :preview-href="`/admin/preview/work/projects/${id}`"
+        :preview-href="`/admin/preview/work/projects/${id}?lang=${lang}`"
         :can-publish="canPublish"
         :can-unpublish="canUnpublish"
         :can-archive="canArchive"
@@ -86,19 +90,19 @@ const codeManaged = [
         <div class="rounded-lg border border-navy-100 bg-white p-4">
           <h3 class="font-semibold">Studi kasus</h3>
           <p v-if="state.extra.caseStudy" class="mt-1 flex items-center gap-2">
-            <NuxtLink :to="`/admin/work/case-studies/${state.extra.caseStudy.id}`" class="underline">#case-{{ state.extra.caseStudy.slug }}</NuxtLink>
+            <NuxtLink :to="`/admin/work/case-studies/${state.extra.caseStudy.id}?lang=${lang}`" class="underline">#case-{{ state.extra.caseStudy.slug }}</NuxtLink>
             <AdminStatusBadge :status="state.extra.caseStudy.status" />
           </p>
           <p v-else class="mt-1 text-navy-500">
             Belum ada — proyek ini hanya tampil sebagai kartu. Studi kasus dibuat dan dihubungkan dari menu Case Studies
-            (<NuxtLink to="/admin/work/case-studies/new" class="underline">buat studi kasus</NuxtLink>).
+            (<NuxtLink :to="`/admin/work/case-studies/new?lang=${lang}`" class="underline">buat studi kasus</NuxtLink>).
           </p>
         </div>
         <div class="rounded-lg border border-navy-100 bg-white p-4">
           <h3 class="font-semibold">Halaman Work</h3>
           <p class="mt-1 text-navy-500">
             Di draft halaman Work: {{ state.extra.usedInWork.draft ? 'dipilih' : 'tidak dipilih' }} · Di website sekarang: {{ state.extra.usedInWork.published ? 'tampil' : 'tidak tampil' }}.
-            Tampil/tidaknya dan urutannya diatur di <NuxtLink to="/admin/work" class="underline">Work → Work page</NuxtLink>.
+            Tampil/tidaknya dan urutannya diatur di <NuxtLink :to="`/admin/work?lang=${lang}`" class="underline">Work → Work page</NuxtLink>.
           </p>
           <p v-if="state.meta.legacyAnchor" class="mt-1 text-xs text-navy-500">Link lama dari website sekarang tetap dipakai: <code>/work#work-{{ state.meta.legacyAnchor }}</code></p>
         </div>

@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto'
 import type { H3Event } from 'h3'
 import type { ZodType } from 'zod'
 import type { ActorRef, PageSource, PageStatus, SingletonAdminState } from '#shared/cms/fields'
+import { applyLangSync, langSyncEmpty, langSyncOf, type LangSync } from './langSync'
 import type { AuditAction, CmsUser } from './types'
 
 // Singleton page engine (About, Technology). One record per page holds two
@@ -64,8 +65,12 @@ export interface SingletonPageConfig<Id extends string, C> {
   // Optional async checks for content that references other records (Work
   // page → projects / case studies). Throw an h3 error to reject. About,
   // Technology and Creative don't use them.
-  validate?: (content: C) => Promise<void>
-  beforePublish?: (content: C) => Promise<void>
+  // `lang` = the language record being saved / published.
+  validate?: (content: C, lang: CmsLang) => Promise<void>
+  beforePublish?: (content: C, lang: CmsLang) => Promise<void>
+  // Language-neutral content paths, kept identical in both languages on
+  // every save (images always are; see langSync.ts).
+  sharedPaths?: string[]
 }
 
 const SYSTEM: ActorRef = { id: 'system', name: 'Dev seed' }
@@ -140,13 +145,19 @@ export function cmsLang(event: H3Event): CmsLang {
 }
 
 export function defineSingletonPage<Id extends string, C extends object, I = C>(cfg: SingletonPageConfig<Id, C>) {
-  const en = buildSingletonEngine<Id, C, I>(cfg, 'en')
-  let id: typeof en | undefined
-  const forLocale = (lang: CmsLang) => (lang === 'id' ? (id ??= buildSingletonEngine<Id, C, I>(cfg, 'id')) : en)
+  let en: Engine
+  let id: Engine | undefined
+  type Engine = ReturnType<typeof buildSingletonEngine<Id, C, I>>
+  const forLocale = (lang: CmsLang): Engine => (lang === 'id' ? (id ??= buildSingletonEngine<Id, C, I>(cfg, 'id', forLocale)) : en)
+  en = buildSingletonEngine<Id, C, I>(cfg, 'en', forLocale)
   return { ...en, forLocale }
 }
 
-function buildSingletonEngine<Id extends string, C extends object, I = C>(cfg: SingletonPageConfig<Id, C>, lang: CmsLang) {
+function buildSingletonEngine<Id extends string, C extends object, I = C>(
+  cfg: SingletonPageConfig<Id, C>,
+  lang: CmsLang,
+  sibling: (lang: CmsLang) => { syncFrom: (event: H3Event, user: CmsUser, from: CmsLang, sync: LangSync, source: C) => Promise<number> }
+) {
   type Rec = SingletonRecord<Id, C>
   const KEY = `pages:${cfg.id}${langSuffix(lang)}`
   const REVISION_PREFIX = `page-revisions:${cfg.id}${langSuffix(lang)}`
@@ -250,11 +261,12 @@ function buildSingletonEngine<Id extends string, C extends object, I = C>(cfg: S
     }
     const publishedIds = r.published ? itemIds(r.published.content) : new Set<string>()
     const content = normalizeContent(input, r.draft.content, publishedIds)
-    if (cfg.validate) await cfg.validate(content)
+    if (cfg.validate) await cfg.validate(content, lang)
     const sections = changedSections(r.draft.content, content)
     if (sections.length === 0) {
-      return { state: toAdminState(r), revision: r.draft.revision, changedSections: sections }
+      return { state: toAdminState(r), revision: r.draft.revision, changedSections: sections, sync: null as LangSync | null, content }
     }
+    const before = r.draft.content
 
     const now = new Date().toISOString()
     const who = actor(user)
@@ -265,7 +277,29 @@ function buildSingletonEngine<Id extends string, C extends object, I = C>(cfg: S
     r.updatedBy = who
     await cmsStorage().setItem(KEY, r)
     await audit(event, { action: cfg.actions.update, entityType: 'page', entityId: cfg.id, metadata: { lang, draftVersion: version, revision: r.draft.revision, changedSections: sections } })
-    return { state: toAdminState(r), revision: r.draft.revision, changedSections: sections }
+    return { state: toAdminState(r), revision: r.draft.revision, changedSections: sections, sync: langSyncOf(before, content, cfg.sharedPaths), content }
+  }
+
+  // The other language saved an image / shared-field change: copy it into
+  // this draft. Same version / revision rules as a normal save, so an editor
+  // open on this language gets the usual "changed elsewhere" reload prompt.
+  // Returns how many images changed here.
+  async function syncFromUnlocked(event: H3Event, user: CmsUser, from: CmsLang, sync: LangSync, source: C): Promise<number> {
+    const r = await cmsStorage().getItem<Rec>(KEY)
+    if (!r) return 0 // never seeded: nothing to keep in step yet
+    const content = clone(r.draft.content)
+    const { images, fields } = applyLangSync(content, source, sync)
+    if (images + fields === 0) return 0
+    const sections = changedSections(r.draft.content, content)
+    const now = new Date().toISOString()
+    const who = actor(user)
+    const version = r.draft.changedSincePublish ? r.draft.version : (r.published?.version ?? 0) + 1
+    r.draft = { version, revision: r.draft.revision + 1, changedSincePublish: true, content, updatedAt: now, updatedBy: who }
+    r.updatedAt = now
+    r.updatedBy = who
+    await cmsStorage().setItem(KEY, r)
+    await audit(event, { action: cfg.actions.update, entityType: 'page', entityId: cfg.id, metadata: { lang, syncedFrom: from, mediaSynced: images, fieldsSynced: fields, draftVersion: version, revision: r.draft.revision, changedSections: sections } })
+    return images
   }
 
   async function publishUnlocked(event: H3Event, user: CmsUser, revision: number) {
@@ -281,8 +315,8 @@ function buildSingletonEngine<Id extends string, C extends object, I = C>(cfg: S
     if (!check.success) {
       throw createError({ statusCode: 422, statusMessage: 'Draft is not valid for publishing', data: { fields: check.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })) } })
     }
-    if (cfg.validate) await cfg.validate(r.draft.content)
-    if (cfg.beforePublish) await cfg.beforePublish(r.draft.content)
+    if (cfg.validate) await cfg.validate(r.draft.content, lang)
+    if (cfg.beforePublish) await cfg.beforePublish(r.draft.content, lang)
 
     const now = new Date().toISOString()
     const who = actor(user)
@@ -327,7 +361,23 @@ function buildSingletonEngine<Id extends string, C extends object, I = C>(cfg: S
 
   // Every mutation runs under the record lock: the revision check and the
   // write are one step, across all server instances (storage.ts).
-  const saveDraft = (...a: Parameters<typeof saveDraftUnlocked>) => withCmsLock(KEY, () => saveDraftUnlocked(...a))
+  // After the save (its lock released), image / shared-field changes go to
+  // the other language's draft under that record's own lock. A failed sync
+  // never undoes the save; the response says how many images were copied.
+  async function saveDraft(...a: Parameters<typeof saveDraftUnlocked>) {
+    const { sync, content, ...result } = await withCmsLock(KEY, () => saveDraftUnlocked(...a))
+    let mediaSynced = 0
+    if (sync && !langSyncEmpty(sync)) {
+      const other: CmsLang = lang === 'id' ? 'en' : 'id'
+      try {
+        mediaSynced = await sibling(other).syncFrom(a[0], a[1], lang, sync, content)
+      } catch (err) {
+        console.error(`[cms] language sync ${cfg.id} ${lang} → ${other} failed`, err)
+      }
+    }
+    return { ...result, mediaSynced }
+  }
+  const syncFrom = (...a: Parameters<typeof syncFromUnlocked>) => withCmsLock(KEY, () => syncFromUnlocked(...a))
   const publish = (...a: Parameters<typeof publishUnlocked>) => withCmsLock(KEY, () => publishUnlocked(...a))
   const setStatus = (...a: Parameters<typeof setStatusUnlocked>) => withCmsLock(KEY, () => setStatusUnlocked(...a))
 
@@ -355,6 +405,7 @@ function buildSingletonEngine<Id extends string, C extends object, I = C>(cfg: S
     getState,
     getDraftContent,
     saveDraft,
+    syncFrom,
     publish,
     setStatus,
     peekRecord,

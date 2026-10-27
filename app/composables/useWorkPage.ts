@@ -176,13 +176,10 @@ export async function resolveWorkPageContent() {
   const state = useState<WorkPageContent>(`${STATE_KEY}-${locale}`, () => legacy)
 
   const { data } = await useAsyncData(`work-cms-source-${locale}`, async () => {
-    // The published CMS copy is English for now: Indonesian pages use the
-    // translated code copy until Indonesian CMS records exist.
-    if (locale === 'id') return { status: 'disabled' as const }
     // SSR: skip the call entirely when the server-side flag is off.
     if (import.meta.server && !workCmsEnabledOnServer()) return { status: 'disabled' as const }
     try {
-      const raw = await $fetch('/api/public/work', { timeout: 2500 })
+      const raw = await $fetch('/api/public/work', { query: { lang: locale }, timeout: 2500 })
       const parsed = PublicWorkResponseSchema.safeParse(raw)
       if (!parsed.success) {
         if (import.meta.server) console.error('[work] CMS response failed validation — using legacy content')

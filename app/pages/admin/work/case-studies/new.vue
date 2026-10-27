@@ -5,10 +5,12 @@ import type { CollectionAdminStateLike } from '~/composables/useCollectionRecord
 // Create a case study for an existing project (draft), then continue in its
 // editor. Projects that already have a case study are not offered.
 definePageMeta({ layout: 'admin' })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 useHead({ title: 'New case study · Work' })
 
 const { cmsFetch } = useCmsSession()
-const { data: projects } = await useAsyncData('admin-work-case-new-projects', () => cmsFetch<ProjectListRow[]>('/api/admin/work/projects'))
+const { data: projects } = await useAsyncData(`admin-work-case-new-projects-${lang}`, () => cmsFetch<ProjectListRow[]>('/api/admin/work/projects', { query: { lang } }))
 const available = computed(() => (projects.value ?? []).filter((p) => p.status !== 'archived' && !p.caseStudy))
 const STATUS_ID: Record<string, string> = { draft: 'draft', published: 'sudah tayang', archived: 'diarsipkan' }
 
@@ -18,8 +20,8 @@ const { errors, err, notice, busy, submit } = useCollectionCreate()
 async function create() {
   await submit({
     validate: () => validateCaseStudyForm(form.value),
-    request: () => cmsFetch<{ state: CollectionAdminStateLike }>('/api/admin/work/case-studies', { method: 'POST', body: { content: toCaseStudyPayload(form.value) }, keepOn401: true }),
-    then: (res) => navigateTo(`/admin/work/case-studies/${res.state.id}`)
+    request: () => cmsFetch<{ state: CollectionAdminStateLike }>('/api/admin/work/case-studies', { query: { lang }, method: 'POST', body: { content: toCaseStudyPayload(form.value) }, keepOn401: true }),
+    then: (res) => navigateTo(`/admin/work/case-studies/${res.state.id}?lang=${lang}`)
   })
 }
 </script>
@@ -27,8 +29,8 @@ async function create() {
 <template>
   <section>
     <nav aria-label="Breadcrumb" class="text-xs text-navy-500">
-      <NuxtLink to="/admin/work" class="hover:underline">Work</NuxtLink> <span aria-hidden="true">/</span>
-      <NuxtLink to="/admin/work/case-studies" class="hover:underline">Case Studies</NuxtLink> <span aria-hidden="true">/</span> Baru
+      <NuxtLink :to="`/admin/work?lang=${lang}`" class="hover:underline">Work</NuxtLink> <span aria-hidden="true">/</span>
+      <NuxtLink :to="`/admin/work/case-studies?lang=${lang}`" class="hover:underline">Case Studies</NuxtLink> <span aria-hidden="true">/</span> Baru
     </nav>
     <h1 class="mt-1 text-2xl font-bold">Studi kasus baru</h1>
     <div class="mt-3 max-w-3xl rounded-lg border border-navy-100 bg-navy-50/60 px-4 py-3 text-sm text-navy-700">
@@ -46,7 +48,7 @@ async function create() {
           <option value="" disabled>Pilih proyek…</option>
           <option v-for="p in available" :key="p.id" :value="p.id">{{ p.name }} · {{ STATUS_ID[p.status] ?? p.status }}</option>
         </select>
-        <p v-if="!available.length" class="mt-1 text-xs text-navy-500">Semua proyek sudah punya studi kasus. <NuxtLink to="/admin/work/projects/new" class="underline">Tambah proyek</NuxtLink> dulu.</p>
+        <p v-if="!available.length" class="mt-1 text-xs text-navy-500">Semua proyek sudah punya studi kasus. <NuxtLink :to="`/admin/work/projects/new?lang=${lang}`" class="underline">Tambah proyek</NuxtLink> dulu.</p>
         <p v-if="err('projectId')" class="mt-1 text-xs font-medium text-red-700" role="alert">{{ err('projectId') }}</p>
       </div>
       <AdminFormField :id="fieldId('slug')" v-model="form.slug" label="Alamat singkat (slug)" :maxlength="60" required hint="Link langsung di /work: #case-<slug>. Huruf kecil, angka dan tanda hubung, mis. toko-online-abc." :error="err('slug')" />

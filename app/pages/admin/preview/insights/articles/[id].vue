@@ -6,6 +6,8 @@ import type { ArticleContent, CategoryContent } from '#shared/utils/insightsSche
 // Authenticated draft preview of ONE article in the real Contents list +
 // Reader (ADMIN + EDITOR, noindex, no-store). Click the row to open it.
 definePageMeta({ layout: false })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 useHead({ title: 'Preview · Article (draft) · PASTI CMS', meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 
 interface PreviewResponse {
@@ -15,7 +17,7 @@ interface PreviewResponse {
 
 const id = useRoute().params.id as string
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData(`admin-insights-article-preview-${id}`, () => cmsFetch<PreviewResponse>(`/api/admin/insights/articles/${id}/preview`))
+const { data, error, refresh, status } = await useAsyncData(`admin-insights-article-preview-${id}-${lang}`, () => cmsFetch<PreviewResponse>(`/api/admin/insights/articles/${id}/preview`, { query: { lang } }))
 const legacy = buildLegacyInsightsContent()
 
 const preview = computed<InsightsPageContent | null>(() => {
@@ -48,7 +50,7 @@ usePreviewJump(mainRef)
     <div v-else-if="error" class="mx-auto max-w-xl p-8" role="alert">
       <p class="font-semibold">Preview tidak tersedia.</p>
       <p class="mt-1 text-sm text-navy-600">{{ error.statusCode === 403 ? 'Role kamu tidak bisa membuka preview ini.' : 'Draft gagal dimuat. Mungkin sesi login sudah habis.' }}</p>
-      <a :href="`/admin/insights/articles/${id}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
+      <a :href="`/admin/insights/articles/${id}?lang=${lang}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
     </div>
     <main v-else-if="preview" ref="mainRef">
       <AdminInsightsPreviewScope :key="`${data?.record.version}-${data?.record.updatedAt}`" :content="preview">

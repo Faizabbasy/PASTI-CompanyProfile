@@ -8,6 +8,6 @@ export default defineEventHandler(async (event) => {
   await requirePermission(event, 'content.edit')
   const { user } = await requirePermission(event, 'content.saveDraft')
   const { revision, content } = await readZodBody(event, Body)
-  const { record, changedSections } = await casesCollection.saveDraft(event, user, getRouterParam(event, 'id') ?? '', revision, content)
-  return { ...(await caseAdminResponse(record)), changedSections }
+  const { record, changedSections, mediaSynced } = await casesCollection.forLocale(cmsLang(event)).saveDraft(event, user, getRouterParam(event, 'id') ?? '', revision, content)
+  return { ...(await caseAdminResponse(record, cmsLang(event))), changedSections, mediaSynced }
 })

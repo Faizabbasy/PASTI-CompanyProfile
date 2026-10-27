@@ -4,10 +4,12 @@ import type { CollectionAdminStateLike } from '~/composables/useCollectionRecord
 
 // Create an article as an unpublished draft, then continue in its editor.
 definePageMeta({ layout: 'admin' })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 useHead({ title: 'Artikel baru · Insights' })
 
 const { cmsFetch } = useCmsSession()
-const { data: categories } = await useAsyncData('admin-insights-new-article-cats', () => cmsFetch<CategoryListRow[]>('/api/admin/insights/categories'))
+const { data: categories } = await useAsyncData(`admin-insights-new-article-cats-${lang}`, () => cmsFetch<CategoryListRow[]>('/api/admin/insights/categories', { query: { lang } }))
 const form = ref<ArticleForm>(emptyArticle())
 const { errors, err, notice, busy, submit } = useCollectionCreate()
 
@@ -25,18 +27,19 @@ watch(errors, (e) => {
 async function create() {
   await submit({
     validate: () => validateArticleForm(form.value),
-    request: () => cmsFetch<{ state: CollectionAdminStateLike }>('/api/admin/insights/articles', { method: 'POST', body: { content: toArticlePayload(form.value) }, keepOn401: true }),
-    then: (res) => navigateTo(`/admin/insights/articles/${res.state.id}`)
+    request: () => cmsFetch<{ state: CollectionAdminStateLike }>('/api/admin/insights/articles', { query: { lang }, method: 'POST', body: { content: toArticlePayload(form.value) }, keepOn401: true }),
+    then: (res) => navigateTo(`/admin/insights/articles/${res.state.id}?lang=${lang}`)
   })
 }
 </script>
 
 <template>
   <AdminEditorFrame
+    :lang="lang"
     v-model:active-tab="activeTab"
     title="Artikel baru"
     crumb="Insights · Articles"
-    crumb-to="/admin/insights/articles"
+    :crumb-to="`/admin/insights/articles?lang=${lang}`"
     :tabs="TABS"
     :code-managed="[]"
     :error-count="errorCount"

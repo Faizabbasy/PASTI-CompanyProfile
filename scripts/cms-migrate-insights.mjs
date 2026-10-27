@@ -80,6 +80,14 @@ try {
   fail(e.message)
 }
 
+// --dump <file>: write the built migration (this language) as JSON and stop —
+// used by cms-bilingual-collections.mjs to pair English and Indonesian copy.
+if (args.has('--dump')) {
+  const { writeFileSync } = await import('node:fs')
+  writeFileSync(process.argv[process.argv.indexOf('--dump') + 1], JSON.stringify(m))
+  process.exit(0)
+}
+
 const l = InsightsContentSchema.safeParse(m.landing)
 if (!l.success) fail('Insights landing fails its schema', l.error.issues)
 for (const c of m.categories) {

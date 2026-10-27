@@ -3,5 +3,5 @@
 export default defineEventHandler(async (event) => {
   await requirePermission(event, 'cms.view')
   await ensureInsightsSeeded()
-  return insightsPage.getState()
+  return insightsPage.forLocale(cmsLang(event)).getState()
 })

@@ -35,8 +35,8 @@ const SINGLETONS: { id: string; label: string; group: Group; to: string; flag: F
   { id: 'fast', label: 'FAST', group: 'Products', to: '/admin/products/fast', flag: 'fastPublicEnabled' , bilingual: true },
   { id: 'dora', label: 'DORA', group: 'Products', to: '/admin/products/dora', flag: 'doraPublicEnabled' , bilingual: true },
   { id: 'matrix', label: 'MATRIX', group: 'Products', to: '/admin/products/matrix', flag: 'matrixPublicEnabled' , bilingual: true },
-  { id: 'work', label: 'Work page', group: 'Work', to: '/admin/work', flag: 'workPublicEnabled' },
-  { id: 'insights', label: 'Insights page', group: 'Insights', to: '/admin/insights', flag: 'insightsPublicEnabled' },
+  { id: 'work', label: 'Work page', group: 'Work', to: '/admin/work', flag: 'workPublicEnabled', bilingual: true },
+  { id: 'insights', label: 'Insights page', group: 'Insights', to: '/admin/insights', flag: 'insightsPublicEnabled', bilingual: true },
   { id: 'clients', label: 'Clients', group: 'Shared Content', to: '/admin/shared/clients', flag: 'clientsPublicEnabled' },
   { id: 'faqs', label: 'FAQs', group: 'Shared Content', to: '/admin/shared/faqs', flag: 'faqsPublicEnabled' , bilingual: true },
   { id: 'ctas', label: 'Global CTAs', group: 'Shared Content', to: '/admin/shared/ctas', flag: 'ctasPublicEnabled' , bilingual: true }
@@ -44,11 +44,11 @@ const SINGLETONS: { id: string; label: string; group: Group; to: string; flag: F
 
 // Collections: storage name → label, group, list/editor paths, public flag,
 // and how to name one record.
-const COLLECTIONS: { name: string; entityType: string; label: string; group: Group; to: string; flag: Flag; title: (c: Record<string, unknown>) => string }[] = [
-  { name: 'projects', entityType: 'project', label: 'Projects', group: 'Work', to: '/admin/work/projects', flag: 'workPublicEnabled', title: (c) => String(c.name ?? '') },
-  { name: 'case-studies', entityType: 'caseStudy', label: 'Case Studies', group: 'Work', to: '/admin/work/case-studies', flag: 'workPublicEnabled', title: (c) => String(c.slug ?? '') },
-  { name: 'articles', entityType: 'article', label: 'Articles', group: 'Insights', to: '/admin/insights/articles', flag: 'insightsPublicEnabled', title: (c) => String(c.title ?? '') },
-  { name: 'article-categories', entityType: 'category', label: 'Topik', group: 'Insights', to: '/admin/insights/categories', flag: 'insightsPublicEnabled', title: (c) => String(c.name ?? '') },
+const COLLECTIONS: { name: string; entityType: string; label: string; group: Group; to: string; flag: Flag; title: (c: Record<string, unknown>) => string; bilingual?: boolean }[] = [
+  { name: 'projects', entityType: 'project', label: 'Projects', group: 'Work', to: '/admin/work/projects', flag: 'workPublicEnabled', title: (c) => String(c.name ?? ''), bilingual: true },
+  { name: 'case-studies', entityType: 'caseStudy', label: 'Case Studies', group: 'Work', to: '/admin/work/case-studies', flag: 'workPublicEnabled', title: (c) => String(c.slug ?? ''), bilingual: true },
+  { name: 'articles', entityType: 'article', label: 'Articles', group: 'Insights', to: '/admin/insights/articles', flag: 'insightsPublicEnabled', title: (c) => String(c.title ?? ''), bilingual: true },
+  { name: 'article-categories', entityType: 'category', label: 'Topik', group: 'Insights', to: '/admin/insights/categories', flag: 'insightsPublicEnabled', title: (c) => String(c.name ?? ''), bilingual: true },
   { name: 'testimonials', entityType: 'testimonial', label: 'Testimonials', group: 'Shared Content', to: '/admin/shared/testimonials', flag: 'testimonialsPublicEnabled', title: (c) => String(c.personName ?? '') }
 ]
 
@@ -121,29 +121,32 @@ export async function buildDashboard(event: H3Event) {
   }
 
   for (const c of COLLECTIONS) {
-    const keys = await store.getKeys(`collections:${c.name}`)
+    for (const lang of c.bilingual ? CMS_LANGS : [null]) {
+    const keys = await store.getKeys(`collections:${c.name}${lang ? langSuffix(lang) : ''}`)
+    const to = (path: string) => (lang ? `${path}?lang=${lang}` : path)
+    const langTag = lang ? ` (${LANG_NAME[lang]})` : ''
     const recs = (await Promise.all(keys.map((k) => store.getItem<StoredRecord>(k)))).filter((r): r is StoredRecord => !!r)
     const real = recs.filter((r) => !r.dummy)
     const cc = { published: 0, draft: 0, archived: 0, needsPublish: 0 }
     let latest: StoredRecord | null = null
     for (const r of recs) {
       const title = c.title(r.draft.content ?? {}) || r.id
-      labels.set(`${c.entityType}:${r.id}`, { label: `${c.label} · ${title}`, to: `${c.to}/${r.id}` })
+      if (lang !== 'en') labels.set(`${c.entityType}:${r.id}`, { label: `${c.label} · ${title}`, to: `${c.to}/${r.id}` })
       if (r.dummy) continue
       count(r)
       cc[r.status] += 1
       if (needsPublish(r)) {
         cc.needsPublish += 1
-        pending.push({ label: `${c.label} · ${title}`, to: `${c.to}/${r.id}`, group: c.group, updatedAt: r.draft.updatedAt, neverPublished: !r.published })
+        pending.push({ label: `${c.label} · ${title}${langTag}`, to: to(`${c.to}/${r.id}`), group: c.group, updatedAt: r.draft.updatedAt, neverPublished: !r.published })
       }
       if (!latest || r.draft.updatedAt > latest.draft.updatedAt) latest = r
     }
     items.push({
-      key: c.name,
-      lang: null,
+      key: lang ? `${c.name}:${lang}` : c.name,
+      lang,
       label: c.label,
       group: c.group,
-      to: c.to,
+      to: to(c.to),
       status: real.length ? (cc.published ? 'published' : cc.draft ? 'draft' : 'archived') : 'none',
       dummy: recs.length > 0 && real.length === 0,
       needsPublish: cc.needsPublish > 0,
@@ -153,6 +156,7 @@ export async function buildDashboard(event: H3Event) {
       updatedBy: latest?.draft.updatedBy?.name ?? null,
       counts: cc
     })
+    }
   }
 
   pending.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))

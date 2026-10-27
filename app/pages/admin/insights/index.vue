@@ -5,19 +5,22 @@ import { INSIGHTS_LIMITS as LIM, type ArticleListRow, type CategoryListRow, type
 // issue lists (order + active) and which topic filters appear. Article and
 // category content live in their own records and are only referenced here.
 definePageMeta({ layout: 'admin' })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 useHead({ title: 'Insights page · Insights' })
 
 const { cmsFetch } = useCmsSession()
-const { data: articleRows } = await useAsyncData('admin-insights-article-options', () => cmsFetch<ArticleListRow[]>('/api/admin/insights/articles'))
-const { data: categoryRows } = await useAsyncData('admin-insights-category-options', () => cmsFetch<CategoryListRow[]>('/api/admin/insights/categories'))
+const { data: articleRows } = await useAsyncData(`admin-insights-article-options-${lang}`, () => cmsFetch<ArticleListRow[]>('/api/admin/insights/articles', { query: { lang } }))
+const { data: categoryRows } = await useAsyncData(`admin-insights-category-options-${lang}`, () => cmsFetch<CategoryListRow[]>('/api/admin/insights/categories', { query: { lang } }))
 
 const {
   loadStatus, loadError, refresh, form, state, dirty, activeTab, errorCount, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, publishedIds, canPublish, canUnpublish, canArchive, publishDisabledReason
 } = await useSingletonEditor<InsightsAdminState, InsightsForm>({
+  lang,
   name: 'halaman Insights',
   endpoint: '/api/admin/insights',
-  asyncKey: 'admin-insights',
+  asyncKey: `admin-insights-${lang}`,
   tabs: INSIGHTS_TABS,
   toForm: toInsightsForm,
   toPayload: toInsightsPayload,
@@ -66,13 +69,14 @@ const codeManaged = [
 
 <template>
   <AdminEditorFrame
+    :lang="lang"
     v-model:active-tab="activeTab"
     title="Halaman Insights"
     crumb="Insights"
     public-path="/insights"
     flag="NUXT_CMS_INSIGHTS_PUBLIC_ENABLED"
     :tabs="INSIGHTS_TABS"
-    preview-path="/admin/preview/insights"
+    :preview-path="`/admin/preview/insights?lang=${lang}`"
     :code-managed="codeManaged"
     :dummy="state?.dummy !== false"
     :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
@@ -98,7 +102,7 @@ const codeManaged = [
           :state="state"
           :dirty="dirty"
           :busy="busy"
-          preview-href="/admin/preview/insights"
+          :preview-href="`/admin/preview/insights?lang=${lang}`"
           :can-publish="canPublish"
           :can-unpublish="canUnpublish"
           :can-archive="canArchive"
@@ -153,7 +157,7 @@ const codeManaged = [
                 <p v-if="articleById(item.articleId)" class="mt-1 flex flex-wrap items-center gap-2 text-xs text-navy-500">
                   <AdminStatusBadge :status="articleById(item.articleId)!.status" />
                   {{ articleById(item.articleId)!.categories.join(', ') }}
-                  <NuxtLink :to="`/admin/insights/articles/${item.articleId}`" class="underline">Edit artikel</NuxtLink>
+                  <NuxtLink :to="`/admin/insights/articles/${item.articleId}?lang=${lang}`" class="underline">Edit artikel</NuxtLink>
                 </p>
               </div>
             </template>
@@ -164,7 +168,7 @@ const codeManaged = [
           <h3 id="sec-filters" class="border-b border-navy-100 pb-1 text-base font-bold">Filter topik</h3>
           <p class="rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">
             Tombol topik setelah “All”, sesuai urutan ini. Tombol hanya muncul kalau topiknya sudah di-publish, tampil, dan dipakai minimal satu artikel di daftar.
-            Nama topik diubah di <NuxtLink to="/admin/insights/categories" class="underline">Categories</NuxtLink>.
+            Nama topik diubah di <NuxtLink :to="`/admin/insights/categories?lang=${lang}`" class="underline">Categories</NuxtLink>.
           </p>
           <AdminFormRepeater legend="Filter topik" :items="form.filters.items" :max="LIM.filters" :published-ids="publishedIds" :item-title="(i) => categoryLabel(i.categoryId)" add-label="Tambah topik" :error="err('filters.items')" @add="addFilter">
             <template #default="{ item, index }">

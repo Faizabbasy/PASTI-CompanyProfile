@@ -6,5 +6,5 @@ const Body = z.object({ revision: z.number().int().min(1) }).strict()
 export default defineEventHandler(async (event) => {
   const { user } = await requirePermission(event, 'content.publish')
   const { revision } = await readZodBody(event, Body)
-  return categoryAdminResponse(await categoriesCollection.publish(event, user, getRouterParam(event, 'id') ?? '', revision))
+  return categoryAdminResponse(await categoriesCollection.forLocale(cmsLang(event)).publish(event, user, getRouterParam(event, 'id') ?? '', revision), cmsLang(event))
 })

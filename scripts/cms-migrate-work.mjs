@@ -76,6 +76,14 @@ const legacyCases = allCases.filter((c) => c.publicationStatus === 'approved')
 
 const m = legacyToWorkMigration(legacy, legacyProjects, legacyCases, { canonicalUrl: `${siteUrl}/work` })
 
+// --dump <file>: write the built migration (this language) as JSON and stop —
+// used by cms-bilingual-collections.mjs to pair English and Indonesian copy.
+if (args.has('--dump')) {
+  const { writeFileSync } = await import('node:fs')
+  writeFileSync(process.argv[process.argv.indexOf('--dump') + 1], JSON.stringify(m))
+  process.exit(0)
+}
+
 // ---- schema checks -----------------------------------------------------------
 const fail = (msg, issues = []) => {
   console.error(`${TAG} ${msg} — nothing written.`)

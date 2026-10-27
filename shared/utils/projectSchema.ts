@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { mediaRef, slug, text, type ActorRef, type PageSource, type PageStatus } from '#shared/cms/fields'
+import { mediaRef, slug, text, type ActorRef, type PageSource, type PageStatus, type RecordLangStates } from '#shared/cms/fields'
 
 // Work CMS — Project record (collection). Owns project identity only: name,
 // client display name, category, filter group, year, description and the
@@ -55,6 +55,7 @@ export interface ProjectListRow {
   // the relation).
   caseStudy: { id: string; slug: string; status: PageStatus } | null
   selectedInWork: boolean
+  languages: RecordLangStates
   updatedAt: string
   updatedBy: ActorRef
 }

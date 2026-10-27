@@ -8,6 +8,8 @@ import { resolveWorkView, type WorkPageContent } from '#shared/utils/workPublic'
 // Studies section (ADMIN + EDITOR, noindex, no-store). Same public filter as
 // the live page: only confirmed metrics / images are shown.
 definePageMeta({ layout: false })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 useHead({ title: 'Preview · Case study (draft) · PASTI CMS', meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 
 interface Rec<C> { id: string; meta: Record<string, string>; status: PageStatus; content: C }
@@ -18,7 +20,7 @@ interface PreviewResponse {
 
 const id = useRoute().params.id as string
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData(`admin-work-case-preview-${id}`, () => cmsFetch<PreviewResponse>(`/api/admin/work/case-studies/${id}/preview`))
+const { data, error, refresh, status } = await useAsyncData(`admin-work-case-preview-${id}-${lang}`, () => cmsFetch<PreviewResponse>(`/api/admin/work/case-studies/${id}/preview`, { query: { lang } }))
 const legacy = buildLegacyWorkContent()
 
 const resolved = computed(() => {
@@ -55,7 +57,7 @@ const preview = computed<WorkPageContent | null>(() => {
     <div v-else-if="error || (data && !data.project)" class="mx-auto max-w-xl bg-paper p-8" role="alert">
       <p class="font-semibold">Preview tidak tersedia.</p>
       <p class="mt-1 text-sm text-navy-600">{{ data && !data.project ? 'Proyek yang ditautkan tidak ada.' : error?.statusCode === 403 ? 'Role kamu tidak bisa membuka preview ini.' : 'Draft gagal dimuat.' }}</p>
-      <a :href="`/admin/work/case-studies/${id}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
+      <a :href="`/admin/work/case-studies/${id}?lang=${lang}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
     </div>
     <main v-else-if="preview">
       <AdminWorkPreviewScope :key="`${data?.record.version}-${data?.record.updatedAt}`" :content="preview">

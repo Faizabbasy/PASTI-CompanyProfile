@@ -4,6 +4,8 @@ import { CATEGORY_LIMITS as LIM, type CategoryContent, type CategoryExtra } from
 
 // Category record editor (name, slug, description, active).
 definePageMeta({ layout: 'admin' })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 
 type CategoryState = CollectionAdminState<CategoryContent, CategoryExtra>
 const id = useRoute().params.id as string
@@ -12,6 +14,7 @@ const {
   loadStatus, loadError, refresh, form, state, dirty, activeTab, errorCount, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, canPublish, canUnpublish, canArchive, publishDisabledReason
 } = await useSingletonEditor<CategoryState, CategoryForm>({
+  lang,
   name: 'topik ini',
   endpoint: `/api/admin/insights/categories/${id}`,
   asyncKey: `admin-insights-category-${id}`,
@@ -21,7 +24,7 @@ const {
   validate: validateCategoryForm
 })
 useHead({ title: computed(() => `${state.value?.draft.content.name ?? 'Topik'} · Categories`) })
-const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin/insights/categories/${id}`, '/admin/insights/categories', () => state.value?.draft.content.name ?? id)
+const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin/insights/categories/${id}?lang=${lang}`, `/admin/insights/categories?lang=${lang}`, () => state.value?.draft.content.name ?? id)
 const slugChanged = computed(() => !!state.value?.extra.publishedSlug && form.value?.slug !== state.value.extra.publishedSlug)
 </script>
 
@@ -30,17 +33,18 @@ const slugChanged = computed(() => !!state.value?.extra.publishedSlug && form.va
     <div v-if="loadError && !form" role="alert" class="mt-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
       {{ loadError.statusCode === 404 ? 'Topik ini tidak ada.' : 'Topik gagal dimuat.' }}
       <button v-if="loadError.statusCode !== 404" type="button" class="ml-2 font-semibold underline" @click="refresh()">Coba lagi</button>
-      <NuxtLink v-else to="/admin/insights/categories" class="ml-2 font-semibold underline">Kembali ke daftar topik</NuxtLink>
+      <NuxtLink v-else :to="`/admin/insights/categories?lang=${lang}`" class="ml-2 font-semibold underline">Kembali ke daftar topik</NuxtLink>
     </div>
 
     <AdminEditorFrame
+      :lang="lang"
       v-else
       v-model:active-tab="activeTab"
       :title="state?.draft.content.name || 'Topik'"
       crumb="Insights · Categories"
-      crumb-to="/admin/insights/categories"
+      :crumb-to="`/admin/insights/categories?lang=${lang}`"
       :tabs="CATEGORY_TABS"
-      preview-path="/admin/preview/insights"
+      :preview-path="`/admin/preview/insights?lang=${lang}`"
       :code-managed="[]"
       :dummy="!!state?.dummy"
       :dirty="dirty"
@@ -61,7 +65,7 @@ const slugChanged = computed(() => !!state.value?.extra.publishedSlug && form.va
           :state="state"
           :dirty="dirty"
           :busy="busy"
-          preview-href="/admin/preview/insights"
+          :preview-href="`/admin/preview/insights?lang=${lang}`"
           :can-publish="canPublish"
           :can-unpublish="canUnpublish"
           :can-archive="canArchive"

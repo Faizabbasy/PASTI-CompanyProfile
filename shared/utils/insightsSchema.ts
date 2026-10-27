@@ -10,6 +10,7 @@ import {
   sortOrder,
   text,
   type ActorRef,
+  type RecordLangStates,
   type PageSource,
   type PageStatus,
   type SingletonAdminState,
@@ -59,6 +60,7 @@ export interface CategoryListRow {
   source: PageSource
   hasUnpublishedChanges: boolean
   articleCount: number
+  languages: RecordLangStates
   updatedAt: string
   updatedBy: ActorRef
 }
@@ -201,6 +203,7 @@ export interface ArticleListRow {
   hasUnpublishedChanges: boolean
   publishedVersion: number | null
   inIssue: boolean
+  languages: RecordLangStates
   updatedAt: string
   updatedBy: ActorRef
 }

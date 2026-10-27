@@ -12,6 +12,8 @@ import type { WorkContent } from '#shared/utils/workSchema'
 // page uses — so only confirmed claims and images show, exactly as they
 // would once published — and rendered with the REAL Work sections.
 definePageMeta({ layout: false })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 useHead({ title: 'Preview · Work (draft) · PASTI CMS', meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 
 interface Src<C> { id: string; meta: Record<string, string>; status: PageStatus; content: C }
@@ -22,7 +24,7 @@ interface PreviewResponse {
 }
 
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData('admin-work-preview', () => cmsFetch<PreviewResponse>('/api/admin/work/preview'))
+const { data, error, refresh, status } = await useAsyncData(`admin-work-preview-${lang}`, () => cmsFetch<PreviewResponse>('/api/admin/work/preview', { query: { lang } }))
 const legacy = buildLegacyWorkContent()
 
 const resolved = computed(() => (data.value ? resolveWorkView(data.value.work.content, data.value.projects, data.value.caseStudies) : null))
@@ -63,7 +65,7 @@ const notLive = computed(() => {
     <div v-else-if="error" class="mx-auto max-w-xl p-8" role="alert">
       <p class="font-semibold">Preview tidak tersedia.</p>
       <p class="mt-1 text-sm text-navy-600">{{ error.statusCode === 403 ? 'Role kamu tidak bisa membuka preview ini.' : 'Draft gagal dimuat. Mungkin sesi login sudah habis.' }}</p>
-      <a href="/admin/work" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
+      <a :href="`/admin/work?lang=${lang}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
     </div>
 
     <main v-else-if="preview" ref="mainRef">

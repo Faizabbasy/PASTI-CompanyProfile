@@ -7,19 +7,22 @@ import type { CaseStudyListRow } from '#shared/utils/caseStudySchema'
 // project and case-study content lives in their own records and is only
 // referenced here. No add / duplicate / delete for the page itself.
 definePageMeta({ layout: 'admin' })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 useHead({ title: 'Work page · Work' })
 
 const { cmsFetch } = useCmsSession()
-const { data: projectRows } = await useAsyncData('admin-work-project-options', () => cmsFetch<ProjectListRow[]>('/api/admin/work/projects'))
-const { data: caseRows } = await useAsyncData('admin-work-case-options', () => cmsFetch<CaseStudyListRow[]>('/api/admin/work/case-studies'))
+const { data: projectRows } = await useAsyncData(`admin-work-project-options-${lang}`, () => cmsFetch<ProjectListRow[]>('/api/admin/work/projects', { query: { lang } }))
+const { data: caseRows } = await useAsyncData(`admin-work-case-options-${lang}`, () => cmsFetch<CaseStudyListRow[]>('/api/admin/work/case-studies', { query: { lang } }))
 
 const {
   loadStatus, loadError, refresh, form, state, dirty, activeTab, errorCount, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, publishedIds, canPublish, canUnpublish, canArchive, publishDisabledReason
 } = await useSingletonEditor<WorkAdminState, WorkForm>({
+  lang,
   name: 'Work',
   endpoint: '/api/admin/work',
-  asyncKey: 'admin-work',
+  asyncKey: `admin-work-${lang}`,
   tabs: WORK_TABS,
   toForm: toWorkForm,
   toPayload: toWorkPayload,
@@ -74,13 +77,14 @@ const codeManaged = [
 
 <template>
   <AdminEditorFrame
+    :lang="lang"
     v-model:active-tab="activeTab"
     title="Halaman Work"
     crumb="Work"
     public-path="/work"
     flag="NUXT_CMS_WORK_PUBLIC_ENABLED"
     :tabs="WORK_TABS"
-    preview-path="/admin/preview/work"
+    :preview-path="`/admin/preview/work?lang=${lang}`"
     :code-managed="codeManaged"
     :dummy="state?.dummy !== false"
     :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
@@ -103,7 +107,7 @@ const codeManaged = [
           :state="state"
           :dirty="dirty"
           :busy="busy"
-          preview-href="/admin/preview/work"
+          :preview-href="`/admin/preview/work?lang=${lang}`"
           :can-publish="canPublish"
           :can-unpublish="canUnpublish"
           :can-archive="canArchive"
@@ -146,7 +150,7 @@ const codeManaged = [
         <AdminFormField :id="fieldId('projectIndex.sectionLabel')" v-model="form.projectIndex.sectionLabel" label="Label bagian" :maxlength="LIM.sectionLabel" required :error="err('projectIndex.sectionLabel')" />
         <p class="rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">
           Maksimal <strong>{{ LIM.projectsActive }}</strong> proyek yang tampil; nomor (01, 02 …) mengikuti urutan. Nama, poster, kategori, filter dan deskripsi diambil dari
-          <NuxtLink to="/admin/work/projects" class="underline">data proyek</NuxtLink>. Kartu memberi link ke studi kasus hanya kalau studi kasusnya dipilih di bagian 03.
+          <NuxtLink :to="`/admin/work/projects?lang=${lang}`" class="underline">data proyek</NuxtLink>. Kartu memberi link ke studi kasus hanya kalau studi kasusnya dipilih di bagian 03.
         </p>
         <AdminFormRepeater legend="Proyek yang tampil" :items="form.projectIndex.items" :max="LIM.projects" :published-ids="publishedIds" :item-title="(i) => projectLabel(i.projectId)" add-label="Tambah proyek" :error="err('projectIndex.items')" @add="addProject">
           <template #default="{ item, index }">
@@ -159,7 +163,7 @@ const codeManaged = [
               <p v-if="err(`projectIndex.items.${index}.projectId`)" class="mt-1 text-xs font-medium text-red-700" role="alert">{{ err(`projectIndex.items.${index}.projectId`) }}</p>
               <p v-if="projectById(item.projectId)" class="mt-1 flex items-center gap-2 text-xs text-navy-500">
                 <AdminStatusBadge :status="projectById(item.projectId)!.status" />
-                <NuxtLink :to="`/admin/work/projects/${item.projectId}`" class="underline">Ubah proyek ini</NuxtLink>
+                <NuxtLink :to="`/admin/work/projects/${item.projectId}?lang=${lang}`" class="underline">Ubah proyek ini</NuxtLink>
               </p>
             </div>
           </template>
@@ -176,7 +180,7 @@ const codeManaged = [
         <AdminFormField :id="fieldId('featuredCases.supportingCopy')" v-model="form.featuredCases.supportingCopy" label="Kalimat di bawah judul" :maxlength="LIM.supportingCopy" required :error="err('featuredCases.supportingCopy')" />
         <p class="rounded-lg border border-navy-100 bg-white px-4 py-3 text-sm text-navy-700">
           Maksimal <strong>{{ LIM.casesActive }}</strong> studi kasus yang tampil. Cerita dan angkanya diisi di masing-masing
-          <NuxtLink to="/admin/work/case-studies" class="underline">studi kasus</NuxtLink>; hanya angka/gambar yang sudah Disetujui yang tampil di website.
+          <NuxtLink :to="`/admin/work/case-studies?lang=${lang}`" class="underline">studi kasus</NuxtLink>; hanya angka/gambar yang sudah Disetujui yang tampil di website.
         </p>
         <AdminFormRepeater legend="Studi kasus unggulan" :items="form.featuredCases.items" :max="LIM.cases" :published-ids="publishedIds" :item-title="(i) => caseLabel(i.caseStudyId)" add-label="Tambah studi kasus" :error="err('featuredCases.items')" @add="addCase">
           <template #default="{ item, index }">
@@ -190,7 +194,7 @@ const codeManaged = [
               <p v-if="caseById(item.caseStudyId)" class="mt-1 flex flex-wrap items-center gap-2 text-xs text-navy-500">
                 <AdminStatusBadge :status="caseById(item.caseStudyId)!.status" />
                 <span v-if="caseById(item.caseStudyId)!.claims.needsApproval">{{ caseById(item.caseStudyId)!.claims.needsApproval }} angka/gambar menunggu persetujuan — belum tampil di website</span>
-                <NuxtLink :to="`/admin/work/case-studies/${item.caseStudyId}`" class="underline">Ubah studi kasus ini</NuxtLink>
+                <NuxtLink :to="`/admin/work/case-studies/${item.caseStudyId}?lang=${lang}`" class="underline">Ubah studi kasus ini</NuxtLink>
               </p>
             </div>
           </template>

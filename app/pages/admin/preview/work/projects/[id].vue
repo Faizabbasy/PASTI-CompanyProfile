@@ -6,6 +6,8 @@ import { resolveWorkView, type WorkPageContent } from '#shared/utils/workPublic'
 // Authenticated draft preview of ONE project card in the real Project Index
 // (ADMIN + EDITOR, noindex, no-store).
 definePageMeta({ layout: false })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 useHead({ title: 'Preview · Project (draft) · PASTI CMS', meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 
 interface PreviewResponse {
@@ -14,7 +16,7 @@ interface PreviewResponse {
 
 const id = useRoute().params.id as string
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData(`admin-work-project-preview-${id}`, () => cmsFetch<PreviewResponse>(`/api/admin/work/projects/${id}/preview`))
+const { data, error, refresh, status } = await useAsyncData(`admin-work-project-preview-${id}-${lang}`, () => cmsFetch<PreviewResponse>(`/api/admin/work/projects/${id}/preview`, { query: { lang } }))
 const legacy = buildLegacyWorkContent()
 
 const preview = computed<WorkPageContent | null>(() => {
@@ -45,7 +47,7 @@ const preview = computed<WorkPageContent | null>(() => {
     <div v-else-if="error" class="mx-auto max-w-xl p-8" role="alert">
       <p class="font-semibold">Preview tidak tersedia.</p>
       <p class="mt-1 text-sm text-navy-600">{{ error.statusCode === 403 ? 'Role kamu tidak bisa membuka preview ini.' : 'Draft gagal dimuat.' }}</p>
-      <a :href="`/admin/work/projects/${id}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
+      <a :href="`/admin/work/projects/${id}?lang=${lang}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
     </div>
     <main v-else-if="preview">
       <AdminWorkPreviewScope :key="`${data?.record.version}-${data?.record.updatedAt}`" :content="preview">

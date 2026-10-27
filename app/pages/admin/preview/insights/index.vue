@@ -10,6 +10,8 @@ import type { ArticleContent, CategoryContent, InsightsContent } from '#shared/u
 // resolver and adapter the public page uses and rendered with the REAL
 // Insights sections.
 definePageMeta({ layout: false })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 useHead({ title: 'Preview · Insights (draft) · PASTI CMS', meta: [{ name: 'robots', content: 'noindex, nofollow' }] })
 
 interface Src<C> { id: string; status: PageStatus; content: C }
@@ -20,7 +22,7 @@ interface PreviewResponse {
 }
 
 const { cmsFetch } = useCmsSession()
-const { data, error, refresh, status } = await useAsyncData('admin-insights-preview', () => cmsFetch<PreviewResponse>('/api/admin/insights/preview'))
+const { data, error, refresh, status } = await useAsyncData(`admin-insights-preview-${lang}`, () => cmsFetch<PreviewResponse>('/api/admin/insights/preview', { query: { lang } }))
 const legacy = buildLegacyInsightsContent()
 
 const preview = computed<InsightsPageContent | null>(() => {
@@ -54,7 +56,7 @@ const notLive = computed(() => {
     <div v-else-if="error" class="mx-auto max-w-xl p-8" role="alert">
       <p class="font-semibold">Preview tidak tersedia.</p>
       <p class="mt-1 text-sm text-navy-600">{{ error.statusCode === 403 ? 'Role kamu tidak bisa membuka preview ini.' : 'Draft gagal dimuat. Mungkin sesi login sudah habis.' }}</p>
-      <a href="/admin/insights" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
+      <a :href="`/admin/insights?lang=${lang}`" class="mt-3 inline-block text-sm font-semibold underline">Kembali ke editor</a>
     </div>
     <main v-else-if="preview" ref="mainRef">
       <AdminInsightsPreviewScope :key="`${data?.insights.version}-${data?.insights.revision}-${data?.insights.updatedAt}`" :content="preview">

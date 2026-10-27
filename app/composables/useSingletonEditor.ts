@@ -42,6 +42,8 @@ export interface SingletonResponse<S extends SingletonStateLike> {
   state: S
   revision: number
   changedSections?: string[]
+  // Images copied into the other language's draft by this save.
+  mediaSynced?: number
 }
 
 export type EditorNotice = { kind: 'success' | 'error' | 'warning'; text: string }
@@ -161,7 +163,7 @@ export async function useSingletonEditor<S extends SingletonStateLike, F>(opts: 
       form.value = opts.toForm(res.state.draft.content)
       savedSnapshot.value = JSON.stringify(opts.toPayload(form.value))
       notice.value = res.changedSections?.length
-        ? { kind: 'success', text: `Draft tersimpan (v${res.state.draft.version}). Website belum berubah sampai admin klik Publish.` }
+        ? { kind: 'success', text: `Draft tersimpan (v${res.state.draft.version}).${res.mediaSynced ? ` ${res.mediaSynced} gambar juga diperbarui di draft versi ${opts.lang === 'id' ? 'English' : 'Indonesia'}.` : ''} Website belum berubah sampai admin klik Publish.` }
         : { kind: 'success', text: 'Tidak ada perubahan untuk disimpan.' }
     } catch (e) {
       notice.value = { kind: 'error', text: describeError(e, 'menyimpan draft') }

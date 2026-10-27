@@ -48,8 +48,6 @@ const props = withDefaults(
 )
 const activeTab = defineModel<string>('activeTab', { required: true })
 
-const route = useRoute()
-const langHref = (l: 'id' | 'en') => `${route.path}?lang=${l}`
 // Preview link for a section, keeping ?lang= when the preview path has it.
 const previewHref = (index: number) => `${props.previewPath}${props.previewPath?.includes('?') ? '&' : '?'}s=${index}`
 const current = computed(() => props.tabs.find((t) => t.key === activeTab.value) ?? props.tabs[0]!)
@@ -99,17 +97,10 @@ function onTabKey(e: KeyboardEvent, index: number) {
     </div>
 
     <!-- Language being edited (bilingual pages). -->
-    <div v-if="lang" class="mt-4 flex max-w-3xl flex-wrap items-center gap-3 rounded-lg border border-navy-100 bg-white px-4 py-3">
-      <span class="text-sm font-semibold">Bahasa yang diedit:</span>
-      <div class="inline-flex rounded-full bg-navy-50 p-0.5 text-sm font-semibold" role="group" aria-label="Bahasa yang diedit">
-        <component :is="lang === 'id' ? 'span' : 'a'" :href="lang === 'id' ? undefined : langHref('id')" class="rounded-full px-3 py-1" :class="lang === 'id' ? 'bg-slateNavy text-white' : 'text-navy-600 hover:text-slateNavy'" :aria-current="lang === 'id' ? 'true' : undefined">Indonesia</component>
-        <component :is="lang === 'en' ? 'span' : 'a'" :href="lang === 'en' ? undefined : langHref('en')" class="rounded-full px-3 py-1" :class="lang === 'en' ? 'bg-slateNavy text-white' : 'text-navy-600 hover:text-slateNavy'" :aria-current="lang === 'en' ? 'true' : undefined">English</component>
-      </div>
-      <p class="w-full text-xs text-navy-500">
-        <template v-if="lang === 'id'">Versi utama — tampil di <code>{{ publicPath || '/' }}</code>. Versi English diedit dan di-publish terpisah.</template>
-        <template v-else>Versi English — tampil di <code>/en{{ publicPath && publicPath !== '/' ? publicPath : '' }}</code>. Versi Indonesia diedit dan di-publish terpisah.</template>
-      </p>
-    </div>
+    <AdminLangSwitch v-if="lang" :lang="lang">
+      <template v-if="lang === 'id'">Versi utama — tampil di <code>{{ publicPath || '/' }}</code>. Teks versi English diedit dan di-publish terpisah; gambar dan pengaturan non-teks (slug, urutan, relasi) yang kamu ubah di sini otomatis ikut ke draft English.</template>
+      <template v-else>Versi English — tampil di <code>/en{{ publicPath && publicPath !== '/' ? publicPath : '' }}</code>. Teks versi Indonesia diedit dan di-publish terpisah; gambar dan pengaturan non-teks (slug, urutan, relasi) yang kamu ubah di sini otomatis ikut ke draft Indonesia.</template>
+    </AdminLangSwitch>
 
     <slot name="status" />
 

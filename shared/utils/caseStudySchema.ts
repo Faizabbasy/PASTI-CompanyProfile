@@ -9,6 +9,7 @@ import {
   sortOrder,
   text,
   type ActorRef,
+  type RecordLangStates,
   type PageSource,
   type PageStatus,
   type WithId
@@ -146,6 +147,7 @@ export interface CaseStudyListRow {
   publishedVersion: number | null
   featuredInWork: boolean
   claims: { confirmed: number; needsApproval: number; hidden: number }
+  languages: RecordLangStates
   updatedAt: string
   updatedBy: ActorRef
 }

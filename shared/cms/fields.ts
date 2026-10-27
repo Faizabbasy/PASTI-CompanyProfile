@@ -115,6 +115,10 @@ export type WithId<T> = Omit<T, 'id'> & { id: string }
 
 export type PageSource = { kind: 'seed' } | { kind: 'migration'; version: string; migratedAt: string }
 
+// Bilingual collections: each language's state of one item (null = that
+// language has no record yet), for the admin list badges.
+export type RecordLangStates = Record<'id' | 'en', { status: PageStatus; hasUnpublishedChanges: boolean } | null>
+
 // What a singleton editor receives — content plus publication metadata.
 export interface SingletonAdminState<Id extends string, C> {
   id: Id

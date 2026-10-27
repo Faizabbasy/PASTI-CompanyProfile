@@ -5,16 +5,19 @@ import type { ArticleContent, ArticleExtra, CategoryListRow } from '#shared/util
 // Article record editor. Unsaved-change protection, optimistic locking and
 // the publish workflow come from useSingletonEditor.
 definePageMeta({ layout: 'admin' })
+// Bilingual: which language record is being edited / previewed (?lang=, default Indonesian).
+const lang = useEditorLang()
 
 type ArticleState = CollectionAdminState<ArticleContent, ArticleExtra>
 const id = useRoute().params.id as string
 const { cmsFetch } = useCmsSession()
-const { data: categories } = await useAsyncData(`admin-insights-article-${id}-cats`, () => cmsFetch<CategoryListRow[]>('/api/admin/insights/categories'))
+const { data: categories } = await useAsyncData(`admin-insights-article-${id}-cats-${lang}`, () => cmsFetch<CategoryListRow[]>('/api/admin/insights/categories', { query: { lang } }))
 
 const {
   loadStatus, loadError, refresh, form, state, dirty, activeTab, errorCount, err, notice, sessionExpired, busy,
   saveDraft, runStatusAction, canPublish, canUnpublish, canArchive, publishDisabledReason
 } = await useSingletonEditor<ArticleState, ArticleForm>({
+  lang,
   name: 'artikel ini',
   endpoint: `/api/admin/insights/articles/${id}`,
   asyncKey: `admin-insights-article-${id}`,
@@ -24,7 +27,7 @@ const {
   validate: validateArticleForm
 })
 useHead({ title: computed(() => `${state.value?.draft.content.title ?? 'Artikel'} · Articles`) })
-const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin/insights/articles/${id}`, '/admin/insights/articles', () => state.value?.draft.content.title ?? id)
+const { canDelete, remove, deleting, deleteError } = useRecordDelete(`/api/admin/insights/articles/${id}?lang=${lang}`, `/admin/insights/articles?lang=${lang}`, () => state.value?.draft.content.title ?? id)
 
 const codeManaged = [
   'Desain baris artikel, pratinjau, pembaca layar penuh dan animasinya.',
@@ -39,17 +42,18 @@ const codeManaged = [
     <div v-if="loadError && !form" role="alert" class="mt-6 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
       {{ loadError.statusCode === 404 ? 'Artikel ini tidak ada.' : 'Artikel gagal dimuat.' }}
       <button v-if="loadError.statusCode !== 404" type="button" class="ml-2 font-semibold underline" @click="refresh()">Coba lagi</button>
-      <NuxtLink v-else to="/admin/insights/articles" class="ml-2 font-semibold underline">Kembali ke daftar artikel</NuxtLink>
+      <NuxtLink v-else :to="`/admin/insights/articles?lang=${lang}`" class="ml-2 font-semibold underline">Kembali ke daftar artikel</NuxtLink>
     </div>
 
     <AdminEditorFrame
+      :lang="lang"
       v-else
       v-model:active-tab="activeTab"
       :title="state?.draft.content.title || 'Artikel'"
       crumb="Insights · Articles"
-      crumb-to="/admin/insights/articles"
+      :crumb-to="`/admin/insights/articles?lang=${lang}`"
       :tabs="ARTICLE_TABS"
-      :preview-path="`/admin/preview/insights/articles/${id}`"
+      :preview-path="`/admin/preview/insights/articles/${id}?lang=${lang}`"
       :code-managed="codeManaged"
       :dummy="!!state?.dummy"
       :migrated-version="state?.source.kind === 'migration' ? state.source.version : null"
@@ -68,7 +72,7 @@ const codeManaged = [
           :state="state"
           :dirty="dirty"
           :busy="busy"
-          :preview-href="`/admin/preview/insights/articles/${id}`"
+          :preview-href="`/admin/preview/insights/articles/${id}?lang=${lang}`"
           :can-publish="canPublish"
           :can-unpublish="canUnpublish"
           :can-archive="canArchive"
@@ -89,7 +93,7 @@ const codeManaged = [
             <h3 class="font-semibold">Di halaman Insights</h3>
             <p class="mt-1 text-navy-600">
               Draft halaman: {{ state.extra.usedInLanding.draft ? 'dipilih' : 'tidak dipilih' }} · Website sekarang: {{ state.extra.usedInLanding.published ? 'tampil' : 'tidak tampil' }}.
-              Urutan dan tampil/tidaknya diatur di <NuxtLink to="/admin/insights" class="underline">Insights → Insights page</NuxtLink>.
+              Urutan dan tampil/tidaknya diatur di <NuxtLink :to="`/admin/insights?lang=${lang}`" class="underline">Insights → Insights page</NuxtLink>.
             </p>
             <p class="mt-1 text-xs text-navy-500">Tombol “Next” di pembaca artikel mengikuti urutan di halaman Insights (diatur di kode); desain sekarang tidak punya blok artikel terkait.</p>
           </div>

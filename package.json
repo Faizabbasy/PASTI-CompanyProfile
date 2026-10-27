@@ -27,7 +27,8 @@
     "cms:migrate-matrix": "node --env-file-if-exists=.env scripts/cms-migrate-product.mjs matrix",
     "cms:migrate-clients": "node --env-file-if-exists=.env scripts/cms-migrate-shared.mjs clients",
     "cms:migrate-faqs": "node --env-file-if-exists=.env scripts/cms-migrate-shared.mjs faqs",
-    "cms:migrate-ctas": "node --env-file-if-exists=.env scripts/cms-migrate-shared.mjs ctas"
+    "cms:migrate-ctas": "node --env-file-if-exists=.env scripts/cms-migrate-shared.mjs ctas",
+    "cms:bilingual-collections": "node --env-file-if-exists=.env scripts/cms-bilingual-collections.mjs"
   },
   "dependencies": {
     "@types/three": "^0.185.4",
