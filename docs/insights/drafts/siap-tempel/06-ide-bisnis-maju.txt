@@ -1,0 +1,76 @@
+**Promo besar memang bisa mendatangkan pengguna dengan cepat. Masalahnya, pengguna yang datang karena promo biasanya juga pergi begitu promonya berhenti.**
+
+Banyak bisnis digital tumbuh dengan cara yang sama: memberi insentif sebesar mungkin, mengejar angka pengguna, lalu berharap mereka bertahan. Strategi ini terlihat berhasil di awal. Tapi ketika insentif dikurangi, pertumbuhannya ikut berhenti, dan biaya yang sudah keluar tidak kembali.
+
+Strategi yang PASTI susun untuk OCTO Mobile CIMB Niaga memberi contoh cara berpikir yang berbeda.
+
+### Masalahnya: pertumbuhan yang dibeli
+
+Saat itu, bank digital di Indonesia masih banyak mengandalkan promo bunga tinggi, atau yang sering disebut "bakar uang", untuk mendapatkan pengguna. Ada tiga masalah dengan pola ini:
+
+- Model ini **tidak berkelanjutan**. Pengguna pergi begitu insentif berhenti.
+- Loyalitas dibangun pada promo, bukan pada manfaat produknya.
+- Sementara itu, produk tradisional seperti kartu kredit **stagnan** dalam akuisisi.
+
+Pertanyaannya bergeser dari "bagaimana mendapatkan pengguna sebanyak-banyaknya?" menjadi "bagaimana membuat pengguna punya alasan untuk tetap tinggal?"
+
+### Game plan: membangun ekosistem, bukan sekadar promo
+
+Jawabannya adalah **Digital Wallet Banking**: ekosistem *digital-first* yang dibangun di atas rekening dan nomor ponsel, dengan alur **Rekening Ponsel → OCTO Mobile → OctoPay**.
+
+Idenya sederhana tapi kuat. Alih-alih menjual satu produk dengan insentif besar, pengguna diajak masuk ke ekosistem di mana setiap produk saling menguatkan.
+
+### Funnel dari kenal sampai setia
+
+Strategi ini dijalankan dalam empat tahap yang saling terhubung:
+
+1. **Awareness**: kampanye digital, influencer, dan bundling dengan merchant.
+2. **Interest**: edukasi manfaat digital wallet banking dibandingkan e-wallet non-bank.
+3. **Conversion**: onboarding digital dengan e-KYC.
+4. **Retention**: program loyalitas berbasis transaksi, bukan promo bunga.
+
+Perhatikan tahap terakhir. Loyalitas tidak lagi dibayar dengan bunga tinggi, tapi dibangun dari kebiasaan bertransaksi.
+
+### Playbook eksekusi
+
+Agar ekosistem itu benar-benar berjalan, ada empat langkah eksekusi:
+
+- **Registrasi rekening dibundel**, sehingga OctoPay aktif otomatis.
+- **PayLater ditawarkan silang** ke nasabah tabungan dan kartu kredit.
+- **Ekosistem kemitraan**: cashback transportasi, belanja online, dan F&B.
+- **Program referral berbasis transaksi**, bukan berbasis saldo.
+
+Setiap langkah punya pola yang sama: memberi nilai lewat penggunaan, bukan lewat uang yang dibagikan di depan.
+
+### Pelajaran yang bisa dipakai bisnis lain
+
+**1. Ukur pertumbuhan dari kebiasaan, bukan dari pendaftaran.**
+Pengguna yang bertransaksi setiap minggu jauh lebih bernilai daripada pengguna yang mendaftar karena promo lalu menghilang.
+
+**2. Biarkan produk saling menguatkan.**
+Ketika satu produk membuka jalan ke produk lain, biaya akuisisi tidak harus ditanggung berulang kali.
+
+**3. Hadiahi perilaku yang ingin Anda pertahankan.**
+Loyalitas berbasis transaksi mendorong pemakaian; loyalitas berbasis saldo atau bunga hanya mendorong orang menunggu promo berikutnya.
+
+**4. Kurangi hambatan di titik konversi.**
+Onboarding digital yang mudah sering lebih menentukan daripada iklan yang paling ramai.
+
+### Dari strategi ke eksekusi
+
+Strategi yang bagus tidak berarti apa-apa tanpa eksekusi yang disiplin. Di PASTI, setiap pekerjaan berjalan dalam lima langkah yang sama: **memahami masalahnya, menyusun strukturnya, membangun solusinya, menghadirkannya, lalu mendampingi langkah berikutnya.**
+
+Urutan ini berlaku baik untuk sistem enterprise maupun kampanye pemasaran. Kuncinya sama: memahami masalah bisnis yang sebenarnya sebelum memilih alatnya.
+
+### Pertanyaan untuk tim Anda
+
+- Berapa banyak pengguna Anda yang masih aktif setelah promo pertama mereka habis?
+- Apakah program loyalitas Anda menghadiahi pemakaian, atau sekadar menghadiahi pendaftaran?
+- Produk mana yang bisa menjadi "pintu masuk" ke produk Anda yang lain?
+- Di titik mana calon pengguna paling sering berhenti sebelum benar-benar memakai produk Anda?
+
+### Penutup
+
+Pertumbuhan yang dibeli dengan promo akan berhenti ketika promonya berhenti. Pertumbuhan yang dibangun dari ekosistem dan kebiasaan cenderung bertahan lebih lama, karena alasan orang untuk tetap tinggal ada di dalam produknya sendiri.
+
+*Lihat studi kasus OCTO Mobile — CIMB Niaga di halaman Creative.*

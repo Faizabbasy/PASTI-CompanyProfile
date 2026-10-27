@@ -1,0 +1,91 @@
+# DRAFT — menunggu review owner
+
+| Field | Isi |
+|---|---|
+| Judul | Keamanan Bukan Fitur Tambahan: Membangun Sistem yang Aman Sejak Rancangan |
+| Untuk artikel CMS | **Keamanan Siber** (slug sekarang `cybersecurity`) |
+| Kategori | Keamanan · Technology |
+| Penulis | **[ISI: nama + jabatan]** |
+| Tanggal terbit | **[ISI]** |
+| Ringkasan (SEO, ±155 karakter) | Keamanan yang kuat tidak ditambahkan di akhir proyek. Cara PASTI merancang sistem yang aman sejak awal: akses per peran, jejak audit, enkripsi, dan pengujian. |
+| Perkiraan baca | ±3–4 menit |
+
+**Catatan untuk reviewer**
+- Layanan Arsitektur Keamanan Siber & Kepatuhan (secure-by-design, lapisan enkripsi, penetration testing, model tata kelola data) dan Pemeliharaan Sistem & Dukungan SLA diambil dari halaman Technology / COMPRO 2025.
+- Nilai "Keamanan" (*"Kepercayaan adalah infrastruktur kami…"*) diambil dari standar perusahaan di halaman About.
+- Contoh fitur (persetujuan berjenjang & audit trail di OPEN, akses per peran di DORA, maker-checker & akses berbasis peran di MATRIX) diambil dari halaman produk masing-masing. Hasil AT-WF (laporan siap audit, kesalahan manual turun 70%) sama dengan draft 01 dan sudah di-approve.
+- Draft ini **tidak menyebut sertifikasi, standar tertentu (ISO dll.), insiden, atau klien keamanan**, karena datanya tidak ada. Kalau PASTI punya sertifikasi, bisa ditambahkan.
+- Bagian "Lima kebiasaan" dan "Pertanyaan untuk tim Anda" adalah **sudut pandang PASTI yang baru ditulis**. Mohon dicek.
+
+---
+
+## Keamanan Bukan Fitur Tambahan
+
+**Keamanan yang paling kuat jarang terlihat. Ia tidak ditempelkan di akhir proyek, tapi dirancang sejak awal: dari siapa yang boleh melihat data sampai bagaimana setiap perubahan tercatat.**
+
+Di banyak proyek digital, keamanan masih diperlakukan sebagai daftar periksa terakhir sebelum sistem diluncurkan. Hasilnya bisa ditebak: celah ditemukan terlambat, perbaikannya mahal, dan kepercayaan pengguna sudah terlanjur dipertaruhkan.
+
+Di PASTI, kami memegang prinsip sederhana: **kepercayaan adalah infrastruktur.** Dari arsitektur sistem sampai penanganan data, keamanan diutamakan di setiap langkah, supaya apa yang kami bangun aman, patuh regulasi, dan andal untuk jangka panjang.
+
+### Aman sejak rancangan (*secure-by-design*)
+
+Membangun sistem yang aman sejak rancangan berarti keputusan keamanan diambil bersamaan dengan keputusan fungsional, bukan setelahnya. Dalam praktiknya, ini mencakup:
+
+- **Lapisan enkripsi** untuk melindungi informasi sensitif.
+- **Model tata kelola data** yang menentukan siapa memegang data apa, dan untuk keperluan apa.
+- ***Penetration testing*** untuk mencari celah sebelum orang lain menemukannya.
+- **Kepatuhan pada standar industri** yang relevan dengan bisnis klien.
+
+Tapi teknologi keamanan hanya separuh cerita. Separuh lainnya ada pada cara sistem mengatur orang dan proses.
+
+### Akses mengikuti peran
+
+Banyak risiko keamanan tidak datang dari serangan luar, melainkan dari akses yang terlalu luas di dalam. Karena itu, sistem yang kami bangun mengatur akses per peran dan cakupan data.
+
+Di **DORA**, framework pengenalan dokumen milik PASTI, siapa yang boleh mengunggah, mengoreksi, memutuskan, mencari, dan mengekspor dokumen diatur per peran. Administrator mengelola akses dan konfigurasi, operator mengunggah dokumen, verifikator meninjau hasil, dan pengguna bisnis hanya melihat dokumen dalam cakupannya. Data sensitif ditangani sesuai kebijakan organisasi.
+
+Di **MATRIX**, platform pengelolaan material, kontrol seperti **akses berbasis peran** dan ***maker-checker*** memastikan satu perubahan penting tidak bisa dibuat dan disetujui oleh orang yang sama.
+
+### Setiap langkah tercatat
+
+Keamanan juga berarti bisa menjawab pertanyaan "siapa melakukan apa, kapan, dan atas persetujuan siapa?"
+
+Di **OPEN**, framework procurement milik PASTI, setiap pengadaan berjalan melalui alur persetujuan berjenjang dan tercatat dalam *audit trail*. Prinsipnya: setiap langkah tercatat, setiap keputusan terkontrol.
+
+Manfaatnya terasa nyata di proyek Workflow Automation Platform (AT-WF) untuk sebuah perusahaan enterprise besar. Dengan alur kerja terpusat, kepatuhan dan akuntabilitas menguat lewat **laporan yang siap audit**, dan **kesalahan manual turun 70%** karena duplikasi dan proses berbasis kertas dihilangkan.
+
+### Keamanan adalah pekerjaan yang berkelanjutan
+
+Sistem yang aman hari ini belum tentu aman tahun depan. Ancaman berubah, pengguna bertambah, dan sistem lain di sekitarnya ikut diperbarui. Karena itu, keamanan tidak berhenti saat peluncuran.
+
+Melalui pemeliharaan sistem dengan **model dukungan berbasis SLA**, sistem yang sudah berjalan tetap mendapat pembaruan, dipantau kontinuitasnya, dan dijaga performanya untuk jangka panjang.
+
+### Lima kebiasaan yang kami pegang
+
+**1. Bahas keamanan di rapat pertama.**
+Kebutuhan keamanan ditentukan bersama kebutuhan fungsional, bukan di minggu terakhir proyek.
+
+**2. Beri akses seperlunya.**
+Setiap peran hanya mendapat akses yang dibutuhkan untuk pekerjaannya.
+
+**3. Pisahkan yang membuat dan yang menyetujui.**
+Perubahan penting sebaiknya selalu melewati lebih dari satu orang.
+
+**4. Catat semuanya.**
+Jejak audit yang lengkap membuat masalah lebih cepat ditemukan dan pemeriksaan lebih mudah dijalani.
+
+**5. Uji sebelum orang lain menguji.**
+Pengujian keamanan dilakukan secara terencana, bukan setelah ada insiden.
+
+### Pertanyaan untuk tim Anda
+
+- Kalau ada data yang berubah hari ini, bisakah Anda tahu siapa yang mengubahnya dan atas persetujuan siapa?
+- Apakah ada akun yang punya akses jauh lebih luas daripada yang dibutuhkan pekerjaannya?
+- Kapan terakhir kali sistem Anda diuji keamanannya?
+- Siapa yang bertanggung jawab memperbarui sistem setelah proyek selesai?
+
+### Penutup
+
+Keamanan bukan fitur yang bisa ditambahkan belakangan. Ia adalah fondasi yang membuat sebuah sistem layak dipercaya oleh orang-orang yang memakainya setiap hari.
+
+*Pelajari lebih lanjut: Kapabilitas teknologi PASTI · OPEN · DORA · MATRIX*
